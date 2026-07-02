@@ -28,3 +28,6 @@ prisma/migrations
 prisma/dev.db
 prisma/dev.db-journal
 node_modules
+
+.vercel
+.env*
