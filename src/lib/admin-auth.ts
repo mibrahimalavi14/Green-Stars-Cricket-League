@@ -1,10 +1,7 @@
 import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 
-export async function requireAdmin() {
+export async function isAdminAuthenticated() {
   const cookieStore = await cookies()
   const auth = cookieStore.get("admin_auth")
-  if (!auth || auth.value !== "true") {
-    redirect("/admin/login")
-  }
+  return auth?.value === "true"
 }
