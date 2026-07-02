@@ -1,12 +1,8 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AdminMatchForm } from "@/components/AdminMatchForm"
 import { AdminMatchesList } from "@/components/AdminMatchesList"
 
 async function AdminMatchesPage({ searchParams }: { searchParams: Promise<{ action?: string }> }) {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
   const { action } = await searchParams
 
   const matches = await prisma.match.findMany({

@@ -1,12 +1,7 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AdminPerformanceForm } from "@/components/AdminPerformanceForm"
 
 async function AdminPerformancesPage() {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
-
   const matches = await prisma.match.findMany({
     where: { status: "completed" },
     include: { team1: true, team2: true, season: true, performances: true },

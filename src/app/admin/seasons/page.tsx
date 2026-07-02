@@ -1,12 +1,8 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AdminSeasonForm } from "@/components/AdminSeasonForm"
 import { PredictionLockToggle } from "@/components/PredictionLockToggle"
 
 async function AdminSeasonsPage() {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
   const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
 
   return (

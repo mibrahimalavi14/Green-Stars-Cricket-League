@@ -1,11 +1,7 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AdminPlayerForm } from "@/components/AdminPlayerForm"
 
 async function AdminPlayersPage() {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
   const players = await prisma.player.findMany({ include: { team: true }, orderBy: { runs: "desc" } })
 
   return (

@@ -1,12 +1,7 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AdminTeamForm } from "@/components/AdminTeamForm"
 
 async function AdminTeamsPage() {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
-
   const teams = await prisma.team.findMany({ include: { _count: { select: { players: true } } } })
 
   return (

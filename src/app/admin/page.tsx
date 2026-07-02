@@ -1,12 +1,8 @@
 import Link from "next/link"
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { Calendar, Users, Shield, Newspaper, PlusCircle } from "lucide-react"
 
 async function AdminPage() {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
 
   const counts = {
     teams: await prisma.team.count(),

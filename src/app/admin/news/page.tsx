@@ -1,11 +1,7 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AdminNewsForm } from "@/components/AdminNewsForm"
 
 async function AdminNewsPage() {
-  const session = await auth()
-  if (!session) redirect("/api/auth/signin")
   const newsList = await prisma.news.findMany({ orderBy: { createdAt: "desc" } })
 
   return (

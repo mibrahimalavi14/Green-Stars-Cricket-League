@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { auth } from "@/lib/auth"
-import { LogIn, LogOut, Shield } from "lucide-react"
+import { LogIn, LogOut } from "lucide-react"
 import { signOut } from "@/lib/auth"
 
 export async function Header() {
@@ -24,6 +24,7 @@ export async function Header() {
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
           <Link href="/contact" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Contact</Link>
+          <Link href="/admin" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Admin</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -41,9 +42,6 @@ export async function Header() {
               <span className="hidden sm:inline">Sign In</span>
             </Link>
           )}
-          <Link href="/admin" className="flex items-center gap-1 rounded-lg bg-[var(--muted)] px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted-foreground)]">
-            <Shield className="h-4 w-4" />
-          </Link>
         </div>
       </div>
 
@@ -57,6 +55,7 @@ export async function Header() {
           <Link href="/predictions" className="shrink-0 transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="shrink-0 transition-colors hover:text-[var(--accent)]">News</Link>
           <Link href="/contact" className="shrink-0 transition-colors hover:text-[var(--accent)]">Contact</Link>
+          <Link href="/admin" className="shrink-0 transition-colors hover:text-[var(--accent)]">Admin</Link>
         </div>
       </nav>
     </header>
