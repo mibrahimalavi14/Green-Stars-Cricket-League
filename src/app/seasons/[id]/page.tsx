@@ -7,7 +7,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
   const season = await prisma.season.findUnique({
     where: { id },
     include: {
-      teams: true,
+      teams: { include: { players: true } },
       matches: {
         orderBy: { date: "asc" },
         include: { team1: true, team2: true },
@@ -17,30 +17,11 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
 
   if (!season) notFound()
 
-  const standings = season.teams.map((team) => {
-    let won = 0, lost = 0, tied = 0, nr = 0
-    const teamMatches = season.matches.filter(
-      (m) => (m.team1Id === team.id || m.team2Id === team.id) && m.status === "completed"
-    )
-    for (const m of teamMatches) {
-      const teamName = team.name.toLowerCase()
-      const resultLower = m.result.toLowerCase()
-      if (resultLower.includes("won")) {
-        if (resultLower.includes(teamName)) won++
-        else lost++
-      } else if (resultLower.includes("tied")) tied++
-      else if (resultLower === "no result" || resultLower.includes("no result")) nr++
-    }
-    return {
-      id: team.id,
-      name: team.shortName,
-      color: team.color,
-      played: teamMatches.length,
-      won, lost, tied, nr,
-      points: won * 2 + tied * 1 + nr * 1,
-    }
-  })
-  standings.sort((a, b) => b.points - a.points)
+  const teamIds = season.teams.map(t => t.id)
+  const allPlayers = season.teams.flatMap(t => t.players)
+
+  const { recalcPointsTable } = await import("@/lib/stats")
+  const standings = await recalcPointsTable(season.id)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
@@ -117,6 +98,88 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
           </div>
         )}
       </section>
+
+      {allPlayers.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-4 text-xl font-semibold">Player Stats</h2>
+
+          <div className="mb-8">
+            <h3 className="mb-3 text-lg font-medium">Batting</h3>
+            <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+                    <th className="p-3 text-left">Player</th>
+                    <th className="p-3 text-left">Team</th>
+                    <th className="p-3 text-center">M</th>
+                    <th className="p-3 text-center">Runs</th>
+                    <th className="p-3 text-center">BF</th>
+                    <th className="p-3 text-center">4s</th>
+                    <th className="p-3 text-center">6s</th>
+                    <th className="p-3 text-center">50</th>
+                    <th className="p-3 text-center">100</th>
+                    <th className="p-3 text-center">SR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allPlayers.filter(p => p.runs > 0).sort((a, b) => b.runs - a.runs).map((p, i) => (
+                    <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
+                      <td className="p-3 font-medium">{p.name}</td>
+                      <td className="p-3 text-[var(--muted-foreground)]">{season.teams.find(t => t.id === p.teamId)?.shortName}</td>
+                      <td className="p-3 text-center">{p.matchesPlayed}</td>
+                      <td className="p-3 text-center font-bold">{p.runs}</td>
+                      <td className="p-3 text-center">{p.ballsFaced}</td>
+                      <td className="p-3 text-center text-blue-600">{p.fours}</td>
+                      <td className="p-3 text-center text-purple-600">{p.sixes}</td>
+                      <td className="p-3 text-center text-yellow-600">{p.fifties}</td>
+                      <td className="p-3 text-center text-green-600">{p.hundreds}</td>
+                      <td className="p-3 text-center font-mono">{p.ballsFaced > 0 ? ((p.runs / p.ballsFaced) * 100).toFixed(1) : "-"}</td>
+                    </tr>
+                  ))}
+                  {allPlayers.filter(p => p.runs > 0).length === 0 && (
+                    <tr><td colSpan={10} className="p-4 text-center text-[var(--muted-foreground)]">No batting data yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-3 text-lg font-medium">Bowling</h3>
+            <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+                    <th className="p-3 text-left">Player</th>
+                    <th className="p-3 text-left">Team</th>
+                    <th className="p-3 text-center">M</th>
+                    <th className="p-3 text-center">Wkts</th>
+                    <th className="p-3 text-center">Runs</th>
+                    <th className="p-3 text-center">Balls</th>
+                    <th className="p-3 text-center">Econ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allPlayers.filter(p => p.wickets > 0).sort((a, b) => b.wickets - a.wickets).map((p, i) => (
+                    <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
+                      <td className="p-3 font-medium">{p.name}</td>
+                      <td className="p-3 text-[var(--muted-foreground)]">{season.teams.find(t => t.id === p.teamId)?.shortName}</td>
+                      <td className="p-3 text-center">{p.matchesPlayed}</td>
+                      <td className="p-3 text-center font-bold text-green-600">{p.wickets}</td>
+                      <td className="p-3 text-center">{p.runsConceded}</td>
+                      <td className="p-3 text-center">{p.ballsBowled}</td>
+                      <td className="p-3 text-center font-mono">{p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-"}</td>
+                    </tr>
+                  ))}
+                  {allPlayers.filter(p => p.wickets > 0).length === 0 && (
+                    <tr><td colSpan={7} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
