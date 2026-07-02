@@ -1,10 +1,10 @@
 "use client"
 
+import { Suspense } from "react"
 import { signIn } from "next-auth/react"
-import { useSession } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 
-export function GoogleSignIn() {
+function GoogleSignInInner() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/predictions"
 
@@ -21,5 +21,13 @@ export function GoogleSignIn() {
       </svg>
       Continue with Google
     </button>
+  )
+}
+
+export function GoogleSignIn() {
+  return (
+    <Suspense fallback={<div className="flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--border)] bg-white px-6 py-3 font-medium text-gray-900 dark:bg-gray-900 dark:text-white">Continue with Google</div>}>
+      <GoogleSignInInner />
+    </Suspense>
   )
 }
