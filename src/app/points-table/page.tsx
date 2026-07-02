@@ -1,59 +1,20 @@
 import { prisma } from "@/lib/prisma"
 
 async function PointsTablePage() {
-  const teams = await prisma.team.findMany({
-    include: {
-      matches1: { include: { team1: true, team2: true } },
-      matches2: { include: { team1: true, team2: true } },
-    },
-  })
+  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const allSeasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
 
-  const standings = teams.map((team) => {
-    let won = 0, lost = 0, tied = 0, nr = 0
-    let forRuns = 0, forBalls = 0, againstRuns = 0, againstBalls = 0
+  if (!season) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-12 text-center">
+        <h1 className="mb-2 text-3xl font-bold">Points Table</h1>
+        <p className="text-[var(--muted-foreground)]">No active season found.</p>
+      </div>
+    )
+  }
 
-    const allMatches = [...team.matches1, ...team.matches2].filter((m) => m.status === "completed")
-    for (const m of allMatches) {
-      const isTeam1 = m.team1Id === team.id
-      const winner = m.result
-      if (winner.includes("won")) {
-        const winnerName = winner.split(" won")[0]
-        if (winnerName === team.name || winnerName === team.shortName) won++
-        else lost++
-      } else if (winner.includes("tied") || winner.includes("Tie")) tied++
-      else if (winner === "No Result") nr++
-
-      const score = isTeam1 ? m.team1Score : m.team2Score
-      const oppScore = isTeam1 ? m.team2Score : m.team1Score
-      if (score) {
-        const [runs] = score.split("/")
-        forRuns += parseInt(runs) || 0
-        forBalls += 120
-      }
-      if (oppScore) {
-        const [runs] = oppScore.split("/")
-        againstRuns += parseInt(runs) || 0
-        againstBalls += 120
-      }
-    }
-
-    const nrr = forBalls > 0 && againstBalls > 0
-      ? Number(((forRuns / forBalls) - (againstRuns / againstBalls)) * 100)
-      : 0
-
-    return {
-      id: team.id,
-      name: team.name,
-      shortName: team.shortName,
-      color: team.color,
-      played: allMatches.length,
-      won, lost, tied, nr,
-      points: won * 2 + tied + nr,
-      nrr: Number(nrr.toFixed(3)),
-    }
-  })
-
-  standings.sort((a, b) => b.points - a.points || b.nrr - a.nrr)
+  const { recalcPointsTable } = await import("@/lib/stats")
+  const standings = await recalcPointsTable(season.id)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
@@ -88,7 +49,7 @@ async function PointsTablePage() {
                         className="inline-block h-3 w-3 rounded-full"
                         style={{ backgroundColor: t.color }}
                       />
-                      <span className="font-medium">{t.shortName}</span>
+                      <span className="font-medium">{t.name}</span>
                     </div>
                   </td>
                   <td className="p-4 text-center font-medium">{t.played}</td>

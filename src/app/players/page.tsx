@@ -9,8 +9,13 @@ async function PlayersPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">Players</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">All players in the Green Stars Cricket League</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Players</h1>
+          <p className="text-[var(--muted-foreground)]">All players in the Green Stars Cricket League</p>
+        </div>
+        <Link href="/players/stats" className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-foreground)] transition-colors hover:opacity-90">View Stats</Link>
+      </div>
       {players.length === 0 ? (
         <p className="text-center text-[var(--muted-foreground)] py-12">No players added yet.</p>
       ) : (
