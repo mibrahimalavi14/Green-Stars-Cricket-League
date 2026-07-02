@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-gscl: #1e3a5f;
+  --color-gscl-light: #2d5a8e;
+  --color-gscl-gold: #d4a843;
+  --color-gscl-dark: #0f1f33;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --border: #e2e8f0;
+    --accent: #d4a843;
+    --accent-foreground: #0f172a;
+  }
+
+  .dark {
+    --background: #0b1120;
+    --foreground: #f1f5f9;
+    --card: #131c31;
+    --card-foreground: #f1f5f9;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --border: #1e293b;
+    --accent: #d4a843;
+    --accent-foreground: #0f172a;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}

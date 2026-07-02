@@ -1,0 +1,55 @@
+import Link from "next/link"
+import { prisma } from "@/lib/prisma"
+
+async function PlayersPage() {
+  const players = await prisma.player.findMany({
+    include: { team: true },
+    orderBy: { runs: "desc" },
+  })
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-12">
+      <h1 className="mb-2 text-3xl font-bold">Players</h1>
+      <p className="mb-8 text-[var(--muted-foreground)]">All players in the Green Stars Cricket League</p>
+      {players.length === 0 ? (
+        <p className="text-center text-[var(--muted-foreground)] py-12">No players added yet.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {players.map((player) => (
+            <Link
+              key={player.id}
+              href={`/players/${player.id}`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg"
+            >
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-lg font-bold text-[var(--accent)]">
+                  {player.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold">{player.name}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">{player.role} &middot; {player.team?.shortName}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                <div>
+                  <p className="font-bold">{player.runs}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]">Runs</p>
+                </div>
+                <div>
+                  <p className="font-bold">{player.wickets}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]">Wkts</p>
+                </div>
+                <div>
+                  <p className="font-bold">{player.matchesPlayed}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]">Matches</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default PlayersPage

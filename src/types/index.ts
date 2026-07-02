@@ -1,0 +1,114 @@
+export type Role = "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper"
+
+export interface TeamData {
+  id: string
+  name: string
+  shortName: string
+  logo: string
+  color: string
+  seasonId: string
+  players?: PlayerData[]
+}
+
+export interface PlayerData {
+  id: string
+  name: string
+  role: Role
+  battingStyle: string
+  bowlingStyle: string
+  photo: string
+  teamId: string
+  runs: number
+  ballsFaced: number
+  fours: number
+  sixes: number
+  wickets: number
+  ballsBowled: number
+  runsConceded: number
+  matchesPlayed: number
+  team?: TeamData
+}
+
+export interface MatchData {
+  id: string
+  seasonId: string
+  team1Id: string
+  team2Id: string
+  team1: TeamData
+  team2: TeamData
+  date: string
+  venue: string
+  status: "upcoming" | "live" | "completed"
+  result: string
+  team1Score: string
+  team2Score: string
+  tossWinner: string
+  tossDecision: string
+  manOfMatch: string
+  youtubeUrl: string
+  season?: SeasonData
+  innings?: InningData[]
+  predictions?: PredictionData[]
+}
+
+export interface InningData {
+  id: string
+  matchId: string
+  teamId: string
+  runs: number
+  wickets: number
+  balls: number
+  extras: number
+  ballsData: string
+}
+
+export interface SeasonData {
+  id: string
+  name: string
+  year: number
+  logo: string
+  isActive: boolean
+  scheduleAnnounced: boolean
+}
+
+export interface PredictionData {
+  id: string
+  userId: string
+  matchId: string
+  predictedTeamId: string
+  user?: { name: string; image: string }
+  match?: MatchData
+  predictedTeam?: TeamData
+}
+
+export interface NewsData {
+  id: string
+  title: string
+  slug: string
+  content: string
+  excerpt: string
+  image: string
+  author: string
+  published: boolean
+  createdAt: string
+}
+
+export interface ContactData {
+  id: string
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
+export interface TeamStats {
+  played: number
+  won: number
+  lost: number
+  tied: number
+  nr: number
+  points: number
+  nrr: number
+  for: { runs: number; overs: number }
+  against: { runs: number; overs: number }
+}

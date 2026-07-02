@@ -1,0 +1,69 @@
+import Link from "next/link"
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { prisma } from "@/lib/prisma"
+import { Calendar, Users, Shield, Newspaper, PlusCircle } from "lucide-react"
+
+async function AdminPage() {
+  const session = await auth()
+  if (!session) redirect("/api/auth/signin")
+
+  const counts = {
+    teams: await prisma.team.count(),
+    players: await prisma.player.count(),
+    matches: await prisma.match.count(),
+    news: await prisma.news.count(),
+    contacts: await prisma.contact.count(),
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="mb-2 text-3xl font-bold">Admin Dashboard</h1>
+      <p className="mb-8 text-[var(--muted-foreground)]">Manage your cricket league</p>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Link href="/admin/teams" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Users className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Teams</h3>
+          <p className="text-2xl font-bold">{counts.teams}</p>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage teams</p>
+        </Link>
+
+        <Link href="/admin/players" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Shield className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Players</h3>
+          <p className="text-2xl font-bold">{counts.players}</p>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage players</p>
+        </Link>
+
+        <Link href="/admin/matches" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Calendar className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Matches</h3>
+          <p className="text-2xl font-bold">{counts.matches}</p>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage fixtures & scores</p>
+        </Link>
+
+        <Link href="/admin/seasons" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Calendar className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Seasons</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage seasons & prediction lock</p>
+        </Link>
+
+        <Link href="/admin/news" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Newspaper className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">News</h3>
+          <p className="text-2xl font-bold">{counts.news}</p>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage news articles</p>
+        </Link>
+
+        <Link href="/admin/matches?action=add" className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <PlusCircle className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Quick Add</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Add new match</p>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+export default AdminPage

@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @default("")
+  access_token      String? @default("")
+  expires_at        Int?
+  token_type        String? @default("")
+  scope             String? @default("")
+  id_token          String? @default("")
+  session_state     String? @default("")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  predictions   Prediction[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Season {
+  id                String   @id @default(cuid())
+  name              String
+  year              Int
+  logo              String   @default("/gscl-logo.png")
+  isActive          Boolean  @default(true)
+  scheduleAnnounced Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  teams             Team[]
+  matches           Match[]
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  shortName String
+  logo      String   @default("/placeholder-team.png")
+  color     String   @default("#1e3a5f")
+  seasonId  String
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  players   Player[]
+  matches1  Match[]  @relation("Team1Matches")
+  matches2  Match[]  @relation("Team2Matches")
+  createdAt DateTime @default(now())
+}
+
+model Player {
+  id            String  @id @default(cuid())
+  name          String
+  role          String  @default("Batsman")
+  battingStyle  String  @default("Right-handed")
+  bowlingStyle  String  @default("Right-arm fast")
+  photo         String  @default("/placeholder-player.png")
+  teamId        String
+  team          Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  runs          Int     @default(0)
+  ballsFaced    Int     @default(0)
+  fours         Int     @default(0)
+  sixes         Int     @default(0)
+  wickets       Int     @default(0)
+  ballsBowled   Int     @default(0)
+  runsConceded  Int     @default(0)
+  matchesPlayed Int     @default(0)
+  createdAt     DateTime @default(now())
+}
+
+model Match {
+  id            String   @id @default(cuid())
+  seasonId      String
+  season        Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  team1Id       String
+  team1         Team     @relation("Team1Matches", fields: [team1Id], references: [id])
+  team2Id       String
+  team2         Team     @relation("Team2Matches", fields: [team2Id], references: [id])
+  date          DateTime
+  venue         String   @default("Main Stadium")
+  status        String   @default("upcoming")
+  result        String   @default("")
+  team1Score    String   @default("")
+  team2Score    String   @default("")
+  tossWinner    String   @default("")
+  tossDecision  String   @default("")
+  manOfMatch    String   @default("")
+  youtubeUrl    String   @default("")
+  createdAt     DateTime @default(now())
+  predictions   Prediction[]
+  innings       Inning[]
+}
+
+model Inning {
+  id       String @id @default(cuid())
+  matchId  String
+  match    Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId   String
+  runs     Int    @default(0)
+  wickets  Int    @default(0)
+  balls    Int    @default(0)
+  extras   Int    @default(0)
+  ballsData String @default("[]")
+}
+
+model Prediction {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId         String
+  match           Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  predictedTeamId String
+  createdAt       DateTime @default(now())
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String
+  excerpt   String   @default("")
+  image     String   @default("/placeholder-news.png")
+  author    String   @default("Admin")
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String   @default("")
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model PredictionLock {
+  id        String   @id @default(cuid())
+  seasonId  String
+  locked    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
