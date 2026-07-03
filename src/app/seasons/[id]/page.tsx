@@ -122,8 +122,10 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     <th className="p-3 text-center">#</th>
                     <th className="p-3 text-left">Player</th>
                     <th className="p-3 text-left">Team</th>
+                    <th className="p-3 text-center">M</th>
                     <th className="p-3 text-center">Inn</th>
                     <th className="p-3 text-center">Runs</th>
+                    <th className="p-3 text-center">Balls</th>
                     <th className="p-3 text-center">HS</th>
                     <th className="p-3 text-center">Avg</th>
                     <th className="p-3 text-center">SR</th>
@@ -145,8 +147,10 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                         <td className="p-3 text-center font-medium text-[var(--muted-foreground)]">{i + 1}</td>
                         <td className="p-3 font-medium">{p.name}</td>
                         <td className="p-3 text-[var(--muted-foreground)]">{season.teams.find(t => t.id === p.teamId)?.shortName}</td>
+                        <td className="p-3 text-center">{p.matchesPlayed}</td>
                         <td className="p-3 text-center">{inns}</td>
                         <td className="p-3 text-center font-bold">{p.runs}</td>
+                        <td className="p-3 text-center">{p.ballsFaced}</td>
                         <td className="p-3 text-center font-medium">{hs}</td>
                         <td className="p-3 text-center font-mono">{avg}</td>
                         <td className="p-3 text-center font-mono">{p.ballsFaced > 0 ? ((p.runs / p.ballsFaced) * 100).toFixed(1) : "-"}</td>
@@ -158,7 +162,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     )
                   })}
                   {allPlayers.filter(p => (perfByPlayer.get(p.id)?.length ?? 0) > 0).length === 0 && (
-                    <tr><td colSpan={12} className="p-4 text-center text-[var(--muted-foreground)]">No batting data yet.</td></tr>
+                    <tr><td colSpan={14} className="p-4 text-center text-[var(--muted-foreground)]">No batting data yet.</td></tr>
                   )}
                 </tbody>
               </table>
