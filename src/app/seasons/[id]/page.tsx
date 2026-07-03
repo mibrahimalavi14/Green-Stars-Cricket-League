@@ -52,6 +52,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 <th className="p-3 text-center">L</th>
                 <th className="p-3 text-center">T</th>
                 <th className="p-3 text-center">NR</th>
+                <th className="p-3 text-center">NRR</th>
                 <th className="p-3 text-center font-bold">Pts</th>
               </tr>
             </thead>
@@ -67,6 +68,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                   <td className="p-3 text-center text-red-500">{t.lost}</td>
                   <td className="p-3 text-center">{t.tied}</td>
                   <td className="p-3 text-center">{t.nr}</td>
+                  <td className={`p-3 text-center font-mono ${t.nrr > 0 ? "text-green-600" : t.nrr < 0 ? "text-red-500" : ""}`}>{t.nrr.toFixed(3)}</td>
                   <td className="p-3 text-center font-bold">{t.points}</td>
                 </tr>
               ))}
