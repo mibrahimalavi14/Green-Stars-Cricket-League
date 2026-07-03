@@ -66,17 +66,20 @@ model Season {
 }
 
 model Team {
-  id        String   @id @default(cuid())
-  name      String
-  shortName String
-  logo      String   @default("/placeholder-team.png")
-  color     String   @default("#1e3a5f")
-  seasonId  String
-  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  players   Player[]
-  matches1  Match[]  @relation("Team1Matches")
-  matches2  Match[]  @relation("Team2Matches")
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String
+  shortName   String
+  logo        String   @default("/placeholder-team.png")
+  color       String   @default("#1e3a5f")
+  captainName String   @default("")
+  headCoach   String   @default("")
+  location    String   @default("")
+  seasonId    String
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  players     Player[]
+  matches1    Match[]  @relation("Team1Matches")
+  matches2    Match[]  @relation("Team2Matches")
+  createdAt   DateTime @default(now())
 }
 
 model Player {

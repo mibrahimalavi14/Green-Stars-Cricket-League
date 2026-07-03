@@ -8,15 +8,21 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
     where: { id },
     include: {
       players: true,
-      matches1: { include: { team1: true, team2: true } },
-      matches2: { include: { team1: true, team2: true } },
+      season: true,
+      matches1: {
+        include: { team1: true, team2: true, season: true },
+        where: { seasonId: (await prisma.team.findUnique({ where: { id }, select: { seasonId: true } }))?.seasonId },
+      },
+      matches2: {
+        include: { team1: true, team2: true, season: true },
+        where: { seasonId: (await prisma.team.findUnique({ where: { id }, select: { seasonId: true } }))?.seasonId },
+      },
     },
   })
 
   if (!team) notFound()
 
   const allMatches = [...team.matches1, ...team.matches2]
-    .filter((m) => m.status !== "upcoming")
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return (
@@ -32,6 +38,27 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
           <h1 className="text-3xl font-bold">{team.name}</h1>
           <p className="text-[var(--muted-foreground)]">{team.players.length} Players | {allMatches.length} Matches</p>
         </div>
+      </div>
+
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        {team.captainName && (
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-center">
+            <p className="text-xs text-[var(--muted-foreground)]">Captain</p>
+            <p className="mt-1 font-semibold">{team.captainName}</p>
+          </div>
+        )}
+        {team.headCoach && (
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-center">
+            <p className="text-xs text-[var(--muted-foreground)]">Head Coach</p>
+            <p className="mt-1 font-semibold">{team.headCoach}</p>
+          </div>
+        )}
+        {team.location && (
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-center">
+            <p className="text-xs text-[var(--muted-foreground)]">Location</p>
+            <p className="mt-1 font-semibold">{team.location}</p>
+          </div>
+        )}
       </div>
 
       <div className="mb-8">
@@ -59,25 +86,29 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
         )}
       </div>
 
-      <h2 className="mb-4 text-xl font-semibold">Recent Matches</h2>
+      <h2 className="mb-4 text-xl font-semibold">Matches {team.season ? `(${team.season.name})` : ""}</h2>
       {allMatches.length === 0 ? (
-        <p className="text-[var(--muted-foreground)]">No matches played yet.</p>
+        <p className="text-[var(--muted-foreground)]">No matches yet.</p>
       ) : (
         <div className="space-y-3">
-          {allMatches.slice(0, 10).map((m) => (
+          {allMatches.map((m) => (
             <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="font-medium">{m.team1.shortName}</span>
                   <span className="text-xs text-[var(--muted-foreground)]">{m.team1Score}</span>
                 </div>
-                <span className="text-xs font-semibold text-[var(--accent)]">VS</span>
+                <div className="text-center">
+                  <span className="text-xs font-semibold text-[var(--accent)]">VS</span>
+                  <div className="text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</div>
+                </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-[var(--muted-foreground)]">{m.team2Score}</span>
                   <span className="font-medium">{m.team2.shortName}</span>
                 </div>
               </div>
-              <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{m.result}</p>
+              {m.result && <p className="mt-1 text-center text-xs font-medium text-green-600">{m.result}</p>}
+              {m.status === "upcoming" && <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{m.venue}</p>}
             </div>
           ))}
         </div>
