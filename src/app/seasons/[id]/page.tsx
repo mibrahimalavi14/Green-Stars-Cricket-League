@@ -84,9 +84,14 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
             {season.matches.map((match) => (
               <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-1 items-center gap-3">
-                    <div className="h-8 w-8 rounded-full" style={{ backgroundColor: match.team1.color }} />
-                    <span className="font-medium">{match.team1.shortName}</span>
+                  <div className="flex flex-1 flex-col items-start gap-1">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full" style={{ backgroundColor: match.team1.color }} />
+                      <span className="font-medium">{match.team1.shortName}</span>
+                    </div>
+                    {match.status === "completed" && match.team1Score && (
+                      <span className="ml-11 text-sm font-semibold">{match.team1Score}</span>
+                    )}
                   </div>
                   <div className="text-center">
                     <div className="text-xs text-[var(--muted-foreground)]">
@@ -94,15 +99,20 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     </div>
                     <div className="my-1 text-xs font-bold text-[var(--accent)]">VS</div>
                     <div className="text-xs text-[var(--muted-foreground)]">{match.venue}</div>
+                    {match.status === "completed" && match.result && (
+                      <div className="mt-1 text-xs font-medium text-green-600">{match.result}</div>
+                    )}
                   </div>
-                  <div className="flex flex-1 items-center justify-end gap-3">
-                    <span className="font-medium">{match.team2.shortName}</span>
-                    <div className="h-8 w-8 rounded-full" style={{ backgroundColor: match.team2.color }} />
+                  <div className="flex flex-1 flex-col items-end gap-1">
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{match.team2.shortName}</span>
+                      <div className="h-8 w-8 rounded-full" style={{ backgroundColor: match.team2.color }} />
+                    </div>
+                    {match.status === "completed" && match.team2Score && (
+                      <span className="mr-11 text-sm font-semibold">{match.team2Score}</span>
+                    )}
                   </div>
                 </div>
-                {match.status === "completed" && match.result && (
-                  <div className="mt-2 text-center text-sm font-medium text-green-600">{match.result}</div>
-                )}
               </div>
             ))}
           </div>
