@@ -19,6 +19,7 @@ export async function Header() {
           <Link href="/" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Home</Link>
           <Link href="/teams" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Teams</Link>
           <Link href="/seasons" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Seasons</Link>
+          <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
@@ -50,6 +51,7 @@ export async function Header() {
           <Link href="/" className="shrink-0 transition-colors hover:text-[var(--accent)]">Home</Link>
           <Link href="/teams" className="shrink-0 transition-colors hover:text-[var(--accent)]">Teams</Link>
           <Link href="/seasons" className="shrink-0 transition-colors hover:text-[var(--accent)]">Seasons</Link>
+          <Link href="/players" className="shrink-0 transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="shrink-0 transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="shrink-0 transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/predictions" className="shrink-0 transition-colors hover:text-[var(--accent)]">Predictions</Link>
