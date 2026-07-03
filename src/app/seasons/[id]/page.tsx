@@ -2,6 +2,8 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
+export const revalidate = 10
+
 async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const season = await prisma.season.findUnique({

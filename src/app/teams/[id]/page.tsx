@@ -2,6 +2,8 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 
+export const revalidate = 10
+
 async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const team = await prisma.team.findUnique({

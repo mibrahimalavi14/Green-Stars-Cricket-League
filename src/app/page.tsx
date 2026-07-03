@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+
+export const revalidate = 10
 import { MatchCard } from "@/components/MatchCard"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 
+export const revalidate = 10
+
 async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const player = await prisma.player.findUnique({
