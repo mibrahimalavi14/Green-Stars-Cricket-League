@@ -41,7 +41,7 @@ export function Footer() {
               <a href="#" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href="#" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
+              <a href="https://www.youtube.com/@GreenStarsCricketLeague" target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
                 <Youtube className="h-4 w-4" />
               </a>
             </div>

@@ -137,7 +137,9 @@ async function HomePage() {
           <h2 className="mb-2 text-2xl font-bold">Live on YouTube</h2>
           <p className="mb-6 text-[var(--muted-foreground)]">Watch all matches live on our YouTube channel</p>
           <a
-            href="#"
+            href="https://www.youtube.com/@GreenStarsCricketLeague"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
           >
             <Youtube className="h-5 w-5" /> Subscribe to GSCL
