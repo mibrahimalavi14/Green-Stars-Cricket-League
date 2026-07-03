@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
-import { PointsTable } from "@/components/PointsTable"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
 async function HomePage() {
@@ -113,20 +112,6 @@ async function HomePage() {
           </div>
         </div>
       </section>
-
-      {(await prisma.team.findMany()).length > 0 && (
-        <section className="py-12">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Points Table</h2>
-              <Link href="/points-table" className="text-sm text-[var(--accent)] hover:underline">Full Table</Link>
-            </div>
-            <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
-              <PointsTable minimal />
-            </div>
-          </div>
-        </section>
-      )}
 
       <section className="border-t border-[var(--border)] bg-[var(--card)] py-12">
         <div className="mx-auto max-w-7xl px-4">
