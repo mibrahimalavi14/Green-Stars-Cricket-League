@@ -6,7 +6,7 @@ import { NewsCard } from "@/components/NewsCard"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
 async function HomePage() {
-  const [season, matches, teams, news, stats, winners] = await Promise.all([
+  const [season, matches, teams, news, winners, matchCount, allTeams] = await Promise.all([
     prisma.season.findFirst({ where: { isActive: true } }),
     prisma.match.findMany({
       take: 4,
@@ -15,17 +15,17 @@ async function HomePage() {
     }),
     prisma.team.findMany({ take: 6, include: { players: true } }),
     prisma.news.findMany({ where: { published: true }, take: 3, orderBy: { createdAt: "desc" } }),
-    prisma.team.findMany({ include: { _count: { select: { players: true } } } }),
     prisma.season.findMany({
       where: { winnerId: { not: "" } },
       include: { teams: true },
       orderBy: { year: "desc" },
     }),
+    prisma.match.count(),
+    prisma.team.findMany({ include: { _count: { select: { players: true } } } }),
   ])
 
-  const teamCount = stats.length
-  const playerCount = stats.reduce((a, b) => a + b._count.players, 0)
-  const matchCount = await prisma.match.count()
+  const teamCount = allTeams.length
+  const playerCount = allTeams.reduce((a, b) => a + b._count.players, 0)
 
   return (
     <>
