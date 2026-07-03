@@ -178,6 +178,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     <th className="p-3 text-center">#</th>
                     <th className="p-3 text-left">Player</th>
                     <th className="p-3 text-left">Team</th>
+                    <th className="p-3 text-center">M</th>
                     <th className="p-3 text-center">Inn</th>
                     <th className="p-3 text-center">Overs</th>
                     <th className="p-3 text-center">Wkts</th>
@@ -201,6 +202,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                         <td className="p-3 text-center font-medium text-[var(--muted-foreground)]">{i + 1}</td>
                         <td className="p-3 font-medium">{p.name}</td>
                         <td className="p-3 text-[var(--muted-foreground)]">{season.teams.find(t => t.id === p.teamId)?.shortName}</td>
+                        <td className="p-3 text-center">{p.matchesPlayed}</td>
                         <td className="p-3 text-center">{inns}</td>
                         <td className="p-3 text-center font-mono">{overs}</td>
                         <td className="p-3 text-center font-bold text-green-600">{p.wickets}</td>
@@ -212,7 +214,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     )
                   })}
                   {allPlayers.filter(p => p.wickets > 0).length === 0 && (
-                    <tr><td colSpan={10} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
+                    <tr><td colSpan={11} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
                   )}
                 </tbody>
               </table>
