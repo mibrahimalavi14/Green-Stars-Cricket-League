@@ -60,6 +60,7 @@ model Season {
   logo              String   @default("/gscl-logo.png")
   isActive          Boolean  @default(true)
   scheduleAnnounced Boolean  @default(false)
+  winnerId          String?  @default("")
   createdAt         DateTime @default(now())
   teams             Team[]
   matches           Match[]

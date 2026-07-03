@@ -4,10 +4,10 @@ import { MatchCard } from "@/components/MatchCard"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { PointsTable } from "@/components/PointsTable"
-import { Youtube, Trophy, Users, Calendar } from "lucide-react"
+import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
 async function HomePage() {
-  const [season, matches, teams, news, stats] = await Promise.all([
+  const [season, matches, teams, news, stats, winners] = await Promise.all([
     prisma.season.findFirst({ where: { isActive: true } }),
     prisma.match.findMany({
       take: 4,
@@ -17,6 +17,11 @@ async function HomePage() {
     prisma.team.findMany({ take: 6, include: { players: true } }),
     prisma.news.findMany({ where: { published: true }, take: 3, orderBy: { createdAt: "desc" } }),
     prisma.team.findMany({ include: { _count: { select: { players: true } } } }),
+    prisma.season.findMany({
+      where: { winnerId: { not: "" } },
+      include: { teams: true },
+      orderBy: { year: "desc" },
+    }),
   ])
 
   const teamCount = stats.length
@@ -47,12 +52,13 @@ async function HomePage() {
 
       <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
             {[
               { label: "Teams", value: teamCount, icon: Users },
               { label: "Players", value: playerCount, icon: Trophy },
               { label: "Matches", value: matchCount, icon: Calendar },
               { label: "Season", value: season?.year || 2026, icon: Trophy },
+              { label: "Founded", value: "Lahore", icon: MapPin },
             ].map((s) => (
               <div key={s.label} className="rounded-lg bg-[var(--muted)] p-4 text-center">
                 <s.icon className="mx-auto mb-1 h-5 w-5 text-[var(--accent)]" />
@@ -61,6 +67,20 @@ async function HomePage() {
               </div>
             ))}
           </div>
+
+          {winners.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-6 rounded-lg bg-[var(--muted)] p-4">
+              <Award className="h-5 w-5 text-gscl-gold" />
+              {winners.map((w) => {
+                const winnerTeam = w.teams.find(t => t.id === w.winnerId)
+                return (
+                  <span key={w.id} className="text-sm">
+                    <span className="font-semibold">{w.name}</span>: {winnerTeam?.name || w.winnerId}
+                  </span>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
