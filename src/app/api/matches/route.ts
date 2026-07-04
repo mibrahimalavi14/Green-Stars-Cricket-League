@@ -36,3 +36,16 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json(match)
 }
+
+export async function DELETE(req: Request) {
+  const { id } = await req.json()
+  const match = await prisma.match.findUnique({ where: { id }, select: { status: true, seasonId: true } })
+  await prisma.playerMatch.deleteMany({ where: { matchId: id } })
+  await prisma.match.delete({ where: { id } })
+  if (match?.status === "completed") {
+    const { recalcPointsTable, recalcPlayerStats } = await import("@/lib/stats")
+    await recalcPointsTable(match.seasonId)
+    await recalcPlayerStats()
+  }
+  return NextResponse.json({ success: true })
+}

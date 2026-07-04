@@ -12,6 +12,7 @@ interface Match {
 export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const router = useRouter()
   const [scoring, setScoring] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
   const [form, setForm] = useState({ team1Score: "", team2Score: "", result: "" })
 
   async function updateStatus(id: string, status: string) {
@@ -31,6 +32,17 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     })
     setScoring(null)
     setForm({ team1Score: "", team2Score: "", result: "" })
+    router.refresh()
+  }
+
+  async function deleteMatch(id: string) {
+    setDeleting(id)
+    await fetch("/api/matches", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    setDeleting(null)
     router.refresh()
   }
 
@@ -60,6 +72,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               {m.status === "upcoming" && (
                 <button onClick={() => { setScoring(m.id); setForm({ team1Score: "", team2Score: "", result: "" }) }} className="rounded bg-orange-500 px-2 py-1 text-xs text-white">Set Result</button>
               )}
+              <button onClick={() => deleteMatch(m.id)} disabled={deleting === m.id}
+                className="rounded bg-red-600 px-2 py-1 text-xs text-white disabled:opacity-50">Delete</button>
             </div>
           </div>
 
