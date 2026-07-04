@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 async function TeamsPage() {
   const teams = await prisma.team.findMany({
     include: { _count: { select: { players: true } } },
+    orderBy: { name: "asc" },
   })
 
   return (
@@ -21,11 +22,12 @@ async function TeamsPage() {
               className="group rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg"
             >
               <div className="flex items-center gap-4">
-                <div
-                  className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold text-white"
-                  style={{ backgroundColor: team.color }}
-                >
-                  {team.shortName}
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)] overflow-hidden" style={{ backgroundColor: team.color }}>
+                  {team.logo && !team.logo.includes("placeholder") ? (
+                    <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-xl font-bold text-white">{team.shortName}</span>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold group-hover:text-[var(--accent)]">{team.name}</h3>

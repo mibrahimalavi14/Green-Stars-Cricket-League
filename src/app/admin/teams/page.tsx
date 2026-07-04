@@ -13,7 +13,13 @@ async function AdminTeamsPage() {
           <div key={t.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white" style={{ backgroundColor: t.color }}>{t.shortName}</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden bg-[var(--muted)] text-sm font-bold" style={{ backgroundColor: t.color }}>
+                  {t.logo && !t.logo.includes("placeholder") ? (
+                    <img src={t.logo} alt={t.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-white">{t.shortName}</span>
+                  )}
+                </span>
                 <div>
                   <p className="font-medium">{t.name}</p>
                   <p className="text-xs text-[var(--muted-foreground)]">{t._count.players} players</p>

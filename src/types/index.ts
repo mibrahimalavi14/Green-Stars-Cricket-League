@@ -7,6 +7,9 @@ export interface TeamData {
   logo: string
   color: string
   seasonId: string
+  captainName?: string
+  headCoach?: string
+  location?: string
   players?: PlayerData[]
 }
 

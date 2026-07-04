@@ -30,11 +30,12 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <div className="mb-8 flex items-center gap-6">
-        <div
-          className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white"
-          style={{ backgroundColor: team.color }}
-        >
-          {team.shortName}
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--muted)] overflow-hidden" style={{ backgroundColor: team.color }}>
+          {team.logo && !team.logo.includes("placeholder") ? (
+            <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-2xl font-bold text-white">{team.shortName}</span>
+          )}
         </div>
         <div>
           <h1 className="text-3xl font-bold">{team.name}</h1>
