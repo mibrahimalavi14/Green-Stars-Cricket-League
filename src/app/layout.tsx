@@ -12,14 +12,14 @@ export const metadata: Metadata = {
   description: "Official website of the Green Stars Cricket League - Live scores, fixtures, points table, and more.",
   keywords: "cricket, league, green stars, live scores, points table, fixtures",
   icons: {
-    icon: "/images/teams/Green Stars Cricket League.png",
-    apple: "/images/teams/Green Stars Cricket League.png",
+    icon: "/images/teams/gscl-logo.png",
+    apple: "/images/teams/gscl-logo.png",
   },
   openGraph: {
     title: "Green Stars Cricket League",
     description: "Official website of the Green Stars Cricket League",
     type: "website",
-    images: ["/images/teams/Green Stars Cricket League.png"],
+    images: ["/images/teams/gscl-logo.png"],
   },
 }
 
