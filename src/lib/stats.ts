@@ -135,14 +135,24 @@ export async function recalcPlayerStats() {
 
     const individualMatches = await prisma.playerMatch.findMany({
       where: { playerId: player.id },
-      select: { battingRuns: true },
+      select: { battingRuns: true, bowlingWickets: true, bowlingRuns: true },
     })
     const fifties = individualMatches.filter(m => m.battingRuns >= 50 && m.battingRuns < 100).length
     const hundreds = individualMatches.filter(m => m.battingRuns >= 100).length
 
+    let bestWkts = 0, bestRuns = 999
+    for (const m of individualMatches) {
+      if (m.bowlingWickets > bestWkts || (m.bowlingWickets === bestWkts && m.bowlingRuns < bestRuns)) {
+        bestWkts = m.bowlingWickets
+        bestRuns = m.bowlingRuns
+      }
+    }
+    const bestBowlingWickets = bestWkts
+    const bestBowlingRuns = bestRuns === 999 ? 0 : bestRuns
+
     await prisma.player.update({
       where: { id: player.id },
-      data: { runs, ballsFaced, fours, sixes, ones, twos, fifties, hundreds, wickets, runsConceded, ballsBowled, matchesPlayed, catches, stumpings, runOuts },
+      data: { runs, ballsFaced, fours, sixes, ones, twos, fifties, hundreds, wickets, runsConceded, ballsBowled, matchesPlayed, bestBowlingWickets, bestBowlingRuns, catches, stumpings, runOuts },
     })
   }
 }

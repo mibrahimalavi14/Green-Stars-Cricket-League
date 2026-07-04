@@ -28,9 +28,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
   const bowlingAvg = player.wickets > 0 ? (player.runsConceded / player.wickets).toFixed(2) : "-"
   const overs = Math.floor(player.ballsBowled / 6) + "." + (player.ballsBowled % 6)
   const hs = Math.max(...performances.map(x => x.battingRuns), 0)
-  const bestWkts = Math.max(...performances.map(x => x.bowlingWickets), 0)
-  const bestRuns = performances.filter(x => x.bowlingWickets === bestWkts).reduce((min, x) => Math.min(min, x.bowlingRuns), Infinity)
-  const bb = bestWkts > 0 ? `${bestWkts}/${bestRuns}` : "-"
+  const bb = player.bestBowlingWickets > 0 ? `${player.bestBowlingWickets}/${player.bestBowlingRuns}` : "-"
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
