@@ -31,8 +31,8 @@ async function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-br from-gscl-dark via-gscl to-gscl-light py-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gscl-gold/20 via-transparent to-transparent" />
+      <section className="relative overflow-hidden bg-cover bg-center py-20" style={{ backgroundImage: "url(/images/teams/Banner.jpg)" }}>
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative mx-auto max-w-7xl px-4 text-center">
           <h1 className="mb-4 text-5xl font-bold text-white md:text-7xl">
             Green Stars <span className="text-gscl-gold">Cricket League</span>
