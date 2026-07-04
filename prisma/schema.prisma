@@ -97,6 +97,8 @@ model Player {
   ballsFaced    Int     @default(0)
   fours         Int     @default(0)
   sixes         Int     @default(0)
+  ones          Int     @default(0)
+  twos          Int     @default(0)
   fifties       Int     @default(0)
   hundreds      Int     @default(0)
   wickets       Int     @default(0)
@@ -160,6 +162,8 @@ model PlayerMatch {
   ballsFaced     Int @default(0)
   fours          Int @default(0)
   sixes          Int @default(0)
+  ones           Int @default(0)
+  twos           Int @default(0)
   isOut          Boolean @default(false)
   dismissalType  String @default("")
 

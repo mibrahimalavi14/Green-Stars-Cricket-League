@@ -18,6 +18,8 @@ interface SavedPerf {
   ballsFaced: number
   fours: number
   sixes: number
+  ones: number
+  twos: number
   isOut: boolean
   bowlingWickets: number
   bowlingRuns: number
@@ -34,6 +36,8 @@ interface PlayerForm {
   ballsFaced: string
   fours: string
   sixes: string
+  ones: string
+  twos: string
   isOut: boolean
   bowlingWickets: string
   bowlingRuns: string
@@ -79,6 +83,8 @@ export function AdminPerformanceForm({ match }: {
           ballsFaced: String(saved?.ballsFaced ?? ""),
           fours: String(saved?.fours ?? ""),
           sixes: String(saved?.sixes ?? ""),
+          ones: String(saved?.ones ?? ""),
+          twos: String(saved?.twos ?? ""),
           isOut: saved?.isOut ?? false,
           bowlingWickets: String(saved?.bowlingWickets ?? ""),
           bowlingRuns: String(saved?.bowlingRuns ?? ""),
@@ -105,6 +111,8 @@ export function AdminPerformanceForm({ match }: {
           ballsFaced: parseInt(p.ballsFaced) || 0,
           fours: parseInt(p.fours) || 0,
           sixes: parseInt(p.sixes) || 0,
+          ones: parseInt(p.ones) || 0,
+          twos: parseInt(p.twos) || 0,
           isOut: p.isOut,
           dismissalType: "",
           bowlingWickets: parseInt(p.bowlingWickets) || 0,
@@ -218,6 +226,24 @@ function renderPlayerForm(
             type="number" min="0"
             value={data.sixes}
             onChange={e => update("sixes", e.target.value)}
+            className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs"
+          />
+        </div>
+        <div>
+          <label className="block text-[var(--muted-foreground)]">1s</label>
+          <input
+            type="number" min="0"
+            value={data.ones}
+            onChange={e => update("ones", e.target.value)}
+            className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs"
+          />
+        </div>
+        <div>
+          <label className="block text-[var(--muted-foreground)]">2s</label>
+          <input
+            type="number" min="0"
+            value={data.twos}
+            onChange={e => update("twos", e.target.value)}
             className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs"
           />
         </div>

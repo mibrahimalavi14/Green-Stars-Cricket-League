@@ -39,6 +39,8 @@ async function AdminPerformancesPage() {
                   ballsFaced: p.ballsFaced,
                   fours: p.fours,
                   sixes: p.sixes,
+                  ones: p.ones,
+                  twos: p.twos,
                   isOut: p.isOut,
                   bowlingWickets: p.bowlingWickets,
                   bowlingRuns: p.bowlingRuns,

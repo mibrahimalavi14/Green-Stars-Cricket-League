@@ -101,6 +101,8 @@ export async function recalcPlayerStats() {
       ballsFaced: true,
       fours: true,
       sixes: true,
+      ones: true,
+      twos: true,
       bowlingWickets: true,
       bowlingRuns: true,
       ballsBowled: true,
@@ -121,6 +123,8 @@ export async function recalcPlayerStats() {
     const ballsFaced = p._sum.ballsFaced || 0
     const fours = p._sum.fours || 0
     const sixes = p._sum.sixes || 0
+    const ones = p._sum.ones || 0
+    const twos = p._sum.twos || 0
     const wickets = p._sum.bowlingWickets || 0
     const runsConceded = p._sum.bowlingRuns || 0
     const ballsBowled = p._sum.ballsBowled || 0
@@ -138,7 +142,7 @@ export async function recalcPlayerStats() {
 
     await prisma.player.update({
       where: { id: player.id },
-      data: { runs, ballsFaced, fours, sixes, fifties, hundreds, wickets, runsConceded, ballsBowled, matchesPlayed, catches, stumpings, runOuts },
+      data: { runs, ballsFaced, fours, sixes, ones, twos, fifties, hundreds, wickets, runsConceded, ballsBowled, matchesPlayed, catches, stumpings, runOuts },
     })
   }
 }
