@@ -124,7 +124,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium">2s</th>
               <th className="py-1 px-1 text-center font-medium">Out</th>
               <th className="py-1 px-1 text-center font-medium">Wkts</th>
-              <th className="py-1 px-1 text-center font-medium">Runs</th>
+              <th className="py-1 px-1 text-center font-medium">Runs Given</th>
               <th className="py-1 px-1 text-center font-medium">Balls</th>
               <th className="py-1 pl-1 text-center font-medium">Ct</th>
             </tr>
