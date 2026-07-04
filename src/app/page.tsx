@@ -31,7 +31,7 @@ async function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-cover bg-center py-20" style={{ backgroundImage: "url(/images/teams/Banner.jpg)" }}>
+      <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url(/images/teams/Banner.jpg)" }}>
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative mx-auto max-w-7xl px-4 text-center">
           <h1 className="mb-4 text-5xl font-bold text-white md:text-7xl">
