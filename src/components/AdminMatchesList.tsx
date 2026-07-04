@@ -117,15 +117,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
             <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
               <th className="py-1 pr-2 text-left font-medium">Player</th>
               <th className="py-1 px-1 text-center font-medium">Runs</th>
-              <th className="py-1 px-1 text-center font-medium">BF</th>
+              <th className="py-1 px-1 text-center font-medium">Balls</th>
               <th className="py-1 px-1 text-center font-medium">4s</th>
               <th className="py-1 px-1 text-center font-medium">6s</th>
               <th className="py-1 px-1 text-center font-medium">1s</th>
               <th className="py-1 px-1 text-center font-medium">2s</th>
               <th className="py-1 px-1 text-center font-medium">Out</th>
               <th className="py-1 px-1 text-center font-medium">Wkts</th>
-              <th className="py-1 px-1 text-center font-medium">BowlR</th>
-              <th className="py-1 px-1 text-center font-medium">BowlB</th>
+              <th className="py-1 px-1 text-center font-medium">Runs</th>
+              <th className="py-1 px-1 text-center font-medium">Balls</th>
               <th className="py-1 pl-1 text-center font-medium">Ct</th>
             </tr>
           </thead>
