@@ -7,7 +7,10 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <h3 className="mb-3 text-lg font-bold text-[var(--accent)]">GSCL</h3>
+            <div className="mb-3 flex items-center gap-2">
+              <img src="/images/teams/Green Stars Cricket League.png" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
+              <h3 className="text-lg font-bold text-[var(--accent)]">GSCL</h3>
+            </div>
             <p className="text-sm text-[var(--muted-foreground)]">
               Green Stars Cricket League - Where champions are made. Follow us for live scores, updates, and more.
             </p>
