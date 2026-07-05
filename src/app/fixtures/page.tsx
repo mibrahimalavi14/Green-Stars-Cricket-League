@@ -42,7 +42,7 @@ async function FixturesPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <h1 className="mb-2 text-3xl font-bold">GSCL 2026 — Full Schedule</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">25 matches • 7 teams • 5-over format</p>
+      <p className="mb-8 text-[var(--muted-foreground)]">7 teams • 5-over format • Double Round Robin</p>
 
       <div className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
         <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-3">
@@ -110,25 +110,6 @@ async function FixturesPage() {
           </div>
         </section>
       )}
-
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
-        <h3 className="mb-2 font-semibold">Playoffs — Top 4 Teams</h3>
-        <div className="flex flex-wrap justify-center gap-6 text-sm text-[var(--muted-foreground)]">
-          <div className="text-left">
-            <p className="font-medium text-[var(--foreground)]">Fri 7 Aug</p>
-            <p>Qualifier 1: Rank 1 vs Rank 2</p>
-            <p>Eliminator: Rank 3 vs Rank 4</p>
-          </div>
-          <div className="text-left">
-            <p className="font-medium text-[var(--foreground)]">Sat 8 Aug</p>
-            <p>Qualifier 2: Loser Q1 vs Winner Eliminator</p>
-          </div>
-          <div className="text-left">
-            <p className="font-medium text-[var(--foreground)]">Sun 9 Aug</p>
-            <p className="text-lg font-bold text-[var(--accent)]">🏆 Final</p>
-          </div>
-        </div>
-      </div>
 
       {matches.length === 0 && schedules.length === 0 && (
         <p className="text-center text-[var(--muted-foreground)] py-12">No fixtures scheduled yet.</p>
