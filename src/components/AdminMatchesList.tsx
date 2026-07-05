@@ -23,7 +23,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const [allPlayers, setAllPlayers] = useState<Player[]>([])
   const [form, setForm] = useState({
     team1Score: "", team2Score: "", result: "",
-    tossWinner: "", tossDecision: "", manOfMatch: "", venue: "",
+    tossWinner: "", tossDecision: "", venue: "",
     inn1Runs: "", inn1Wkts: "", inn1Balls: "", inn1Extras: "",
     inn2Runs: "", inn2Wkts: "", inn2Balls: "", inn2Extras: "",
   })
@@ -40,7 +40,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setForm({
       team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "",
       tossWinner: m.tossWinner || "", tossDecision: m.tossDecision || "",
-      manOfMatch: m.manOfMatch || "", venue: m.venue || "",
+      venue: m.venue || "",
       inn1Runs: inn1?.runs?.toString() || "", inn1Wkts: inn1?.wickets?.toString() || "",
       inn1Balls: inn1?.balls?.toString() || "", inn1Extras: inn1?.extras?.toString() || "",
       inn2Runs: inn2?.runs?.toString() || "", inn2Wkts: inn2?.wickets?.toString() || "",
@@ -100,8 +100,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         runOuts: parseInt(s(p.id, "ro")) || 0,
       }))
 
-    let mom = form.manOfMatch
-    if (!mom && playersData.length > 0) {
+    let mom = ""
+    if (playersData.length > 0) {
       let bestScore = -Infinity
       for (const p of playersData) {
         const player = allPlayers.find(x => x.id === p.playerId)
@@ -149,7 +149,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setScoring(null)
     setForm({
       team1Score: "", team2Score: "", result: "",
-      tossWinner: "", tossDecision: "", manOfMatch: "", venue: "",
+      tossWinner: "", tossDecision: "", venue: "",
       inn1Runs: "", inn1Wkts: "", inn1Balls: "", inn1Extras: "",
       inn2Runs: "", inn2Wkts: "", inn2Balls: "", inn2Extras: "",
     })
@@ -234,7 +234,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       {matches.map((m) => {
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)
         const team2Players = allPlayers.filter(p => p.teamId === m.team2.id)
-        const allMatchPlayers = [...team1Players, ...team2Players]
         return (
         <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
           <div className="flex items-center justify-between">
@@ -282,16 +281,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     <option value="">Select</option>
                     <option value="bat">Bat</option>
                     <option value="bowl">Bowl</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Man of the Match</label>
-                  <select value={form.manOfMatch} onChange={e => setForm({...form, manOfMatch: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm">
-                    <option value="">Select</option>
-                    {allMatchPlayers.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
                   </select>
                 </div>
                 <div>
