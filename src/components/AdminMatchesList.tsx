@@ -77,17 +77,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   }
 
   async function submitScore(id: string, m: Match) {
-    await fetch("/api/matches", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id, status: "completed",
-        team1Score: form.team1Score, team2Score: form.team2Score, result: form.result,
-        tossWinner: form.tossWinner, tossDecision: form.tossDecision,
-        manOfMatch: form.manOfMatch, venue: form.venue,
-      }),
-    })
-
     const playersData = allPlayers
       .filter(p => p.teamId === m.team1.id || p.teamId === m.team2.id)
       .filter(p => s(p.id, "runs") || s(p.id, "wkts") || s(p.id, "ct") || s(p.id, "st") || s(p.id, "ro"))
@@ -110,6 +99,30 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         stumpings: parseInt(s(p.id, "st")) || 0,
         runOuts: parseInt(s(p.id, "ro")) || 0,
       }))
+
+    let mom = form.manOfMatch
+    if (!mom && playersData.length > 0) {
+      let bestScore = -Infinity
+      for (const p of playersData) {
+        const player = allPlayers.find(x => x.id === p.playerId)
+        const battingImpact = p.battingRuns + p.fours * 2 + p.sixes * 4 - (p.isOut ? 5 : 0)
+        const bowlingImpact = p.bowlingWickets * 25 - p.bowlingRuns
+        const fieldingImpact = p.catches * 10 + p.stumpings * 15 + p.runOuts * 15
+        const total = battingImpact + bowlingImpact + fieldingImpact
+        if (total > bestScore) { bestScore = total; mom = p.playerId }
+      }
+    }
+
+    await fetch("/api/matches", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id, status: "completed",
+        team1Score: form.team1Score, team2Score: form.team2Score, result: form.result,
+        tossWinner: form.tossWinner, tossDecision: form.tossDecision,
+        manOfMatch: mom, venue: form.venue,
+      }),
+    })
 
     if (playersData.length > 0) {
       await fetch("/api/performances", {
@@ -323,9 +336,9 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">Balls (20 ov = 120)</label>
+                  <label className="mb-1 block text-xs">Balls (5 ov = 30)</label>
                   <input type="number" min="0" value={form.inn1Balls} onChange={e => setForm({...form, inn1Balls: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="120" />
+                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="30" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Extras</label>
@@ -343,9 +356,9 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">Balls (20 ov = 120)</label>
+                  <label className="mb-1 block text-xs">Balls (5 ov = 30)</label>
                   <input type="number" min="0" value={form.inn2Balls} onChange={e => setForm({...form, inn2Balls: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="120" />
+                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="30" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Extras</label>
