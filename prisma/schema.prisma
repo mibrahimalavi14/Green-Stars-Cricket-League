@@ -202,6 +202,7 @@ model News {
   excerpt   String   @default("")
   image     String   @default("/placeholder-news.png")
   author    String   @default("Admin")
+  type      String   @default("general")
   published Boolean  @default(false)
   createdAt DateTime @default(now())
 }

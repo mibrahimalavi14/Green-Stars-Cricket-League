@@ -14,7 +14,7 @@ async function AdminNewsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{n.title}</p>
-                <p className="text-xs text-[var(--muted-foreground)]">{n.published ? "Published" : "Draft"} &middot; {n.author}</p>
+                <p className="text-xs text-[var(--muted-foreground)]">{n.published ? "Published" : "Draft"} &middot; {n.author} &middot; {n.type === "schedule" ? "📅 Schedule" : "📰 News"}</p>
               </div>
             </div>
           </div>

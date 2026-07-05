@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const body = await req.json()
   const slug = body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
   const news = await prisma.news.create({
-    data: { ...body, slug, published: true },
+    data: { ...body, type: body.type || "general", slug, published: true },
   })
   return NextResponse.json(news)
 }

@@ -92,6 +92,7 @@ export interface NewsData {
   excerpt: string
   image: string
   author: string
+  type: string
   published: boolean
   createdAt: string
 }
