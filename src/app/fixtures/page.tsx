@@ -12,7 +12,7 @@ async function FixturesPage() {
     orderBy: { createdAt: "desc" },
   })
 
-  const teams = await prisma.team.findMany({ select: { name: true, shortName: true, color: true } })
+  const teams = await prisma.team.findMany({ select: { name: true, shortName: true, logo: true } })
 
   const upcoming = matches.filter((m) => m.status === "upcoming")
   const live = matches.filter((m) => m.status === "live")
@@ -59,13 +59,13 @@ async function FixturesPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full" style={{ backgroundColor: parsed.t1.color }} />
+                        <img src={parsed.t1.logo || ""} alt={parsed.t1.shortName} className="h-8 w-8 rounded-full object-cover" />
                         <span className="font-semibold">{parsed.t1.shortName}</span>
                       </div>
                       <span className="text-xs text-[var(--muted-foreground)]">vs</span>
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">{parsed.t2.shortName}</span>
-                        <div className="h-8 w-8 rounded-full" style={{ backgroundColor: parsed.t2.color }} />
+                        <img src={parsed.t2.logo || ""} alt={parsed.t2.shortName} className="h-8 w-8 rounded-full object-cover" />
                       </div>
                     </div>
                   </div>
