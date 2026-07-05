@@ -12,72 +12,87 @@ async function FixturesPage() {
     orderBy: { createdAt: "desc" },
   })
 
-  const teams = await prisma.team.findMany({ select: { name: true, shortName: true, logo: true } })
-
-  const upcoming = matches.filter((m) => m.status === "upcoming")
   const live = matches.filter((m) => m.status === "live")
   const completed = matches.filter((m) => m.status === "completed").reverse()
+  const upcoming = matches.filter((m) => m.status === "upcoming")
 
-  function findTeam(name: string) {
-    const n = name.toLowerCase().trim()
-    return teams.find(t => t.name.toLowerCase() === n || t.shortName.toLowerCase() === n)
+  const groups: Record<string, typeof matches> = {}
+  for (const m of upcoming) {
+    const dateKey = new Date(m.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
+    if (!groups[dateKey]) groups[dateKey] = []
+    groups[dateKey].push(m)
   }
 
-  function parseScheduleLine(line: string) {
-    const parts = line.split("—").map(s => s.trim())
-    const teamsPart = parts[0]
-    const datePart = parts[1] || ""
-    const matchParts = teamsPart.split(":")
-    const matchLabel = matchParts[0]?.trim() || ""
-    const teamsNames = (matchParts[1] || teamsPart).split("vs").map(s => s.trim())
-    const t1 = findTeam(teamsNames[0] || "")
-    const t2 = findTeam(teamsNames[1] || "")
-    return { matchLabel, t1, t2, date: datePart }
+  const weekDays: Record<string, string> = {
+    "Friday": "Fri",
+    "Saturday": "Sat",
+    "Sunday": "Sun",
+  }
+
+  const roundLabels: Record<string, string> = {
+    "17 July": "Round 1",
+    "18 July": "Round 2",
+    "19 July": "Round 3",
+    "24 July": "Round 4",
+    "25 July": "Round 5",
+    "26 July": "Round 6",
+    "31 July": "Round 7",
   }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">Fixtures & Results</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">Complete schedule and results</p>
+      <h1 className="mb-2 text-3xl font-bold">GSCL 2026 — Full Schedule</h1>
+      <p className="mb-8 text-[var(--muted-foreground)]">25 matches • 7 teams • 5-over format</p>
 
-      {schedules.map((s) => {
-        const lines = s.content.split("\n").filter(l => l.trim())
-        return (
-          <section key={s.id} className="mb-8">
-            <h2 className="mb-4 text-xl font-semibold">{s.title}</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {lines.map((line, i) => {
-                const parsed = parseScheduleLine(line)
-                if (!parsed.t1 || !parsed.t2) {
-                  return <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-sm">{line}</div>
-                }
-                return (
-                  <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-                    <div className="mb-2 flex items-center justify-between text-xs text-[var(--muted-foreground)]">
-                      <span>{parsed.matchLabel}</span>
-                      <span>{parsed.date}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <img src={parsed.t1.logo || ""} alt={parsed.t1.shortName} className="h-8 w-8 rounded-full object-cover" />
-                        <span className="font-semibold">{parsed.t1.shortName}</span>
-                      </div>
-                      <span className="text-xs text-[var(--muted-foreground)]">vs</span>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold">{parsed.t2.shortName}</span>
-                        <img src={parsed.t2.logo || ""} alt={parsed.t2.shortName} className="h-8 w-8 rounded-full object-cover" />
-                      </div>
-                    </div>
+      <div className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+        <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-3">
+          <h2 className="text-lg font-semibold">League Stage</h2>
+        </div>
+        <div className="divide-y divide-[var(--border)]">
+          {Object.entries(groups).map(([dateKey, dayMatches]) => {
+            const dayNum = dateKey.match(/\d+/)?.[0] || ""
+            const month = dateKey.match(/[A-Z]\w+/)?.[0] || ""
+            const roundLabel = roundLabels[`${dayNum} ${month}`] || ""
+            return (
+              <div key={dateKey} className="px-6 py-4">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
+                    {weekDays[dateKey.split(",")[0]] || dateKey.split(",")[0].slice(0, 3)}
                   </div>
-                )
-              })}
-            </div>
-          </section>
-        )
-      })}
+                  <div>
+                    <p className="font-semibold">{dateKey}</p>
+                    {roundLabel && <p className="text-xs text-[var(--muted-foreground)]">{roundLabel}</p>}
+                  </div>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {dayMatches.map((m) => (
+                    <div key={m.id} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3 transition-colors hover:border-[var(--accent)]/30">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <img src={m.team1.logo || ""} alt={m.team1.shortName} className="h-7 w-7 rounded-full object-cover" />
+                          <span className="text-sm font-medium">{m.team1.shortName}</span>
+                        </div>
+                        <span className="text-[10px] text-[var(--muted-foreground)]">vs</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{m.team2.shortName}</span>
+                          <img src={m.team2.logo || ""} alt={m.team2.shortName} className="h-7 w-7 rounded-full object-cover" />
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
+                        <span>7:00 PM</span>
+                        <span>{m.venue}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
       {live.length > 0 && (
-        <section className="mb-8">
+        <section className="mb-10">
           <h2 className="mb-4 text-xl font-semibold flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live Now
           </h2>
@@ -87,31 +102,34 @@ async function FixturesPage() {
         </section>
       )}
 
-      {matches.length > 0 && (
-        <>
-          <section className="mb-8">
-            <h2 className="mb-4 text-xl font-semibold">Upcoming</h2>
-            {upcoming.length === 0 ? (
-              <p className="text-[var(--muted-foreground)]">No upcoming matches.</p>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {upcoming.map((m) => <MatchCard key={m.id} match={m as never} />)}
-              </div>
-            )}
-          </section>
-
-          <section>
-            <h2 className="mb-4 text-xl font-semibold">Results</h2>
-            {completed.length === 0 ? (
-              <p className="text-[var(--muted-foreground)]">No completed matches.</p>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {completed.map((m) => <MatchCard key={m.id} match={m as never} />)}
-              </div>
-            )}
-          </section>
-        </>
+      {completed.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-xl font-semibold">Results</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {completed.map((m) => <MatchCard key={m.id} match={m as never} />)}
+          </div>
+        </section>
       )}
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
+        <h3 className="mb-2 font-semibold">Playoffs — Top 4 Teams</h3>
+        <div className="flex flex-wrap justify-center gap-6 text-sm text-[var(--muted-foreground)]">
+          <div className="text-left">
+            <p className="font-medium text-[var(--foreground)]">Fri 7 Aug</p>
+            <p>Qualifier 1: Rank 1 vs Rank 2</p>
+            <p>Eliminator: Rank 3 vs Rank 4</p>
+          </div>
+          <div className="text-left">
+            <p className="font-medium text-[var(--foreground)]">Sat 8 Aug</p>
+            <p>Qualifier 2: Loser Q1 vs Winner Eliminator</p>
+          </div>
+          <div className="text-left">
+            <p className="font-medium text-[var(--foreground)]">Sun 9 Aug</p>
+            <p className="text-lg font-bold text-[var(--accent)]">🏆 Final</p>
+          </div>
+        </div>
+      </div>
+
       {matches.length === 0 && schedules.length === 0 && (
         <p className="text-center text-[var(--muted-foreground)] py-12">No fixtures scheduled yet.</p>
       )}
