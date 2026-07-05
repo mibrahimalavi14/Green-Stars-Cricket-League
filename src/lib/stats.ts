@@ -78,7 +78,7 @@ export async function recalcPointsTable(seasonId: string) {
 
     return {
       id: team.id,
-      name: team.shortName,
+      name: team.name,
       color: team.color,
       played: s.played,
       won: s.won,
