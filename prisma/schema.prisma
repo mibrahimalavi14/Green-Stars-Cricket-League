@@ -150,6 +150,8 @@ model Inning {
   balls    Int    @default(0)
   extras   Int    @default(0)
   ballsData String @default("[]")
+
+  @@unique([matchId, teamId])
 }
 
 model PlayerMatch {
