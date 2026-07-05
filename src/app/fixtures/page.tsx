@@ -70,11 +70,11 @@ async function FixturesPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <img src={m.team1.logo || ""} alt={m.team1.shortName} className="h-7 w-7 rounded-full object-cover" />
-                          <span className="text-sm font-medium">{m.team1.shortName}</span>
+                          <span className="text-sm font-medium">{m.team1.name}</span>
                         </div>
                         <span className="text-[10px] text-[var(--muted-foreground)]">vs</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{m.team2.shortName}</span>
+                          <span className="text-sm font-medium">{m.team2.name}</span>
                           <img src={m.team2.logo || ""} alt={m.team2.shortName} className="h-7 w-7 rounded-full object-cover" />
                         </div>
                       </div>
