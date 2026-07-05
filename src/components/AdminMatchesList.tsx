@@ -323,9 +323,9 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">Overs (balls)</label>
+                  <label className="mb-1 block text-xs">Balls (20 ov = 120)</label>
                   <input type="number" min="0" value={form.inn1Balls} onChange={e => setForm({...form, inn1Balls: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="120" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Extras</label>
@@ -343,9 +343,9 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">Overs (balls)</label>
+                  <label className="mb-1 block text-xs">Balls (20 ov = 120)</label>
                   <input type="number" min="0" value={form.inn2Balls} onChange={e => setForm({...form, inn2Balls: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="120" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Extras</label>
