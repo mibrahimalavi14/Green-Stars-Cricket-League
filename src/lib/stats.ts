@@ -53,12 +53,15 @@ export async function recalcPointsTable(seasonId: string) {
       if (stats[m.team1Id]) stats[m.team1Id].nr++
       if (stats[m.team2Id]) stats[m.team2Id].nr++
     } else {
-      const team1Lower = teams.find(t => t.id === m.team1Id)?.name.toLowerCase() || ""
-      const team2Lower = teams.find(t => t.id === m.team2Id)?.name.toLowerCase() || ""
-      if (result.includes(team1Lower)) {
+      const t1 = teams.find(t => t.id === m.team1Id)
+      const t2 = teams.find(t => t.id === m.team2Id)
+      const r = result.toLowerCase()
+      const t1Match = r.includes((t1?.name || "").toLowerCase()) || r.includes((t1?.shortName || "").toLowerCase())
+      const t2Match = r.includes((t2?.name || "").toLowerCase()) || r.includes((t2?.shortName || "").toLowerCase())
+      if (t1Match && !t2Match) {
         if (stats[m.team1Id]) stats[m.team1Id].won++
         if (stats[m.team2Id]) stats[m.team2Id].lost++
-      } else if (result.includes(team2Lower)) {
+      } else if (t2Match && !t1Match) {
         if (stats[m.team2Id]) stats[m.team2Id].won++
         if (stats[m.team1Id]) stats[m.team1Id].lost++
       }
