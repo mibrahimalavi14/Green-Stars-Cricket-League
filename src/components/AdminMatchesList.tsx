@@ -26,9 +26,9 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     fetch("/api/players").then(r => r.json()).then(setAllPlayers)
   }, [])
 
-  function openScoring(id: string) {
+  function openScoring(id: string, m: Match) {
     setScoring(id)
-    setForm({ team1Score: "", team2Score: "", result: "" })
+    setForm({ team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "" })
     setStats({})
   }
 
@@ -175,8 +175,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               {m.status === "upcoming" && (
                 <button onClick={() => updateStatus(m.id, "live")} className="rounded bg-red-500 px-2 py-1 text-xs text-white">Set Live</button>
               )}
-              {(m.status === "live" || m.status === "upcoming") && !scoring && (
-                <button onClick={() => openScoring(m.id)} className="rounded bg-green-500 px-2 py-1 text-xs text-white">{m.status === "live" ? "Add Score" : "Set Result"}</button>
+              {!scoring && (
+                <button onClick={() => openScoring(m.id, m)} className="rounded bg-green-500 px-2 py-1 text-xs text-white">
+                  {m.status === "completed" ? (m.team1Score ? "Edit Result" : "Add Result") : m.status === "live" ? "Add Score" : "Set Result"}
+                </button>
               )}
               <button onClick={() => deleteMatch(m.id)} disabled={deleting === m.id}
                 className="rounded bg-red-600 px-2 py-1 text-xs text-white disabled:opacity-50">Delete</button>
