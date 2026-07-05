@@ -1,4 +1,4 @@
-const baseUrl = "https://gscl.pk"
+const baseUrl = "https://green-stars-cricket-league.vercel.app"
 
 export default async function sitemap() {
   try {
