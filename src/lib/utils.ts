@@ -22,6 +22,22 @@ export function calculateNRR(
   )
 }
 
+export function relativeDateLabel(date: Date, timeZone = "Asia/Karachi") {
+  const now = new Date()
+  const nowPKT = new Date(now.toLocaleString("en-US", { timeZone }))
+  const datePKT = new Date(date.toLocaleString("en-US", { timeZone }))
+  const today = nowPKT.toDateString()
+  const target = datePKT.toDateString()
+  if (target === today) return { label: "Today", className: "text-green-600 font-semibold" }
+  const tomorrow = new Date(nowPKT)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  if (target === tomorrow.toDateString()) return { label: "Tomorrow", className: "text-amber-600 font-semibold" }
+  const yesterday = new Date(nowPKT)
+  yesterday.setDate(yesterday.getDate() - 1)
+  if (target === yesterday.toDateString()) return { label: "Yesterday", className: "text-red-500 font-semibold" }
+  return { label: "", className: "" }
+}
+
 export function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString("en-PK", {
     day: "numeric",

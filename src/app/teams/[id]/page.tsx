@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import { relativeDateLabel } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -110,7 +111,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 <div className="text-center">
                   <span className="text-xs font-semibold text-[var(--accent)]">VS</span>
                   <div className="text-xs text-[var(--muted-foreground)]">
-                    {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })} &middot;{" "}
+                    {(() => { const rel = relativeDateLabel(new Date(m.date)); return rel.label ? <span className={rel.className}>{rel.label}</span> : <>{new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
                     {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
                   </div>
                 </div>

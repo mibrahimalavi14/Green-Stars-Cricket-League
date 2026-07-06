@@ -1,10 +1,10 @@
 import Link from "next/link"
-import { formatDate, formatTime } from "@/lib/utils"
+import { formatDate, relativeDateLabel } from "@/lib/utils"
 import { MatchData } from "@/types"
 
 export function MatchCard({ match }: { match: MatchData }) {
   const date = new Date(match.date)
-  const isToday = new Date().toDateString() === date.toDateString()
+  const rel = relativeDateLabel(date)
 
   return (
     <Link
@@ -36,8 +36,12 @@ export function MatchCard({ match }: { match: MatchData }) {
         <div className="text-center">
           <span className="text-xs font-semibold text-[var(--accent)]">VS</span>
           {match.status === "upcoming" && (
-            <div className="mt-1 text-xs text-[var(--muted-foreground)]">
-              {isToday ? formatTime(date) : formatDate(date)}
+            <div className="mt-1 text-xs">
+              {rel.label ? (
+                <span className={rel.className}>{rel.label}</span>
+              ) : (
+                <span className="text-[var(--muted-foreground)]">{formatDate(date)}</span>
+              )}
             </div>
           )}
         </div>

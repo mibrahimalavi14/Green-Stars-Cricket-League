@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { relativeDateLabel } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -131,7 +132,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-[var(--muted-foreground)]">
-                            {new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })} &middot;{" "}
+                            {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
                             {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
                           </div>
                           <div className="my-1 text-xs font-bold text-[var(--accent)]">VS</div>
@@ -173,7 +174,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-[var(--muted-foreground)]">
-                            {new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })} &middot;{" "}
+                            {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
                             {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
                           </div>
                           <div className="my-1 text-xs font-bold text-amber-600">VS</div>
@@ -185,7 +186,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                       </div>
                     </div>
                   ))}
-                </div>
+                    </div>
               </div>
             )}
           </>
