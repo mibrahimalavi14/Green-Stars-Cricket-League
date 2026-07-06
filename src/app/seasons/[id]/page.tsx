@@ -39,7 +39,21 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
     <div className="mx-auto max-w-5xl px-4 py-12">
       <Link href="/seasons" className="mb-4 inline-block text-sm text-[var(--accent)] hover:underline">&larr; All Seasons</Link>
       <h1 className="mb-1 text-3xl font-bold">{season.name}</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">{season.year} &middot; {season.teams.length} Teams &middot; {season.matches.length} Matches</p>
+      <p className="text-[var(--muted-foreground)]">{season.year} &middot; {season.teams.length} Teams &middot; {season.matches.length} Matches</p>
+      <div className="mb-8 mt-2 flex flex-wrap gap-2">
+        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${season.isActive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${season.isActive ? "bg-green-500" : "bg-yellow-500"}`} />
+          {season.isActive ? "Active" : "Inactive"}
+        </span>
+        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${season.scheduleAnnounced ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${season.scheduleAnnounced ? "bg-green-500" : "bg-gray-400"}`} />
+          Schedule {season.scheduleAnnounced ? "Announced" : "Not Announced"}
+        </span>
+        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${season.scheduleAnnounced ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${season.scheduleAnnounced ? "bg-red-500" : "bg-green-500"}`} />
+          Predictions {season.scheduleAnnounced ? "Locked" : "Open"}
+        </span>
+      </div>
 
       <section className="mb-12">
         <h2 className="mb-4 text-xl font-semibold">Points Table</h2>
