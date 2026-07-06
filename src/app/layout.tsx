@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   keywords: "cricket, league, green stars, live scores, points table, fixtures",
   verification: { google: "L9HDnSdCMqHCyPsiK-e5ofuY_1Pb4AZUuuQsx0E-mh4" },
   icons: {
-    icon: [{ url: "/images/teams/gscl-logo.png", type: "image/png" }],
-    apple: "/images/teams/gscl-logo.png",
+    icon: [{ url: "/images/logo/gscl-logo.png", type: "image/png" }],
+    apple: "/images/logo/gscl-logo.png",
   },
   openGraph: {
     title: "Green Stars Cricket League",
     description: "Official website of the Green Stars Cricket League",
     type: "website",
-    images: ["/images/teams/gscl-logo.png"],
+    images: ["/images/logo/gscl-logo.png"],
   },
 }
 

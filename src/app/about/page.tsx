@@ -21,7 +21,7 @@ function AboutPage() {
       <div className="mb-12 flex flex-col items-center gap-6 md:flex-row">
         <div className="shrink-0">
           <img
-            src="/images/teams/Chairman-of-GSCL.jpg"
+            src="/images/chairman/Chairman-of-GSCL.jpg"
             alt="Chairman of GSCL"
             className="h-48 w-48 rounded-xl border border-[var(--border)] object-cover md:h-56 md:w-56"
           />
