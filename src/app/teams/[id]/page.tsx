@@ -120,6 +120,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                     <span className="font-medium">{m.team2.name}</span>
                     {m.team2.logo && <img src={m.team2.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
                   </div>
+                </div>
               </div>
               {m.result && <p className="mt-1 text-center text-xs font-medium text-green-600">{m.result}</p>}
               {m.status === "upcoming" && <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{m.venue}</p>}
