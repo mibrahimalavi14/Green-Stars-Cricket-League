@@ -1,40 +1,26 @@
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
 import { PredictionsClient } from "@/components/PredictionsClient"
 
 async function PredictionsPage() {
-  const session = await auth()
   const season = await prisma.season.findFirst({ where: { isActive: true } })
-  const matches = await prisma.match.findMany({
-    where: { seasonId: season?.id, status: "upcoming" },
-    include: { team1: true, team2: true },
-    orderBy: { date: "asc" },
+  if (!season) return <div className="mx-auto max-w-5xl px-4 py-12"><p className="text-[var(--muted-foreground)]">No active season.</p></div>
+
+  const teams = await prisma.team.findMany({
+    where: { seasonId: season.id },
   })
-  const allPredictions = await prisma.prediction.findMany({
-    include: { user: { select: { name: true, image: true } }, match: { include: { team1: true, team2: true } } },
+
+  const predictions = await prisma.seasonPrediction.findMany({
+    where: { seasonId: season.id },
     orderBy: { createdAt: "desc" },
   })
 
-  const userPredictions = session ? allPredictions.filter((p) => p.userId === session.user?.id) : []
-  const locked = season?.scheduleAnnounced ?? false
-
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">Match Predictions</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">
-        {locked
-          ? "Predictions are now closed. Check out the predictions below!"
-          : "Predict match winners and earn bragging rights!"}
-      </p>
-
-      <PredictionsClient
-        matches={matches as never[]}
-        userPredictions={userPredictions as never[]}
-        allPredictions={allPredictions as never[]}
-        session={session as never}
-        locked={locked}
-      />
-    </div>
+    <PredictionsClient
+      teams={teams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, logo: t.logo, color: t.color }))}
+      seasonId={season.id}
+      initialPredictions={predictions.map(p => ({ id: p.id, name: p.name, email: p.email, predictedTeamId: p.predictedTeamId }))}
+      locked={season.scheduleAnnounced}
+    />
   )
 }
 

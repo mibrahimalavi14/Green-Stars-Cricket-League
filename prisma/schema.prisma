@@ -218,6 +218,18 @@ model Contact {
   createdAt DateTime @default(now())
 }
 
+model SeasonPrediction {
+  id              String   @id @default(cuid())
+  seasonId        String
+  predictedTeamId String
+  name            String
+  email           String
+  googleUserId    String?
+  createdAt       DateTime @default(now())
+
+  @@unique([email, seasonId])
+}
+
 model PredictionLock {
   id        String   @id @default(cuid())
   seasonId  String
