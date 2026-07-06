@@ -18,6 +18,25 @@ function AboutPage() {
         />
       </div>
 
+      <div className="mb-12 flex flex-col items-center gap-6 md:flex-row">
+        <div className="shrink-0">
+          <img
+            src="/images/teams/Chairman-of-GSCL.jpg"
+            alt="Chairman of GSCL"
+            className="h-48 w-48 rounded-xl border border-[var(--border)] object-cover md:h-56 md:w-56"
+          />
+        </div>
+        <div>
+          <h2 className="mb-1 text-xl font-bold">Chairman of GSCL</h2>
+          <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
+            The Green Stars Cricket League is proudly led by our Chairman, whose vision and dedication have
+            brought this platform to life. With a passion for grassroots cricket and a commitment to nurturing
+            young talent, the Chairman continues to drive GSCL forward — building a league that represents the
+            spirit and future of Pakistan cricket.
+          </p>
+        </div>
+      </div>
+
       <div className="mb-12 space-y-6 text-sm leading-relaxed text-[var(--muted-foreground)]">
         <p>
           The <strong className="text-[var(--foreground)]">Green Stars Cricket League (GSCL)</strong> is a
