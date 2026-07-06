@@ -35,6 +35,15 @@ async function FixturesPage() {
     playoffGroups[dateKey].push(m)
   }
 
+  function playoffLabel(d: Date) {
+    const iso = d.toISOString()
+    if (iso.startsWith("2026-08-28T12:")) return "Qualifier 1"
+    if (iso.startsWith("2026-08-28T13:")) return "Eliminator"
+    if (iso.startsWith("2026-08-29T")) return "Qualifier 2"
+    if (iso.startsWith("2026-08-30T")) return "Final"
+    return ""
+  }
+
   const playoffRoundLabels: Record<string, string> = {
     "28 August": "Qualifier 1 & Eliminator",
     "29 August": "Qualifier 2",
@@ -148,6 +157,9 @@ async function FixturesPage() {
                   <div className="grid gap-3 md:grid-cols-3">
                     {dayMatches.map((m) => (
                       <div key={m.id} className="rounded-xl border border-amber-200 bg-[var(--background)] p-3 dark:border-amber-800/40">
+                        <div className="mb-1">
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(new Date(m.date))}</span>
+                        </div>
                         <div className="flex items-center justify-between">
                           <div className="flex flex-1 items-center gap-2">
                             <span className="text-sm font-bold text-amber-600">TBD</span>

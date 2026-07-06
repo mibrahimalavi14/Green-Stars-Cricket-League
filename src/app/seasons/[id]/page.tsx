@@ -37,6 +37,15 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
     perfByPlayer.get(p.playerId)!.push(p)
   }
 
+  function playoffLabel(d: Date) {
+    const iso = d.toISOString()
+    if (iso.startsWith("2026-08-28T12:")) return "Qualifier 1"
+    if (iso.startsWith("2026-08-28T13:")) return "Eliminator"
+    if (iso.startsWith("2026-08-29T")) return "Qualifier 2"
+    if (iso.startsWith("2026-08-30T")) return "Final"
+    return ""
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <Link href="/seasons" className="mb-4 inline-block text-sm text-[var(--accent)] hover:underline">&larr; All Seasons</Link>
@@ -155,6 +164,9 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 <div className="space-y-3">
                   {season.matches.filter(m => m.date >= new Date("2026-08-28T00:00:00.000Z")).map((match) => (
                     <div key={match.id} className="rounded-xl border border-amber-200 bg-[var(--card)] p-4 dark:border-amber-800/40">
+                      <div className="mb-1">
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(new Date(match.date))}</span>
+                      </div>
                       <div className="flex items-center justify-between">
                         <div className="flex flex-1 items-center justify-center gap-2">
                           <span className="font-bold text-amber-600">TBD</span>
