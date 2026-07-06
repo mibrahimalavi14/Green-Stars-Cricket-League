@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { RefreshCw } from "lucide-react"
+import { getVenueMapsUrl } from "@/lib/utils"
 
 interface LiveMatch {
   id: string
@@ -71,7 +72,7 @@ export function LiveScoreClient({
                       {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                     </div>
                   </div>
-                  <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString()} &middot; {m.venue}</p>
+                  <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString()} &middot; {(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(m.venue)}</p>
                 </div>
               ))}
             </div>

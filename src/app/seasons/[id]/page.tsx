@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { relativeDateLabel } from "@/lib/utils"
+import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -136,7 +136,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                             {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
                           </div>
                           <div className="my-1 text-xs font-bold text-[var(--accent)]">VS</div>
-                          <div className="text-xs text-[var(--muted-foreground)]">{match.venue}</div>
+                          <div className="text-xs text-[var(--muted-foreground)]">{(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(match.venue)}</div>
                           {match.status === "completed" && match.result && (
                             <div className="mt-1 text-xs font-medium text-green-600">{match.result}</div>
                           )}

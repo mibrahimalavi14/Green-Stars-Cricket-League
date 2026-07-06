@@ -38,6 +38,16 @@ export function relativeDateLabel(date: Date, timeZone = "Asia/Karachi") {
   return { label: "", className: "" }
 }
 
+const venueCoordinates: Record<string, string> = {
+  "Al-Kabir Cricket Road": "31°21'08.4%22N+74°13'53.5%22E",
+}
+
+export function getVenueMapsUrl(venue: string): string | null {
+  const coords = venueCoordinates[venue]
+  if (coords) return `https://www.google.com/maps/search/${coords}`
+  return null
+}
+
 export function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString("en-PK", {
     day: "numeric",

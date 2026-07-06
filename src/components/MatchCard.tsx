@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { formatDate, relativeDateLabel } from "@/lib/utils"
+import { formatDate, relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 import { MatchData } from "@/types"
 
 export function MatchCard({ match }: { match: MatchData }) {
@@ -60,7 +60,9 @@ export function MatchCard({ match }: { match: MatchData }) {
         </div>
       </div>
       <div className="mt-2 text-center text-xs text-[var(--muted-foreground)]">
-        {match.status === "completed" ? match.result : match.venue}
+        {match.status === "completed" ? match.result : (
+          (() => { const url = getVenueMapsUrl(match.venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{match.venue}</a> : <>{match.venue}</> })()
+        )}
       </div>
     </Link>
   )

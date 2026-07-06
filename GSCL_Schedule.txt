@@ -5,9 +5,9 @@
 
 
 Friday, 17 July 2026
-  Dragon Knights         vs Power Panthers          5:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Thunder Hawks          vs Legends XI              6:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Alpha Warriors         vs Elite Rangers           7:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Dragon Knights         vs Power Panthers          5:00 PM  |  Al-Kabir Cricket Road
+  Thunder Hawks          vs Legends XI              6:00 PM  |  Al-Kabir Cricket Road
+  Alpha Warriors         vs Elite Rangers           7:00 PM  |  Al-Kabir Cricket Road
 
 Saturday, 18 July 2026
   Green Gladiators       vs Power Panthers          5:00 PM  |  TBD
@@ -15,9 +15,9 @@ Saturday, 18 July 2026
   Thunder Hawks          vs Alpha Warriors          7:00 PM  |  TBD
 
 Sunday, 19 July 2026
-  Green Gladiators       vs Legends XI              5:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Power Panthers         vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Dragon Knights         vs Thunder Hawks           7:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Green Gladiators       vs Legends XI              5:00 PM  |  Al-Kabir Cricket Road
+  Power Panthers         vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road
+  Dragon Knights         vs Thunder Hawks           7:00 PM  |  Al-Kabir Cricket Road
 
 Friday, 24 July 2026
   Green Gladiators       vs Elite Rangers           5:00 PM  |  TBD
@@ -25,9 +25,9 @@ Friday, 24 July 2026
   Power Panthers         vs Thunder Hawks           7:00 PM  |  TBD
 
 Saturday, 25 July 2026
-  Green Gladiators       vs Alpha Warriors          5:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Elite Rangers          vs Thunder Hawks           6:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Legends XI             vs Dragon Knights          7:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Green Gladiators       vs Alpha Warriors          5:00 PM  |  Al-Kabir Cricket Road
+  Elite Rangers          vs Thunder Hawks           6:00 PM  |  Al-Kabir Cricket Road
+  Legends XI             vs Dragon Knights          7:00 PM  |  Al-Kabir Cricket Road
 
 Sunday, 26 July 2026
   Green Gladiators       vs Thunder Hawks           5:00 PM  |  TBD
@@ -35,19 +35,19 @@ Sunday, 26 July 2026
   Legends XI             vs Power Panthers          7:00 PM  |  TBD
 
 Friday, 31 July 2026
-  Green Gladiators       vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Alpha Warriors         vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Elite Rangers          vs Legends XI              7:00 PM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Green Gladiators       vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road
+  Alpha Warriors         vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road
+  Elite Rangers          vs Legends XI              7:00 PM  |  Al-Kabir Cricket Road
 
 Saturday, 1 August 2026
-  Elite Rangers          vs Alpha Warriors          12:00 AM  |  TBD
   Legends XI             vs Thunder Hawks           12:00 AM  |  TBD
   Power Panthers         vs Dragon Knights          12:00 AM  |  TBD
+  Elite Rangers          vs Alpha Warriors          12:00 AM  |  TBD
 
 Sunday, 2 August 2026
-  Power Panthers         vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Elite Rangers          vs Dragon Knights          12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Alpha Warriors         vs Thunder Hawks           12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Power Panthers         vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road
+  Alpha Warriors         vs Thunder Hawks           12:00 AM  |  Al-Kabir Cricket Road
+  Elite Rangers          vs Dragon Knights          12:00 AM  |  Al-Kabir Cricket Road
 
 Saturday, 8 August 2026
   Legends XI             vs Green Gladiators        12:00 AM  |  TBD
@@ -55,24 +55,24 @@ Saturday, 8 August 2026
   Elite Rangers          vs Power Panthers          12:00 AM  |  TBD
 
 Sunday, 9 August 2026
-  Elite Rangers          vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Thunder Hawks          vs Power Panthers          12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Alpha Warriors         vs Legends XI              12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Alpha Warriors         vs Legends XI              12:00 AM  |  Al-Kabir Cricket Road
+  Elite Rangers          vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road
+  Thunder Hawks          vs Power Panthers          12:00 AM  |  Al-Kabir Cricket Road
 
 Saturday, 15 August 2026
-  Dragon Knights         vs Legends XI              12:00 AM  |  TBD
-  Thunder Hawks          vs Elite Rangers           12:00 AM  |  TBD
   Alpha Warriors         vs Green Gladiators        12:00 AM  |  TBD
+  Thunder Hawks          vs Elite Rangers           12:00 AM  |  TBD
+  Dragon Knights         vs Legends XI              12:00 AM  |  TBD
 
 Sunday, 16 August 2026
-  Power Panthers         vs Legends XI              12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Dragon Knights         vs Alpha Warriors          12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
-  Thunder Hawks          vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road, 31°21'08.4"N 74°13'53.5"E
+  Thunder Hawks          vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road
+  Dragon Knights         vs Alpha Warriors          12:00 AM  |  Al-Kabir Cricket Road
+  Power Panthers         vs Legends XI              12:00 AM  |  Al-Kabir Cricket Road
 
 Saturday, 22 August 2026
-  Legends XI             vs Elite Rangers           12:00 AM  |  TBD
   Dragon Knights         vs Green Gladiators        12:00 AM  |  TBD
   Power Panthers         vs Alpha Warriors          12:00 AM  |  TBD
+  Legends XI             vs Elite Rangers           12:00 AM  |  TBD
 
 --- PLAYOFFS ---
 

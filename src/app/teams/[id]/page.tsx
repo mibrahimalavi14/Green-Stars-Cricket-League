@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import { relativeDateLabel } from "@/lib/utils"
+import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -124,7 +124,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
               {m.result && <p className="mt-1 text-center text-xs font-medium text-green-600">{m.result}</p>}
-              {m.status === "upcoming" && <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{m.venue}</p>}
+              {m.status === "upcoming" && <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(m.venue)}</p>}
             </div>
           ))}
         </div>

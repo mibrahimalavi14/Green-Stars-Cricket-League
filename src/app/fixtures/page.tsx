@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
+import { getVenueMapsUrl } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -119,7 +120,7 @@ async function FixturesPage() {
                       </div>
                       <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
                         <span>{new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</span>
-                        <span>{m.venue}</span>
+                        <span>{(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(m.venue)}</span>
                       </div>
                     </div>
                   ))}
