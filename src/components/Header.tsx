@@ -19,6 +19,7 @@ export function Header() {
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
+          <Link href="/about" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">About</Link>
           <Link href="/contact" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Contact</Link>
         </nav>
 
@@ -37,6 +38,7 @@ export function Header() {
           <Link href="/points-table" className="shrink-0 transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/predictions" className="shrink-0 transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="shrink-0 transition-colors hover:text-[var(--accent)]">News</Link>
+          <Link href="/about" className="shrink-0 transition-colors hover:text-[var(--accent)]">About</Link>
           <Link href="/contact" className="shrink-0 transition-colors hover:text-[var(--accent)]">Contact</Link>
         </div>
       </nav>
