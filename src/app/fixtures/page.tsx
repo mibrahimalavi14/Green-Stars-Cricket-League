@@ -44,6 +44,11 @@ async function FixturesPage() {
       <h1 className="mb-2 text-3xl font-bold">Season 1 — Full Schedule</h1>
       <p className="mb-8 text-[var(--muted-foreground)]">7 teams • 5-over format • Double Round Robin • 42 matches</p>
 
+      <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-300">
+        <p className="font-medium">Note: Starter Phase — Neutral Fielders</p>
+        <p className="mt-1">During the starter phase of GSCL, players from non-participating teams may act as neutral fielders and wicketkeepers. Their fielding performances are recorded in the scorebook but do not affect their team's points or standings.</p>
+      </div>
+
       <div className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
         <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-3">
           <h2 className="text-lg font-semibold">League Stage</h2>
