@@ -2,6 +2,8 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { Calendar, Users, Shield, Newspaper, PlusCircle } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 async function AdminPage() {
 
   const counts = {
