@@ -1,12 +1,7 @@
 import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
-import { auth } from "@/lib/auth"
-import { LogIn, LogOut } from "lucide-react"
-import { signOut } from "@/lib/auth"
 
-export async function Header() {
-  const session = await auth()
-
+export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -30,19 +25,6 @@ export async function Header() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {session ? (
-            <form action={async () => { "use server"; await signOut() }}>
-              <button type="submit" className="flex items-center gap-1 rounded-lg bg-[var(--muted)] px-3 py-1.5 text-sm transition-colors hover:bg-[var(--accent)]">
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">{session.user?.name?.split(" ")[0]}</span>
-              </button>
-            </form>
-          ) : (
-            <Link href="/predictions" className="flex items-center gap-1 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-medium text-[var(--accent-foreground)] transition-colors hover:opacity-90">
-              <LogIn className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign In</span>
-            </Link>
-          )}
         </div>
       </div>
 
