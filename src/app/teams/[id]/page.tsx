@@ -27,7 +27,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!team) notFound()
 
   const allMatches = [...team.matches1, ...team.matches2]
-    .filter(m => m.date < new Date("2026-08-28T00:00:00.000Z"))
+    .filter(m => new Date(m.date) < new Date("2026-08-28T00:00:00.000Z"))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   return (
