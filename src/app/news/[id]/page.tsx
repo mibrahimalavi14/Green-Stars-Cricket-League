@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { formatDate } from "@/lib/utils"
 
+export const dynamic = "force-dynamic"
+
 async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const news = await prisma.news.findUnique({ where: { id } })

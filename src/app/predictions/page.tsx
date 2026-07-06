@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { PredictionsClient } from "@/components/PredictionsClient"
 
+export const dynamic = "force-dynamic"
+
 export const revalidate = 10
 
 async function PredictionsPage() {
@@ -20,7 +22,7 @@ async function PredictionsPage() {
     <PredictionsClient
       teams={teams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, logo: t.logo, color: t.color }))}
       seasonId={season.id}
-      initialPredictions={predictions.map(p => ({ id: p.id, name: p.name, email: p.email, predictedTeamId: p.predictedTeamId }))}
+      initialPredictions={predictions.map(p => ({ id: p.id, name: p.name, email: p.email, predictedTeamId: p.predictedTeamId, createdAt: p.createdAt.toISOString() }))}
       locked={season.scheduleAnnounced}
     />
   )

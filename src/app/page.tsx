@@ -7,6 +7,8 @@ import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 async function HomePage() {
   const [season, matches, teams, news, winners, matchCount, allTeams] = await Promise.all([
     prisma.season.findFirst({ where: { isActive: true } }),
@@ -75,8 +77,10 @@ async function HomePage() {
               {winners.map((w) => {
                 const winnerTeam = w.teams.find(t => t.id === w.winnerId)
                 return (
-                  <span key={w.id} className="text-sm">
-                    <span className="font-semibold">{w.name}</span>: {winnerTeam?.name || w.winnerId}
+                  <span key={w.id} className="flex items-center gap-1.5 text-sm">
+                    <span className="font-semibold">{w.name}</span>: 
+                    {winnerTeam?.logo && <img src={winnerTeam.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    {winnerTeam?.name || w.winnerId}
                   </span>
                 )
               })}

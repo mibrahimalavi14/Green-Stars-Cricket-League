@@ -2,12 +2,14 @@ import { prisma } from "@/lib/prisma"
 import { AdminMatchForm } from "@/components/AdminMatchForm"
 import { AdminMatchesList } from "@/components/AdminMatchesList"
 
+export const dynamic = "force-dynamic"
+
 async function AdminMatchesPage({ searchParams }: { searchParams: Promise<{ action?: string }> }) {
   const { action } = await searchParams
 
   const matches = await prisma.match.findMany({
     include: { team1: true, team2: true, season: true },
-    orderBy: { date: "desc" },
+    orderBy: { date: "asc" },
   })
 
   return (

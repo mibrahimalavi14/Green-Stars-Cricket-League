@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { AdminTeamForm } from "@/components/AdminTeamForm"
 
+export const dynamic = "force-dynamic"
+
 async function AdminTeamsPage() {
   const teams = await prisma.team.findMany({ include: { _count: { select: { players: true } }, season: true } })
 

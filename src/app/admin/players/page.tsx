@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { AdminPlayerForm } from "@/components/AdminPlayerForm"
 
+export const dynamic = "force-dynamic"
+
 async function AdminPlayersPage() {
   const players = await prisma.player.findMany({ include: { team: true }, orderBy: { runs: "desc" } })
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 function PredictionsInner({
   teams,
@@ -10,7 +10,7 @@ function PredictionsInner({
 }: {
   teams: { id: string; name: string; shortName: string; logo: string; color: string }[]
   seasonId: string
-  initialPredictions: { id: string; name: string; email: string; predictedTeamId: string }[]
+  initialPredictions: { id: string; name: string; email: string; predictedTeamId: string; createdAt: string }[]
   locked: boolean
 }) {
   const [name, setName] = useState("")
@@ -18,21 +18,19 @@ function PredictionsInner({
   const [selectedTeam, setSelectedTeam] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState("")
+  const [emailError, setEmailError] = useState("")
   const [predictions, setPredictions] = useState(initialPredictions)
-  const [hasVoted, setHasVoted] = useState(false)
-
-  useEffect(() => {
-    if (email) {
-      const existing = predictions.find(p => p.email === email)
-      if (existing) setHasVoted(true)
-      else setHasVoted(false)
-    }
-  }, [email, predictions])
+  const [voted, setVoted] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name || !email || !selectedTeam) return
     if (locked) return
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Please enter a valid email (e.g., name@gmail.com)")
+      return
+    }
+    setEmailError("")
     setSubmitting(true)
     setMessage("")
     try {
@@ -43,9 +41,8 @@ function PredictionsInner({
       })
       const data = await res.json()
       if (res.ok) {
-        setMessage("Prediction submitted!")
         setPredictions((prev) => [data, ...prev])
-        setHasVoted(true)
+        setVoted(true)
       } else {
         setMessage(data.error || "Something went wrong")
       }
@@ -65,6 +62,7 @@ function PredictionsInner({
     .sort((a, b) => b.votes - a.votes)
 
   const maxVotes = teamsWithVotes[0]?.votes || 1
+  const alreadyVoted = !!email && predictions.some((p) => p.email === email)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
@@ -75,7 +73,7 @@ function PredictionsInner({
           : "Pick which team will win Season 1!"}
       </p>
 
-      {!locked && (
+      {!locked && !voted && (
         <form onSubmit={handleSubmit} className="mb-10 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
           <div className="mb-4 grid gap-4 sm:grid-cols-2">
             <div>
@@ -94,16 +92,19 @@ function PredictionsInner({
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setEmailError("") }}
                 required
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none transition-colors focus:border-[var(--accent)]"
                 placeholder="your@email.com"
               />
+              {emailError && <p className="mt-1.5 text-xs text-red-500">{emailError}</p>}
             </div>
           </div>
 
-          {hasVoted ? (
-            <p className="text-center text-sm font-medium text-green-600">You have already voted! ({email})</p>
+          {alreadyVoted ? (
+            <div className="rounded-xl border border-green-200 bg-green-50 p-5 text-center dark:border-green-800/40 dark:bg-green-900/20">
+              <p className="text-base font-semibold text-green-700 dark:text-green-400">This email has already voted!</p>
+            </div>
           ) : (
             <>
               <div className="mb-6">
@@ -138,9 +139,7 @@ function PredictionsInner({
           )}
 
           {message && (
-            <p className={`mt-3 text-center text-sm ${message === "Prediction submitted!" ? "text-green-600" : "text-red-500"}`}>
-              {message}
-            </p>
+            <p className="mt-3 text-center text-sm text-red-500">{message}</p>
           )}
         </form>
       )}
@@ -196,6 +195,13 @@ function PredictionsInner({
                         {team.name}
                       </span>
                     )}
+                    <span className="ml-3 whitespace-nowrap text-xs text-[var(--muted-foreground)]">
+                      {new Date(p.createdAt).toLocaleString("en-GB", {
+                        day: "numeric", month: "short",
+                        hour: "2-digit", minute: "2-digit",
+                        timeZone: "Asia/Karachi",
+                      })}
+                    </span>
                   </div>
                 </div>
               )
@@ -210,7 +216,7 @@ function PredictionsInner({
 export function PredictionsClient(props: {
   teams: { id: string; name: string; shortName: string; logo: string; color: string }[]
   seasonId: string
-  initialPredictions: { id: string; name: string; email: string; predictedTeamId: string }[]
+  initialPredictions: { id: string; name: string; email: string; predictedTeamId: string; createdAt: string }[]
   locked: boolean
 }) {
   return <PredictionsInner {...props} />

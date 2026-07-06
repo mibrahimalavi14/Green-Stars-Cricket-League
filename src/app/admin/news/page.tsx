@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { AdminNewsForm } from "@/components/AdminNewsForm"
 
+export const dynamic = "force-dynamic"
+
 async function AdminNewsPage() {
   const newsList = await prisma.news.findMany({ orderBy: { createdAt: "desc" } })
 

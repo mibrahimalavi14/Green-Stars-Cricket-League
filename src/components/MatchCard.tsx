@@ -21,11 +21,13 @@ export function MatchCard({ match }: { match: MatchData }) {
       )}
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-[var(--muted)] p-1">
-            <div className="flex h-full w-full items-center justify-center text-xs font-bold" style={{ color: match.team1.color }}>
+          {match.team1.logo ? (
+            <img src={match.team1.logo} alt={match.team1.name} className="h-10 w-10 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: match.team1.color, color: "#fff" }}>
               {match.team1.shortName}
             </div>
-          </div>
+          )}
           <div className="text-right">
             <p className="text-sm font-medium">{match.team1.name}</p>
             {match.team1Score && <p className="text-lg font-bold">{match.team1Score}</p>}
@@ -44,11 +46,13 @@ export function MatchCard({ match }: { match: MatchData }) {
             <p className="text-sm font-medium">{match.team2.name}</p>
             {match.team2Score && <p className="text-lg font-bold">{match.team2Score}</p>}
           </div>
-          <div className="h-10 w-10 rounded-full bg-[var(--muted)] p-1">
-            <div className="flex h-full w-full items-center justify-center text-xs font-bold" style={{ color: match.team2.color }}>
+          {match.team2.logo ? (
+            <img src={match.team2.logo} alt={match.team2.name} className="h-10 w-10 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: match.team2.color, color: "#fff" }}>
               {match.team2.shortName}
             </div>
-          </div>
+          )}
         </div>
       </div>
       <div className="mt-2 text-center text-xs text-[var(--muted-foreground)]">

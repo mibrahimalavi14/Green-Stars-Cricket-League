@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 async function SeasonsPage() {
   const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
   const teamCounts = await Promise.all(

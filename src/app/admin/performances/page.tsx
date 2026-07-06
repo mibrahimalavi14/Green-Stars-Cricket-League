@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { AdminPerformanceForm } from "@/components/AdminPerformanceForm"
 
+export const dynamic = "force-dynamic"
+
 async function AdminPerformancesPage() {
   const matches = await prisma.match.findMany({
     where: { status: "completed" },

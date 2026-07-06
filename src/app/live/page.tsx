@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { LiveScoreClient } from "@/components/LiveScoreClient"
 
+export const dynamic = "force-dynamic"
+
 async function LivePage() {
   const liveMatch = await prisma.match.findFirst({
     where: { status: "live" },

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation"
 interface Match {
   id: string; date: string; status: string; result: string; team1Score: string; team2Score: string
   tossWinner: string; tossDecision: string; manOfMatch: string; venue: string
-  team1: { id: string; shortName: string; name: string; color: string }
-  team2: { id: string; shortName: string; name: string; color: string }
+  team1: { id: string; shortName: string; name: string; color: string; logo: string }
+  team2: { id: string; shortName: string; name: string; color: string; logo: string }
   season: { name: string }
   innings: { teamId: string; runs: number; wickets: number; balls: number; extras: number }[]
 }
@@ -238,8 +238,14 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm text-[var(--muted-foreground)]">{m.season.name} &middot; {new Date(m.date).toLocaleDateString()}</p>
-              <p className="font-medium">{m.team1.shortName} vs {m.team2.shortName}</p>
+              <p className="text-sm text-[var(--muted-foreground)]">{m.season.name} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
+              <div className="flex items-center gap-2">
+                {m.team1.logo && <img src={m.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                <p className="font-medium">{m.team1.name}</p>
+                <span className="text-xs text-[var(--muted-foreground)]">vs</span>
+                <p className="font-medium">{m.team2.name}</p>
+                {m.team2.logo && <img src={m.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+              </div>
               {m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
               {m.result && <p className="text-xs text-[var(--muted-foreground)]">{m.result}</p>}
             </div>
@@ -270,8 +276,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   <select value={form.tossWinner} onChange={e => setForm({...form, tossWinner: e.target.value})}
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm">
                     <option value="">Select</option>
-                    <option value={m.team1.id}>{m.team1.shortName}</option>
-                    <option value={m.team2.id}>{m.team2.shortName}</option>
+                    <option value={m.team1.id}>{m.team1.name}</option>
+                    <option value={m.team2.id}>{m.team2.name}</option>
                   </select>
                 </div>
                 <div>
@@ -293,13 +299,13 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
 
               <div className="grid gap-3 md:grid-cols-5">
                 <div>
-                  <label className="mb-1 block text-xs">{m.team1.shortName} Score</label>
+                  <label className="mb-1 block text-xs">{m.team1.name} Score</label>
                   <input value={form.team1Score} onChange={e => setForm({...form, team1Score: e.target.value})}
                     placeholder="180/4"
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">{m.team2.shortName} Score</label>
+                  <label className="mb-1 block text-xs">{m.team2.name} Score</label>
                   <input value={form.team2Score} onChange={e => setForm({...form, team2Score: e.target.value})}
                     placeholder="170/8"
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
@@ -307,7 +313,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <div className="md:col-span-3">
                   <label className="mb-1 block text-xs">Result</label>
                   <input value={form.result} onChange={e => setForm({...form, result: e.target.value})}
-                    placeholder={`${m.team1.shortName} won by...`}
+                    placeholder={`${m.team1.name} won by...`}
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
               </div>
@@ -315,7 +321,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <div className="grid gap-3 md:grid-cols-4">
                 <p className="text-sm font-semibold md:col-span-4">Innings Details</p>
                 <div>
-                  <label className="mb-1 block text-xs">{m.team1.shortName} Runs</label>
+                  <label className="mb-1 block text-xs">{m.team1.name} Runs</label>
                   <input type="number" min="0" value={form.inn1Runs} onChange={e => setForm({...form, inn1Runs: e.target.value})}
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
@@ -335,7 +341,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">{m.team2.shortName} Runs</label>
+                  <label className="mb-1 block text-xs">{m.team2.name} Runs</label>
                   <input type="number" min="0" value={form.inn2Runs} onChange={e => setForm({...form, inn2Runs: e.target.value})}
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
@@ -358,14 +364,20 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
 
               {team1Players.length > 0 && (
                 <div>
-                  <p className="mb-1 text-sm font-semibold" style={{ color: m.team1.color }}>{m.team1.shortName} — Batting & Bowling</p>
-                  {PlayerTable(team1Players, m.team1.color, m.team1.shortName)}
+                  <div className="mb-1 flex items-center gap-2">
+                    {m.team1.logo && <img src={m.team1.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    <p className="text-sm font-semibold" style={{ color: m.team1.color }}>{m.team1.name} — Batting & Bowling</p>
+                  </div>
+                  {PlayerTable(team1Players, m.team1.color, m.team1.name)}
                 </div>
               )}
               {team2Players.length > 0 && (
                 <div>
-                  <p className="mb-1 mt-3 text-sm font-semibold" style={{ color: m.team2.color }}>{m.team2.shortName} — Batting & Bowling</p>
-                  {PlayerTable(team2Players, m.team2.color, m.team2.shortName)}
+                  <div className="mb-1 mt-3 flex items-center gap-2">
+                    {m.team2.logo && <img src={m.team2.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    <p className="text-sm font-semibold" style={{ color: m.team2.color }}>{m.team2.name} — Batting & Bowling</p>
+                  </div>
+                  {PlayerTable(team2Players, m.team2.color, m.team2.name)}
                 </div>
               )}
 

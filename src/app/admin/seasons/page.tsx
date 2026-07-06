@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 import { AdminSeasonForm } from "@/components/AdminSeasonForm"
 import { PredictionLockToggle } from "@/components/PredictionLockToggle"
 
+export const dynamic = "force-dynamic"
+
 async function AdminSeasonsPage() {
   const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
 

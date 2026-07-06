@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 async function PointsTablePage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })
   const allSeasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
@@ -45,10 +47,7 @@ async function PointsTablePage() {
                   <td className="p-4 font-medium">{i + 1}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span
-                        className="inline-block h-3 w-3 rounded-full"
-                        style={{ backgroundColor: t.color }}
-                      />
+                      {t.logo && <img src={t.logo} alt={t.name} className="h-6 w-6 rounded-full object-cover" />}
                       <span className="font-medium">{t.name}</span>
                     </div>
                   </td>

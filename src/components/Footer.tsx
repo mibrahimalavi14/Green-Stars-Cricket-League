@@ -27,9 +27,9 @@ export function Footer() {
           <div>
             <h4 className="mb-3 font-semibold">Contact</h4>
             <div className="flex flex-col gap-2 text-sm text-[var(--muted-foreground)]">
-              <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Karachi, Pakistan</span>
-              <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> info@gscl.pk</span>
-              <span className="flex items-center gap-2"><Phone className="h-4 w-4" /> +92 300 1234567</span>
+              <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Lahore, Pakistan</span>
+              <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> greenstarscricketleague@gmail.com</span>
+              <span className="flex items-center gap-2"><Phone className="h-4 w-4" /> +92 325 7682420</span>
             </div>
           </div>
           <div>

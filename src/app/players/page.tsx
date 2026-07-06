@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 async function PlayersPage() {
   const players = await prisma.player.findMany({
     include: { team: true },
@@ -32,7 +34,10 @@ async function PlayersPage() {
                 </div>
                 <div>
                   <p className="font-semibold">{player.name}</p>
-                  <p className="text-xs text-[var(--muted-foreground)]">{player.role} &middot; {player.team?.shortName}</p>
+                  <p className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
+                    {player.team?.logo && <img src={player.team.logo} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />}
+                    {player.role} &middot; {player.team?.shortName}
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center text-sm">

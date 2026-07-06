@@ -20,7 +20,6 @@ export function Header() {
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
           <Link href="/contact" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Contact</Link>
-          <Link href="/admin" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Admin</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -39,7 +38,6 @@ export function Header() {
           <Link href="/predictions" className="shrink-0 transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="shrink-0 transition-colors hover:text-[var(--accent)]">News</Link>
           <Link href="/contact" className="shrink-0 transition-colors hover:text-[var(--accent)]">Contact</Link>
-          <Link href="/admin" className="shrink-0 transition-colors hover:text-[var(--accent)]">Admin</Link>
         </div>
       </nav>
     </header>

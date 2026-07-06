@@ -2,6 +2,8 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { formatDate } from "@/lib/utils"
 
+export const dynamic = "force-dynamic"
+
 async function NewsPage() {
   const newsList = await prisma.news.findMany({
     where: { published: true },

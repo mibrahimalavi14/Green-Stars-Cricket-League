@@ -2,6 +2,8 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+
 export const revalidate = 10
 
 async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {

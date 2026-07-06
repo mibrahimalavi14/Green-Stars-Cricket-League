@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 async function PlayerStatsPage() {
   const players = await prisma.player.findMany({
     include: { team: true },
@@ -41,7 +43,12 @@ async function PlayerStatsPage() {
                 <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                   <td className="p-3 font-medium">{i + 1}</td>
                   <td className="p-3 font-medium">{p.name}</td>
-                  <td className="p-3 text-[var(--muted-foreground)]">{p.team?.shortName}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-1.5">
+                      {p.team?.logo && <img src={p.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                      <span className="text-[var(--muted-foreground)]">{p.team?.shortName}</span>
+                    </div>
+                  </td>
                   <td className="p-3 text-center">{p.matchesPlayed}</td>
                   <td className="p-3 text-center font-bold">{p.runs}</td>
                   <td className="p-3 text-center">{p.ballsFaced}</td>
@@ -80,7 +87,12 @@ async function PlayerStatsPage() {
                 <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                   <td className="p-3 font-medium">{i + 1}</td>
                   <td className="p-3 font-medium">{p.name}</td>
-                  <td className="p-3 text-[var(--muted-foreground)]">{p.team?.shortName}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-1.5">
+                      {p.team?.logo && <img src={p.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                      <span className="text-[var(--muted-foreground)]">{p.team?.shortName}</span>
+                    </div>
+                  </td>
                   <td className="p-3 text-center">{p.matchesPlayed}</td>
                   <td className="p-3 text-center font-bold text-green-600">{p.wickets}</td>
                   <td className="p-3 text-center">{p.runsConceded}</td>
@@ -113,7 +125,12 @@ async function PlayerStatsPage() {
                   <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                     <td className="p-3 font-medium">{i + 1}</td>
                     <td className="p-3 font-medium">{p.name}</td>
-                    <td className="p-3 text-[var(--muted-foreground)]">{p.team?.shortName}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-1.5">
+                        {p.team?.logo && <img src={p.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                        <span className="text-[var(--muted-foreground)]">{p.team?.shortName}</span>
+                      </div>
+                    </td>
                     <td className="p-3 text-center">{p.matchesPlayed}</td>
                     <td className="p-3 text-center font-bold">{p.runs}</td>
                     <td className="p-3 text-center font-bold text-green-600">{p.wickets}</td>

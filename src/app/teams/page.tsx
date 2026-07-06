@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 async function TeamsPage() {
   const teams = await prisma.team.findMany({
     include: { _count: { select: { players: true } } },

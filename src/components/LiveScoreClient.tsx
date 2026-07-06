@@ -5,8 +5,8 @@ import { RefreshCw } from "lucide-react"
 
 interface LiveMatch {
   id: string
-  team1: { id: string; name: string; shortName: string; color: string }
-  team2: { id: string; name: string; shortName: string; color: string }
+  team1: { id: string; name: string; shortName: string; logo: string; color: string }
+  team2: { id: string; name: string; shortName: string; logo: string; color: string }
   team1Score: string
   team2Score: string
   status: string
@@ -17,8 +17,8 @@ interface LiveMatch {
 
 interface UpcomingMatch {
   id: string
-  team1: { shortName: string; color: string }
-  team2: { shortName: string; color: string }
+  team1: { name: string; shortName: string; logo: string; color: string }
+  team2: { name: string; shortName: string; logo: string; color: string }
   date: string
   venue: string
 }
@@ -61,9 +61,15 @@ export function LiveScoreClient({
               {upcomingMatches.map((m) => (
                 <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium" style={{ color: m.team1.color }}>{m.team1.shortName}</span>
+                    <div className="flex items-center gap-2">
+                      {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                      <span className="font-medium" style={{ color: m.team1.color }}>{m.team1.name}</span>
+                    </div>
                     <span className="text-xs text-[var(--accent)]">VS</span>
-                    <span className="font-medium" style={{ color: m.team2.color }}>{m.team2.shortName}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: m.team2.color }}>{m.team2.name}</span>
+                      {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                    </div>
                   </div>
                   <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString()} &middot; {m.venue}</p>
                 </div>
@@ -99,7 +105,10 @@ export function LiveScoreClient({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center">
-            <p className="font-bold" style={{ color: match.team1.color }}>{match.team1.shortName}</p>
+            <div className="mb-2 flex items-center justify-center gap-2">
+              {match.team1.logo && <img src={match.team1.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
+              <p className="font-bold" style={{ color: match.team1.color }}>{match.team1.name}</p>
+            </div>
             <p className="text-3xl font-bold">{match.team1Score || battingTeam?.runs.toString() || "0"}</p>
             <p className="text-sm text-[var(--muted-foreground)]">
               {battingTeam ? `${battingTeam.wickets}/${battingTeam.runs} (${overs} ov)` : "Yet to bat"}
@@ -107,7 +116,10 @@ export function LiveScoreClient({
           </div>
 
           <div className="text-center">
-            <p className="font-bold" style={{ color: match.team2.color }}>{match.team2.shortName}</p>
+            <div className="mb-2 flex items-center justify-center gap-2">
+              <p className="font-bold" style={{ color: match.team2.color }}>{match.team2.name}</p>
+              {match.team2.logo && <img src={match.team2.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
+            </div>
             <p className="text-3xl font-bold">{match.team2Score || "0"}</p>
             <p className="text-sm text-[var(--muted-foreground)]">Yet to bat</p>
           </div>

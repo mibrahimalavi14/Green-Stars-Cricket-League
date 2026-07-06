@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+
 export const revalidate = 10
 
 async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -42,7 +44,11 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
           </div>
           <div>
             <h1 className="text-3xl font-bold">{player.name}</h1>
-            <p className="text-lg text-[var(--muted-foreground)]">{player.role} &middot; {player.team?.name}</p>
+            <p className="text-lg text-[var(--muted-foreground)]">
+              {player.role} &middot;
+              {player.team?.logo && <img src={player.team.logo} alt="" className="mr-1 inline-block h-5 w-5 rounded-full object-cover" />}
+              {player.team?.name}
+            </p>
             <div className="mt-1 flex gap-4 text-sm text-[var(--muted-foreground)]">
               <span>Bat: {player.battingStyle}</span>
               <span>Bowl: {player.bowlingStyle}</span>
@@ -97,7 +103,13 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             {performances.map((p) => (
               <div key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
                 <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-medium">{p.match.team1.shortName} vs {p.match.team2.shortName}</span>
+                  <span className="flex items-center gap-1.5 font-medium">
+                    {p.match.team1.logo && <img src={p.match.team1.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    {p.match.team1.shortName}
+                    <span className="text-[var(--muted-foreground)]">vs</span>
+                    {p.match.team2.shortName}
+                    {p.match.team2.logo && <img src={p.match.team2.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                  </span>
                   <span className="text-[var(--muted-foreground)]">{new Date(p.match.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
                 <div className="flex gap-6 text-sm">
