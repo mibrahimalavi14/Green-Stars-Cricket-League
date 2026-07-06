@@ -1,0 +1,101 @@
+================================================================================
+         GREEN STARS CRICKET LEAGUE - SEASON 1 - FULL SCHEDULE
+         7 Teams | 5-over Format | 42 League + 4 Playoff Matches
+================================================================================
+
+
+Friday, 17 July 2026
+  Dragon Knights         vs Power Panthers          5:00 PM  |  Venue: TBD
+  Thunder Hawks          vs Legends XI              6:00 PM  |  Venue: TBD
+  Alpha Warriors         vs Elite Rangers           7:00 PM  |  Venue: TBD
+
+Saturday, 18 July 2026
+  Green Gladiators       vs Power Panthers          5:00 PM  |  Venue: TBD
+  Dragon Knights         vs Elite Rangers           6:00 PM  |  Venue: TBD
+  Thunder Hawks          vs Alpha Warriors          7:00 PM  |  Venue: TBD
+
+Sunday, 19 July 2026
+  Green Gladiators       vs Legends XI              5:00 PM  |  Venue: TBD
+  Power Panthers         vs Elite Rangers           6:00 PM  |  Venue: TBD
+  Dragon Knights         vs Thunder Hawks           7:00 PM  |  Venue: TBD
+
+Friday, 24 July 2026
+  Green Gladiators       vs Elite Rangers           5:00 PM  |  Venue: TBD
+  Legends XI             vs Alpha Warriors          6:00 PM  |  Venue: TBD
+  Power Panthers         vs Thunder Hawks           7:00 PM  |  Venue: TBD
+
+Saturday, 25 July 2026
+  Green Gladiators       vs Alpha Warriors          5:00 PM  |  Venue: TBD
+  Elite Rangers          vs Thunder Hawks           6:00 PM  |  Venue: TBD
+  Legends XI             vs Dragon Knights          7:00 PM  |  Venue: TBD
+
+Sunday, 26 July 2026
+  Green Gladiators       vs Thunder Hawks           5:00 PM  |  Venue: TBD
+  Alpha Warriors         vs Dragon Knights          6:00 PM  |  Venue: TBD
+  Legends XI             vs Power Panthers          7:00 PM  |  Venue: TBD
+
+Friday, 31 July 2026
+  Green Gladiators       vs Dragon Knights          5:00 PM  |  Venue: TBD
+  Alpha Warriors         vs Power Panthers          6:00 PM  |  Venue: TBD
+  Elite Rangers          vs Legends XI              7:00 PM  |  Venue: TBD
+
+Sunday, 2 August 2026
+  Power Panthers         vs Dragon Knights          12:00 AM  |  Venue: TBD
+  Legends XI             vs Thunder Hawks           12:00 AM  |  Venue: TBD
+  Elite Rangers          vs Alpha Warriors          12:00 AM  |  Venue: TBD
+
+Monday, 3 August 2026
+  Power Panthers         vs Green Gladiators        12:00 AM  |  Venue: TBD
+  Elite Rangers          vs Dragon Knights          12:00 AM  |  Venue: TBD
+  Alpha Warriors         vs Thunder Hawks           12:00 AM  |  Venue: TBD
+
+Sunday, 9 August 2026
+  Elite Rangers          vs Power Panthers          12:00 AM  |  Venue: TBD
+  Thunder Hawks          vs Dragon Knights          12:00 AM  |  Venue: TBD
+  Legends XI             vs Green Gladiators        12:00 AM  |  Venue: TBD
+
+Monday, 10 August 2026
+  Alpha Warriors         vs Legends XI              12:00 AM  |  Venue: TBD
+  Thunder Hawks          vs Power Panthers          12:00 AM  |  Venue: TBD
+  Elite Rangers          vs Green Gladiators        12:00 AM  |  Venue: TBD
+
+Sunday, 16 August 2026
+  Thunder Hawks          vs Elite Rangers           12:00 AM  |  Venue: TBD
+  Dragon Knights         vs Legends XI              12:00 AM  |  Venue: TBD
+  Alpha Warriors         vs Green Gladiators        12:00 AM  |  Venue: TBD
+
+Monday, 17 August 2026
+  Dragon Knights         vs Alpha Warriors          12:00 AM  |  Venue: TBD
+  Power Panthers         vs Legends XI              12:00 AM  |  Venue: TBD
+  Thunder Hawks          vs Green Gladiators        12:00 AM  |  Venue: TBD
+
+Sunday, 23 August 2026
+  Dragon Knights         vs Green Gladiators        12:00 AM  |  Venue: TBD
+  Legends XI             vs Elite Rangers           12:00 AM  |  Venue: TBD
+  Power Panthers         vs Alpha Warriors          12:00 AM  |  Venue: TBD
+
+--- PLAYOFFS ---
+
+
+Friday, 28 August 2026
+  Green Gladiators       vs Dragon Knights          5:00 PM   [Qualifier 1]  |  Venue: TBD
+  Thunder Hawks          vs Alpha Warriors          6:00 PM   [Eliminator]  |  Venue: TBD
+
+Saturday, 29 August 2026
+  Elite Rangers          vs Legends XI              5:00 PM   [Qualifier 2]  |  Venue: TBD
+
+--- PLAYOFFS ---
+
+
+Sunday, 30 August 2026
+  Green Gladiators       vs Power Panthers          5:00 PM   [FINAL]  |  Venue: TBD
+
+--------------------------------------------------------------------------------
+                              PLAYOFFS FORMAT
+--------------------------------------------------------------------------------
+  Qualifier 1:  Rank 1 vs Rank 2  ->  Winner to Final
+  Eliminator:   Rank 3 vs Rank 4  ->  Winner to Qualifier 2
+  Qualifier 2:  Loser of Q1 vs Winner of Eliminator  ->  Winner to Final
+  Final:        Winner of Q1 vs Winner of Q2  ->  CHAMPION!
+
+================================================================================

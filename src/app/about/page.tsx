@@ -12,7 +12,7 @@ function AboutPage() {
 
       <div className="mb-12 overflow-hidden rounded-xl border border-[var(--border)]">
         <img
-          src="/images/hero/Banner.jpg"
+          src="/images/teams/Banner.jpg"
           alt="Green Stars Cricket League"
           className="h-64 w-full object-cover md:h-80"
         />
