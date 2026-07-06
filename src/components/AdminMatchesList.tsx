@@ -233,7 +233,16 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     <div className="space-y-3">
       {matches.map((m) => {
         const playoffCutoff = new Date("2026-08-28T00:00:00.000Z")
-        const isPlayoff = new Date(m.date) >= playoffCutoff
+        const md = new Date(m.date)
+        const isPlayoff = md >= playoffCutoff
+        function playoffLabel(d: Date) {
+          const iso = d.toISOString()
+          if (iso.startsWith("2026-08-28T12:")) return "Qualifier 1"
+          if (iso.startsWith("2026-08-28T13:")) return "Eliminator"
+          if (iso.startsWith("2026-08-29T")) return "Qualifier 2"
+          if (iso.startsWith("2026-08-30T")) return "Final"
+          return ""
+        }
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)
         const team2Players = allPlayers.filter(p => p.teamId === m.team2.id)
         return (
@@ -243,6 +252,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <p className="text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : m.season.name} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
               {isPlayoff ? (
                 <div className="flex items-center gap-2">
+                  <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(md)}</span>
+                  <span className="text-xs text-[var(--muted-foreground)]">&middot;</span>
                   <p className="font-bold text-amber-600">TBD</p>
                   <span className="text-xs text-amber-600">vs</span>
                   <p className="font-bold text-amber-600">TBD</p>
