@@ -232,22 +232,32 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   return (
     <div className="space-y-3">
       {matches.map((m) => {
+        const playoffCutoff = new Date("2026-08-28T00:00:00.000Z")
+        const isPlayoff = new Date(m.date) >= playoffCutoff
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)
         const team2Players = allPlayers.filter(p => p.teamId === m.team2.id)
         return (
-        <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+        <div key={m.id} className={`rounded-lg border p-4 ${isPlayoff ? 'border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10' : 'border-[var(--border)] bg-[var(--card)]'}`}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm text-[var(--muted-foreground)]">{m.season.name} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
-              <div className="flex items-center gap-2">
-                {m.team1.logo && <img src={m.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-                <p className="font-medium">{m.team1.name}</p>
-                <span className="text-xs text-[var(--muted-foreground)]">vs</span>
-                <p className="font-medium">{m.team2.name}</p>
-                {m.team2.logo && <img src={m.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-              </div>
-              {m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
-              {m.result && <p className="text-xs text-[var(--muted-foreground)]">{m.result}</p>}
+              <p className="text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : m.season.name} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
+              {isPlayoff ? (
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-amber-600">TBD</p>
+                  <span className="text-xs text-amber-600">vs</span>
+                  <p className="font-bold text-amber-600">TBD</p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {m.team1.logo && <img src={m.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                  <p className="font-medium">{m.team1.name}</p>
+                  <span className="text-xs text-[var(--muted-foreground)]">vs</span>
+                  <p className="font-medium">{m.team2.name}</p>
+                  {m.team2.logo && <img src={m.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                </div>
+              )}
+              {!isPlayoff && m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
+              {!isPlayoff && m.result && <p className="text-xs text-[var(--muted-foreground)]">{m.result}</p>}
             </div>
             <div className="flex items-center gap-2">
               <span className={`rounded px-2 py-1 text-xs font-medium ${
