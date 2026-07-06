@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { PredictionsClient } from "@/components/PredictionsClient"
 
+export const revalidate = 10
+
 async function PredictionsPage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })
   if (!season) return <div className="mx-auto max-w-5xl px-4 py-12"><p className="text-[var(--muted-foreground)]">No active season.</p></div>
