@@ -22,7 +22,7 @@ async function AdminPlayersPage() {
                 {p.photo && p.photo !== "/placeholder-player.svg" ? (
                   <img src={p.photo} alt="" className="h-8 w-8 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-bold">{p.name.charAt(0)}</div>
+                  <img src="/placeholder-player.svg" alt="" className="h-8 w-8 rounded-full bg-[var(--muted)] p-1" />
                 )}
                 <div>
                   <p className="font-medium text-sm">{p.name}</p>

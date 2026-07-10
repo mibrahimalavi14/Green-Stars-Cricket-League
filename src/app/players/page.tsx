@@ -32,9 +32,7 @@ async function PlayersPage() {
                 {player.photo && player.photo !== "/placeholder-player.svg" ? (
                   <img src={player.photo} alt={player.name} className="h-12 w-12 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-lg font-bold text-[var(--accent)]">
-                    {player.name.charAt(0)}
-                  </div>
+                  <img src="/placeholder-player.svg" alt={player.name} className="h-12 w-12 rounded-full bg-[var(--muted)] p-2" />
                 )}
                 <div>
                   <p className="font-semibold">{player.name}</p>

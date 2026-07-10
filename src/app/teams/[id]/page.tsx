@@ -81,9 +81,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 {player.photo && player.photo !== "/placeholder-player.svg" ? (
                   <img src={player.photo} alt={player.name} className="h-10 w-10 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] text-sm font-bold text-[var(--accent)]">
-                    {player.name.charAt(0)}
-                  </div>
+                  <img src="/placeholder-player.svg" alt={player.name} className="h-10 w-10 rounded-full bg-[var(--muted)] p-2" />
                 )}
                 <div>
                   <p className="font-medium">{player.name}</p>

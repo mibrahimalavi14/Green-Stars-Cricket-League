@@ -50,7 +50,7 @@ async function PlayerStatsPage() {
                       {p.photo && p.photo !== "/placeholder-player.svg" ? (
                         <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
                       ) : (
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
+                        <img src="/placeholder-player.svg" alt="" className="h-6 w-6 rounded-full bg-[var(--muted)] p-1" />
                       )}
                       <span className="font-medium">{p.name}</span>
                     </div>
@@ -109,7 +109,7 @@ async function PlayerStatsPage() {
                       {p.photo && p.photo !== "/placeholder-player.svg" ? (
                         <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
                       ) : (
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
+                        <img src="/placeholder-player.svg" alt="" className="h-6 w-6 rounded-full bg-[var(--muted)] p-1" />
                       )}
                       <span className="font-medium">{p.name}</span>
                     </div>
@@ -159,7 +159,7 @@ async function PlayerStatsPage() {
                         {p.photo && p.photo !== "/placeholder-player.svg" ? (
                           <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
                         ) : (
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
+                          <img src="/placeholder-player.svg" alt="" className="h-6 w-6 rounded-full bg-[var(--muted)] p-1" />
                         )}
                         <span className="font-medium">{p.name}</span>
                       </div>
