@@ -47,7 +47,7 @@ async function PlayerStatsPage() {
                   <td className="p-3 font-medium">{i + 1}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      {p.photo && p.photo !== "/placeholder-player.png" ? (
+                      {p.photo && p.photo !== "/placeholder-player.svg" ? (
                         <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
                       ) : (
                         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
@@ -106,7 +106,7 @@ async function PlayerStatsPage() {
                   <td className="p-3 font-medium">{i + 1}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      {p.photo && p.photo !== "/placeholder-player.png" ? (
+                      {p.photo && p.photo !== "/placeholder-player.svg" ? (
                         <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
                       ) : (
                         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
@@ -156,7 +156,7 @@ async function PlayerStatsPage() {
                     <td className="p-3 font-medium">{i + 1}</td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        {p.photo && p.photo !== "/placeholder-player.png" ? (
+                        {p.photo && p.photo !== "/placeholder-player.svg" ? (
                           <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
                         ) : (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>

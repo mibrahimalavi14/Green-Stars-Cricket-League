@@ -29,7 +29,7 @@ async function PlayersPage() {
               className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg"
             >
               <div className="mb-3 flex items-center gap-3">
-                {player.photo && player.photo !== "/placeholder-player.png" ? (
+                {player.photo && player.photo !== "/placeholder-player.svg" ? (
                   <img src={player.photo} alt={player.name} className="h-12 w-12 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-lg font-bold text-[var(--accent)]">

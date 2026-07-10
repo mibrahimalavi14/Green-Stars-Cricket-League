@@ -37,7 +37,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
     <div className="mx-auto max-w-5xl px-4 py-12">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
         <div className="mb-8 flex items-center gap-6">
-          {player.photo && player.photo !== "/placeholder-player.png" ? (
+          {player.photo && player.photo !== "/placeholder-player.svg" ? (
             <img src={player.photo} alt={player.name} className="h-24 w-24 rounded-full object-cover" />
           ) : (
             <div

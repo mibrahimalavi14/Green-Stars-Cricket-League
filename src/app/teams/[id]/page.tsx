@@ -78,7 +78,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 href={`/players/${player.id}`}
                 className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 transition-all hover:border-[var(--accent)]"
               >
-                {player.photo && player.photo !== "/placeholder-player.png" ? (
+                {player.photo && player.photo !== "/placeholder-player.svg" ? (
                   <img src={player.photo} alt={player.name} className="h-10 w-10 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] text-sm font-bold text-[var(--accent)]">

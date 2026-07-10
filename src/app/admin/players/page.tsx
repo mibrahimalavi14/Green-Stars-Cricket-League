@@ -19,7 +19,7 @@ async function AdminPlayersPage() {
           <div key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {p.photo && p.photo !== "/placeholder-player.png" ? (
+                {p.photo && p.photo !== "/placeholder-player.svg" ? (
                   <img src={p.photo} alt="" className="h-8 w-8 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-bold">{p.name.charAt(0)}</div>
