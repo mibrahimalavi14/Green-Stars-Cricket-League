@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function TeamsPage() {
   const teams = await prisma.team.findMany({

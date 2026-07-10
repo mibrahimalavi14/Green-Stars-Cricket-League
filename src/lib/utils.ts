@@ -40,6 +40,7 @@ export function relativeDateLabel(date: Date, timeZone = "Asia/Karachi") {
 
 const venueCoordinates: Record<string, string> = {
   "Al-Kabir Cricket Road": "31°21'08.4%22N+74°13'53.5%22E",
+  "AWT Cricket Ground": "Plot+134+Block+B+AWT+Housing+Scheme+Phase+2+Lahore",
 }
 
 export function getVenueMapsUrl(venue: string): string | null {

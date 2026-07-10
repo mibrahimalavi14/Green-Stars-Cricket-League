@@ -2,6 +2,10 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET() {
+  await prisma.match.updateMany({
+    where: { status: "upcoming", date: { lte: new Date() } },
+    data: { status: "live" },
+  })
   const matches = await prisma.match.findMany({
     include: { team1: true, team2: true, season: true, innings: true, performances: { include: { player: true } } },
     orderBy: { date: "asc" },
@@ -11,8 +15,18 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json()
+  const seasonId = body.seasonId
+  let matchNo = body.matchNo
+  if (seasonId && !matchNo) {
+    const last = await prisma.match.findFirst({
+      where: { seasonId },
+      orderBy: { matchNo: "desc" },
+      select: { matchNo: true },
+    })
+    matchNo = (last?.matchNo ?? 0) + 1
+  }
   const match = await prisma.match.create({
-    data: { ...body, date: new Date(body.date) },
+    data: { ...body, matchNo, date: new Date(body.date) },
   })
   return NextResponse.json(match)
 }

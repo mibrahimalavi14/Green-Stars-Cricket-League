@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { LiveScoreClient } from "@/components/LiveScoreClient"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function LivePage() {
   const liveMatch = await prisma.match.findFirst({
@@ -26,8 +26,8 @@ async function LivePage() {
       <p className="mb-8 text-[var(--muted-foreground)]">Real-time ball-by-ball updates</p>
 
       <LiveScoreClient
-        liveMatch={liveMatch as never}
-        upcomingMatches={upcomingMatches as never[]}
+        liveMatch={liveMatch as any}
+        upcomingMatches={upcomingMatches as any[]}
       />
     </div>
   )

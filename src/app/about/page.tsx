@@ -1,6 +1,6 @@
 import { Shield, Users, Trophy, Star, Target, Heart } from "lucide-react"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 function AboutPage() {
   return (
@@ -18,22 +18,46 @@ function AboutPage() {
         />
       </div>
 
-      <div className="mb-12 flex flex-col items-center gap-6 md:flex-row">
-        <div className="shrink-0">
-          <img
-            src="/images/chairman/Chairman-of-GSCL.jpg"
-            alt="Chairman of GSCL"
-            className="h-48 w-48 rounded-xl border border-[var(--border)] object-cover md:h-56 md:w-56"
-          />
+      <div className="mb-12 grid gap-8 md:grid-cols-2">
+        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="relative bg-gradient-to-br from-gscl-gold/20 via-gscl-dark to-gscl-gold/10 p-6">
+            <div className="absolute inset-0 opacity-10" style={{backgroundImage: "radial-gradient(circle at 30% 50%, rgba(255,215,0,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.3) 0%, transparent 50%)"}} />
+            <img
+              src="/images/management/Chairman Muhammad Ibrahim Alavi.png"
+              alt="Chairman Muhammad Ibrahim Alavi"
+              className="relative w-full rounded-xl shadow-lg"
+            />
+          </div>
+          <div className="p-6">
+            <h2 className="mb-1 text-center text-xl font-bold">Chairman</h2>
+            <p className="mb-3 text-center text-sm font-bold text-[var(--muted-foreground)]">Muhammad Ibrahim Alavi</p>
+            <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
+              GSCL is not just a league — it is a platform for the youth of Lahore to showcase their talent and
+              pursue their dreams. My vision is to build a cricket ecosystem where every player, regardless of
+              their background, gets a fair chance to rise. The passion I see in these young cricketers reminds
+              me why we started this journey.
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className="mb-1 text-xl font-bold">Chairman of GSCL</h2>
-          <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
-            The Green Stars Cricket League is proudly led by our Chairman, whose vision and dedication have
-            brought this platform to life. With a passion for grassroots cricket and a commitment to nurturing
-            young talent, the Chairman continues to drive GSCL forward — building a league that represents the
-            spirit and future of Pakistan cricket.
-          </p>
+        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="relative bg-gradient-to-br from-gscl-gold/20 via-gscl-dark to-gscl-gold/10 p-6">
+            <div className="absolute inset-0 opacity-10" style={{backgroundImage: "radial-gradient(circle at 30% 50%, rgba(255,215,0,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.3) 0%, transparent 50%)"}} />
+            <img
+              src="/images/management/General Secretary Malik Taha Qaiser.png"
+              alt="General Secretary Malik Taha Qaiser"
+              className="relative w-full rounded-xl shadow-lg"
+            />
+          </div>
+          <div className="p-6">
+            <h2 className="mb-1 text-center text-xl font-bold">General Secretary</h2>
+            <p className="mb-3 text-center text-sm font-bold text-[var(--muted-foreground)]">Malik Taha Qaiser</p>
+            <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
+              Every match, every run, every wicket — it is all about building a community that lives and breathes
+              cricket. My goal is to ensure GSCL runs smoothly, fairly, and professionally so that the players
+              can focus on what they do best: playing the game they love. This league is for the players, by the
+              players.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -45,7 +69,7 @@ function AboutPage() {
           to compete in an exciting, high-energy 5-over format.
         </p>
         <p>
-          Our league is built on the values of sportsmanship, competition, and community. Every season, 7
+          Our league is built on the values of sportsmanship, competition, and community. Every season, 6
           teams battle through a double round-robin league stage, followed by playoffs, culminating in a
           grand final to crown the champion. From raw pace to classic swing, from powerful hitting to
           clever spin — GSCL is where the future stars of Pakistan cricket rise.
@@ -71,9 +95,9 @@ function AboutPage() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/10">
             <Users className="h-6 w-6 text-[var(--accent)]" />
           </div>
-          <h3 className="mb-1 font-semibold">7 Teams</h3>
+          <h3 className="mb-1 font-semibold">          6 Teams</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
-            Each representing a unique identity, with their own captain, coach, and squad of passionate players.
+                Each representing a unique identity, with their own captain, and squad of passionate players.
           </p>
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
@@ -97,7 +121,7 @@ function AboutPage() {
             <div>
               <h4 className="mb-1 font-medium">Double Round Robin</h4>
               <p className="text-xs text-[var(--muted-foreground)]">
-                Each team plays every other team twice — once home, once away. A total of 42 league matches.
+                Each team plays every other team twice — once home, once away. A total of 30 league matches.
               </p>
             </div>
           </div>

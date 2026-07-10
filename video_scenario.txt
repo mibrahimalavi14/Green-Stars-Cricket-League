@@ -1,0 +1,113 @@
+GSCL SEASON 1 - PROMOTIONAL VIDEO SCENARIO
+=============================================
+
+Total Duration: ~1 minute
+
+--- SCENE 1 (5 seconds) ---
+Visual: GSCL logo center screen, dark green background
+Text: "GREEN STARS CRICKET LEAGUE"
+       "Season 1 - 2026"
+Animation: Logo fade in, text slides from bottom
+Audio: Dramatic intro music
+
+--- SCENE 2 (4 seconds) ---
+Visual: Chairman photo center
+Text: "Chairman"
+       "Muhammad Ibrahim Alavi"
+Animation: Photo fade in with border effect
+
+--- SCENE 3 (4 seconds) ---
+Visual: General Secretary photo (agar hai) ya text
+Text: "General Secretary"
+      "Malik Taha Qaiser"
+Animation: Slide from right
+
+--- SCENE 4 (15 seconds - 2.5 sec each) ---
+TOURNAMENT FORMAT
+Text on screen:
+  "6 Teams"
+  "Double Round Robin"
+  "30 League Matches"
+  "Top 4 → Playoffs"
+  "Grand Final"
+  "5-Over Format"
+Animation: Each line appear one by one
+
+--- SCENE 5 (18 seconds - 3 sec each) ---
+TEAM INTRODUCTIONS
+Har team ke liye alag scene:
+
+Team 1:
+  Logo: Alpha Warriors
+  Name: "ALPHA WARRIORS"
+  Captain: "Captain: Abdulrehman Farhan"
+  Player: "Ahmed Raza"
+  Color accent: Dark Red
+
+Team 2:
+  Logo: Dragon Knights
+  Name: "DRAGON KNIGHTS"
+  Captain: "Captain: Abdulrehman Khan"
+  Color accent: Orange
+
+Team 3:
+  Logo: Elite Rangers
+  Name: "ELITE RANGERS"
+  Captain: "Captain: Abubakar Saddique"
+  Color accent: Green
+
+Team 4:
+  Logo: Falcon Strikers
+  Name: "FALCON STRIKERS"
+  Captain: "Captain: Abdul Wahab"
+  Color accent: Dark Red
+
+Team 5:
+  Logo: Legends XI
+  Name: "LEGENDS XI"
+  Captain: "Captain: Taha Qaiser"
+  Color accent: Gold
+
+Team 6:
+  Logo: Power Panthers
+  Name: "POWER PANTHERS"
+  Captain: "Captain: Muhammad Abdullah"
+  Players: "Farhan Rasool"
+  Color accent: Purple
+
+--- SCENE 6 (8 seconds) ---
+SCHEDULE HIGHLIGHTS
+Text:
+  "MATCH DAYS"
+  "July 17 - August 9"
+  "Every Friday, Saturday & Sunday"
+  "4 PM - 8 PM PKT"
+Animation: Calendar style
+
+--- SCENE 7 (8 seconds) ---
+VENUES
+Text:
+  "VENUES"
+  "Al-Kabir Cricket Road, Lahore"
+  "AWT Cricket Ground, Lahore"
+Show both venue photos (if available)
+Animation: Map style with pins
+
+--- SCENE 8 (10 seconds) ---
+PLAYOFFS
+Text:
+  "PLAYOFFS"
+  "Qualifier 1 - 16 August"
+  "Eliminator - 16 August"
+  "Qualifier 2 - 16 August"
+  "GRAND FINAL - 23 August"
+Animation: Trophy icon, countdown style
+
+--- SCENE 9 (5 seconds) ---
+CLOSING
+Visual: GSCL logo center
+Text: "GREEN STARS CRICKET LEAGUE"
+      "Follow us for updates"
+      "greenstarscricketleague@gmail.com"
+Logos: Facebook, Instagram, YouTube icons
+Animation: Logo pulse, fade out

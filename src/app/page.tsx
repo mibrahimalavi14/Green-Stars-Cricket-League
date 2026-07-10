@@ -1,19 +1,19 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
-export const revalidate = 10
 import { MatchCard } from "@/components/MatchCard"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function HomePage() {
-  const [season, matches, teams, news, winners, matchCount, allTeams] = await Promise.all([
-    prisma.season.findFirst({ where: { isActive: true } }),
+  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const [matches, teams, news, winners, matchCount, allTeams, players] = await Promise.all([
     prisma.match.findMany({
-      take: 4,
+      take: 6,
+      where: { status: { not: "completed" } },
       orderBy: { date: "asc" },
       include: { team1: true, team2: true },
     }),
@@ -26,6 +26,7 @@ async function HomePage() {
     }),
     prisma.match.count(),
     prisma.team.findMany({ include: { _count: { select: { players: true } } } }),
+    season ? prisma.player.findMany({ where: { team: { seasonId: season.id } }, include: { team: true } }) : Promise.resolve([]),
   ])
 
   const teamCount = allTeams.length
@@ -33,7 +34,8 @@ async function HomePage() {
 
   return (
     <>
-      <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url(/images/teams/Banner.jpg)" }}>
+      <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
+        <img src="/images/teams/Banner.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative mx-auto max-w-7xl px-4 text-center">
           <h1 className="mb-4 text-5xl font-bold text-white md:text-7xl">
@@ -79,7 +81,7 @@ async function HomePage() {
                 return (
                   <span key={w.id} className="flex items-center gap-1.5 text-sm">
                     <span className="font-semibold">{w.name}</span>: 
-                    {winnerTeam?.logo && <img src={winnerTeam.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    {winnerTeam?.logo && <img src={winnerTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
                     {winnerTeam?.name || w.winnerId}
                   </span>
                 )
@@ -89,6 +91,33 @@ async function HomePage() {
         </div>
       </section>
 
+      {players.length > 0 && (
+        <section className="border-t border-[var(--border)] py-10">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Tournament Leaders</h2>
+              <Link href="/players/stats" className="text-sm text-[var(--accent)] hover:underline">Full Stats</Link>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+              {(() => {
+                const tR = players.filter(p => p.runs > 0).sort((a, b) => b.runs - a.runs)[0]
+                const tW = players.filter(p => p.wickets > 0).sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)[0]
+                const m6 = players.filter(p => p.sixes > 0).sort((a, b) => b.sixes - a.sixes)[0]
+                const sR = players.filter(p => p.ballsFaced >= 10).sort((a, b) => (b.runs / b.ballsFaced) - (a.runs / a.ballsFaced))[0]
+                const aR = players.filter(p => p.runs >= 20 && p.wickets >= 2).sort((a, b) => (b.runs + b.wickets * 20) - (a.runs + a.wickets * 20))[0]
+                return (<>
+                  <LeaderCard label="Orange Cap" value={tR ? String(tR.runs) : "-"} stat="Runs" name={tR?.name || "Yet to be decided"} team={tR?.team?.shortName} color="orange" />
+                  <LeaderCard label="Purple Cap" value={tW ? String(tW.wickets) : "-"} stat="Wickets" name={tW?.name || "Yet to be decided"} team={tW?.team?.shortName} color="violet" />
+                  <LeaderCard label="Most Sixes" value={m6 ? String(m6.sixes) : "-"} stat="Sixes" name={m6?.name || "Yet to be decided"} team={m6?.team?.shortName} color="purple" />
+                  <LeaderCard label="Best Strike Rate" value={sR ? ((sR.runs / sR.ballsFaced) * 100).toFixed(1) : "-"} stat="SR (min 10 balls)" name={sR?.name || "Yet to be decided"} team={sR?.team?.shortName} color="cyan" />
+                  <LeaderCard label="Best All-Rounder" value={aR ? String(aR.runs + aR.wickets * 20) : "-"} stat="Pts" name={aR?.name || "Yet to be decided"} team={aR?.team?.shortName} color="amber" />
+                </>)
+              })()}
+            </div>
+          </div>
+        </section>
+      )}
+
       {matches.length > 0 && (
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4">
@@ -97,8 +126,8 @@ async function HomePage() {
               <Link href="/fixtures" className="text-sm text-[var(--accent)] hover:underline">View All</Link>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {matches.map((m) => (
-                <MatchCard key={m.id} match={m as never} />
+              {matches.map((match) => (
+                <MatchCard key={match.id} match={match as any} showMatchNo={true} />
               ))}
             </div>
           </div>
@@ -113,7 +142,7 @@ async function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {teams.map((t) => (
-              <TeamCard key={t.id} team={t as never} />
+              <TeamCard key={t.id} team={t as any} />
             ))}
           </div>
         </div>
@@ -128,7 +157,7 @@ async function HomePage() {
           {news.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-3">
               {news.map((n) => (
-                <NewsCard key={n.id} news={n as never} />
+                <NewsCard key={n.id} news={n as any} />
               ))}
             </div>
           ) : (
@@ -157,3 +186,31 @@ async function HomePage() {
 }
 
 export default HomePage
+
+function LeaderCard({ label, stat, value, name, team, color }: { label: string; stat: string; value: string; name: string; team?: string; color: string }) {
+  const circleMap: Record<string, string> = {
+    orange: "bg-orange-100 text-orange-600 dark:text-orange-400 dark:bg-orange-900/30",
+    violet: "bg-violet-100 text-violet-700 dark:text-violet-400 dark:bg-violet-900/60",
+    purple: "bg-purple-100 text-purple-600 dark:text-purple-400 dark:bg-purple-900/30",
+    cyan: "bg-cyan-100 text-cyan-600 dark:text-cyan-400 dark:bg-cyan-900/30",
+    amber: "bg-amber-100 text-amber-600 dark:text-amber-400 dark:bg-amber-900/30",
+  }
+  const labelMap: Record<string, string> = {
+    orange: "text-orange-600 dark:text-orange-400",
+    violet: "text-violet-700 dark:text-violet-400",
+    purple: "text-purple-600 dark:text-purple-400",
+    cyan: "text-cyan-600 dark:text-cyan-400",
+    amber: "text-amber-600 dark:text-amber-400",
+  }
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
+      <div className={`mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${circleMap[color] || circleMap.orange}`}>
+        {name.charAt(0)}
+      </div>
+      <div className={`text-[10px] font-semibold uppercase tracking-wider ${labelMap[color] || labelMap.orange}`}>{label}</div>
+      <div className="mt-1 truncate text-sm font-bold">{name}</div>
+      <div className="text-lg font-bold">{value}</div>
+      <div className="text-[10px] text-[var(--muted-foreground)]">{team || stat}</div>
+    </div>
+  )
+}

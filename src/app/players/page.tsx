@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function PlayersPage() {
   const players = await prisma.player.findMany({
@@ -13,7 +13,7 @@ async function PlayersPage() {
     <div className="mx-auto max-w-7xl px-4 py-12">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Players</h1>
+          <h1 className="text-3xl font-bold">Players <span className="text-lg font-normal text-[var(--muted-foreground)]">({players.length})</span></h1>
           <p className="text-[var(--muted-foreground)]">All players in the Green Stars Cricket League</p>
         </div>
         <Link href="/players/stats" className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-foreground)] transition-colors hover:opacity-90">View Stats</Link>
@@ -29,13 +29,17 @@ async function PlayersPage() {
               className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg"
             >
               <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-lg font-bold text-[var(--accent)]">
-                  {player.name.charAt(0)}
-                </div>
+                {player.photo && player.photo !== "/placeholder-player.png" ? (
+                  <img src={player.photo} alt={player.name} className="h-12 w-12 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-lg font-bold text-[var(--accent)]">
+                    {player.name.charAt(0)}
+                  </div>
+                )}
                 <div>
                   <p className="font-semibold">{player.name}</p>
                   <p className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
-                    {player.team?.logo && <img src={player.team.logo} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />}
+                    {player.team?.logo && <img src={player.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
                     {player.role} &middot; {player.team?.shortName}
                   </p>
                 </div>

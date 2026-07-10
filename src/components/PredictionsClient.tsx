@@ -153,7 +153,7 @@ function PredictionsInner({
               <img src={team.logo} alt={team.name} className="h-10 w-10 rounded-full object-cover" />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold" style={{ color: team.color }}>{team.name}</span>
+                   <span className="font-semibold">{team.name}</span>
                   <span className="text-lg font-bold">{team.votes} vote{team.votes !== 1 ? "s" : ""}</span>
                 </div>
                 <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-[var(--muted)]">
@@ -190,8 +190,8 @@ function PredictionsInner({
                     <span className="font-medium">{p.name}</span>
                     <span className="mx-2 text-[var(--muted-foreground)]">predicted</span>
                     {team && (
-                      <span className="inline-flex items-center gap-1.5 font-semibold" style={{ color: team.color }}>
-                        {team.logo && <img src={team.logo} alt="" className="h-4 w-4 rounded-full" />}
+                       <span className="inline-flex items-center gap-1.5 font-semibold">
+                        {team.logo && <img src={team.logo} alt="" className="h-5 w-5 rounded-full" />}
                         {team.name}
                       </span>
                     )}

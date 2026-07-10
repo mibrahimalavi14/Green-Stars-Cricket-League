@@ -11,3 +11,10 @@ export async function POST(req: Request) {
   const player = await prisma.player.create({ data: body })
   return NextResponse.json(player)
 }
+
+export async function PATCH(req: Request) {
+  const body = await req.json()
+  const { id, ...data } = body
+  const player = await prisma.player.update({ where: { id }, data })
+  return NextResponse.json(player)
+}

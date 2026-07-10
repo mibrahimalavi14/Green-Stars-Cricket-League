@@ -1,9 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 
-export const dynamic = "force-dynamic"
-
-export const revalidate = 10
+export const revalidate = 30
 
 async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -31,27 +29,46 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
   const overs = Math.floor(player.ballsBowled / 6) + "." + (player.ballsBowled % 6)
   const hs = Math.max(...performances.map(x => x.battingRuns), 0)
   const bb = player.bestBowlingWickets > 0 ? `${player.bestBowlingWickets}/${player.bestBowlingRuns}` : "-"
+  const bowlingSr = player.wickets > 0 ? (player.ballsBowled / player.wickets).toFixed(1) : "-"
+  const ballsPerBoundary = (player.fours + player.sixes) > 0 ? (player.ballsFaced / (player.fours + player.sixes)).toFixed(1) : "-"
+  const wktsPerMatch = player.matchesPlayed > 0 ? (player.wickets / player.matchesPlayed).toFixed(2) : "-"
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
         <div className="mb-8 flex items-center gap-6">
-          <div
-            className="flex h-24 w-24 items-center justify-center rounded-full text-3xl font-bold text-white"
-            style={{ backgroundColor: player.team?.color || "#1e3a5f" }}
-          >
-            {player.name.charAt(0)}
-          </div>
+          {player.photo && player.photo !== "/placeholder-player.png" ? (
+            <img src={player.photo} alt={player.name} className="h-24 w-24 rounded-full object-cover" />
+          ) : (
+            <div
+              className="flex h-24 w-24 items-center justify-center rounded-full text-3xl font-bold text-white"
+              style={{ backgroundColor: player.team?.color || "#1e3a5f" }}
+            >
+              {player.name.charAt(0)}
+            </div>
+          )}
           <div>
             <h1 className="text-3xl font-bold">{player.name}</h1>
             <p className="text-lg text-[var(--muted-foreground)]">
               {player.role} &middot;
-              {player.team?.logo && <img src={player.team.logo} alt="" className="mr-1 inline-block h-5 w-5 rounded-full object-cover" />}
+              {player.team?.logo && <img src={player.team.logo} alt="" className="mr-1 inline-block h-6 w-6 rounded-full object-cover" />}
               {player.team?.name}
             </p>
-            <div className="mt-1 flex gap-4 text-sm text-[var(--muted-foreground)]">
+            <div className="mt-1 text-sm text-[var(--muted-foreground)]">
               <span>Bat: {player.battingStyle}</span>
-              <span>Bowl: {player.bowlingStyle}</span>
+              {(player.role === "All-rounder" || player.role === "Bowler") && <span className="ml-4">Bowl: {player.bowlingStyle}</span>}
+            </div>
+            <div className="mt-2 text-xs text-[var(--muted-foreground)]">
+              <span className="font-medium text-[var(--foreground)]">Experience</span>
+              <div className="mt-1 flex items-center gap-2">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--muted)]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 transition-all"
+                    style={{ width: `${Math.min((player.matchesPlayed / 30) * 100, 100)}%` }}
+                  />
+                </div>
+                <span className="text-xs font-semibold">{player.matchesPlayed} matches</span>
+              </div>
             </div>
           </div>
         </div>
@@ -68,7 +85,10 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             <StatCard label="4s" value={player.fours} />
             <StatCard label="6s" value={player.sixes} />
             <StatCard label="Fifties" value={player.fifties} />
-            <StatCard label="Hundreds" value={player.hundreds} />
+            <StatCard label="100s" value={player.hundreds} />
+            <StatCard label="Not Outs" value={player.notOuts} />
+            <StatCard label="Ducks" value={player.ducks} />
+            <StatCard label="Balls/B" value={ballsPerBoundary} />
           </div>
         </div>
 
@@ -81,8 +101,12 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             <StatCard label="Wickets" value={player.wickets} />
             <StatCard label="Runs" value={player.runsConceded} />
             <StatCard label="BB" value={bb} />
+            <StatCard label="SR" value={bowlingSr} />
             <StatCard label="Avg" value={bowlingAvg} />
             <StatCard label="Econ" value={econ} />
+            <StatCard label="4w" value={player.fourWickets} />
+            <StatCard label="5w" value={player.fiveWickets} />
+            <StatCard label="Wkts/M" value={wktsPerMatch} />
           </div>
         </div>
 
@@ -104,11 +128,11 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
               <div key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="flex items-center gap-1.5 font-medium">
-                    {p.match.team1.logo && <img src={p.match.team1.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    {p.match.team1.logo && <img src={p.match.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
                     {p.match.team1.shortName}
                     <span className="text-[var(--muted-foreground)]">vs</span>
                     {p.match.team2.shortName}
-                    {p.match.team2.logo && <img src={p.match.team2.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    {p.match.team2.logo && <img src={p.match.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
                   </span>
                   <span className="text-[var(--muted-foreground)]">{new Date(p.match.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>

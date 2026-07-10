@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 interface Match {
-  id: string; date: string; status: string; result: string; team1Score: string; team2Score: string
+  id: string; matchNo: number; date: string; status: string; result: string; team1Score: string; team2Score: string
   tossWinner: string; tossDecision: string; manOfMatch: string; venue: string
   team1: { id: string; shortName: string; name: string; color: string; logo: string }
   team2: { id: string; shortName: string; name: string; color: string; logo: string }
@@ -28,6 +28,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     inn2Runs: "", inn2Wkts: "", inn2Balls: "", inn2Extras: "",
   })
   const [stats, setStats] = useState<Record<string, Record<string, string>>>({})
+  const [neutralFielders, setNeutralFielders] = useState<{ playerId: string; ct: string; st: string; ro: string; wk: boolean }[]>([])
 
   useEffect(() => {
     fetch("/api/players").then(r => r.json()).then(setAllPlayers)
@@ -41,12 +42,16 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "",
       tossWinner: m.tossWinner || "", tossDecision: m.tossDecision || "",
       venue: m.venue || "",
-      inn1Runs: inn1?.runs?.toString() || "", inn1Wkts: inn1?.wickets?.toString() || "",
+      inn1Runs: inn1?.runs?.toString() || (!inn1 && m.team1Score ? m.team1Score.split("/")[0] : ""),
+      inn1Wkts: inn1?.wickets?.toString() || (!inn1 && m.team1Score ? m.team1Score.split("/")[1] || "" : ""),
       inn1Balls: inn1?.balls?.toString() || "", inn1Extras: inn1?.extras?.toString() || "",
-      inn2Runs: inn2?.runs?.toString() || "", inn2Wkts: inn2?.wickets?.toString() || "",
+      inn2Runs: inn2?.runs?.toString() || (!inn2 && m.team2Score ? m.team2Score.split("/")[0] : ""),
+      inn2Wkts: inn2?.wickets?.toString() || (!inn2 && m.team2Score ? m.team2Score.split("/")[1] || "" : ""),
       inn2Balls: inn2?.balls?.toString() || "", inn2Extras: inn2?.extras?.toString() || "",
     })
     setStats({})
+    const others = allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id)
+    setNeutralFielders(others.map((p, i) => ({ playerId: p.id, ct: "", st: "", ro: "", wk: i === 0 })))
   }
 
   function s(playerId: string, field: string) {
@@ -79,7 +84,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   async function submitScore(id: string, m: Match) {
     const playersData = allPlayers
       .filter(p => p.teamId === m.team1.id || p.teamId === m.team2.id)
-      .filter(p => s(p.id, "runs") || s(p.id, "wkts") || s(p.id, "ct") || s(p.id, "st") || s(p.id, "ro"))
       .map(p => ({
         playerId: p.id,
         teamId: p.teamId,
@@ -99,6 +103,19 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         stumpings: parseInt(s(p.id, "st")) || 0,
         runOuts: parseInt(s(p.id, "ro")) || 0,
       }))
+    const neutralData = neutralFielders
+      .filter(n => n.playerId && (n.ct || n.st || n.ro))
+      .map(n => ({
+        playerId: n.playerId,
+        teamId: m.team1.id,
+        battingRuns: 0, ballsFaced: 0, fours: 0, sixes: 0, ones: 0, twos: 0,
+        isOut: false, dismissalType: "",
+        bowlingWickets: 0, bowlingRuns: 0, ballsBowled: 0, maidens: 0,
+        catches: parseInt(n.ct) || 0,
+        stumpings: parseInt(n.st) || 0,
+        runOuts: parseInt(n.ro) || 0,
+      }))
+    playersData.push(...neutralData)
 
     let mom = ""
     if (playersData.length > 0) {
@@ -113,12 +130,46 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       }
     }
 
+    let result = ""
+    const s1Runs = parseInt(form.inn1Runs) || 0
+    const s2Runs = parseInt(form.inn2Runs) || 0
+    const s1Extras = parseInt(form.inn1Extras) || 0
+    const s2Extras = parseInt(form.inn2Extras) || 0
+    const s1Total = s1Runs + s1Extras
+    const s2Total = s2Runs + s2Extras
+    const s1Wkts = form.inn1Wkts !== "" ? parseInt(form.inn1Wkts) ?? 0 : null
+    const s2Wkts = form.inn2Wkts !== "" ? parseInt(form.inn2Wkts) ?? 0 : null
+    if ((s1Runs || s2Runs || s1Extras || s2Extras) && form.tossWinner && form.tossDecision) {
+      const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
+      const t2BattingFirst = !t1BattingFirst
+      if (s1Total === s2Total) {
+        result = "Match Tied"
+      } else if (s1Total > s2Total) {
+        if (t1BattingFirst) {
+          const diff = s1Total - s2Total
+          result = `${m.team1.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
+        } else if (t2BattingFirst && s1Wkts !== null) {
+          const wktsLeft = 2 - s1Wkts
+          result = `${m.team1.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
+        }
+      } else {
+        if (t2BattingFirst) {
+          const diff = s2Total - s1Total
+          result = `${m.team2.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
+        } else if (t1BattingFirst && s2Wkts !== null) {
+          const wktsLeft = 2 - s2Wkts
+          result = `${m.team2.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
+        }
+      }
+    }
     await fetch("/api/matches", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id, status: "completed",
-        team1Score: form.team1Score, team2Score: form.team2Score, result: form.result,
+        team1Score: `${s1Total}/${s1Wkts !== null ? s1Wkts : 0}${form.inn1Balls ? ` (${Math.floor(parseInt(form.inn1Balls) / 6)}.${parseInt(form.inn1Balls) % 6})` : ""}`,
+        team2Score: `${s2Total}/${s2Wkts !== null ? s2Wkts : 0}${form.inn2Balls ? ` (${Math.floor(parseInt(form.inn2Balls) / 6)}.${parseInt(form.inn2Balls) % 6})` : ""}`,
+        result,
         tossWinner: form.tossWinner, tossDecision: form.tossDecision,
         manOfMatch: mom, venue: form.venue,
       }),
@@ -167,7 +218,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     router.refresh()
   }
 
-  function PlayerTable(players: Player[], color: string, teamName: string) {
+  function PlayerTable(players: Player[], teamName: string) {
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
@@ -194,7 +245,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
           <tbody>
             {players.map(p => (
               <tr key={p.id} className="border-b border-[var(--border)] hover:bg-[var(--background)]">
-                <td className="py-1 pr-2 text-left font-medium" style={{ color }}>{p.name}</td>
+                <td className="py-1 pr-2 text-left font-medium">{p.name}</td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "runs")} onChange={e => set(p.id, "runs", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "bf")} onChange={e => set(p.id, "bf", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "4s")} onChange={e => set(p.id, "4s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
@@ -232,39 +283,72 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   return (
     <div className="space-y-3">
       {matches.map((m) => {
-        const playoffCutoff = new Date("2026-08-28T00:00:00.000Z")
+        const playoffCutoff = new Date("2026-08-16T00:00:00.000Z")
         const md = new Date(m.date)
         const isPlayoff = md >= playoffCutoff
         function playoffLabel(d: Date) {
           const iso = d.toISOString()
-          if (iso.startsWith("2026-08-28T12:")) return "Qualifier 1"
-          if (iso.startsWith("2026-08-28T13:")) return "Eliminator"
-          if (iso.startsWith("2026-08-29T")) return "Qualifier 2"
-          if (iso.startsWith("2026-08-30T")) return "Final"
+          if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
+          if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
+          if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
+          if (iso.startsWith("2026-08-23T")) return "Final"
           return ""
         }
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)
         const team2Players = allPlayers.filter(p => p.teamId === m.team2.id)
+        function autoResult() {
+          const t1Runs = parseInt(form.inn1Runs) || 0
+          const t2Runs = parseInt(form.inn2Runs) || 0
+          const t1Extras = parseInt(form.inn1Extras) || 0
+          const t2Extras = parseInt(form.inn2Extras) || 0
+          const t1Total = t1Runs + t1Extras
+          const t2Total = t2Runs + t2Extras
+          const t1Wkts = form.inn1Wkts !== "" ? parseInt(form.inn1Wkts) ?? 0 : null
+          const t2Wkts = form.inn2Wkts !== "" ? parseInt(form.inn2Wkts) ?? 0 : null
+          if (!t1Runs && !t2Runs && !t1Extras && !t2Extras && !form.inn1Wkts && !form.inn2Wkts) return ""
+          if (!form.tossWinner || !form.tossDecision) return ""
+          const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
+          const t2BattingFirst = !t1BattingFirst
+          if (t1Total === t2Total) return "Match Tied"
+          if (t1Total > t2Total) {
+            if (t1BattingFirst) {
+              const diff = t1Total - t2Total
+              return `${m.team1.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
+            } else if (t2BattingFirst && t1Wkts !== null) {
+              const wktsLeft = 2 - t1Wkts
+              return `${m.team1.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
+            }
+          } else {
+            if (t2BattingFirst) {
+              const diff = t2Total - t1Total
+              return `${m.team2.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
+            } else if (t1BattingFirst && t2Wkts !== null) {
+              const wktsLeft = 2 - t2Wkts
+              return `${m.team2.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
+            }
+          }
+          return ""
+        }
         return (
         <div key={m.id} className={`rounded-lg border p-4 ${isPlayoff ? 'border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10' : 'border-[var(--border)] bg-[var(--card)]'}`}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : m.season.name} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
+              <p className="text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : `${m.season.name} \u00b7 Match ${m.matchNo}`} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
               {isPlayoff ? (
                 <div className="flex items-center gap-2">
                   <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(md)}</span>
                   <span className="text-xs text-[var(--muted-foreground)]">&middot;</span>
-                  <p className="font-bold text-amber-600">TBD</p>
-                  <span className="text-xs text-amber-600">vs</span>
-                  <p className="font-bold text-amber-600">TBD</p>
+                  <p className="font-bold text-amber-600 dark:text-amber-400">TBD</p>
+                  <span className="text-xs text-amber-600 dark:text-amber-400">vs</span>
+                  <p className="font-bold text-amber-600 dark:text-amber-400">TBD</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  {m.team1.logo && <img src={m.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                  {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                   <p className="font-medium">{m.team1.name}</p>
                   <span className="text-xs text-[var(--muted-foreground)]">vs</span>
                   <p className="font-medium">{m.team2.name}</p>
-                  {m.team2.logo && <img src={m.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                  {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                 </div>
               )}
               {!isPlayoff && m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
@@ -318,25 +402,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 </div>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-5">
-                <div>
-                  <label className="mb-1 block text-xs">{m.team1.name} Score</label>
-                  <input value={form.team1Score} onChange={e => setForm({...form, team1Score: e.target.value})}
-                    placeholder="180/4"
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">{m.team2.name} Score</label>
-                  <input value={form.team2Score} onChange={e => setForm({...form, team2Score: e.target.value})}
-                    placeholder="170/8"
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
-                </div>
-                <div className="md:col-span-3">
-                  <label className="mb-1 block text-xs">Result</label>
-                  <input value={form.result} onChange={e => setForm({...form, result: e.target.value})}
-                    placeholder={`${m.team1.name} won by...`}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
-                </div>
+              <div>
+                <label className="mb-1 block text-xs">Result (auto from innings + toss)</label>
+                <input value={autoResult()} readOnly
+                  className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
               </div>
 
               <div className="grid gap-3 md:grid-cols-4">
@@ -386,19 +455,59 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               {team1Players.length > 0 && (
                 <div>
                   <div className="mb-1 flex items-center gap-2">
-                    {m.team1.logo && <img src={m.team1.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
-                    <p className="text-sm font-semibold" style={{ color: m.team1.color }}>{m.team1.name} — Batting & Bowling</p>
+                    {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                    <p className="text-sm font-semibold">{m.team1.name} — Batting & Bowling</p>
                   </div>
-                  {PlayerTable(team1Players, m.team1.color, m.team1.name)}
+                  {PlayerTable(team1Players, m.team1.name)}
                 </div>
               )}
               {team2Players.length > 0 && (
                 <div>
                   <div className="mb-1 mt-3 flex items-center gap-2">
-                    {m.team2.logo && <img src={m.team2.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
-                    <p className="text-sm font-semibold" style={{ color: m.team2.color }}>{m.team2.name} — Batting & Bowling</p>
+                    {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                    <p className="text-sm font-semibold">{m.team2.name} — Batting & Bowling</p>
                   </div>
-                  {PlayerTable(team2Players, m.team2.color, m.team2.name)}
+                  {PlayerTable(team2Players, m.team2.name)}
+                </div>
+              )}
+
+              {allPlayers.length > 0 && (
+                <div className="mt-3 rounded-lg border border-dashed border-amber-300 bg-amber-50/50 p-3 dark:border-amber-700/40 dark:bg-amber-900/10">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Starter Phase — Neutral Fielders</span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">(fielding only, no batting/bowling)</span>
+                  </div>
+                  <p className="mb-2 text-[10px] text-[var(--muted-foreground)]">Select players from other teams who fielded in this match.</p>
+                  {neutralFielders.map((nf, idx) => (
+                    <div key={idx} className="mb-1.5 flex items-center gap-2">
+                      <select value={nf.playerId} onChange={e => { const n = [...neutralFielders]; n[idx].playerId = e.target.value; setNeutralFielders(n) }}
+                        className="w-40 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-xs">
+                        <option value="">Select</option>
+                        {allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id).map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                      <label className="flex items-center gap-0.5 text-[10px]">
+                        <input type="checkbox" checked={nf.wk} onChange={e => {
+                          const n = [...neutralFielders]; n[idx].wk = e.target.checked;
+                          if (e.target.checked) n.forEach((x, j) => { if (j !== idx) x.wk = false })
+                          setNeutralFielders(n)
+                        }} className="h-3 w-3" /> WK
+                      </label>
+                      <label className="text-[10px]">Ct</label>
+                      <input type="number" min="0" value={nf.ct} onChange={e => { const n = [...neutralFielders]; n[idx].ct = e.target.value; setNeutralFielders(n) }}
+                        className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
+                      <label className="text-[10px]">St</label>
+                      <input type="number" min="0" value={nf.st} onChange={e => { const n = [...neutralFielders]; n[idx].st = e.target.value; setNeutralFielders(n) }}
+                        className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
+                      <label className="text-[10px]">RO</label>
+                      <input type="number" min="0" value={nf.ro} onChange={e => { const n = [...neutralFielders]; n[idx].ro = e.target.value; setNeutralFielders(n) }}
+                        className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
+                      <button onClick={() => setNeutralFielders(neutralFielders.filter((_, j) => j !== idx))} className="text-red-500 text-xs">✕</button>
+                    </div>
+                  ))}
+                  <button onClick={() => setNeutralFielders([...neutralFielders, { playerId: "", ct: "", st: "", ro: "", wk: false }])}
+                    className="mt-1 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700">+ Add Neutral Fielder</button>
                 </div>
               )}
 

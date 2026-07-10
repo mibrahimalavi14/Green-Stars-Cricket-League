@@ -1,101 +1,63 @@
 ================================================================================
          GREEN STARS CRICKET LEAGUE - SEASON 1 - FULL SCHEDULE
-         7 Teams | 5-over Format | 42 League + 4 Playoff Matches
+         6 Teams | 5-over Format | 30 League + 4 Playoff Matches
 ================================================================================
 
 
 Friday, 17 July 2026
-  Dragon Knights         vs Power Panthers          5:00 PM  |  Al-Kabir Cricket Road
-  Thunder Hawks          vs Legends XI              6:00 PM  |  Al-Kabir Cricket Road
-  Alpha Warriors         vs Elite Rangers           7:00 PM  |  Al-Kabir Cricket Road
+  Alpha Warriors         vs Dragon Knights          4:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Elite Rangers          vs Power Panthers          5:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Falcon Strikers        vs Legends XI              6:00 PM  |  Al-Kabir Cricket Road, Lahore
 
 Saturday, 18 July 2026
-  Green Gladiators       vs Power Panthers          5:00 PM  |  TBD
-  Dragon Knights         vs Elite Rangers           6:00 PM  |  TBD
-  Thunder Hawks          vs Alpha Warriors          7:00 PM  |  TBD
+  Alpha Warriors         vs Power Panthers          4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Dragon Knights         vs Legends XI              5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Elite Rangers          vs Falcon Strikers         6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
 
 Sunday, 19 July 2026
-  Green Gladiators       vs Legends XI              5:00 PM  |  Al-Kabir Cricket Road
-  Power Panthers         vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road
-  Dragon Knights         vs Thunder Hawks           7:00 PM  |  Al-Kabir Cricket Road
+  Alpha Warriors         vs Legends XI              4:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Power Panthers         vs Falcon Strikers         5:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Dragon Knights         vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road, Lahore
 
 Friday, 24 July 2026
-  Green Gladiators       vs Elite Rangers           5:00 PM  |  TBD
-  Legends XI             vs Alpha Warriors          6:00 PM  |  TBD
-  Power Panthers         vs Thunder Hawks           7:00 PM  |  TBD
+  Alpha Warriors         vs Falcon Strikers         4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Legends XI             vs Elite Rangers           5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Power Panthers         vs Dragon Knights          6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
 
 Saturday, 25 July 2026
-  Green Gladiators       vs Alpha Warriors          5:00 PM  |  Al-Kabir Cricket Road
-  Elite Rangers          vs Thunder Hawks           6:00 PM  |  Al-Kabir Cricket Road
-  Legends XI             vs Dragon Knights          7:00 PM  |  Al-Kabir Cricket Road
+  Alpha Warriors         vs Elite Rangers           4:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Falcon Strikers        vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Legends XI             vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road, Lahore
 
 Sunday, 26 July 2026
-  Green Gladiators       vs Thunder Hawks           5:00 PM  |  TBD
-  Alpha Warriors         vs Dragon Knights          6:00 PM  |  TBD
-  Legends XI             vs Power Panthers          7:00 PM  |  TBD
+  Dragon Knights         vs Alpha Warriors          4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Power Panthers         vs Elite Rangers           5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Legends XI             vs Falcon Strikers         6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
 
 Friday, 31 July 2026
-  Green Gladiators       vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road
-  Alpha Warriors         vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road
-  Elite Rangers          vs Legends XI              7:00 PM  |  Al-Kabir Cricket Road
-
-Saturday, 1 August 2026
-  Legends XI             vs Thunder Hawks           12:00 AM  |  TBD
-  Power Panthers         vs Dragon Knights          12:00 AM  |  TBD
-  Elite Rangers          vs Alpha Warriors          12:00 AM  |  TBD
+  Power Panthers         vs Alpha Warriors          4:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Legends XI             vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Falcon Strikers        vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Elite Rangers          vs Alpha Warriors          7:00 PM  |  Al-Kabir Cricket Road, Lahore
 
 Sunday, 2 August 2026
-  Power Panthers         vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road
-  Alpha Warriors         vs Thunder Hawks           12:00 AM  |  Al-Kabir Cricket Road
-  Elite Rangers          vs Dragon Knights          12:00 AM  |  Al-Kabir Cricket Road
-
-Saturday, 8 August 2026
-  Legends XI             vs Green Gladiators        12:00 AM  |  TBD
-  Thunder Hawks          vs Dragon Knights          12:00 AM  |  TBD
-  Elite Rangers          vs Power Panthers          12:00 AM  |  TBD
+  Legends XI             vs Alpha Warriors          4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Falcon Strikers        vs Power Panthers          5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Elite Rangers          vs Dragon Knights          6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  Dragon Knights         vs Falcon Strikers         7:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
 
 Sunday, 9 August 2026
-  Alpha Warriors         vs Legends XI              12:00 AM  |  Al-Kabir Cricket Road
-  Elite Rangers          vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road
-  Thunder Hawks          vs Power Panthers          12:00 AM  |  Al-Kabir Cricket Road
-
-Saturday, 15 August 2026
-  Alpha Warriors         vs Green Gladiators        12:00 AM  |  TBD
-  Thunder Hawks          vs Elite Rangers           12:00 AM  |  TBD
-  Dragon Knights         vs Legends XI              12:00 AM  |  TBD
+  Falcon Strikers        vs Alpha Warriors          4:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Elite Rangers          vs Legends XI              5:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Dragon Knights         vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road, Lahore
+  Power Panthers         vs Legends XI              7:00 PM  |  Al-Kabir Cricket Road, Lahore
 
 Sunday, 16 August 2026
-  Thunder Hawks          vs Green Gladiators        12:00 AM  |  Al-Kabir Cricket Road
-  Dragon Knights         vs Alpha Warriors          12:00 AM  |  Al-Kabir Cricket Road
-  Power Panthers         vs Legends XI              12:00 AM  |  Al-Kabir Cricket Road
+  Qualifier 1               TBD                     4:00 PM  |  TBD
+  Eliminator                TBD                     5:00 PM  |  TBD
+  Qualifier 2               TBD                     6:00 PM  |  TBD
 
-Saturday, 22 August 2026
-  Dragon Knights         vs Green Gladiators        12:00 AM  |  TBD
-  Power Panthers         vs Alpha Warriors          12:00 AM  |  TBD
-  Legends XI             vs Elite Rangers           12:00 AM  |  TBD
-
---- PLAYOFFS ---
-
-
-Friday, 28 August 2026
-  Green Gladiators       vs Dragon Knights          5:00 PM   [Qualifier 1]  |  TBD
-  Thunder Hawks          vs Alpha Warriors          6:00 PM   [Eliminator]  |  TBD
-
-Saturday, 29 August 2026
-  Elite Rangers          vs Legends XI              5:00 PM   [Qualifier 2]  |  TBD
-
---- PLAYOFFS ---
-
-
-Sunday, 30 August 2026
-  Green Gladiators       vs Power Panthers          5:00 PM   [FINAL]  |  TBD
-
---------------------------------------------------------------------------------
-                              PLAYOFFS FORMAT
---------------------------------------------------------------------------------
-  Qualifier 1:  Rank 1 vs Rank 2  ->  Winner to Final
-  Eliminator:   Rank 3 vs Rank 4  ->  Winner to Qualifier 2
-  Qualifier 2:  Loser of Q1 vs Winner of Eliminator  ->  Winner to Final
-  Final:        Winner of Q1 vs Winner of Q2  ->  CHAMPION!
+Sunday, 23 August 2026
+  FINAL                     TBD                     5:00 PM  |  TBD
 
 ================================================================================

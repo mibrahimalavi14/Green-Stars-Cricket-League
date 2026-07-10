@@ -19,22 +19,22 @@ async function AdminPerformancesPage() {
         <p className="text-center text-[var(--muted-foreground)] py-8">No completed matches yet. Complete a match first.</p>
       ) : (
         <div className="space-y-6">
-          {matches.map((m) => (
+          {matches.map((match) => (
             <AdminPerformanceForm
-              key={m.id}
+              key={match.id}
               match={{
-                id: m.id,
-                seasonName: m.season.name,
-                date: m.date.toISOString(),
-                team1Id: m.team1.id,
-                team1Name: m.team1.shortName,
-                team1Color: m.team1.color,
-                team2Id: m.team2.id,
-                team2Name: m.team2.shortName,
-                team2Color: m.team2.color,
-                team1Score: m.team1Score,
-                team2Score: m.team2Score,
-                savedPerformances: m.performances.map(p => ({
+                id: match.id,
+                seasonName: match.season.name,
+                date: match.date.toISOString(),
+                team1Id: match.team1.id,
+                team1Name: match.team1.shortName,
+                team1Color: match.team1.color,
+                team2Id: match.team2.id,
+                team2Name: match.team2.shortName,
+                team2Color: match.team2.color,
+                team1Score: match.team1Score,
+                team2Score: match.team2Score,
+                savedPerformances: match.performances.map(p => ({
                   playerId: p.playerId,
                   teamId: p.teamId,
                   battingRuns: p.battingRuns,

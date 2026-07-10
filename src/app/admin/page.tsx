@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Calendar, Users, Shield, Newspaper, PlusCircle } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -72,6 +72,13 @@ async function AdminPage() {
           <PlusCircle className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Quick Add</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Add new match</p>
+        </Link>
+
+        <Link href="/admin/contact" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <MessageSquare className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Contact Messages</h3>
+          <p className="text-2xl font-bold">{counts.contacts}</p>
+          <p className="text-sm text-[var(--muted-foreground)]">View messages from visitors</p>
         </Link>
       </div>
     </div>

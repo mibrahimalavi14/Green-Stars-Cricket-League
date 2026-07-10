@@ -18,6 +18,7 @@ interface LiveMatch {
 
 interface UpcomingMatch {
   id: string
+  matchNo: number
   team1: { name: string; shortName: string; logo: string; color: string }
   team2: { name: string; shortName: string; logo: string; color: string }
   date: string
@@ -59,20 +60,21 @@ export function LiveScoreClient({
           <div className="mt-8">
             <h2 className="mb-4 text-xl font-semibold">Upcoming Matches</h2>
             <div className="space-y-3 max-w-md mx-auto">
-              {upcomingMatches.map((m) => (
-                <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+              {upcomingMatches.map((match) => (
+                <div key={match.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+                  {(match as any).matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {(match as any).matchNo}</div>}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
-                      <span className="font-medium" style={{ color: m.team1.color }}>{m.team1.name}</span>
+                      {match.team1.logo && <img src={match.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                       <span className="font-medium">{match.team1.name}</span>
                     </div>
                     <span className="text-xs text-[var(--accent)]">VS</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium" style={{ color: m.team2.color }}>{m.team2.name}</span>
-                      {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                       <span className="font-medium">{match.team2.name}</span>
+                      {match.team2.logo && <img src={match.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                     </div>
                   </div>
-                  <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString()} &middot; {(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(m.venue)}</p>
+                  <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(match.date).toLocaleDateString()} &middot; {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</p>
                 </div>
               ))}
             </div>
@@ -108,7 +110,7 @@ export function LiveScoreClient({
           <div className="text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
               {match.team1.logo && <img src={match.team1.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
-              <p className="font-bold" style={{ color: match.team1.color }}>{match.team1.name}</p>
+               <p className="font-bold">{match.team1.name}</p>
             </div>
             <p className="text-3xl font-bold">{match.team1Score || battingTeam?.runs.toString() || "0"}</p>
             <p className="text-sm text-[var(--muted-foreground)]">
@@ -118,7 +120,7 @@ export function LiveScoreClient({
 
           <div className="text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
-              <p className="font-bold" style={{ color: match.team2.color }}>{match.team2.name}</p>
+               <p className="font-bold">{match.team2.name}</p>
               {match.team2.logo && <img src={match.team2.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
             </div>
             <p className="text-3xl font-bold">{match.team2Score || "0"}</p>

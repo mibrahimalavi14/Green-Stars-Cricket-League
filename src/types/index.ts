@@ -29,11 +29,18 @@ export interface PlayerData {
   ballsBowled: number
   runsConceded: number
   matchesPlayed: number
+  notOuts: number
+  ducks: number
+  fourWickets: number
+  fiveWickets: number
+  fifties: number
+  hundreds: number
   team?: TeamData
 }
 
 export interface MatchData {
   id: string
+  matchNo: number
   seasonId: string
   team1Id: string
   team2Id: string
@@ -72,6 +79,7 @@ export interface SeasonData {
   logo: string
   isActive: boolean
   scheduleAnnounced: boolean
+  winnerId?: string
 }
 
 export interface PredictionData {
@@ -105,14 +113,3 @@ export interface ContactData {
   message: string
 }
 
-export interface TeamStats {
-  played: number
-  won: number
-  lost: number
-  tied: number
-  nr: number
-  points: number
-  nrr: number
-  for: { runs: number; overs: number }
-  against: { runs: number; overs: number }
-}

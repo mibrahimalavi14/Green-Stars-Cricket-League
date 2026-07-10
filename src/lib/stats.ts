@@ -1,23 +1,14 @@
 import { prisma } from "./prisma"
 
-export function parseScore(score: string) {
-  const parts = score.split("/")
-  const runs = parseInt(parts[0]) || 0
-  const wickets = parts[1] ? parseInt(parts[1]) || 0 : 0
-  return { runs, wickets }
-}
-
 export function ballsToOvers(balls: number) {
-  const overs = Math.floor(balls / 6)
-  const extraBalls = balls % 6
-  return overs + extraBalls / 10
+  return balls / 6
 }
 
 export async function recalcPointsTable(seasonId: string) {
   const teams = await prisma.team.findMany({ where: { seasonId } })
   const matches = await prisma.match.findMany({
     where: { seasonId, status: "completed" },
-    select: { team1Id: true, team2Id: true, team1Score: true, team2Score: true, result: true },
+    include: { innings: true, team1: true, team2: true },
   })
 
   const stats: Record<string, { played: number; won: number; lost: number; tied: number; nr: number; forRuns: number; forBalls: number; againstRuns: number; againstBalls: number }> = {}
@@ -27,25 +18,10 @@ export async function recalcPointsTable(seasonId: string) {
   }
 
   for (const m of matches) {
-    const s1 = parseScore(m.team1Score)
-    const s2 = parseScore(m.team2Score)
+    if (stats[m.team1Id]) stats[m.team1Id].played++
+    if (stats[m.team2Id]) stats[m.team2Id].played++
+
     const result = m.result.toLowerCase()
-
-    if (stats[m.team1Id]) {
-      stats[m.team1Id].played++
-      stats[m.team1Id].forRuns += s1.runs
-      stats[m.team1Id].forBalls += s1.wickets + s1.runs
-      stats[m.team1Id].againstRuns += s2.runs
-      stats[m.team1Id].againstBalls += s2.wickets + s2.runs
-    }
-    if (stats[m.team2Id]) {
-      stats[m.team2Id].played++
-      stats[m.team2Id].forRuns += s2.runs
-      stats[m.team2Id].forBalls += s2.wickets + s2.runs
-      stats[m.team2Id].againstRuns += s1.runs
-      stats[m.team2Id].againstBalls += s1.wickets + s1.runs
-    }
-
     if (result.includes("tied")) {
       if (stats[m.team1Id]) stats[m.team1Id].tied++
       if (stats[m.team2Id]) stats[m.team2Id].tied++
@@ -53,11 +29,8 @@ export async function recalcPointsTable(seasonId: string) {
       if (stats[m.team1Id]) stats[m.team1Id].nr++
       if (stats[m.team2Id]) stats[m.team2Id].nr++
     } else {
-      const t1 = teams.find(t => t.id === m.team1Id)
-      const t2 = teams.find(t => t.id === m.team2Id)
-      const r = result.toLowerCase()
-      const t1Match = r.includes((t1?.name || "").toLowerCase()) || r.includes((t1?.shortName || "").toLowerCase())
-      const t2Match = r.includes((t2?.name || "").toLowerCase()) || r.includes((t2?.shortName || "").toLowerCase())
+      const t1Match = result.includes((m.team1?.name || "").toLowerCase()) || result.includes((m.team1?.shortName || "").toLowerCase())
+      const t2Match = result.includes((m.team2?.name || "").toLowerCase()) || result.includes((m.team2?.shortName || "").toLowerCase())
       if (t1Match && !t2Match) {
         if (stats[m.team1Id]) stats[m.team1Id].won++
         if (stats[m.team2Id]) stats[m.team2Id].lost++
@@ -66,15 +39,37 @@ export async function recalcPointsTable(seasonId: string) {
         if (stats[m.team1Id]) stats[m.team1Id].lost++
       }
     }
+
+    const team1Inning = m.innings.find(inng => inng.teamId === m.team1Id)
+    const team2Inning = m.innings.find(inng => inng.teamId === m.team2Id)
+
+    if (team1Inning && stats[m.team1Id]) {
+      stats[m.team1Id].forRuns += team1Inning.runs
+      stats[m.team1Id].forBalls += team1Inning.balls
+    }
+    if (team2Inning && stats[m.team1Id]) {
+      stats[m.team1Id].againstRuns += team2Inning.runs
+      stats[m.team1Id].againstBalls += team2Inning.balls
+    }
+    if (team2Inning && stats[m.team2Id]) {
+      stats[m.team2Id].forRuns += team2Inning.runs
+      stats[m.team2Id].forBalls += team2Inning.balls
+    }
+    if (team1Inning && stats[m.team2Id]) {
+      stats[m.team2Id].againstRuns += team1Inning.runs
+      stats[m.team2Id].againstBalls += team1Inning.balls
+    }
   }
 
   return teams.map(team => {
     const s = stats[team.id] || { played: 0, won: 0, lost: 0, tied: 0, nr: 0, forRuns: 0, forBalls: 0, againstRuns: 0, againstBalls: 0 }
-    const forOvers = ballsToOvers(s.forBalls)
-    const againstOvers = ballsToOvers(s.againstBalls)
+    const forOvers = s.forBalls / 6
+    const againstOvers = s.againstBalls / 6
     const nrr = forOvers > 0 && againstOvers > 0
       ? ((s.forRuns / forOvers) - (s.againstRuns / againstOvers))
-      : 0
+      : forOvers > 0
+        ? s.forRuns / forOvers
+        : 0
 
     return {
       id: team.id,
@@ -140,12 +135,16 @@ export async function recalcPlayerStats() {
 
     const individualMatches = await prisma.playerMatch.findMany({
       where: { playerId: player.id },
-      select: { battingRuns: true, bowlingWickets: true, bowlingRuns: true },
+      select: { battingRuns: true, ballsFaced: true, isOut: true, bowlingWickets: true, bowlingRuns: true },
     })
     const fifties = individualMatches.filter(m => m.battingRuns >= 50 && m.battingRuns < 100).length
     const hundreds = individualMatches.filter(m => m.battingRuns >= 100).length
+    const notOuts = individualMatches.filter(m => m.ballsFaced > 0 && !m.isOut).length
+    const ducks = individualMatches.filter(m => m.battingRuns === 0 && m.isOut).length
+    const fourWickets = individualMatches.filter(m => m.bowlingWickets >= 4 && m.bowlingWickets < 5).length
+    const fiveWickets = individualMatches.filter(m => m.bowlingWickets >= 5).length
 
-    let bestWkts = 0, bestRuns = 999
+    let bestWkts = 0, bestRuns = Infinity
     for (const m of individualMatches) {
       if (m.bowlingWickets > bestWkts || (m.bowlingWickets === bestWkts && m.bowlingRuns < bestRuns)) {
         bestWkts = m.bowlingWickets
@@ -153,11 +152,11 @@ export async function recalcPlayerStats() {
       }
     }
     const bestBowlingWickets = bestWkts
-    const bestBowlingRuns = bestRuns === 999 ? 0 : bestRuns
+    const bestBowlingRuns = bestRuns === Infinity ? 0 : bestRuns
 
     await prisma.player.update({
       where: { id: player.id },
-      data: { runs, ballsFaced, fours, sixes, ones, twos, fifties, hundreds, wickets, runsConceded, ballsBowled, matchesPlayed, bestBowlingWickets, bestBowlingRuns, catches, stumpings, runOuts },
+      data: { runs, ballsFaced, fours, sixes, ones, twos, fifties, hundreds, notOuts, ducks, fourWickets, fiveWickets, wickets, runsConceded, ballsBowled, matchesPlayed, bestBowlingWickets, bestBowlingRuns, catches, stumpings, runOuts },
     })
   }
 }

@@ -110,6 +110,10 @@ model Player {
   catches             Int     @default(0)
   stumpings           Int     @default(0)
   runOuts             Int     @default(0)
+  notOuts             Int     @default(0)
+  ducks               Int     @default(0)
+  fourWickets         Int     @default(0)
+  fiveWickets         Int     @default(0)
 
   performances PlayerMatch[]
 
@@ -124,6 +128,7 @@ model Match {
   team1         Team     @relation("Team1Matches", fields: [team1Id], references: [id])
   team2Id       String
   team2         Team     @relation("Team2Matches", fields: [team2Id], references: [id])
+  matchNo       Int      @default(0)
   date          DateTime
   venue         String   @default("Main Stadium")
   status        String   @default("upcoming")

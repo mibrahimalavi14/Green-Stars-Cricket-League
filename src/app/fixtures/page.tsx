@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
 import { getVenueMapsUrl } from "@/lib/utils"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function FixturesPage() {
   const matches = await prisma.match.findMany({
@@ -15,12 +15,14 @@ async function FixturesPage() {
     orderBy: { createdAt: "desc" },
   })
 
-  const live = matches.filter((m) => m.status === "live")
-  const completed = matches.filter((m) => m.status === "completed").reverse()
-  const upcoming = matches.filter((m) => m.status === "upcoming")
-  const playoffCutoff = new Date("2026-08-28T00:00:00.000Z")
-  const leagueUpcoming = upcoming.filter((m) => m.date < playoffCutoff)
-  const playoffUpcoming = upcoming.filter((m) => m.date >= playoffCutoff)
+  const live = matches.filter((match) => match.status === "live")
+  const completed = matches.filter((match) => match.status === "completed").reverse()
+  const upcoming = matches.filter((match) => match.status === "upcoming")
+
+  const playoffCutoff = new Date("2026-08-16T00:00:00.000Z")
+
+  const leagueUpcoming = upcoming.filter((match) => match.date < playoffCutoff)
+  const playoffUpcoming = upcoming.filter((match) => match.date >= playoffCutoff)
 
   const groups: Record<string, typeof matches> = {}
   for (const m of leagueUpcoming) {
@@ -38,17 +40,16 @@ async function FixturesPage() {
 
   function playoffLabel(d: Date) {
     const iso = d.toISOString()
-    if (iso.startsWith("2026-08-28T12:")) return "Qualifier 1"
-    if (iso.startsWith("2026-08-28T13:")) return "Eliminator"
-    if (iso.startsWith("2026-08-29T")) return "Qualifier 2"
-    if (iso.startsWith("2026-08-30T")) return "Final"
+    if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
+    if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
+    if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
+    if (iso.startsWith("2026-08-23T")) return "Final"
     return ""
   }
 
   const playoffRoundLabels: Record<string, string> = {
-    "28 August": "Qualifier 1 & Eliminator",
-    "29 August": "Qualifier 2",
-    "30 August": "Final",
+    "16 August": "Qualifier 1, Eliminator & Qualifier 2",
+    "23 August": "Final",
   }
 
   const weekDays: Record<string, string> = {
@@ -65,19 +66,14 @@ async function FixturesPage() {
     "25 July": "Round 5",
     "26 July": "Round 6",
     "31 July": "Round 7",
-    "1 August": "Round 8",
-    "2 August": "Round 9",
-    "8 August": "Round 10",
-    "9 August": "Round 11",
-    "15 August": "Round 12",
-    "16 August": "Round 13",
-    "22 August": "Round 14",
+    "2 August": "Round 8",
+    "9 August": "Round 9",
   }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <h1 className="mb-2 text-3xl font-bold">Season 1 — Full Schedule</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">7 teams • 5-over format • Double Round Robin • 42 matches</p>
+      <p className="mb-8 text-[var(--muted-foreground)]">6 teams • 5-over format • Double Round Robin • 30 league matches</p>
 
       <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-300">
         <p className="font-medium">Note: Starter Phase — Neutral Fielders</p>
@@ -105,22 +101,23 @@ async function FixturesPage() {
                   </div>
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
-                  {dayMatches.map((m) => (
-                    <div key={m.id} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3 transition-colors hover:border-[var(--accent)]/30">
+                  {dayMatches.map((match) => (
+                    <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3 transition-colors hover:border-[var(--accent)]/30">
+                      {match.matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <img src={m.team1.logo || ""} alt={m.team1.name} className="h-7 w-7 rounded-full object-cover" />
-                          <span className="text-sm font-medium">{m.team1.name}</span>
+                          {match.team1.logo ? <img src={match.team1.logo} alt={match.team1.name} className="h-7 w-7 rounded-full object-cover" /> : <div className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: match.team1.color }}>{match.team1.shortName?.charAt(0)}</div>}
+                          <span className="text-sm font-medium">{match.team1.name}</span>
                         </div>
                         <span className="text-[10px] text-[var(--muted-foreground)]">vs</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{m.team2.name}</span>
-                          <img src={m.team2.logo || ""} alt={m.team2.name} className="h-7 w-7 rounded-full object-cover" />
+                          <span className="text-sm font-medium">{match.team2.name}</span>
+                          {match.team2.logo ? <img src={match.team2.logo} alt={match.team2.name} className="h-7 w-7 rounded-full object-cover" /> : <div className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: match.team2.color }}>{match.team2.shortName?.charAt(0)}</div>}
                         </div>
                       </div>
                       <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
-                        <span>{new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</span>
-                        <span>{(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(m.venue)}</span>
+                        <span>{new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</span>
+                        <span>{(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</span>
                       </div>
                     </div>
                   ))}
@@ -134,7 +131,7 @@ async function FixturesPage() {
       {playoffUpcoming.length > 0 && (
         <div className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
           <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-3">
-            <h2 className="text-lg font-semibold text-amber-600">Playoffs</h2>
+            <h2 className="text-lg font-semibold text-amber-600 dark:text-amber-400">Playoffs</h2>
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">
               Top 4 teams from the Points Table will qualify for the Playoffs.
             </p>
@@ -147,31 +144,32 @@ async function FixturesPage() {
               return (
                 <div key={dateKey} className="px-6 py-4">
                   <div className="mb-3 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-sm font-bold text-amber-600">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-sm font-bold text-amber-600 dark:text-amber-400">
                       {weekDays[dateKey.split(",")[0]] || dateKey.split(",")[0].slice(0, 3)}
                     </div>
                     <div>
                       <p className="font-semibold">{dateKey}</p>
-                      {label && <p className="text-xs font-medium text-amber-600">{label}</p>}
+                      {label && <p className="text-xs font-medium text-amber-600 dark:text-amber-400">{label}</p>}
                     </div>
                   </div>
                   <div className="grid gap-3 md:grid-cols-3">
-                    {dayMatches.map((m) => (
-                      <div key={m.id} className="rounded-xl border border-amber-200 bg-[var(--background)] p-3 dark:border-amber-800/40">
+                    {dayMatches.map((match) => (
+                      <div key={match.id} className="rounded-xl border border-amber-200 bg-[var(--background)] p-3 dark:border-amber-800/40">
+                        {match.matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">Match {match.matchNo}</div>}
                         <div className="mb-1">
-                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(new Date(m.date))}</span>
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(new Date(match.date))}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex flex-1 items-center gap-2">
-                            <span className="text-sm font-bold text-amber-600">TBD</span>
+                            <span className="text-sm font-bold text-amber-600 dark:text-amber-400">TBD</span>
                           </div>
-                          <span className="text-[10px] text-amber-600">vs</span>
+                          <span className="text-[10px] text-amber-600 dark:text-amber-400">vs</span>
                           <div className="flex flex-1 items-center justify-end gap-2">
-                            <span className="text-sm font-bold text-amber-600">TBD</span>
+                            <span className="text-sm font-bold text-amber-600 dark:text-amber-400">TBD</span>
                           </div>
                         </div>
                         <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
-                          <span>{new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</span>
+                          <span>{new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</span>
                           <span>TBD</span>
                         </div>
                       </div>
@@ -190,7 +188,7 @@ async function FixturesPage() {
             <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live Now
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {live.map((m) => <MatchCard key={m.id} match={m as never} />)}
+            {live.map((match) => <MatchCard key={match.id} match={match as any} />)}
           </div>
         </section>
       )}
@@ -199,7 +197,7 @@ async function FixturesPage() {
         <section className="mb-10">
           <h2 className="mb-4 text-xl font-semibold">Results</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {completed.map((m) => <MatchCard key={m.id} match={m as never} />)}
+            {completed.map((match) => <MatchCard key={match.id} match={match as any} />)}
           </div>
         </section>
       )}

@@ -3,9 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 
-export const dynamic = "force-dynamic"
-
-export const revalidate = 10
+export const revalidate = 30
 
 async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -28,7 +26,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!team) notFound()
 
   const allMatches = [...team.matches1, ...team.matches2]
-    .filter(m => new Date(m.date) < new Date("2026-08-28T00:00:00.000Z"))
+    .filter(match => new Date(match.date) < new Date("2026-08-16T00:00:00.000Z"))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   return (
@@ -80,9 +78,13 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 href={`/players/${player.id}`}
                 className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 transition-all hover:border-[var(--accent)]"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] text-sm font-bold text-[var(--accent)]">
-                  {player.name.charAt(0)}
-                </div>
+                {player.photo && player.photo !== "/placeholder-player.png" ? (
+                  <img src={player.photo} alt={player.name} className="h-10 w-10 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] text-sm font-bold text-[var(--accent)]">
+                    {player.name.charAt(0)}
+                  </div>
+                )}
                 <div>
                   <p className="font-medium">{player.name}</p>
                   <p className="text-xs text-[var(--muted-foreground)]">{player.role}</p>
@@ -93,42 +95,51 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
         )}
       </div>
 
-      <h2 className="mb-4 text-xl font-semibold">Matches {team.season ? `(${team.season.name})` : ""}</h2>
+      <details className="group rounded-xl border border-[var(--border)] bg-[var(--card)]" open>
+        <summary className="flex cursor-pointer items-center justify-between p-4 text-lg font-semibold hover:bg-[var(--muted)]/50">
+          <span>Matches {team.season ? `(${team.season.name})` : ""}</span>
+          <span className="text-xs text-[var(--muted-foreground)] group-open:hidden">Show</span>
+          <span className="text-xs text-[var(--muted-foreground)] hidden group-open:inline">Hide</span>
+        </summary>
+        <div className="px-4 pb-4">
       {allMatches.length === 0 ? (
-        <p className="text-[var(--muted-foreground)]">No matches yet.</p>
+        <p className="text-[var(--muted-foreground)] py-4 text-center">No matches yet.</p>
       ) : (
         <div className="space-y-3">
-          {allMatches.map((m) => (
-            <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    {m.team1.logo && <img src={m.team1.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
-                    <span className="font-medium">{m.team1.name}</span>
+          {allMatches.map((match) => (
+            <div key={match.id} className="rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 sm:p-4">
+              {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {match.team1.logo && <img src={match.team1.logo} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover" />}
+                    <span className="truncate text-sm font-medium">{match.team1.name}</span>
                   </div>
-                  <span className="text-xs text-[var(--muted-foreground)]">{m.team1Score}</span>
+                  {match.team1Score && <span className="shrink-0 text-xs font-semibold text-[var(--foreground)]">{match.team1Score}</span>}
                 </div>
-                <div className="text-center">
+                <div className="shrink-0 text-center">
                   <span className="text-xs font-semibold text-[var(--accent)]">VS</span>
                   <div className="text-xs text-[var(--muted-foreground)]">
-                    {(() => { const rel = relativeDateLabel(new Date(m.date)); return rel.label ? <span className={rel.className}>{rel.label}</span> : <>{new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
-                    {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
+                    {(() => { const rel = relativeDateLabel(new Date(match.date)); return rel.label ? <span className={rel.className}>{rel.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
+                    {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-[var(--muted-foreground)]">{m.team2Score}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-medium">{m.team2.name}</span>
-                    {m.team2.logo && <img src={m.team2.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                  {match.team2Score && <span className="shrink-0 text-xs font-semibold text-[var(--foreground)]">{match.team2Score}</span>}
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <span className="truncate text-sm font-medium">{match.team2.name}</span>
+                    {match.team2.logo && <img src={match.team2.logo} alt="" className="h-7 w-7 shrink-0 rounded-full object-cover" />}
                   </div>
                 </div>
               </div>
-              {m.result && <p className="mt-1 text-center text-xs font-medium text-green-600">{m.result}</p>}
-              {m.status === "upcoming" && <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{(u => { const url = getVenueMapsUrl(u); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{u}</a> : <>{u}</> })(m.venue)}</p>}
+              {match.result && <p className="mt-1 text-center text-xs font-medium text-green-600 dark:text-green-400">{match.result}</p>}
+              {match.status === "upcoming" && <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</p>}
             </div>
           ))}
         </div>
       )}
+    </div>
+  </details>
     </div>
   )
 }

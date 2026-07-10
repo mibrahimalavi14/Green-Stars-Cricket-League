@@ -1,10 +1,14 @@
 import { prisma } from "@/lib/prisma"
 import { AdminPlayerForm } from "@/components/AdminPlayerForm"
+import { AdminPlayerEdit } from "@/components/AdminPlayerEdit"
 
 export const dynamic = "force-dynamic"
 
 async function AdminPlayersPage() {
-  const players = await prisma.player.findMany({ include: { team: true }, orderBy: { runs: "desc" } })
+  const [players, teams] = await Promise.all([
+    prisma.player.findMany({ include: { team: true }, orderBy: { runs: "desc" } }),
+    prisma.team.findMany({ select: { id: true, name: true } }),
+  ])
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -12,17 +16,26 @@ async function AdminPlayersPage() {
       <div className="mb-8"><AdminPlayerForm /></div>
       <div className="space-y-2">
         {players.map((p) => (
-          <div key={p.id} className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-bold">{p.name.charAt(0)}</div>
-              <div>
-                <p className="font-medium text-sm">{p.name}</p>
-                <p className="text-xs text-[var(--muted-foreground)]">{p.role} &middot; {p.team?.shortName}</p>
+          <div key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {p.photo && p.photo !== "/placeholder-player.png" ? (
+                  <img src={p.photo} alt="" className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-bold">{p.name.charAt(0)}</div>
+                )}
+                <div>
+                  <p className="font-medium text-sm">{p.name}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">{p.role} &middot; {p.team?.shortName}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-4 text-xs text-[var(--muted-foreground)]">
-              <span>{p.runs} runs</span>
-              <span>{p.wickets} wkts</span>
+              <div className="flex items-center gap-4">
+                <div className="flex gap-4 text-xs text-[var(--muted-foreground)]">
+                  <span>{p.runs} runs</span>
+                  <span>{p.wickets} wkts</span>
+                </div>
+                <AdminPlayerEdit player={p as any} teams={teams} />
+              </div>
             </div>
           </div>
         ))}

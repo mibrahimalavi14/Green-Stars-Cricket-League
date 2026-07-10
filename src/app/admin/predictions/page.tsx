@@ -42,7 +42,7 @@ async function AdminPredictionsPage() {
                     <td className="p-3 font-medium">{p.name}</td>
                     <td className="p-3 text-[var(--muted-foreground)]">{p.email}</td>
                     <td className="p-3">
-                      <span className="font-semibold" style={{ color: team?.color }}>{team?.name || "Unknown"}</span>
+                       <span className="font-semibold">{team?.name || "Unknown"}</span>
                     </td>
                     <td className="p-3 whitespace-nowrap text-[var(--muted-foreground)]">
                       {new Date(p.createdAt).toLocaleString("en-GB", {

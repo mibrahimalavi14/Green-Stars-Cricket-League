@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { formatDate } from "@/lib/utils"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function NewsPage() {
   const newsList = await prisma.news.findMany({

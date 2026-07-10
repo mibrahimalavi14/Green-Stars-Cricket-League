@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 30
 
 async function PlayerStatsPage() {
   const players = await prisma.player.findMany({
@@ -33,29 +33,44 @@ async function PlayerStatsPage() {
                 <th className="p-3 text-center">6s</th>
                 <th className="p-3 text-center">50</th>
                 <th className="p-3 text-center">100</th>
+                <th className="p-3 text-center">NO</th>
+                <th className="p-3 text-center">Duck</th>
+                <th className="p-3 text-center">B/B</th>
                 <th className="p-3 text-center">SR</th>
               </tr>
             </thead>
             <tbody>
               {batting.length === 0 ? (
-                <tr><td colSpan={9} className="p-6 text-center text-[var(--muted-foreground)]">No batting data yet.</td></tr>
+                <tr><td colSpan={14} className="p-6 text-center text-[var(--muted-foreground)]">No batting data yet.</td></tr>
               ) : batting.map((p, i) => (
                 <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                   <td className="p-3 font-medium">{i + 1}</td>
-                  <td className="p-3 font-medium">{p.name}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      {p.photo && p.photo !== "/placeholder-player.png" ? (
+                        <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
+                      )}
+                      <span className="font-medium">{p.name}</span>
+                    </div>
+                  </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1.5">
-                      {p.team?.logo && <img src={p.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                      {p.team?.logo && <img src={p.team.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
                       <span className="text-[var(--muted-foreground)]">{p.team?.shortName}</span>
                     </div>
                   </td>
                   <td className="p-3 text-center">{p.matchesPlayed}</td>
                   <td className="p-3 text-center font-bold">{p.runs}</td>
                   <td className="p-3 text-center">{p.ballsFaced}</td>
-                  <td className="p-3 text-center text-blue-600">{p.fours}</td>
-                  <td className="p-3 text-center text-purple-600">{p.sixes}</td>
-                  <td className="p-3 text-center text-yellow-600">{p.fifties}</td>
-                  <td className="p-3 text-center text-green-600">{p.hundreds}</td>
+                  <td className="p-3 text-center text-blue-600 dark:text-blue-400">{p.fours}</td>
+                  <td className="p-3 text-center text-purple-600 dark:text-purple-400">{p.sixes}</td>
+                  <td className="p-3 text-center text-yellow-600 dark:text-yellow-400">{p.fifties}</td>
+                  <td className="p-3 text-center text-green-600 dark:text-green-400">{p.hundreds}</td>
+                  <td className="p-3 text-center">{p.notOuts}</td>
+                  <td className="p-3 text-center">{p.ducks}</td>
+                  <td className="p-3 text-center font-mono">{(p.fours + p.sixes) > 0 ? (p.ballsFaced / (p.fours + p.sixes)).toFixed(1) : "-"}</td>
                   <td className="p-3 text-center font-mono">{p.ballsFaced > 0 ? ((p.runs / p.ballsFaced) * 100).toFixed(1) : "-"}</td>
                 </tr>
               ))}
@@ -77,26 +92,41 @@ async function PlayerStatsPage() {
                 <th className="p-3 text-center">Wkts</th>
                 <th className="p-3 text-center">Runs</th>
                 <th className="p-3 text-center">Balls</th>
+                <th className="p-3 text-center">4w</th>
+                <th className="p-3 text-center">5w</th>
+                <th className="p-3 text-center">SR</th>
                 <th className="p-3 text-center">Econ</th>
               </tr>
             </thead>
             <tbody>
               {bowling.length === 0 ? (
-                <tr><td colSpan={8} className="p-6 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
+                <tr><td colSpan={11} className="p-6 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
               ) : bowling.map((p, i) => (
                 <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                   <td className="p-3 font-medium">{i + 1}</td>
-                  <td className="p-3 font-medium">{p.name}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      {p.photo && p.photo !== "/placeholder-player.png" ? (
+                        <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
+                      )}
+                      <span className="font-medium">{p.name}</span>
+                    </div>
+                  </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1.5">
-                      {p.team?.logo && <img src={p.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                      {p.team?.logo && <img src={p.team.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
                       <span className="text-[var(--muted-foreground)]">{p.team?.shortName}</span>
                     </div>
                   </td>
                   <td className="p-3 text-center">{p.matchesPlayed}</td>
-                  <td className="p-3 text-center font-bold text-green-600">{p.wickets}</td>
+                  <td className="p-3 text-center font-bold text-green-600 dark:text-green-400">{p.wickets}</td>
                   <td className="p-3 text-center">{p.runsConceded}</td>
                   <td className="p-3 text-center">{p.ballsBowled}</td>
+                  <td className="p-3 text-center font-bold text-orange-600 dark:text-orange-400">{p.fourWickets}</td>
+                  <td className="p-3 text-center font-bold text-red-600 dark:text-red-400">{p.fiveWickets}</td>
+                  <td className="p-3 text-center font-mono">{p.wickets > 0 ? (p.ballsBowled / p.wickets).toFixed(1) : "-"}</td>
                   <td className="p-3 text-center font-mono">{p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-"}</td>
                 </tr>
               ))}
@@ -124,16 +154,25 @@ async function PlayerStatsPage() {
                 {allrounders.map((p, i) => (
                   <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                     <td className="p-3 font-medium">{i + 1}</td>
-                    <td className="p-3 font-medium">{p.name}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        {p.photo && p.photo !== "/placeholder-player.png" ? (
+                          <img src={p.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold text-[var(--accent)]">{p.name.charAt(0)}</div>
+                        )}
+                        <span className="font-medium">{p.name}</span>
+                      </div>
+                    </td>
                     <td className="p-3">
                       <div className="flex items-center gap-1.5">
-                        {p.team?.logo && <img src={p.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                        {p.team?.logo && <img src={p.team.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
                         <span className="text-[var(--muted-foreground)]">{p.team?.shortName}</span>
                       </div>
                     </td>
                     <td className="p-3 text-center">{p.matchesPlayed}</td>
                     <td className="p-3 text-center font-bold">{p.runs}</td>
-                    <td className="p-3 text-center font-bold text-green-600">{p.wickets}</td>
+                    <td className="p-3 text-center font-bold text-green-600 dark:text-green-400">{p.wickets}</td>
                   </tr>
                 ))}
               </tbody>
