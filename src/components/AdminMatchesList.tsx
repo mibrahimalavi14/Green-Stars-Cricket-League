@@ -412,50 +412,17 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs">Result (auto from innings + toss)</label>
-                <input value={autoResult()} readOnly
-                  className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
+                <label className="mb-1 block text-xs">Result</label>
+                <p className="rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]">{autoResult() || "\u00a0"}</p>
               </div>
-
-              <div className="grid gap-3 md:grid-cols-4">
-                <p className="text-sm font-semibold md:col-span-4">Innings Details <span className="text-xs font-normal text-[var(--muted-foreground)]">(auto from player stats)</span></p>
+              <div className="grid gap-3 md:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs">{m.team1.name} Runs</label>
-                  <input value={calcTeamStats(m.team1.id).runs} readOnly
-                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Wickets</label>
-                  <input value={calcTeamStats(m.team1.id).wickets} readOnly
-                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Balls (5 ov = 30)</label>
-                  <input value={calcTeamStats(m.team1.id).balls} readOnly
-                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Extras</label>
+                  <label className="mb-1 block text-xs">{m.team1.name} Extras</label>
                   <input type="number" min="0" value={form.inn1Extras} onChange={e => setForm({...form, inn1Extras: e.target.value})}
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs">{m.team2.name} Runs</label>
-                  <input value={calcTeamStats(m.team2.id).runs} readOnly
-                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Wickets</label>
-                  <input value={calcTeamStats(m.team2.id).wickets} readOnly
-                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Balls (5 ov = 30)</label>
-                  <input value={calcTeamStats(m.team2.id).balls} readOnly
-                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">Extras</label>
+                  <label className="mb-1 block text-xs">{m.team2.name} Extras</label>
                   <input type="number" min="0" value={form.inn2Extras} onChange={e => setForm({...form, inn2Extras: e.target.value})}
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
                 </div>
