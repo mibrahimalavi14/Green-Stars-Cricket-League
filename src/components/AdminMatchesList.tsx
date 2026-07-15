@@ -533,7 +533,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     <input type="number" min="0" value={form.inn1Byes} onChange={e => setForm({...form, inn1Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn1LegByes} onChange={e => setForm({...form, inn1LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                   </div>
-                  <div className="mt-1 text-center text-xs text-[var(--foreground)]">{m.team1.name}</div>
+                  <div className="mt-1 text-center text-xs font-semibold text-[var(--foreground)]">{m.team1.name}</div>
                 </fieldset>
                 <fieldset className="rounded border border-[var(--border)] p-3">
                   <legend className="px-2 text-sm font-semibold">Extras</legend>
@@ -547,7 +547,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     <input type="number" min="0" value={form.inn2Byes} onChange={e => setForm({...form, inn2Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn2LegByes} onChange={e => setForm({...form, inn2LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                   </div>
-                  <div className="mt-1 text-center text-xs text-[var(--muted)]">{m.team2.name}</div>
+                  <div className="mt-1 text-center text-xs font-semibold text-[var(--foreground)]">{m.team2.name}</div>
                 </fieldset>
               </div>
 
