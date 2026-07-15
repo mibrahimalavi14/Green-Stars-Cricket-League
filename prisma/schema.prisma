@@ -245,8 +245,5 @@ model PredictionLock {
 model Rating {
   id        String   @id @default(cuid())
   value     Int
-  ip        String
   createdAt DateTime @default(now())
-
-  @@unique([ip])
 }
