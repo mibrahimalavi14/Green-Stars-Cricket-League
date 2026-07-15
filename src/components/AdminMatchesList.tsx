@@ -524,24 +524,24 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <fieldset className="rounded border border-[var(--border)] p-3">
                   <legend className="px-2 text-sm font-semibold">Extras</legend>
                   <div className="grid grid-cols-4 gap-1 text-center text-xs">
-                    <div className="text-[var(--muted)]">Wides</div>
-                    <div className="text-[var(--muted)]">No Balls</div>
-                    <div className="text-[var(--muted)]">Byes</div>
-                    <div className="text-[var(--muted)]">Leg Byes</div>
+                    <div className="font-semibold text-[var(--foreground)]">Wides</div>
+                    <div className="font-semibold text-[var(--foreground)]">No Balls</div>
+                    <div className="font-semibold text-[var(--foreground)]">Byes</div>
+                    <div className="font-semibold text-[var(--foreground)]">Leg Byes</div>
                     <input type="number" min="0" value={form.inn1Wides} onChange={e => setForm({...form, inn1Wides: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn1NoBalls} onChange={e => setForm({...form, inn1NoBalls: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn1Byes} onChange={e => setForm({...form, inn1Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn1LegByes} onChange={e => setForm({...form, inn1LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                   </div>
-                  <div className="mt-1 text-center text-xs text-[var(--muted)]">{m.team1.name}</div>
+                  <div className="mt-1 text-center text-xs text-[var(--foreground)]">{m.team1.name}</div>
                 </fieldset>
                 <fieldset className="rounded border border-[var(--border)] p-3">
                   <legend className="px-2 text-sm font-semibold">Extras</legend>
                   <div className="grid grid-cols-4 gap-1 text-center text-xs">
-                    <div className="text-[var(--muted)]">Wides</div>
-                    <div className="text-[var(--muted)]">No Balls</div>
-                    <div className="text-[var(--muted)]">Byes</div>
-                    <div className="text-[var(--muted)]">Leg Byes</div>
+                    <div className="font-semibold text-[var(--foreground)]">Wides</div>
+                    <div className="font-semibold text-[var(--foreground)]">No Balls</div>
+                    <div className="font-semibold text-[var(--foreground)]">Byes</div>
+                    <div className="font-semibold text-[var(--foreground)]">Leg Byes</div>
                     <input type="number" min="0" value={form.inn2Wides} onChange={e => setForm({...form, inn2Wides: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn2NoBalls} onChange={e => setForm({...form, inn2NoBalls: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
                     <input type="number" min="0" value={form.inn2Byes} onChange={e => setForm({...form, inn2Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
