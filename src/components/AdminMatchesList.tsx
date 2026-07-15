@@ -144,8 +144,9 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       if (totalBalls > 0) {
         const opponentTeamId = teamId === m.team1.id ? m.team2.id : m.team1.id
         const oppBattingRuns = playersData.filter(p => p.teamId === opponentTeamId).reduce((s, p) => s + p.battingRuns, 0)
-        const oppExtras = calcFieldExtras(teamId === m.team1.id ? "inn2" : "inn1")
-        const totalConceded = oppBattingRuns + oppExtras
+        const prefix = teamId === m.team1.id ? "inn2" : "inn1"
+        const oppWideNb = (parseInt(form[`${prefix}Wides` as keyof typeof form] as string) || 0) + (parseInt(form[`${prefix}NoBalls` as keyof typeof form] as string) || 0)
+        const totalConceded = oppBattingRuns + oppWideNb
         for (const p of bowlers) {
           p.bowlingRuns = Math.round(totalConceded * (p.ballsBowled / totalBalls))
         }
