@@ -44,19 +44,19 @@ export async function recalcPointsTable(seasonId: string) {
     const team2Inning = m.innings.find(inng => inng.teamId === m.team2Id)
 
     if (team1Inning && stats[m.team1Id]) {
-      stats[m.team1Id].forRuns += team1Inning.runs
+      stats[m.team1Id].forRuns += team1Inning.runs + team1Inning.extras
       stats[m.team1Id].forBalls += team1Inning.balls
     }
     if (team2Inning && stats[m.team1Id]) {
-      stats[m.team1Id].againstRuns += team2Inning.runs
+      stats[m.team1Id].againstRuns += team2Inning.runs + team2Inning.extras
       stats[m.team1Id].againstBalls += team2Inning.balls
     }
     if (team2Inning && stats[m.team2Id]) {
-      stats[m.team2Id].forRuns += team2Inning.runs
+      stats[m.team2Id].forRuns += team2Inning.runs + team2Inning.extras
       stats[m.team2Id].forBalls += team2Inning.balls
     }
     if (team1Inning && stats[m.team2Id]) {
-      stats[m.team2Id].againstRuns += team1Inning.runs
+      stats[m.team2Id].againstRuns += team1Inning.runs + team1Inning.extras
       stats[m.team2Id].againstBalls += team1Inning.balls
     }
   }

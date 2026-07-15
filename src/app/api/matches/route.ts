@@ -6,6 +6,8 @@ export async function GET() {
     where: { status: "upcoming", date: { lte: new Date() } },
     data: { status: "live" },
   })
+  const { recalcPlayerStats } = await import("@/lib/stats")
+  await recalcPlayerStats()
   const matches = await prisma.match.findMany({
     include: { team1: true, team2: true, season: true, innings: true, performances: { include: { player: true } } },
     orderBy: { date: "asc" },
