@@ -138,21 +138,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       }))
     playersData.push(...neutralData)
 
-    for (const teamId of [m.team1.id, m.team2.id]) {
-      const bowlers = playersData.filter(p => p.teamId === teamId && p.ballsBowled > 0 && !p.bowlingRuns)
-      const totalBalls = bowlers.reduce((s, p) => s + p.ballsBowled, 0)
-      if (totalBalls > 0) {
-        const opponentTeamId = teamId === m.team1.id ? m.team2.id : m.team1.id
-        const oppBattingRuns = playersData.filter(p => p.teamId === opponentTeamId).reduce((s, p) => s + p.battingRuns, 0)
-        const prefix = teamId === m.team1.id ? "inn2" : "inn1"
-        const oppWideNb = (parseInt(form[`${prefix}Wides` as keyof typeof form] as string) || 0) + (parseInt(form[`${prefix}NoBalls` as keyof typeof form] as string) || 0)
-        const totalConceded = oppBattingRuns + oppWideNb
-        for (const p of bowlers) {
-          p.bowlingRuns = Math.round(totalConceded * (p.ballsBowled / totalBalls))
-        }
-      }
-    }
-
     let mom = ""
     if (playersData.length > 0) {
       let bestScore = -Infinity
@@ -283,7 +268,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium">Out</th>
               <th className="py-1 px-1 text-center font-medium">Dismissal</th>
               <th className="py-1 px-1 text-center font-medium" title="Bowling Wickets">Wkts</th>
-              <th className="py-1 px-1 text-center font-medium" title="Runs Conceded (auto-calculated if empty)">Runs</th>
+              <th className="py-1 px-1 text-center font-medium" title="Runs Conceded">Runs</th>
               <th className="py-1 px-1 text-center font-medium" title="Balls Bowled">Balls</th>
               <th className="py-1 px-1 text-center font-medium" title="Maidens">Mdns</th>
               <th className="py-1 px-1 text-center font-medium" title="Catches">Ct</th>
@@ -315,7 +300,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   </select>
                 </td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wkts")} onChange={e => set(p.id, "wkts", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
-                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "br")} onChange={e => set(p.id, "br", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Leave empty to auto-calculate" /></td>
+                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "br")} onChange={e => set(p.id, "br", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Runs Conceded" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "bb")} onChange={e => set(p.id, "bb", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Includes wides/no-balls" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "mdns")} onChange={e => set(p.id, "mdns", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "ct")} onChange={e => set(p.id, "ct", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
