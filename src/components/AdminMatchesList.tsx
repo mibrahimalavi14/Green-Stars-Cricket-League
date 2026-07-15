@@ -24,7 +24,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const [form, setForm] = useState({
     team1Score: "", team2Score: "", result: "",
     tossWinner: "", tossDecision: "", venue: "",
-    inn1Extras: "", inn2Extras: "",
+    inn1Wides: "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
+    inn2Wides: "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
   })
   const [stats, setStats] = useState<Record<string, Record<string, string>>>({})
   const [neutralFielders, setNeutralFielders] = useState<{ playerId: string; ct: string; st: string; ro: string; wk: boolean }[]>([])
@@ -43,8 +44,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "",
       tossWinner: m.tossWinner || "", tossDecision: m.tossDecision || "",
       venue: m.venue || "",
-      inn1Extras: inn1?.extras?.toString() || "",
-      inn2Extras: inn2?.extras?.toString() || "",
+      inn1Wides: inn1?.extras?.toString() || "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
+      inn2Wides: inn2?.extras?.toString() || "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
     })
     setStats({})
     setSavedInnings(m.innings || [])
@@ -65,6 +66,13 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       if (saved) return { runs: saved.runs, wickets: saved.wickets, balls: saved.balls }
     }
     return { runs, wickets, balls: liveBalls }
+  }
+
+  function calcFieldExtras(prefix: string) {
+    return (parseInt(form[`${prefix}Wides` as keyof typeof form] as string) || 0) +
+      (parseInt(form[`${prefix}NoBalls` as keyof typeof form] as string) || 0) +
+      (parseInt(form[`${prefix}Byes` as keyof typeof form] as string) || 0) +
+      (parseInt(form[`${prefix}LegByes` as keyof typeof form] as string) || 0)
   }
 
   function s(playerId: string, field: string) {
@@ -130,14 +138,13 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       }))
     playersData.push(...neutralData)
 
-    // Auto-calculate bowling runs
     for (const teamId of [m.team1.id, m.team2.id]) {
-      const bowlers = playersData.filter(p => p.teamId === teamId && p.ballsBowled > 0)
+      const bowlers = playersData.filter(p => p.teamId === teamId && p.ballsBowled > 0 && !p.bowlingRuns)
       const totalBalls = bowlers.reduce((s, p) => s + p.ballsBowled, 0)
       if (totalBalls > 0) {
         const opponentTeamId = teamId === m.team1.id ? m.team2.id : m.team1.id
         const oppBattingRuns = playersData.filter(p => p.teamId === opponentTeamId).reduce((s, p) => s + p.battingRuns, 0)
-        const oppExtras = parseInt(teamId === m.team1.id ? form.inn2Extras : form.inn1Extras) || 0
+        const oppExtras = calcFieldExtras(teamId === m.team1.id ? "inn2" : "inn1")
         const totalConceded = oppBattingRuns + oppExtras
         for (const p of bowlers) {
           p.bowlingRuns = Math.round(totalConceded * (p.ballsBowled / totalBalls))
@@ -163,8 +170,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     const team2Stats = calcTeamStats(m.team2.id)
     const s1Runs = team1Stats.runs
     const s2Runs = team2Stats.runs
-    const s1Extras = parseInt(form.inn1Extras) || 0
-    const s2Extras = parseInt(form.inn2Extras) || 0
+    const s1Extras = calcFieldExtras("inn1")
+    const s2Extras = calcFieldExtras("inn2")
     const s1Total = s1Runs + s1Extras
     const s2Total = s2Runs + s2Extras
     const s1Wkts = team1Stats.wickets
@@ -241,7 +248,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setForm({
       team1Score: "", team2Score: "", result: "",
       tossWinner: "", tossDecision: "", venue: "",
-      inn1Extras: "", inn2Extras: "",
+      inn1Wides: "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
+      inn2Wides: "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
     })
     setSuperOver({ t1Runs: "", t1Wkts: "", t2Runs: "", t2Wkts: "" })
     router.refresh()
@@ -274,6 +282,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium">Out</th>
               <th className="py-1 px-1 text-center font-medium">Dismissal</th>
               <th className="py-1 px-1 text-center font-medium" title="Bowling Wickets">Wkts</th>
+              <th className="py-1 px-1 text-center font-medium" title="Runs Conceded (auto-calculated if empty)">Runs</th>
               <th className="py-1 px-1 text-center font-medium" title="Balls Bowled">Balls</th>
               <th className="py-1 px-1 text-center font-medium" title="Maidens">Mdns</th>
               <th className="py-1 px-1 text-center font-medium" title="Catches">Ct</th>
@@ -305,6 +314,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   </select>
                 </td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wkts")} onChange={e => set(p.id, "wkts", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
+                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "br")} onChange={e => set(p.id, "br", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Leave empty to auto-calculate" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "bb")} onChange={e => set(p.id, "bb", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Includes wides/no-balls" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "mdns")} onChange={e => set(p.id, "mdns", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "ct")} onChange={e => set(p.id, "ct", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
@@ -339,8 +349,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
           const t2Stats = calcTeamStats(m.team2.id)
           const t1Runs = t1Stats.runs
           const t2Runs = t2Stats.runs
-          const t1Extras = parseInt(form.inn1Extras) || 0
-          const t2Extras = parseInt(form.inn2Extras) || 0
+          const t1Extras = calcFieldExtras("inn1")
+          const t2Extras = calcFieldExtras("inn2")
           const t1Total = t1Runs + t1Extras
           const t2Total = t2Runs + t2Extras
           const t1Wkts = t1Stats.wickets
@@ -458,7 +468,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <div className="grid gap-3 md:grid-cols-2">
                 {[m.team1, m.team2].map(t => {
                   const st = calcTeamStats(t.id)
-                  const extras = parseInt(t.id === m.team1.id ? form.inn1Extras : form.inn2Extras) || 0
+                  const extras = calcFieldExtras(t.id === m.team1.id ? "inn1" : "inn2")
                   const total = st.runs + extras
                   return (
                     <div key={t.id} className="rounded border border-[var(--border)] bg-[var(--muted)] p-2">
@@ -476,7 +486,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 {form.tossWinner && form.tossDecision && (() => {
                   const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
                   const firstTeam = t1BattingFirst ? m.team1 : m.team2
-                  const firstTotal = calcTeamStats(firstTeam.id).runs + (parseInt(firstTeam.id === m.team1.id ? form.inn1Extras : form.inn2Extras) || 0)
+                  const firstTotal = calcTeamStats(firstTeam.id).runs + calcFieldExtras(firstTeam.id === m.team1.id ? "inn1" : "inn2")
                   const secondTeam = t1BattingFirst ? m.team2 : m.team1
                   return (
                     <div className="col-span-2 text-xs text-center">
@@ -511,16 +521,34 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     </div>
                   </div>
                 )}
-                <div>
-                  <label className="mb-1 block text-xs">{m.team1.name} Extras</label>
-                  <input type="number" min="0" value={form.inn1Extras} onChange={e => setForm({...form, inn1Extras: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs">{m.team2.name} Extras</label>
-                  <input type="number" min="0" value={form.inn2Extras} onChange={e => setForm({...form, inn2Extras: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
-                </div>
+                <fieldset className="rounded border border-[var(--border)] p-3">
+                  <legend className="px-2 text-sm font-semibold">Extras</legend>
+                  <div className="grid grid-cols-4 gap-1 text-center text-xs">
+                    <div className="text-[var(--muted)]">Wides</div>
+                    <div className="text-[var(--muted)]">No Balls</div>
+                    <div className="text-[var(--muted)]">Byes</div>
+                    <div className="text-[var(--muted)]">Leg Byes</div>
+                    <input type="number" min="0" value={form.inn1Wides} onChange={e => setForm({...form, inn1Wides: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                    <input type="number" min="0" value={form.inn1NoBalls} onChange={e => setForm({...form, inn1NoBalls: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                    <input type="number" min="0" value={form.inn1Byes} onChange={e => setForm({...form, inn1Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                    <input type="number" min="0" value={form.inn1LegByes} onChange={e => setForm({...form, inn1LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                  </div>
+                  <div className="mt-1 text-center text-xs text-[var(--muted)]">{m.team1.name}</div>
+                </fieldset>
+                <fieldset className="rounded border border-[var(--border)] p-3">
+                  <legend className="px-2 text-sm font-semibold">Extras</legend>
+                  <div className="grid grid-cols-4 gap-1 text-center text-xs">
+                    <div className="text-[var(--muted)]">Wides</div>
+                    <div className="text-[var(--muted)]">No Balls</div>
+                    <div className="text-[var(--muted)]">Byes</div>
+                    <div className="text-[var(--muted)]">Leg Byes</div>
+                    <input type="number" min="0" value={form.inn2Wides} onChange={e => setForm({...form, inn2Wides: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                    <input type="number" min="0" value={form.inn2NoBalls} onChange={e => setForm({...form, inn2NoBalls: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                    <input type="number" min="0" value={form.inn2Byes} onChange={e => setForm({...form, inn2Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                    <input type="number" min="0" value={form.inn2LegByes} onChange={e => setForm({...form, inn2LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                  </div>
+                  <div className="mt-1 text-center text-xs text-[var(--muted)]">{m.team2.name}</div>
+                </fieldset>
               </div>
 
               {team1Players.length > 0 && (
