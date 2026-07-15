@@ -28,6 +28,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   })
   const [stats, setStats] = useState<Record<string, Record<string, string>>>({})
   const [neutralFielders, setNeutralFielders] = useState<{ playerId: string; ct: string; st: string; ro: string; wk: boolean }[]>([])
+  const [savedInnings, setSavedInnings] = useState<{ teamId: string; runs: number; wickets: number; balls: number; extras: number }[]>([])
 
   useEffect(() => {
     fetch("/api/players").then(r => r.json()).then(setAllPlayers)
@@ -45,6 +46,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       inn2Extras: inn2?.extras?.toString() || "",
     })
     setStats({})
+    setSavedInnings(m.innings || [])
     const others = allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id)
     setNeutralFielders(others.map((p, i) => ({ playerId: p.id, ct: "", st: "", ro: "", wk: i === 0 })))
   }
@@ -55,7 +57,12 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     const wickets = players.reduce((sum, p) => sum + (parseInt(s(p.id, "wkts")) || 0), 0)
     const ballsFaced = players.reduce((sum, p) => sum + (parseInt(s(p.id, "bf")) || 0), 0)
     const ballsBowled = players.reduce((sum, p) => sum + (parseInt(s(p.id, "bb")) || 0), 0)
-    return { runs, wickets, balls: Math.max(ballsFaced, ballsBowled) }
+    const liveBalls = Math.max(ballsFaced, ballsBowled)
+    if (liveBalls === 0 && savedInnings.length > 0) {
+      const saved = savedInnings.find(i => i.teamId === teamId)
+      if (saved) return { runs: saved.runs, wickets: saved.wickets, balls: saved.balls }
+    }
+    return { runs, wickets, balls: liveBalls }
   }
 
   function s(playerId: string, field: string) {
