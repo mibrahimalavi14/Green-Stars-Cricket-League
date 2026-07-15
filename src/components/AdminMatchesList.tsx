@@ -423,14 +423,34 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <p className="rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]">{autoResult() || "\u00a0"}</p>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded border border-[var(--border)] bg-[var(--muted)] p-2 text-xs">
-                  <p className="font-semibold">{m.team1.name}</p>
-                  <p>Runs: {calcTeamStats(m.team1.id).runs} &middot; Wkts: {calcTeamStats(m.team1.id).wickets} &middot; Balls: {calcTeamStats(m.team1.id).balls}</p>
-                </div>
-                <div className="rounded border border-[var(--border)] bg-[var(--muted)] p-2 text-xs">
-                  <p className="font-semibold">{m.team2.name}</p>
-                  <p>Runs: {calcTeamStats(m.team2.id).runs} &middot; Wkts: {calcTeamStats(m.team2.id).wickets} &middot; Balls: {calcTeamStats(m.team2.id).balls}</p>
-                </div>
+                {[m.team1, m.team2].map(t => {
+                  const st = calcTeamStats(t.id)
+                  const extras = parseInt(t.id === m.team1.id ? form.inn1Extras : form.inn2Extras) || 0
+                  const total = st.runs + extras
+                  return (
+                    <div key={t.id} className="rounded border border-[var(--border)] bg-[var(--muted)] p-2">
+                      <p className="mb-1 font-semibold text-sm">{t.name}</p>
+                      <div className="grid grid-cols-5 gap-1 text-xs text-center">
+                        <div><p className="text-[var(--muted-foreground)]">Runs</p><p className="font-medium">{st.runs}</p></div>
+                        <div><p className="text-[var(--muted-foreground)]">Wkts</p><p className="font-medium">{st.wickets}</p></div>
+                        <div><p className="text-[var(--muted-foreground)]">Overs</p><p className="font-medium">{st.balls ? `${Math.floor(st.balls / 6)}.${st.balls % 6}` : "0.0"}</p></div>
+                        <div><p className="text-[var(--muted-foreground)]">Extras</p><p className="font-medium">{extras}</p></div>
+                        <div><p className="text-[var(--muted-foreground)]">Total</p><p className="font-medium">{total}</p></div>
+                      </div>
+                    </div>
+                  )
+                })}
+                {form.tossWinner && form.tossDecision && (() => {
+                  const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
+                  const firstTeam = t1BattingFirst ? m.team1 : m.team2
+                  const firstTotal = calcTeamStats(firstTeam.id).runs + (parseInt(firstTeam.id === m.team1.id ? form.inn1Extras : form.inn2Extras) || 0)
+                  const secondTeam = t1BattingFirst ? m.team2 : m.team1
+                  return (
+                    <div className="col-span-2 text-xs text-center">
+                      <span className="font-medium">{secondTeam.name} need <strong>{firstTotal + 1}</strong> runs to win</span>
+                    </div>
+                  )
+                })()}
                 <div>
                   <label className="mb-1 block text-xs">{m.team1.name} Extras</label>
                   <input type="number" min="0" value={form.inn1Extras} onChange={e => setForm({...form, inn1Extras: e.target.value})}
