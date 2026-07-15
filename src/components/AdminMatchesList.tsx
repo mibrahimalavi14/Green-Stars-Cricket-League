@@ -239,21 +239,21 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
           <thead>
             <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
               <th className="py-1 pr-2 text-left font-medium">Player</th>
-              <th className="py-1 px-1 text-center font-medium">Runs</th>
-              <th className="py-1 px-1 text-center font-medium">Balls</th>
-              <th className="py-1 px-1 text-center font-medium">4s</th>
-              <th className="py-1 px-1 text-center font-medium">6s</th>
-              <th className="py-1 px-1 text-center font-medium">1s</th>
-              <th className="py-1 px-1 text-center font-medium">2s</th>
+              <th className="py-1 px-1 text-center font-medium" title="Batting Runs">Runs</th>
+              <th className="py-1 px-1 text-center font-medium" title="Balls Faced">Balls</th>
+              <th className="py-1 px-1 text-center font-medium" title="Fours">4s</th>
+              <th className="py-1 px-1 text-center font-medium" title="Sixes">6s</th>
+              <th className="py-1 px-1 text-center font-medium" title="Ones (1 run)">1s</th>
+              <th className="py-1 px-1 text-center font-medium" title="Twos (2 runs)">2s</th>
               <th className="py-1 px-1 text-center font-medium">Out</th>
               <th className="py-1 px-1 text-center font-medium">Dismissal</th>
-              <th className="py-1 px-1 text-center font-medium">Wkts</th>
-              <th className="py-1 px-1 text-center font-medium">Runs</th>
-              <th className="py-1 px-1 text-center font-medium">Balls</th>
-              <th className="py-1 px-1 text-center font-medium">Mdns</th>
-              <th className="py-1 px-1 text-center font-medium">Ct</th>
-              <th className="py-1 px-1 text-center font-medium">St</th>
-              <th className="py-1 px-1 text-center font-medium">RO</th>
+              <th className="py-1 px-1 text-center font-medium" title="Bowling Wickets">Wkts</th>
+              <th className="py-1 px-1 text-center font-medium" title="Runs Conceded">Runs</th>
+              <th className="py-1 px-1 text-center font-medium" title="Balls Bowled">Balls</th>
+              <th className="py-1 px-1 text-center font-medium" title="Maidens">Mdns</th>
+              <th className="py-1 px-1 text-center font-medium" title="Catches">Ct</th>
+              <th className="py-1 px-1 text-center font-medium" title="Stumpings">St</th>
+              <th className="py-1 px-1 text-center font-medium" title="Run Outs">RO</th>
             </tr>
           </thead>
           <tbody>
@@ -268,15 +268,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "2s")} onChange={e => set(p.id, "2s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1 text-center"><input type="checkbox" checked={s(p.id, "out") === "1"} onChange={() => toggleOut(p.id)} className="h-3 w-3" /></td>
                 <td className="py-1 px-1">
-                  <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                  <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-16 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                     <option value="">-</option>
-                    <option value="bowled">b</option>
-                    <option value="caught">c</option>
-                    <option value="lbw">lbw</option>
-                    <option value="stumped">st</option>
-                    <option value="run out">ro</option>
-                    <option value="retired">rt</option>
-                    <option value="hit wicket">hw</option>
+                    <option value="bowled">Bowled</option>
+                    <option value="caught">Caught</option>
+                    <option value="lbw">LBW</option>
+                    <option value="stumped">Stumped</option>
+                    <option value="run out">Run Out</option>
+                    <option value="retired">Retired</option>
+                    <option value="hit wicket">Hit Wkt</option>
                   </select>
                 </td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wkts")} onChange={e => set(p.id, "wkts", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
@@ -503,15 +503,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                           const n = [...neutralFielders]; n[idx].wk = e.target.checked;
                           if (e.target.checked) n.forEach((x, j) => { if (j !== idx) x.wk = false })
                           setNeutralFielders(n)
-                        }} className="h-3 w-3" /> WK
+                        }} className="h-3 w-3" title="Wicket Keeper" /> WK
                       </label>
-                      <label className="text-[10px]">Ct</label>
+                      <label className="text-[10px]" title="Catches">Ct</label>
                       <input type="number" min="0" value={nf.ct} onChange={e => { const n = [...neutralFielders]; n[idx].ct = e.target.value; setNeutralFielders(n) }}
                         className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
-                      <label className="text-[10px]">St</label>
+                      <label className="text-[10px]" title="Stumpings">St</label>
                       <input type="number" min="0" value={nf.st} onChange={e => { const n = [...neutralFielders]; n[idx].st = e.target.value; setNeutralFielders(n) }}
                         className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
-                      <label className="text-[10px]">RO</label>
+                      <label className="text-[10px]" title="Run Outs">RO</label>
                       <input type="number" min="0" value={nf.ro} onChange={e => { const n = [...neutralFielders]; n[idx].ro = e.target.value; setNeutralFielders(n) }}
                         className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
                       <button onClick={() => setNeutralFielders(neutralFielders.filter((_, j) => j !== idx))} className="text-red-500 text-xs">✕</button>
