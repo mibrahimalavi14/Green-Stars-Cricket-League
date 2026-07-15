@@ -29,6 +29,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const [stats, setStats] = useState<Record<string, Record<string, string>>>({})
   const [neutralFielders, setNeutralFielders] = useState<{ playerId: string; ct: string; st: string; ro: string; wk: boolean }[]>([])
   const [savedInnings, setSavedInnings] = useState<{ teamId: string; runs: number; wickets: number; balls: number; extras: number }[]>([])
+  const [superOver, setSuperOver] = useState({ t1Runs: "", t1Wkts: "", t2Runs: "", t2Wkts: "" })
 
   useEffect(() => {
     fetch("/api/players").then(r => r.json()).then(setAllPlayers)
@@ -47,6 +48,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     })
     setStats({})
     setSavedInnings(m.innings || [])
+    setSuperOver({ t1Runs: "", t1Wkts: "", t2Runs: "", t2Wkts: "" })
     const others = allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id)
     setNeutralFielders(others.map((p, i) => ({ playerId: p.id, ct: "", st: "", ro: "", wk: i === 0 })))
   }
@@ -156,7 +158,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
       const t2BattingFirst = !t1BattingFirst
       if (s1Total === s2Total) {
-        result = "Match Tied"
+        const so1Runs = parseInt(superOver.t1Runs) || 0
+        const so2Runs = parseInt(superOver.t2Runs) || 0
+        if (so1Runs || so2Runs) {
+          if (so1Runs > so2Runs) result = `${m.team1.name} won the Super Over`
+          else if (so2Runs > so1Runs) result = `${m.team2.name} won the Super Over`
+          else result = "Super Over tied again"
+        } else {
+          result = "Match Tied"
+        }
       } else if (s1Total > s2Total) {
         if (t1BattingFirst) {
           const diff = s1Total - s2Total
@@ -218,6 +228,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       tossWinner: "", tossDecision: "", venue: "",
       inn1Extras: "", inn2Extras: "",
     })
+    setSuperOver({ t1Runs: "", t1Wkts: "", t2Runs: "", t2Wkts: "" })
     router.refresh()
   }
 
@@ -261,7 +272,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <tr key={p.id} className="border-b border-[var(--border)] hover:bg-[var(--background)]">
                 <td className="py-1 pr-2 text-left font-medium">{p.name}</td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "runs")} onChange={e => set(p.id, "runs", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
-                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "bf")} onChange={e => set(p.id, "bf", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
+                <td className="py-1 px-1"><input type="number" min="0" max="30" value={s(p.id, "bf")} onChange={e => set(p.id, "bf", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Max 30 (5 overs)" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "4s")} onChange={e => set(p.id, "4s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "6s")} onChange={e => set(p.id, "6s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "1s")} onChange={e => set(p.id, "1s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
@@ -281,7 +292,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 </td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wkts")} onChange={e => set(p.id, "wkts", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "br")} onChange={e => set(p.id, "br", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
-                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "bb")} onChange={e => set(p.id, "bb", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
+                <td className="py-1 px-1"><input type="number" min="0" max="30" value={s(p.id, "bb")} onChange={e => set(p.id, "bb", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Max 30 (5 overs)" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "mdns")} onChange={e => set(p.id, "mdns", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "ct")} onChange={e => set(p.id, "ct", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "st")} onChange={e => set(p.id, "st", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
@@ -325,7 +336,16 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
           if (!form.tossWinner || !form.tossDecision) return ""
           const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
           const t2BattingFirst = !t1BattingFirst
-          if (t1Total === t2Total) return "Match Tied"
+          if (t1Total === t2Total) {
+            const so1Runs = parseInt(superOver.t1Runs) || 0
+            const so2Runs = parseInt(superOver.t2Runs) || 0
+            if (so1Runs || so2Runs) {
+              const soWinner = so1Runs > so2Runs ? m.team1.name : so2Runs > so1Runs ? m.team2.name : ""
+              if (soWinner) return `Match Tied (${soWinner} won the Super Over${so1Runs === so2Runs ? " (tied again)" : ""})`
+              return "Match Tied (Super Over tied again - add another)"
+            }
+            return "Match Tied"
+          }
           if (t1Total > t2Total) {
             if (t1BattingFirst) {
               const diff = t1Total - t2Total
@@ -451,6 +471,33 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     </div>
                   )
                 })()}
+                {autoResult() === "Match Tied" && (
+                  <div className="col-span-2 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-700/40 dark:bg-amber-900/10">
+                    <p className="mb-2 text-xs font-semibold text-amber-700 dark:text-amber-400">Super Over</p>
+                    <div className="grid gap-2 md:grid-cols-4">
+                      <div>
+                        <label className="mb-1 block text-xs">{m.team1.name} Runs</label>
+                        <input type="number" min="0" value={superOver.t1Runs} onChange={e => setSuperOver({...superOver, t1Runs: e.target.value})}
+                          className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs">Wickets</label>
+                        <input type="number" min="0" max="2" value={superOver.t1Wkts} onChange={e => setSuperOver({...superOver, t1Wkts: e.target.value})}
+                          className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs">{m.team2.name} Runs</label>
+                        <input type="number" min="0" value={superOver.t2Runs} onChange={e => setSuperOver({...superOver, t2Runs: e.target.value})}
+                          className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs">Wickets</label>
+                        <input type="number" min="0" max="2" value={superOver.t2Wkts} onChange={e => setSuperOver({...superOver, t2Wkts: e.target.value})}
+                          className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="mb-1 block text-xs">{m.team1.name} Extras</label>
                   <input type="number" min="0" value={form.inn1Extras} onChange={e => setForm({...form, inn1Extras: e.target.value})}
