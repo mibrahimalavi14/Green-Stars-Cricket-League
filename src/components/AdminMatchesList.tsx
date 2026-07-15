@@ -416,6 +416,14 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <p className="rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]">{autoResult() || "\u00a0"}</p>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded border border-[var(--border)] bg-[var(--muted)] p-2 text-xs">
+                  <p className="font-semibold">{m.team1.name}</p>
+                  <p>Runs: {calcTeamStats(m.team1.id).runs} &middot; Wkts: {calcTeamStats(m.team1.id).wickets} &middot; Balls: {calcTeamStats(m.team1.id).balls}</p>
+                </div>
+                <div className="rounded border border-[var(--border)] bg-[var(--muted)] p-2 text-xs">
+                  <p className="font-semibold">{m.team2.name}</p>
+                  <p>Runs: {calcTeamStats(m.team2.id).runs} &middot; Wkts: {calcTeamStats(m.team2.id).wickets} &middot; Balls: {calcTeamStats(m.team2.id).balls}</p>
+                </div>
                 <div>
                   <label className="mb-1 block text-xs">{m.team1.name} Extras</label>
                   <input type="number" min="0" value={form.inn1Extras} onChange={e => setForm({...form, inn1Extras: e.target.value})}
