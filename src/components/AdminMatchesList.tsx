@@ -24,8 +24,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const [form, setForm] = useState({
     team1Score: "", team2Score: "", result: "",
     tossWinner: "", tossDecision: "", venue: "",
-    inn1Runs: "", inn1Wkts: "", inn1Balls: "", inn1Extras: "",
-    inn2Runs: "", inn2Wkts: "", inn2Balls: "", inn2Extras: "",
+    inn1Extras: "", inn2Extras: "",
   })
   const [stats, setStats] = useState<Record<string, Record<string, string>>>({})
   const [neutralFielders, setNeutralFielders] = useState<{ playerId: string; ct: string; st: string; ro: string; wk: boolean }[]>([])
@@ -42,16 +41,21 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "",
       tossWinner: m.tossWinner || "", tossDecision: m.tossDecision || "",
       venue: m.venue || "",
-      inn1Runs: inn1?.runs?.toString() || (!inn1 && m.team1Score ? m.team1Score.split("/")[0] : ""),
-      inn1Wkts: inn1?.wickets?.toString() || (!inn1 && m.team1Score ? m.team1Score.split("/")[1] || "" : ""),
-      inn1Balls: inn1?.balls?.toString() || "", inn1Extras: inn1?.extras?.toString() || "",
-      inn2Runs: inn2?.runs?.toString() || (!inn2 && m.team2Score ? m.team2Score.split("/")[0] : ""),
-      inn2Wkts: inn2?.wickets?.toString() || (!inn2 && m.team2Score ? m.team2Score.split("/")[1] || "" : ""),
-      inn2Balls: inn2?.balls?.toString() || "", inn2Extras: inn2?.extras?.toString() || "",
+      inn1Extras: inn1?.extras?.toString() || "",
+      inn2Extras: inn2?.extras?.toString() || "",
     })
     setStats({})
     const others = allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id)
     setNeutralFielders(others.map((p, i) => ({ playerId: p.id, ct: "", st: "", ro: "", wk: i === 0 })))
+  }
+
+  function calcTeamStats(teamId: string) {
+    const players = allPlayers.filter(p => p.teamId === teamId)
+    const runs = players.reduce((sum, p) => sum + (parseInt(s(p.id, "runs")) || 0), 0)
+    const wickets = players.reduce((sum, p) => sum + (parseInt(s(p.id, "wkts")) || 0), 0)
+    const ballsFaced = players.reduce((sum, p) => sum + (parseInt(s(p.id, "bf")) || 0), 0)
+    const ballsBowled = players.reduce((sum, p) => sum + (parseInt(s(p.id, "bb")) || 0), 0)
+    return { runs, wickets, balls: Math.max(ballsFaced, ballsBowled) }
   }
 
   function s(playerId: string, field: string) {
@@ -131,14 +135,16 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     }
 
     let result = ""
-    const s1Runs = parseInt(form.inn1Runs) || 0
-    const s2Runs = parseInt(form.inn2Runs) || 0
+    const team1Stats = calcTeamStats(m.team1.id)
+    const team2Stats = calcTeamStats(m.team2.id)
+    const s1Runs = team1Stats.runs
+    const s2Runs = team2Stats.runs
     const s1Extras = parseInt(form.inn1Extras) || 0
     const s2Extras = parseInt(form.inn2Extras) || 0
     const s1Total = s1Runs + s1Extras
     const s2Total = s2Runs + s2Extras
-    const s1Wkts = form.inn1Wkts !== "" ? parseInt(form.inn1Wkts) ?? 0 : null
-    const s2Wkts = form.inn2Wkts !== "" ? parseInt(form.inn2Wkts) ?? 0 : null
+    const s1Wkts = team1Stats.wickets
+    const s2Wkts = team2Stats.wickets
     if ((s1Runs || s2Runs || s1Extras || s2Extras) && form.tossWinner && form.tossDecision) {
       const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
       const t2BattingFirst = !t1BattingFirst
@@ -148,7 +154,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         if (t1BattingFirst) {
           const diff = s1Total - s2Total
           result = `${m.team1.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
-        } else if (t2BattingFirst && s1Wkts !== null) {
+        } else {
           const wktsLeft = 2 - s1Wkts
           result = `${m.team1.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
         }
@@ -156,19 +162,21 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         if (t2BattingFirst) {
           const diff = s2Total - s1Total
           result = `${m.team2.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
-        } else if (t1BattingFirst && s2Wkts !== null) {
+        } else {
           const wktsLeft = 2 - s2Wkts
           result = `${m.team2.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
         }
       }
     }
+    const t1Balls = team1Stats.balls
+    const t2Balls = team2Stats.balls
     await fetch("/api/matches", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id, status: "completed",
-        team1Score: `${s1Total}/${s1Wkts !== null ? s1Wkts : 0}${form.inn1Balls ? ` (${Math.floor(parseInt(form.inn1Balls) / 6)}.${parseInt(form.inn1Balls) % 6})` : ""}`,
-        team2Score: `${s2Total}/${s2Wkts !== null ? s2Wkts : 0}${form.inn2Balls ? ` (${Math.floor(parseInt(form.inn2Balls) / 6)}.${parseInt(form.inn2Balls) % 6})` : ""}`,
+        team1Score: `${s1Total}/${s1Wkts}${t1Balls ? ` (${Math.floor(t1Balls / 6)}.${t1Balls % 6})` : ""}`,
+        team2Score: `${s2Total}/${s2Wkts}${t2Balls ? ` (${Math.floor(t2Balls / 6)}.${t2Balls % 6})` : ""}`,
         result,
         tossWinner: form.tossWinner, tossDecision: form.tossDecision,
         manOfMatch: mom, venue: form.venue,
@@ -183,15 +191,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       })
     }
 
-    if (form.inn1Runs || form.inn2Runs) {
+    if (s1Runs || s2Runs) {
       await fetch("/api/innings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           matchId: id,
           innings: [
-            { teamId: m.team1.id, runs: parseInt(form.inn1Runs) || 0, wickets: parseInt(form.inn1Wkts) || 0, balls: parseInt(form.inn1Balls) || 0, extras: parseInt(form.inn1Extras) || 0 },
-            { teamId: m.team2.id, runs: parseInt(form.inn2Runs) || 0, wickets: parseInt(form.inn2Wkts) || 0, balls: parseInt(form.inn2Balls) || 0, extras: parseInt(form.inn2Extras) || 0 },
+            { teamId: m.team1.id, runs: s1Runs, wickets: s1Wkts, balls: t1Balls, extras: s1Extras },
+            { teamId: m.team2.id, runs: s2Runs, wickets: s2Wkts, balls: t2Balls, extras: s2Extras },
           ],
         }),
       })
@@ -201,8 +209,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setForm({
       team1Score: "", team2Score: "", result: "",
       tossWinner: "", tossDecision: "", venue: "",
-      inn1Runs: "", inn1Wkts: "", inn1Balls: "", inn1Extras: "",
-      inn2Runs: "", inn2Wkts: "", inn2Balls: "", inn2Extras: "",
+      inn1Extras: "", inn2Extras: "",
     })
     router.refresh()
   }
@@ -297,15 +304,17 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)
         const team2Players = allPlayers.filter(p => p.teamId === m.team2.id)
         function autoResult() {
-          const t1Runs = parseInt(form.inn1Runs) || 0
-          const t2Runs = parseInt(form.inn2Runs) || 0
+          const t1Stats = calcTeamStats(m.team1.id)
+          const t2Stats = calcTeamStats(m.team2.id)
+          const t1Runs = t1Stats.runs
+          const t2Runs = t2Stats.runs
           const t1Extras = parseInt(form.inn1Extras) || 0
           const t2Extras = parseInt(form.inn2Extras) || 0
           const t1Total = t1Runs + t1Extras
           const t2Total = t2Runs + t2Extras
-          const t1Wkts = form.inn1Wkts !== "" ? parseInt(form.inn1Wkts) ?? 0 : null
-          const t2Wkts = form.inn2Wkts !== "" ? parseInt(form.inn2Wkts) ?? 0 : null
-          if (!t1Runs && !t2Runs && !t1Extras && !t2Extras && !form.inn1Wkts && !form.inn2Wkts) return ""
+          const t1Wkts = t1Stats.wickets
+          const t2Wkts = t2Stats.wickets
+          if (!t1Runs && !t2Runs && !t1Extras && !t2Extras) return ""
           if (!form.tossWinner || !form.tossDecision) return ""
           const t1BattingFirst = form.tossDecision === "bat" ? form.tossWinner === m.team1.id : form.tossWinner === m.team2.id
           const t2BattingFirst = !t1BattingFirst
@@ -314,7 +323,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
             if (t1BattingFirst) {
               const diff = t1Total - t2Total
               return `${m.team1.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
-            } else if (t2BattingFirst && t1Wkts !== null) {
+            } else {
               const wktsLeft = 2 - t1Wkts
               return `${m.team1.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
             }
@@ -322,7 +331,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
             if (t2BattingFirst) {
               const diff = t2Total - t1Total
               return `${m.team2.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
-            } else if (t1BattingFirst && t2Wkts !== null) {
+            } else {
               const wktsLeft = 2 - t2Wkts
               return `${m.team2.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
             }
@@ -409,21 +418,21 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               </div>
 
               <div className="grid gap-3 md:grid-cols-4">
-                <p className="text-sm font-semibold md:col-span-4">Innings Details</p>
+                <p className="text-sm font-semibold md:col-span-4">Innings Details <span className="text-xs font-normal text-[var(--muted-foreground)]">(auto from player stats)</span></p>
                 <div>
                   <label className="mb-1 block text-xs">{m.team1.name} Runs</label>
-                  <input type="number" min="0" value={form.inn1Runs} onChange={e => setForm({...form, inn1Runs: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                  <input value={calcTeamStats(m.team1.id).runs} readOnly
+                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Wickets</label>
-                  <input type="number" min="0" max="10" value={form.inn1Wkts} onChange={e => setForm({...form, inn1Wkts: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                  <input value={calcTeamStats(m.team1.id).wickets} readOnly
+                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Balls (5 ov = 30)</label>
-                  <input type="number" min="0" value={form.inn1Balls} onChange={e => setForm({...form, inn1Balls: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="30" />
+                  <input value={calcTeamStats(m.team1.id).balls} readOnly
+                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Extras</label>
@@ -432,18 +441,18 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">{m.team2.name} Runs</label>
-                  <input type="number" min="0" value={form.inn2Runs} onChange={e => setForm({...form, inn2Runs: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                  <input value={calcTeamStats(m.team2.id).runs} readOnly
+                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Wickets</label>
-                  <input type="number" min="0" max="10" value={form.inn2Wkts} onChange={e => setForm({...form, inn2Wkts: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                  <input value={calcTeamStats(m.team2.id).wickets} readOnly
+                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Balls (5 ov = 30)</label>
-                  <input type="number" min="0" value={form.inn2Balls} onChange={e => setForm({...form, inn2Balls: e.target.value})}
-                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" placeholder="30" />
+                  <input value={calcTeamStats(m.team2.id).balls} readOnly
+                    className="w-full rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs">Extras</label>
