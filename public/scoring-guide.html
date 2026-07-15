@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scoring Guide - Green Stars Cricket League</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 16px; line-height: 1.6; }
+  h1 { font-size: 22px; margin-bottom: 4px; color: #f97316; }
+  .subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+  h2 { font-size: 16px; margin: 20px 0 10px; color: #fbbf24; border-right: 3px solid #f97316; padding-right: 8px; }
+  h3 { font-size: 14px; margin: 14px 0 6px; color: #38bdf8; }
+  .step { background: #1e293b; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid #334155; }
+  .step-num { display: inline-block; background: #f97316; color: #fff; border-radius: 50%; width: 24px; height: 24px; text-align: center; font-size: 13px; line-height: 24px; font-weight: bold; margin-left: 6px; }
+  .label { color: #94a3b8; font-size: 11px; display: block; margin-top: 8px; }
+  .box { background: #0f172a; border-radius: 8px; padding: 10px; margin: 6px 0; border: 1px solid #334155; }
+  .highlight { color: #4ade80; font-weight: 600; }
+  .warn { color: #fb923c; }
+  .note { background: #1e293b; border-right: 3px solid #38bdf8; padding: 8px 10px; margin: 8px 0; font-size: 13px; border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+  th { background: #334155; padding: 6px; text-align: center; font-weight: 600; color: #94a3b8; }
+  td { padding: 6px; text-align: center; border-bottom: 1px solid #1e293b; }
+  .col-bat { color: #4ade80; }
+  .col-ball { color: #38bdf8; }
+  .col-field { color: #c084fc; }
+  .col-team { color: #f97316; }
+  .footer { text-align: center; margin-top: 30px; padding: 16px; color: #64748b; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>🏏 Scoring Guide</h1>
+<p class="subtitle">Green Stars Cricket League — Score kaise daalein</p>
+
+<div class="note">
+  <strong>📌 Pehle karein:</strong> Match ki date/time ke 10 min pehle admin panel mein jaa kar match ka status <strong>"Live"</strong> karein. Phir <strong>"Add Score"</strong> button dabayein.
+</div>
+
+<h2>📝 Step 1: Match Info</h2>
+
+<div class="step">
+  <span class="step-num">1</span>
+  <strong>Toss Winner</strong> select karein — kis team ne toss jita
+  <span class="label">Dropdown mein se team select karein</span>
+</div>
+
+<div class="step">
+  <span class="step-num">2</span>
+  <strong>Toss Decision</strong> — jis ne toss jita, usne kya chuna?
+  <span class="label">Bat = pehle batting karenge &nbsp;|&nbsp; Bowl = pehle bowling karenge</span>
+</div>
+
+<div class="step">
+  <span class="step-num">3</span>
+  <strong>Venue</strong> — ground ka naam daalein
+  <span class="label">Jaise: "Main Stadium Haripur"</span>
+</div>
+
+<h2>🏏 Step 2: Batting Stats (Player Table)</h2>
+
+<p style="font-size:13px;margin-bottom:8px;">Har player ke liye ye columns bharein:</p>
+
+<table>
+  <tr><th colspan="2" class="col-bat">⚔️ Batting</th></tr>
+  <tr><th>Column</th><th>Kya daalna hai</th></tr>
+  <tr><td><strong>Runs</strong></td><td>Kitne runs banaye (bat se)</td></tr>
+  <tr><td><strong>Balls</strong></td><td>Kitni balls kheli (max 30)</td></tr>
+  <tr><td><strong>4s</strong></td><td>Kitne chauke mare</td></tr>
+  <tr><td><strong>6s</strong></td><td>Kitne chhakke mare</td></tr>
+  <tr><td><strong>1s</strong></td><td>Kitne single runs liye</td></tr>
+  <tr><td><strong>2s</strong></td><td>Kitne double runs liye</td></tr>
+  <tr><td><strong>Out ✅</strong></td><td>Check karein agar player out hua</td></tr>
+  <tr><td><strong>Dismissal</strong></td><td>Kaise out hua (Bowled, Caught, LBW, etc.)</td></tr>
+</table>
+
+<table>
+  <tr><th colspan="2" class="col-ball">🎯 Bowling</th></tr>
+  <tr><th>Column</th><th>Kya daalna hai</th></tr>
+  <tr><td><strong>Wkts</strong></td><td>Kitne wickets liye</td></tr>
+  <tr><td><strong>Balls</strong></td><td>Kitni balls daali (wides/no-balls included)</td></tr>
+  <tr><td><strong>Mdns</strong></td><td>Kitne maiden overs daale (jis over mein 0 runs diye)</td></tr>
+</table>
+
+<table>
+  <tr><th colspan="2" class="col-field">🧤 Fielding</th></tr>
+  <tr><th>Column</th><th>Kya daalna hai</th></tr>
+  <tr><td><strong>Ct</strong></td><td>Kitne catches liye</td></tr>
+  <tr><td><strong>St</strong></td><td>Kitne stumpings kiye</td></tr>
+  <tr><td><strong>RO</strong></td><td>Kitne run outs kiye</td></tr>
+</table>
+
+<div class="note">
+  <strong>💡 Tip:</strong> Bowling <strong>Runs</strong> ka column nahi hai — wo auto-calculate hota hai! Balls proportion ke hisaab se runs distribute ho jayenge.
+</div>
+
+<h2>➕ Step 3: Extras</h2>
+
+<div class="step">
+  <strong>Extras</strong> — wides, no-balls aur byes ka total number daalein
+  <div class="box" style="margin-top:6px;">
+    <strong>Example:</strong> 2 wides + 1 no-ball + 1 bye = <span class="highlight">4 Extras</span>
+  </div>
+</div>
+
+<h2>🔄 Step 4: Check & Save</h2>
+
+<div class="step">
+  <span class="step-num">✓</span>
+  <strong>Result</strong> — auto dikh jayega (kis ne jita, kitne se)
+  <span class="label">Jaise: "Alpha Warriors won by 4 runs"</span>
+</div>
+
+<div class="step">
+  <span class="step-num">✓</span>
+  <strong>Target</strong> — bhi auto dikhe ga ("Team X need Y runs to win")
+</div>
+
+<div class="step">
+  <span class="step-num">✓</span>
+  <strong>Overs</strong> — auto calculate hote hain (e.g. 4.3 = 4 overs 3 balls)
+</div>
+
+<div class="step">
+  <span class="step-num">✓</span>
+  <span class="highlight">SAVE</span> — <strong>"Save Result & Performances"</strong> button dabayein
+</div>
+
+<h2>⚡ Extras Kaise daalein — Examples</h2>
+
+<div class="box">
+  <strong>🏏 No-ball + batsman 4 maare:</strong><br>
+  Batsman Runs = <span class="highlight">4</span> | Extras = <span class="highlight">1</span>
+</div>
+
+<div class="box">
+  <strong>🏏 Wide ball + 2 runs bhaage:</strong><br>
+  Kisi batsman ko kuch nahi | Extras = <span class="highlight">2</span>
+</div>
+
+<div class="box">
+  <strong>🏏 No-ball + batsman 0:</strong><br>
+  Batsman Runs = <span class="highlight">0</span> | Extras = <span class="highlight">1</span>
+</div>
+
+<h2>⚠️ Important Notes</h2>
+
+<div class="note">✅ <strong>Balls Faced (bf)</strong> — max 30 hai (5 overs). Wides/no-balls yahan nahi ginate.</div>
+<div class="note">✅ <strong>Balls Bowled (bb)</strong> — koi limit nahi. Wides/no-balls bhi yahan shamil hain.</div>
+<div class="note">✅ <strong>Bowling Runs (br)</strong> — auto-calculate hota hai, column nahi dikhe ga.</div>
+<div class="note">✅ <strong>Wickets</strong> — "Out" checkbox se count hote hain, bowling Wkts column se nahi.</div>
+<div class="note">✅ <strong>Neutral Fielders</strong> — agar doosri team ka player fielding kare to "Starter Phase" section use karein.</div>
+<div class="note">🔄 <strong>Edit</strong> — galti ho jaye to dubara "Edit Result" karke change kar sakte hain.</div>
+
+<h2>❓ Common Mistakes</h2>
+
+<div class="step">
+  ❌ <strong>Bhoolna:</strong> Out checkbox ke baad dismissal select karna<br>
+  ✅ Hamesha Out check karein AUR dismissal select karein
+</div>
+
+<div class="step">
+  ❌ <strong>Bhoolna:</strong> dono teams ke players ka data daalna<br>
+  ✅ Pehle Team 1 table bharein, phir Team 2 table
+</div>
+
+<div class="step">
+  ❌ <strong>Bhoolna:</strong> Toss Winner select karna<br>
+  ✅ Toss ke baghair result calculate nahi ho ga
+</div>
+
+<div class="footer">
+  Green Stars Cricket League 🏏<br>
+  Koi masla ho to admin se contact karein
+</div>
+
+</body>
+</html>
