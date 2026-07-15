@@ -241,3 +241,12 @@ model PredictionLock {
   locked    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model Rating {
+  id        String   @id @default(cuid())
+  value     Int
+  ip        String
+  createdAt DateTime @default(now())
+
+  @@unique([ip])
+}

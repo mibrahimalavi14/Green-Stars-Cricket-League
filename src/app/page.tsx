@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
+import { StarRating } from "@/components/StarRating"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
 export const revalidate = 30
@@ -179,6 +180,13 @@ async function HomePage() {
           >
             <Youtube className="h-5 w-5" /> Subscribe to GSCL
           </a>
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--border)] py-10">
+        <div className="mx-auto max-w-md px-4">
+          <h3 className="mb-1 text-center text-sm font-semibold text-[var(--muted-foreground)]">Rate this website</h3>
+          <StarRating />
         </div>
       </section>
     </>
