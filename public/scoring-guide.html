@@ -25,7 +25,16 @@
   .col-ball { color: #38bdf8; }
   .col-field { color: #c084fc; }
   .col-team { color: #f97316; }
-  .footer { text-align: center; margin-top: 30px; padding: 16px; color: #64748b; font-size: 12px; }
+  .form-preview { background: #1e293b; border-radius: 12px; padding: 12px; margin: 12px 0; border: 1px solid #f97316; font-size: 12px; }
+  .form-field { background: #0f172a; border-radius: 6px; padding: 6px 8px; margin: 3px 0; border: 1px solid #334155; }
+  .mock-input { background: #1e293b; border: 1px solid #475569; border-radius: 4px; padding: 4px 8px; color: #94a3b8; font-size: 11px; }
+  .mock-select { background: #1e293b; border: 1px solid #475569; border-radius: 4px; padding: 4px 8px; color: #94a3b8; font-size: 11px; }
+  .tbl-cell { background: #0f172a; border: 1px solid #334155; border-radius: 3px; padding: 3px 4px; text-align: center; font-size: 10px; color: #94a3b8; }
+  .bat-col { border-top: 2px solid #4ade80; }
+  .ball-col { border-top: 2px solid #38bdf8; }
+  .fld-col { border-top: 2px solid #c084fc; }
+  .extras-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 6px 0; }
+  .extras-cell { background: #334155; border-radius: 4px; padding: 6px; text-align: center; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -38,6 +47,14 @@
 </div>
 
 <h2>📝 Step 1: Match Info</h2>
+
+<div class="form-preview">
+  <div class="form-field" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="flex:1;"><strong>Toss Winner</strong><br><span class="mock-select">Select team… ▼</span></div>
+    <div style="flex:1;"><strong>Toss Decision</strong><br><span class="mock-select">Select… ▼</span></div>
+    <div style="flex:1;"><strong>Venue</strong><br><span class="mock-input">Al Kabir Stadium</span></div>
+  </div>
+</div>
 
 <div class="step">
   <span class="step-num">1</span>
@@ -54,10 +71,76 @@
 <div class="step">
   <span class="step-num">3</span>
   <strong>Venue</strong> — ground ka naam daalein
-  <span class="label">Jaise: "Main Stadium Haripur"</span>
+  <span class="label">Jaise: "Al Kabir Stadium"</span>
 </div>
 
-<h2>🏏 Step 2: Batting Stats (Player Table)</h2>
+<h2>🏏 Step 2: Player Table (Yeh dekhe ga screen pe)</h2>
+
+<div class="form-preview">
+  <div style="overflow-x:auto;white-space:nowrap;">
+    <table style="font-size:10px;margin:0;">
+      <tr>
+        <th style="text-align:right;">Player</th>
+        <th class="bat-col" style="color:#4ade80;">Runs</th>
+        <th class="bat-col" style="color:#4ade80;">BF</th>
+        <th class="bat-col" style="color:#4ade80;">4s</th>
+        <th class="bat-col" style="color:#4ade80;">6s</th>
+        <th class="bat-col" style="color:#4ade80;">1s</th>
+        <th class="bat-col" style="color:#4ade80;">2s</th>
+        <th class="bat-col" style="color:#4ade80;">Out</th>
+        <th class="bat-col" style="color:#4ade80;">How</th>
+        <th class="ball-col" style="color:#38bdf8;">Wkts</th>
+        <th class="ball-col" style="color:#38bdf8;">Runs</th>
+        <th class="ball-col" style="color:#38bdf8;">Balls</th>
+        <th class="ball-col" style="color:#38bdf8;">Mdns</th>
+        <th class="fld-col" style="color:#c084fc;">Ct</th>
+        <th class="fld-col" style="color:#c084fc;">St</th>
+        <th class="fld-col" style="color:#c084fc;">RO</th>
+      </tr>
+      <tr>
+        <td style="text-align:right;font-weight:600;padding:3px 4px;">Ahmed</td>
+        <td><span class="tbl-cell">20</span></td>
+        <td><span class="tbl-cell">15</span></td>
+        <td><span class="tbl-cell">2</span></td>
+        <td><span class="tbl-cell">1</span></td>
+        <td><span class="tbl-cell">3</span></td>
+        <td><span class="tbl-cell">1</span></td>
+        <td><span class="tbl-cell">✅</span></td>
+        <td><span class="mock-select" style="font-size:8px;">Caught</span></td>
+        <td><span class="tbl-cell">1</span></td>
+        <td><span class="tbl-cell" title="Leave empty to auto-calc">18</span></td>
+        <td><span class="tbl-cell">18</span></td>
+        <td><span class="tbl-cell">0</span></td>
+        <td><span class="tbl-cell">2</span></td>
+        <td><span class="tbl-cell">0</span></td>
+        <td><span class="tbl-cell">1</span></td>
+      </tr>
+      <tr>
+        <td style="text-align:right;font-weight:600;padding:3px 4px;">Ali</td>
+        <td><span class="tbl-cell">12</span></td>
+        <td><span class="tbl-cell">10</span></td>
+        <td><span class="tbl-cell">1</span></td>
+        <td><span class="tbl-cell">0</span></td>
+        <td><span class="tbl-cell">2</span></td>
+        <td><span class="tbl-cell">0</span></td>
+        <td><span class="tbl-cell">—</span></td>
+        <td><span class="mock-select" style="font-size:8px;">-</span></td>
+        <td><span class="tbl-cell">2</span></td>
+        <td><span class="tbl-cell" title="Leave empty to auto-calc">12</span></td>
+        <td><span class="tbl-cell">12</span></td>
+        <td><span class="tbl-cell">1</span></td>
+        <td><span class="tbl-cell">0</span></td>
+        <td><span class="tbl-cell">0</span></td>
+        <td><span class="tbl-cell">0</span></td>
+      </tr>
+    </table>
+  </div>
+  <div style="display:flex;gap:4px;margin-top:4px;font-size:10px;">
+    <span style="color:#4ade80;">⚔️ Batting</span>
+    <span style="color:#38bdf8;">🎯 Bowling</span>
+    <span style="color:#c084fc;">🧤 Fielding</span>
+  </div>
+</div>
 
 <p style="font-size:13px;margin-bottom:8px;">Har player ke liye ye columns bharein:</p>
 
@@ -97,6 +180,53 @@
 
 <h2>➕ Step 3: Extras (4 alag fields)</h2>
 
+<div class="form-preview">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1;">
+      <strong style="color:#f97316;">{Team 1 Name} Extras</strong>
+      <div class="extras-grid">
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">Wides</div>
+          <span class="mock-input" style="display:block;">2</span>
+        </div>
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">No Balls</div>
+          <span class="mock-input" style="display:block;">1</span>
+        </div>
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">Byes</div>
+          <span class="mock-input" style="display:block;">0</span>
+        </div>
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">Leg Byes</div>
+          <span class="mock-input" style="display:block;">0</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <strong style="color:#f97316;">{Team 2 Name} Extras</strong>
+      <div class="extras-grid">
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">Wides</div>
+          <span class="mock-input" style="display:block;">1</span>
+        </div>
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">No Balls</div>
+          <span class="mock-input" style="display:block;">0</span>
+        </div>
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">Byes</div>
+          <span class="mock-input" style="display:block;">2</span>
+        </div>
+        <div style="background:#334155;border-radius:4px;padding:6px;text-align:center;font-size:10px;">
+          <div style="color:#94a3b8;">Leg Byes</div>
+          <span class="mock-input" style="display:block;">1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="note">
   <strong>🤔 Extra kya hota hai?</strong> — jo run ball ko bat se nahi mare, unhe <strong>Extra</strong> kehte hain.
 </div>
@@ -125,12 +255,40 @@
   <span class="label">Example: 1 leg bye = 1</span>
 </div>
 
-<h2>🔄 Step 4: Check & Save</h2>
+<h2>🔄 Step 4: Innings Display (Yeh auto dikhe ga)</h2>
+
+<div class="form-preview">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 12px;flex:1;">
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Alpha Warriors</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center;font-size:11px;">
+        <div><span style="color:#94a3b8;">Runs</span><br><strong>32</strong></div>
+        <div><span style="color:#94a3b8;">Wkts</span><br><strong>1</strong></div>
+        <div><span style="color:#94a3b8;">Overs</span><br><strong>5.0</strong></div>
+        <div><span style="color:#94a3b8;">Extras</span><br><strong>3</strong></div>
+        <div><span style="color:#94a3b8;">Total</span><br><strong style="color:#f97316;">35</strong></div>
+      </div>
+    </div>
+    <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 12px;flex:1;">
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Beta Knights</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center;font-size:11px;">
+        <div><span style="color:#94a3b8;">Runs</span><br><strong>36</strong></div>
+        <div><span style="color:#94a3b8;">Wkts</span><br><strong>2</strong></div>
+        <div><span style="color:#94a3b8;">Overs</span><br><strong>4.3</strong></div>
+        <div><span style="color:#94a3b8;">Extras</span><br><strong>4</strong></div>
+        <div><span style="color:#94a3b8;">Total</span><br><strong style="color:#4ade80;">40</strong></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:6px;text-align:center;background:#1e293b;border-radius:6px;padding:6px;font-size:12px;">
+    <strong style="color:#fbbf24;">Result:</strong> Beta Knights won by 5 runs
+  </div>
+</div>
 
 <div class="step">
   <span class="step-num">✓</span>
   <strong>Result</strong> — auto dikh jayega (kis ne jita, kitne se)
-  <span class="label">Jaise: "Alpha Warriors won by 4 runs"</span>
+  <span class="label">Jaise: "Beta Knights won by 5 runs"</span>
 </div>
 
 <div class="step">
