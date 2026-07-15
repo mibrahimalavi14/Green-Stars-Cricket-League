@@ -183,7 +183,7 @@
   <tr><th colspan="2" class="col-ball">🎯 Bowling</th></tr>
   <tr><th>Column</th><th>Kya daalna hai</th></tr>
   <tr><td><strong>Wkts</strong></td><td>Kitne wickets liye</td></tr>
-  <tr><td><strong>Runs</strong></td><td>Kitne runs diye (khali chhoro to auto-calculate ho jayega)</td></tr>
+  <tr><td><strong>Runs</strong></td><td>Kitne runs diye (khud dalna pare ga — auto nahi hota)</td></tr>
   <tr><td><strong>Balls</strong></td><td>Kitni balls daali (wides/no-balls included)</td></tr>
   <tr><td><strong>Mdns</strong></td><td>Kitne maiden overs daale (jis over mein 0 runs diye)</td></tr>
 </table>
@@ -197,7 +197,7 @@
 </table>
 
 <div class="note">
-  <strong>💡 Tip:</strong> Bowling <strong>Runs</strong> — agar khali chhoro ga to auto-calculate ho jayega (balls proportion ke hisaab se). Chahto ho to khud bhi daal sakte ho.
+  <strong>💡 Tip:</strong> Bowling <strong>Runs</strong> — aapko khud dalni pare gi. Auto-calculate nahi hota. Har wide aur no-ball ka 1 run <strong>bowler ke runs mein bhi</strong> add karein.
 </div>
 
 <h2>➕ Step 3: Extras (4 alag fields)</h2>
@@ -328,43 +328,73 @@
   <span class="highlight">SAVE</span> — <strong>"Save Result & Performances"</strong> button dabayein
 </div>
 
-<h2>⚡ Extras Kaise daalein — Examples</h2>
+<h2>⚡ Extra Scenarios — Kahan kya daalein</h2>
 
-<div class="box">
-  <strong>🏏 No-ball + batsman 4 maare:</strong><br>
-  Batsman Runs = <span class="highlight">4</span> | No Balls = <span class="highlight">1</span>
-</div>
-
-<div class="box">
-  <strong>🏏 Wide ball (batsman ne kuch nahi kiya):</strong><br>
-  Kisi batsman ko kuch nahi | Wides = <span class="highlight">1</span>
-</div>
-
-<div class="box">
-  <strong>🏏 Wide + 2 extra runs bhaage (total 3 wide runs):</strong><br>
-  Kisi batsman ko kuch nahi | Wides = <span class="highlight">3</span>
-</div>
-
-<div class="box">
-  <strong>🏏 No-ball + batsman 0:</strong><br>
-  Batsman Runs = <span class="highlight">0</span> | No Balls = <span class="highlight">1</span>
-</div>
-
-<div class="box">
-  <strong>🏏 Ball misses everything, 2 byes:</strong><br>
-  Batsman Runs = <span class="highlight">0</span> | Byes = <span class="highlight">2</span>
-</div>
-
-<div class="box">
-  <strong>🏏 Ball hits pad, 1 leg bye:</strong><br>
-  Batsman Runs = <span class="highlight">0</span> | Leg Byes = <span class="highlight">1</span>
-</div>
+<table>
+  <tr><th>Scenario</th><th>Batsman Runs</th><th>Bowler Runs</th><th>Bowler Balls</th><th>Extras</th></tr>
+  <tr>
+    <td style="text-align:right;"><strong>Wide ball</strong><br><span style="color:#94a3b8;font-size:10px;">batsman ne kuch nahi kiya</span></td>
+    <td>0</td>
+    <td style="color:#4ade80;">+1</td>
+    <td style="color:#38bdf8;">+1</td>
+    <td style="color:#f97316;">Wides +1</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>Wide + 2 runs</strong><br><span style="color:#94a3b8;font-size:10px;">wide pe 2 extra bhaage</span></td>
+    <td>0</td>
+    <td style="color:#4ade80;">+3 (1 wide + 2 runs)</td>
+    <td style="color:#38bdf8;">+1</td>
+    <td style="color:#f97316;">Wides +3</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>Wide + boundary</strong><br><span style="color:#94a3b8;font-size:10px;">wide pe 4 runs</span></td>
+    <td>0</td>
+    <td style="color:#4ade80;">+5 (1 wide + 4)</td>
+    <td style="color:#38bdf8;">+1</td>
+    <td style="color:#f97316;">Wides +5</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>No ball</strong><br><span style="color:#94a3b8;font-size:10px;">batsman ne 0 mara</span></td>
+    <td>0</td>
+    <td style="color:#4ade80;">+1</td>
+    <td style="color:#38bdf8;">+1</td>
+    <td style="color:#f97316;">No Balls +1</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>No ball + chauka</strong><br><span style="color:#94a3b8;font-size:10px;">batsman ne 4 maare</span></td>
+    <td style="color:#4ade80;">+4</td>
+    <td style="color:#4ade80;">+5 (1 nb + 4 runs)</td>
+    <td style="color:#38bdf8;">+1</td>
+    <td style="color:#f97316;">No Balls +1</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>No ball + 2 runs</strong></td>
+    <td style="color:#4ade80;">+2</td>
+    <td style="color:#4ade80;">+3 (1 nb + 2 runs)</td>
+    <td style="color:#38bdf8;">+1</td>
+    <td style="color:#f97316;">No Balls +1</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>Byes</strong><br><span style="color:#94a3b8;font-size:10px;">ball wicketkeeper se chhoot gayi, 2 bhaage</span></td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td style="color:#f97316;">Byes +2</td>
+  </tr>
+  <tr>
+    <td style="text-align:right;"><strong>Leg Byes</strong><br><span style="color:#94a3b8;font-size:10px;">ball leg se lagi, 1 bhaaga</span></td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td style="color:#f97316;">Leg Byes +1</td>
+  </tr>
+</table>
 
 <h2>⚠️ Important Notes</h2>
 
 <div class="note">✅ <strong>Balls Faced (bf)</strong> — max 30 hai (5 overs). Wides/no-balls yahan nahi ginate.</div>
 <div class="note">✅ <strong>Balls Bowled (bb)</strong> — koi limit nahi. Wides/no-balls bhi yahan shamil hain.</div>
-<div class="note">✅ <strong>Bowling Runs (Runs)</strong> — khali chhoro to auto-calculate ho jayega (balls proportion se). Apni marzi se bhi daal sakte ho.</div>
+<div class="note">✅ <strong>Bowling Runs (Runs)</strong> — aapko khud dalni pare gi, auto nahi hoti.</div>
 <div class="note">✅ <strong>Wickets</strong> — "Out" checkbox se count hote hain, bowling Wkts column se nahi.</div>
 <div class="note">✅ <strong>Extras ka bowler se rishta:</strong> <span style="color:#4ade80;">Wides + No Balls</span> bowler ke runs mein add hote hain. <span style="color:#94a3b8;">Byes aur Leg Byes</span> sirf team total mein jate hain, bowler ko nahi lagte.</div>
 <div class="note">✅ <strong>Neutral Fielders</strong> — agar doosri team ka player fielding kare to "Starter Phase" section use karein.</div>
