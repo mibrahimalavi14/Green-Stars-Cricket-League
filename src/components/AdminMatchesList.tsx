@@ -375,10 +375,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
           return ""
         }
         return (
-        <div key={m.id} className={`rounded-lg border p-4 ${isPlayoff ? 'border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10' : 'border-[var(--border)] bg-[var(--card)]'}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : `${m.season.name} \u00b7 Match ${m.matchNo}`} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
+        <div key={m.id} className={`rounded-lg border p-3 sm:p-4 ${isPlayoff ? 'border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10' : 'border-[var(--border)] bg-[var(--card)]'}`}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : `${m.season.name} \u00b7 Match ${m.matchNo}`} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
               {isPlayoff ? (
                 <div className="flex items-center gap-2">
                   <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(md)}</span>
@@ -388,33 +388,33 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   <p className="font-bold text-amber-600 dark:text-amber-400">TBD</p>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
-                  <p className="font-medium">{m.team1.name}</p>
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                  {m.team1.logo && <img src={m.team1.logo} alt="" className="h-5 w-5 sm:h-6 sm:w-6 rounded-full object-cover" />}
+                  <p className="font-medium text-sm">{m.team1.name}</p>
                   <span className="text-xs text-[var(--muted-foreground)]">vs</span>
-                  <p className="font-medium">{m.team2.name}</p>
-                  {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                  <p className="font-medium text-sm">{m.team2.name}</p>
+                  {m.team2.logo && <img src={m.team2.logo} alt="" className="h-5 w-5 sm:h-6 sm:w-6 rounded-full object-cover" />}
                 </div>
               )}
               {!isPlayoff && m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
               {!isPlayoff && m.result && <p className="text-xs text-[var(--muted-foreground)]">{m.result}</p>}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
               <span className={`rounded px-2 py-1 text-xs font-medium ${
                 m.status === "live" ? "bg-red-500/20 text-red-500" :
                 m.status === "completed" ? "bg-green-500/20 text-green-500" :
                 "bg-blue-500/20 text-blue-500"
               }`}>{m.status}</span>
               {m.status === "upcoming" && (
-                <button onClick={() => updateStatus(m.id, "live")} className="rounded bg-red-500 px-2 py-1 text-xs text-white">Set Live</button>
+                <button onClick={() => updateStatus(m.id, "live")} className="rounded bg-red-500 px-2 py-1 text-xs text-white whitespace-nowrap">Set Live</button>
               )}
               {!scoring && (
-                <button onClick={() => openScoring(m.id, m)} className="rounded bg-green-500 px-2 py-1 text-xs text-white">
+                <button onClick={() => openScoring(m.id, m)} className="rounded bg-green-500 px-2 py-1 text-xs text-white whitespace-nowrap">
                   {m.status === "completed" ? (m.team1Score ? "Edit Result" : "Add Result") : m.status === "live" ? "Add Score" : "Set Result"}
                 </button>
               )}
               <button onClick={() => deleteMatch(m.id)} disabled={deleting === m.id}
-                className="rounded bg-red-600 px-2 py-1 text-xs text-white disabled:opacity-50">Delete</button>
+                className="rounded bg-red-600 px-2 py-1 text-xs text-white disabled:opacity-50 whitespace-nowrap">Delete</button>
             </div>
           </div>
 
