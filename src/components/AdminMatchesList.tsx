@@ -54,7 +54,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   function calcTeamStats(teamId: string) {
     const players = allPlayers.filter(p => p.teamId === teamId)
     const runs = players.reduce((sum, p) => sum + (parseInt(s(p.id, "runs")) || 0), 0)
-    const wickets = players.reduce((sum, p) => sum + (parseInt(s(p.id, "wkts")) || 0), 0)
+    const wickets = players.reduce((sum, p) => sum + (s(p.id, "out") === "1" ? 1 : 0), 0)
     const ballsFaced = players.reduce((sum, p) => sum + (parseInt(s(p.id, "bf")) || 0), 0)
     const ballsBowled = players.reduce((sum, p) => sum + (parseInt(s(p.id, "bb")) || 0), 0)
     const liveBalls = Math.max(ballsFaced, ballsBowled)
