@@ -49,7 +49,7 @@ async function PlayersPage() {
                 </div>
                 <div>
                   <p className="font-bold">{player.wickets}</p>
-                  <p className="text-[10px] text-[var(--muted-foreground)]">Wkts</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]" title="Wickets">Wkts</p>
                 </div>
                 <div>
                   <p className="font-bold">{player.matchesPlayed}</p>

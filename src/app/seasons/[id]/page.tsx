@@ -260,16 +260,16 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     <th className="p-3 text-left">Player</th>
                     <th className="p-3 text-left">Team</th>
                     <th className="p-3 text-center">M</th>
-                    <th className="p-3 text-center">Inn</th>
+                    <th className="p-3 text-center" title="Innings">Inn</th>
                     <th className="p-3 text-center">Runs</th>
                     <th className="p-3 text-center">Balls</th>
-                    <th className="p-3 text-center">HS</th>
-                    <th className="p-3 text-center">Avg</th>
-                    <th className="p-3 text-center">SR</th>
-                    <th className="p-3 text-center">4s</th>
-                    <th className="p-3 text-center">6s</th>
-                    <th className="p-3 text-center">NO</th>
-                    <th className="p-3 text-center">Duck</th>
+                    <th className="p-3 text-center" title="Highest Score">HS</th>
+                    <th className="p-3 text-center" title="Average">Avg</th>
+                    <th className="p-3 text-center" title="Strike Rate">SR</th>
+                    <th className="p-3 text-center" title="Fours">4s</th>
+                    <th className="p-3 text-center" title="Sixes">6s</th>
+                    <th className="p-3 text-center" title="Not Outs">NO</th>
+                    <th className="p-3 text-center" title="Ducks (0 runs)">Duck</th>
                     <th className="p-3 text-center">50</th>
                     <th className="p-3 text-center">100</th>
                   </tr>
@@ -327,16 +327,16 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     <th className="p-3 text-left">Player</th>
                     <th className="p-3 text-left">Team</th>
                     <th className="p-3 text-center">M</th>
-                    <th className="p-3 text-center">Inn</th>
+                    <th className="p-3 text-center" title="Innings">Inn</th>
                     <th className="p-3 text-center">Overs</th>
-                    <th className="p-3 text-center">Wkts</th>
+                    <th className="p-3 text-center" title="Wickets">Wkts</th>
                     <th className="p-3 text-center">Runs</th>
-                    <th className="p-3 text-center">BB</th>
-                    <th className="p-3 text-center">4w</th>
-                    <th className="p-3 text-center">5w</th>
-                    <th className="p-3 text-center">SR</th>
-                    <th className="p-3 text-center">Avg</th>
-                    <th className="p-3 text-center">Econ</th>
+                    <th className="p-3 text-center" title="Best Bowling">BB</th>
+                    <th className="p-3 text-center" title="4 Wickets">4w</th>
+                    <th className="p-3 text-center" title="5 Wickets">5w</th>
+                    <th className="p-3 text-center" title="Strike Rate">SR</th>
+                    <th className="p-3 text-center" title="Average">Avg</th>
+                    <th className="p-3 text-center" title="Economy Rate">Econ</th>
                   </tr>
                 </thead>
                 <tbody>

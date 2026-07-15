@@ -28,15 +28,15 @@ async function PlayerStatsPage() {
                 <th className="p-3 text-left">Team</th>
                 <th className="p-3 text-center">M</th>
                 <th className="p-3 text-center">Runs</th>
-                <th className="p-3 text-center">BF</th>
-                <th className="p-3 text-center">4s</th>
-                <th className="p-3 text-center">6s</th>
+                <th className="p-3 text-center" title="Balls Faced">BF</th>
+                <th className="p-3 text-center" title="Fours">4s</th>
+                <th className="p-3 text-center" title="Sixes">6s</th>
                 <th className="p-3 text-center">50</th>
                 <th className="p-3 text-center">100</th>
-                <th className="p-3 text-center">NO</th>
-                <th className="p-3 text-center">Duck</th>
-                <th className="p-3 text-center">B/B</th>
-                <th className="p-3 text-center">SR</th>
+                <th className="p-3 text-center" title="Not Outs">NO</th>
+                <th className="p-3 text-center" title="Ducks (0 runs)">Duck</th>
+                <th className="p-3 text-center" title="Balls per Boundary">B/B</th>
+                <th className="p-3 text-center" title="Strike Rate">SR</th>
               </tr>
             </thead>
             <tbody>
@@ -89,13 +89,13 @@ async function PlayerStatsPage() {
                 <th className="p-3 text-left">Player</th>
                 <th className="p-3 text-left">Team</th>
                 <th className="p-3 text-center">M</th>
-                <th className="p-3 text-center">Wkts</th>
+                <th className="p-3 text-center" title="Wickets">Wkts</th>
                 <th className="p-3 text-center">Runs</th>
                 <th className="p-3 text-center">Balls</th>
-                <th className="p-3 text-center">4w</th>
-                <th className="p-3 text-center">5w</th>
-                <th className="p-3 text-center">SR</th>
-                <th className="p-3 text-center">Econ</th>
+                <th className="p-3 text-center" title="4 Wickets">4w</th>
+                <th className="p-3 text-center" title="5 Wickets">5w</th>
+                <th className="p-3 text-center" title="Strike Rate">SR</th>
+                <th className="p-3 text-center" title="Economy Rate">Econ</th>
               </tr>
             </thead>
             <tbody>
@@ -147,7 +147,7 @@ async function PlayerStatsPage() {
                   <th className="p-3 text-left">Team</th>
                   <th className="p-3 text-center">M</th>
                   <th className="p-3 text-center">Runs</th>
-                  <th className="p-3 text-center">Wkts</th>
+                  <th className="p-3 text-center" title="Wickets">Wkts</th>
                 </tr>
               </thead>
               <tbody>

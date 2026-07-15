@@ -74,11 +74,11 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             <StatCard label="Matches" value={player.matchesPlayed} />
             <StatCard label="Innings" value={inns} />
             <StatCard label="Runs" value={player.runs} />
-            <StatCard label="HS" value={hs} />
-            <StatCard label="Avg" value={battingAvg} />
-            <StatCard label="SR" value={sr} />
-            <StatCard label="4s" value={player.fours} />
-            <StatCard label="6s" value={player.sixes} />
+            <StatCard label="HS" value={hs} title="Highest Score" />
+            <StatCard label="Avg" value={battingAvg} title="Batting Average" />
+            <StatCard label="SR" value={sr} title="Strike Rate" />
+            <StatCard label="4s" value={player.fours} title="Fours" />
+            <StatCard label="6s" value={player.sixes} title="Sixes" />
             <StatCard label="Fifties" value={player.fifties} />
             <StatCard label="100s" value={player.hundreds} />
             <StatCard label="Not Outs" value={player.notOuts} />
@@ -95,13 +95,13 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             <StatCard label="Overs" value={overs} />
             <StatCard label="Wickets" value={player.wickets} />
             <StatCard label="Runs" value={player.runsConceded} />
-            <StatCard label="BB" value={bb} />
-            <StatCard label="SR" value={bowlingSr} />
-            <StatCard label="Avg" value={bowlingAvg} />
-            <StatCard label="Econ" value={econ} />
-            <StatCard label="4w" value={player.fourWickets} />
-            <StatCard label="5w" value={player.fiveWickets} />
-            <StatCard label="Wkts/M" value={wktsPerMatch} />
+            <StatCard label="BB" value={bb} title="Best Bowling" />
+            <StatCard label="SR" value={bowlingSr} title="Strike Rate" />
+            <StatCard label="Avg" value={bowlingAvg} title="Bowling Average" />
+            <StatCard label="Econ" value={econ} title="Economy Rate" />
+            <StatCard label="4w" value={player.fourWickets} title="4 Wickets in an Innings" />
+            <StatCard label="5w" value={player.fiveWickets} title="5 Wickets in an Innings" />
+            <StatCard label="Wkts/M" value={wktsPerMatch} title="Wickets per Match" />
           </div>
         </div>
 
@@ -158,11 +158,11 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
   )
 }
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+function StatCard({ label, value, title }: { label: string; value: string | number; title?: string }) {
   return (
     <div className="rounded-lg bg-[var(--muted)] p-3 text-center">
       <p className="text-xl font-bold">{value}</p>
-      <p className="text-xs text-[var(--muted-foreground)]">{label}</p>
+      <p className="text-xs text-[var(--muted-foreground)]" title={title || label}>{label}</p>
     </div>
   )
 }

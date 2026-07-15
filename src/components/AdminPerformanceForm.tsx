@@ -203,7 +203,7 @@ function renderPlayerForm(
           />
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">BF</label>
+          <label className="block text-[var(--muted-foreground)]" title="Balls Faced">BF</label>
           <input
             type="number" min="0"
             value={data.ballsFaced}
@@ -212,7 +212,7 @@ function renderPlayerForm(
           />
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">4s</label>
+          <label className="block text-[var(--muted-foreground)]" title="Fours">4s</label>
           <input
             type="number" min="0"
             value={data.fours}
@@ -221,7 +221,7 @@ function renderPlayerForm(
           />
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">6s</label>
+          <label className="block text-[var(--muted-foreground)]" title="Sixes">6s</label>
           <input
             type="number" min="0"
             value={data.sixes}
@@ -230,7 +230,7 @@ function renderPlayerForm(
           />
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">1s</label>
+          <label className="block text-[var(--muted-foreground)]" title="Ones (1 run)">1s</label>
           <input
             type="number" min="0"
             value={data.ones}
@@ -239,7 +239,7 @@ function renderPlayerForm(
           />
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">2s</label>
+          <label className="block text-[var(--muted-foreground)]" title="Twos (2 runs)">2s</label>
           <input
             type="number" min="0"
             value={data.twos}
@@ -257,7 +257,7 @@ function renderPlayerForm(
           <label className="text-[var(--muted-foreground)]">Out</label>
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">Wkts</label>
+          <label className="block text-[var(--muted-foreground)]" title="Wickets">Wkts</label>
           <input
             type="number" min="0"
             value={data.bowlingWickets}
@@ -284,7 +284,7 @@ function renderPlayerForm(
           />
         </div>
         <div>
-          <label className="block text-[var(--muted-foreground)]">Ct</label>
+          <label className="block text-[var(--muted-foreground)]" title="Catches">Ct</label>
           <input
             type="number" min="0"
             value={data.catches}
