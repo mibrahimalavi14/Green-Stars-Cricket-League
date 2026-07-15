@@ -275,6 +275,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     <option value="lbw">LBW</option>
                     <option value="stumped">Stumped</option>
                     <option value="run out">Run Out</option>
+                    <option value="retired">Retired</option>
                     <option value="hit wicket">Hit Wkt</option>
                   </select>
                 </td>
