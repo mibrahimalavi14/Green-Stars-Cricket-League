@@ -564,31 +564,33 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   </div>
                   <p className="mb-2 text-[10px] text-[var(--muted-foreground)]">Select players from other teams who fielded in this match.</p>
                   {neutralFielders.map((nf, idx) => (
-                    <div key={idx} className="mb-1.5 flex items-center gap-2">
+                    <div key={idx} className="mb-1.5 flex flex-wrap items-center gap-1.5">
                       <select value={nf.playerId} onChange={e => { const n = [...neutralFielders]; n[idx].playerId = e.target.value; setNeutralFielders(n) }}
-                        className="w-40 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-xs">
+                        className="w-full sm:w-40 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-xs">
                         <option value="">Select</option>
                         {allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id).map(p => (
                           <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
                       </select>
-                      <label className="flex items-center gap-0.5 text-[10px]">
-                        <input type="checkbox" checked={nf.wk} onChange={e => {
-                          const n = [...neutralFielders]; n[idx].wk = e.target.checked;
-                          if (e.target.checked) n.forEach((x, j) => { if (j !== idx) x.wk = false })
-                          setNeutralFielders(n)
-                        }} className="h-3 w-3" title="Wicket Keeper" /> WK
-                      </label>
-                      <label className="text-[10px]" title="Catches">Ct</label>
-                      <input type="number" min="0" value={nf.ct} onChange={e => { const n = [...neutralFielders]; n[idx].ct = e.target.value; setNeutralFielders(n) }}
-                        className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
-                      <label className="text-[10px]" title="Stumpings">St</label>
-                      <input type="number" min="0" value={nf.st} onChange={e => { const n = [...neutralFielders]; n[idx].st = e.target.value; setNeutralFielders(n) }}
-                        className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
-                      <label className="text-[10px]" title="Run Outs">RO</label>
-                      <input type="number" min="0" value={nf.ro} onChange={e => { const n = [...neutralFielders]; n[idx].ro = e.target.value; setNeutralFielders(n) }}
-                        className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
-                      <button onClick={() => setNeutralFielders(neutralFielders.filter((_, j) => j !== idx))} className="text-red-500 text-xs">✕</button>
+                      <div className="flex items-center gap-1.5">
+                        <label className="flex items-center gap-0.5 text-[10px]">
+                          <input type="checkbox" checked={nf.wk} onChange={e => {
+                            const n = [...neutralFielders]; n[idx].wk = e.target.checked;
+                            if (e.target.checked) n.forEach((x, j) => { if (j !== idx) x.wk = false })
+                            setNeutralFielders(n)
+                          }} className="h-3 w-3" title="Wicket Keeper" /> WK
+                        </label>
+                        <label className="text-[10px]" title="Catches">Ct</label>
+                        <input type="number" min="0" value={nf.ct} onChange={e => { const n = [...neutralFielders]; n[idx].ct = e.target.value; setNeutralFielders(n) }}
+                          className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
+                        <label className="text-[10px]" title="Stumpings">St</label>
+                        <input type="number" min="0" value={nf.st} onChange={e => { const n = [...neutralFielders]; n[idx].st = e.target.value; setNeutralFielders(n) }}
+                          className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
+                        <label className="text-[10px]" title="Run Outs">RO</label>
+                        <input type="number" min="0" value={nf.ro} onChange={e => { const n = [...neutralFielders]; n[idx].ro = e.target.value; setNeutralFielders(n) }}
+                          className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-xs" />
+                        <button onClick={() => setNeutralFielders(neutralFielders.filter((_, j) => j !== idx))} className="text-red-500 text-xs">✕</button>
+                      </div>
                     </div>
                   ))}
                   <button onClick={() => setNeutralFielders([...neutralFielders, { playerId: "", ct: "", st: "", ro: "", wk: false }])}
