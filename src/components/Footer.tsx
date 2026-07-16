@@ -26,6 +26,7 @@ export function Footer() {
               <Link href="/teams" className="transition-colors hover:text-[var(--accent)]">Teams</Link>
               <Link href="/fixtures" className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
               <Link href="/points-table" className="transition-colors hover:text-[var(--accent)]">Standings</Link>
+              <Link href="/toss-analysis" className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
               <Link href="/predictions" className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
               <Link href="/about" className="transition-colors hover:text-[var(--accent)]">About</Link>
             </div>

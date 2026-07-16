@@ -71,6 +71,7 @@ export function Header() {
           <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
+          <Link href="/toss-analysis" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Toss</Link>
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
           <Link href="/about" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">About</Link>
@@ -94,6 +95,7 @@ export function Header() {
             <Link href="/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
             <Link href="/fixtures" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
             <Link href="/points-table" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Standings</Link>
+            <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss</Link>
             <Link href="/predictions" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
             <Link href="/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
             <Link href="/about" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">About</Link>
