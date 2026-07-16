@@ -7,46 +7,45 @@ import { recalcPointsTable } from "@/lib/stats"
 export const revalidate = 30
 
 async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const season = await prisma.season.findUnique({
-    where: { id },
-    include: {
-      teams: { include: { players: true } },
-      matches: {
-        orderBy: { date: "asc" },
-        include: { team1: true, team2: true },
+  try {
+    const { id } = await params
+    const season = await prisma.season.findUnique({
+      where: { id },
+      include: {
+        teams: { include: { players: true } },
+        matches: {
+          orderBy: { date: "asc" },
+          include: { team1: true, team2: true },
+        },
       },
-    },
-  })
+    })
 
-  if (!season) notFound()
+    if (!season) notFound()
 
-  const teamIds = season.teams.map(t => t.id)
-  const allPlayers = season.teams.flatMap(t => t.players)
+    const allPlayers = season.teams.flatMap(t => t.players)
 
-  const standings = await recalcPointsTable(season.id)
+    const standings = await recalcPointsTable(season.id)
 
-  // Fetch performances only for matches in this season
-  const seasonMatchIds = season.matches.map(match => match.id)
-  const allPerformances = await prisma.playerMatch.findMany({
-    where: { matchId: { in: seasonMatchIds } },
-  })
-  const perfByPlayer = new Map<string, typeof allPerformances>()
-  for (const p of allPerformances) {
-    if (!perfByPlayer.has(p.playerId)) perfByPlayer.set(p.playerId, [])
-    perfByPlayer.get(p.playerId)!.push(p)
-  }
+    const seasonMatchIds = season.matches.map(match => match.id)
+    const allPerformances = await prisma.playerMatch.findMany({
+      where: { matchId: { in: seasonMatchIds } },
+    })
+    const perfByPlayer = new Map<string, typeof allPerformances>()
+    for (const p of allPerformances) {
+      if (!perfByPlayer.has(p.playerId)) perfByPlayer.set(p.playerId, [])
+      perfByPlayer.get(p.playerId)!.push(p)
+    }
 
-  function playoffLabel(d: Date) {
-    const iso = d.toISOString()
-    if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
-    if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
-    if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
-    if (iso.startsWith("2026-08-23T")) return "Final"
-    return ""
-  }
+    function playoffLabel(d: Date) {
+      const iso = d.toISOString()
+      if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
+      if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
+      if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
+      if (iso.startsWith("2026-08-23T")) return "Final"
+      return ""
+    }
 
-  return (
+    return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <Link href="/seasons" className="mb-4 inline-block text-sm text-[var(--accent)] hover:underline">&larr; All Seasons</Link>
       <h1 className="mb-1 text-3xl font-bold">{season.name}</h1>
@@ -431,6 +430,10 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
       )}
     </div>
   )
+  } catch (e: any) {
+    console.error("=== SEASON PAGE ERROR ===", e)
+    return <div className="p-8 text-red-600"><h1 className="text-xl font-bold">Server Error</h1><p className="mt-2">{e?.message || String(e)}</p><pre className="mt-4 text-xs whitespace-pre-wrap">{e?.stack || ""}</pre></div>
+  }
 }
 
 export default SeasonDetailPage
