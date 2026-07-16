@@ -2,6 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
 import { MatchCard } from "@/components/MatchCard"
+import { NewsNotification } from "@/components/NewsNotification"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { StarRating } from "@/components/StarRating"
@@ -33,8 +34,11 @@ async function HomePage() {
   const teamCount = allTeams.length
   const playerCount = allTeams.reduce((a, b) => a + b._count.players, 0)
 
+  const latestNews = news.length > 0 ? news[0] : null
+
   return (
     <>
+      <NewsNotification news={latestNews ? { id: latestNews.id, title: latestNews.title, excerpt: latestNews.excerpt || "", createdAt: latestNews.createdAt.toISOString(), type: latestNews.type } : null} />
       <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
         <img src="/images/teams/Banner.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-black/50" />
