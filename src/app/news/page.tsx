@@ -22,18 +22,37 @@ async function NewsPage() {
             <Link
               key={news.id}
               href={`/news/${news.id}`}
-              className={`group relative rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden transition-all hover:border-[var(--accent)] hover:shadow-lg ${news.title.toLowerCase().includes("schedule") || news.title.toLowerCase().includes("fixture") || news.title.toLowerCase().includes("match") ? "bg-[var(--card)]" : ""}`}
+              className="group relative rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden transition-all hover:border-[var(--accent)] hover:shadow-lg"
             >
-              <div className="aspect-video bg-[var(--muted)] flex items-center justify-center overflow-hidden">
-                {news.title.toLowerCase().includes("schedule") || news.title.toLowerCase().includes("fixture") || news.title.toLowerCase().includes("match") ? (
+              <div className={`aspect-video flex items-center justify-center overflow-hidden ${
+                news.type === "schedule" || news.type === "match" ? "bg-gradient-to-br from-green-700 via-green-600 to-lime-700" :
+                news.type === "team" ? "bg-gradient-to-br from-blue-700 via-indigo-600 to-purple-700" :
+                "bg-gradient-to-br from-amber-700 via-orange-600 to-red-700"
+              }`}>
+                {news.type === "schedule" || news.type === "match" ? (
                   <div className="relative flex h-full w-full items-center justify-center">
-                    <span className="absolute left-4 top-4 text-7xl opacity-20 rotate-12">🏏</span>
-                    <span className="absolute right-6 bottom-4 text-6xl opacity-20 -rotate-12">🏏</span>
-                    <span className="absolute left-1/3 top-1/3 text-5xl opacity-15">⚪</span>
-                    <span className="text-5xl relative z-10">🏏</span>
+                    <span className="text-6xl opacity-30">📅</span>
+                    <div className="absolute inset-0 opacity-10" style={{
+                      backgroundImage: "radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)",
+                      backgroundSize: "40px 40px"
+                    }} />
+                  </div>
+                ) : news.type === "team" ? (
+                  <div className="relative flex h-full w-full items-center justify-center">
+                    <span className="text-6xl opacity-30">👥</span>
+                    <div className="absolute inset-0 opacity-10" style={{
+                      backgroundImage: "radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)",
+                      backgroundSize: "40px 40px"
+                    }} />
                   </div>
                 ) : (
-                  <span className="text-5xl">🏏</span>
+                  <div className="relative flex h-full w-full items-center justify-center">
+                    <span className="text-6xl opacity-30">📢</span>
+                    <div className="absolute inset-0 opacity-10" style={{
+                      backgroundImage: "radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)",
+                      backgroundSize: "40px 40px"
+                    }} />
+                  </div>
                 )}
               </div>
               <div className="p-5">
