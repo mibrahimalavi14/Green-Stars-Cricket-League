@@ -8,29 +8,55 @@ export const revalidate = 300
 
 async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const season = await prisma.season.findUnique({
-    where: { id },
-    include: {
-      teams: { include: { players: true } },
-      matches: {
-        orderBy: { date: "asc" },
-        include: { team1: true, team2: true },
+  let season
+  try {
+    season = await prisma.season.findUnique({
+      where: { id },
+      include: {
+        teams: { include: { players: true } },
+        matches: {
+          orderBy: { date: "asc" },
+          include: { team1: true, team2: true },
+        },
       },
-    },
-  })
+    })
+  } catch {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-12 text-center">
+        <h1 className="mb-4 text-2xl font-bold">Temporary Issue</h1>
+        <p className="mb-4 text-[var(--muted-foreground)]">
+          The database is waking up from sleep. Please refresh the page in a few seconds.
+        </p>
+        <p className="text-xs text-[var(--muted-foreground)]">
+          Error establishing database connection. The free-tier database hibernates after inactivity.
+        </p>
+      </div>
+    )
+  }
 
   if (!season) notFound()
 
   const teamIds = season.teams.map(t => t.id)
   const allPlayers = season.teams.flatMap(t => t.players)
 
-  const standings = await recalcPointsTable(season.id)
+  let standings: Awaited<ReturnType<typeof recalcPointsTable>> = []
+  try {
+    standings = await recalcPointsTable(season.id)
+  } catch {
+    // standings will be empty, page degrades gracefully
+  }
 
   // Fetch performances only for matches in this season
   const seasonMatchIds = season.matches.map(match => match.id)
-  const allPerformances = await prisma.playerMatch.findMany({
-    where: { matchId: { in: seasonMatchIds } },
-  })
+  const allPerformances: { playerId: string; matchId: string; teamId: string; battingRuns: number; ballsFaced: number; isOut: boolean; bowlingWickets: number; bowlingRuns: number; ballsBowled: number; catches: number; stumpings: number; runOuts: number; fours: number; sixes: number; dismissedByBowlerId: string; dismissedByFielderId: string; wides: number; noBalls: number; maidens: number; ones: number; twos: number; dismissalType: string }[] = []
+  try {
+    const perfs = await prisma.playerMatch.findMany({
+      where: { matchId: { in: seasonMatchIds } },
+    })
+    allPerformances.push(...perfs)
+  } catch {
+    // empty - stats will show zero
+  }
   const perfByPlayer = new Map<string, typeof allPerformances>()
   for (const p of allPerformances) {
     if (!perfByPlayer.has(p.playerId)) perfByPlayer.set(p.playerId, [])
