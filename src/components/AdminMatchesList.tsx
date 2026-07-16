@@ -495,12 +495,12 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   return (
                     <div key={t.id} className="rounded border border-[var(--border)] bg-[var(--muted)] p-2">
                       <p className="mb-2 font-semibold text-sm">{t.name}</p>
-                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 text-center text-xs">
+                      <div className="grid grid-cols-5 gap-1 text-center text-xs">
                         <div><p className="text-[var(--muted-foreground)]">Runs</p><p className="font-medium">{st.runs}</p></div>
                         <div><p className="text-[var(--muted-foreground)]">Wkts</p><p className="font-medium">{st.wickets}</p></div>
                         <div><p className="text-[var(--muted-foreground)]">Overs</p><p className="font-medium">{st.balls ? `${Math.floor(st.balls / 6)}.${st.balls % 6}` : "0.0"}</p></div>
-                        <div className="hidden sm:block"><p className="text-[var(--muted-foreground)]">Extras</p><p className="font-medium">{extras}</p></div>
-                        <div className="hidden sm:block"><p className="text-[var(--muted-foreground)]">Total</p><p className="font-medium">{total}</p></div>
+                        <div><p className="text-[var(--muted-foreground)]">Extras</p><p className="font-medium">{extras}</p></div>
+                        <div><p className="text-[var(--muted-foreground)]">Total</p><p className="font-medium">{total}</p></div>
                       </div>
                       <div className="mt-2 border-t border-[var(--border)] pt-2">
                         <p className="mb-1 text-[10px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Extras</p>
