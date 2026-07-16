@@ -22,10 +22,19 @@ async function NewsPage() {
             <Link
               key={news.id}
               href={`/news/${news.id}`}
-              className="group rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden transition-all hover:border-[var(--accent)] hover:shadow-lg"
+              className={`group relative rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden transition-all hover:border-[var(--accent)] hover:shadow-lg ${news.title.toLowerCase().includes("schedule") || news.title.toLowerCase().includes("fixture") || news.title.toLowerCase().includes("match") ? "bg-[var(--card)]" : ""}`}
             >
-              <div className="aspect-video bg-[var(--muted)] flex items-center justify-center">
-                <span className="text-5xl">ðŸ</span>
+              <div className="aspect-video bg-[var(--muted)] flex items-center justify-center overflow-hidden">
+                {news.title.toLowerCase().includes("schedule") || news.title.toLowerCase().includes("fixture") || news.title.toLowerCase().includes("match") ? (
+                  <div className="relative flex h-full w-full items-center justify-center">
+                    <span className="absolute left-4 top-4 text-7xl opacity-20 rotate-12">🏏</span>
+                    <span className="absolute right-6 bottom-4 text-6xl opacity-20 -rotate-12">🏏</span>
+                    <span className="absolute left-1/3 top-1/3 text-5xl opacity-15">⚪</span>
+                    <span className="text-5xl relative z-10">🏏</span>
+                  </div>
+                ) : (
+                  <span className="text-5xl">🏏</span>
+                )}
               </div>
               <div className="p-5">
                 <p className="mb-2 text-xs text-[var(--muted-foreground)]">{formatDate(news.createdAt)} &middot; {news.author}</p>
