@@ -27,7 +27,7 @@ async function AdminPredictionsPage() {
                 <div className="flex items-center gap-3">
                   <span>{season.name}</span>
                   <span className="rounded bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--accent)]">{predictions.length} votes</span>
-                  {season.isActive && <span className="rounded bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">Active</span>}
+                  {!season.scheduleAnnounced ? <span className="rounded bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">Active</span> : <span className="rounded bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400">Locked</span>}
                 </div>
                 <span className="text-xs text-[var(--muted-foreground)] group-open:hidden">Show</span>
                 <span className="text-xs text-[var(--muted-foreground)] hidden group-open:inline">Hide</span>
