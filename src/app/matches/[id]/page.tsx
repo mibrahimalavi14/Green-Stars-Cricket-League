@@ -3,24 +3,44 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
 
+type Perf = PlayerMatch & { player: Player }
+
 type MatchWithRelations = Match & {
   team1: Team
   team2: Team
   season: { name: string }
   innings: Inning[]
-  performances: (PlayerMatch & { player: Player })[]
+  performances: Perf[]
 }
 
 export const revalidate = 30
 
-function BattingTable({ performances, heading }: { performances: (PlayerMatch & { player: Player })[], heading?: string }) {
+function getDismissalText(p: Perf, allPerfs: Perf[]) {
+  if (!p.isOut) return p.ballsFaced > 0 ? "not out" : ""
+  const bowlerName = p.dismissedByBowlerId ? allPerfs.find(pp => pp.playerId === p.dismissedByBowlerId)?.player.name : null
+  const fielderName = p.dismissedByFielderId ? allPerfs.find(pp => pp.playerId === p.dismissedByFielderId)?.player.name : null
+  const bn = bowlerName || ""
+  const fn = fielderName || ""
+  switch (p.dismissalType) {
+    case "bowled": return `b ${bn}`
+    case "caught": return `c ${fn} b ${bn}`
+    case "lbw": return `lbw b ${bn}`
+    case "stumped": return `st ${fn} b ${bn}`
+    case "run out": return `run out (${fn || bn})`
+    case "hit wicket": return `hit wicket b ${bn}`
+    case "retired": return "retired hurt"
+    default: return p.dismissalType
+  }
+}
+
+function BattingTable({ performances, allPerformances, heading }: { performances: Perf[], allPerformances: Perf[], heading?: string }) {
   const batters = performances.filter(p => p.ballsFaced > 0).sort((a, b) => b.battingRuns - a.battingRuns)
   if (batters.length === 0) return null
   return (
     <div className="mb-6">
       {heading && <h3 className="mb-2 font-semibold">{heading}</h3>}
       <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-        <table className="w-full min-w-[400px] text-sm">
+        <table className="w-full min-w-[450px] text-sm">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
               <th className="p-2 text-left">Batter</th>
@@ -32,24 +52,28 @@ function BattingTable({ performances, heading }: { performances: (PlayerMatch & 
             </tr>
           </thead>
           <tbody>
-            {batters.map(p => (
-              <tr key={p.id} className="border-b border-[var(--border)] last:border-b-0">
-                <td className="p-2 font-medium">
-                  <Link href={`/players/${p.playerId}`} className="hover:text-[var(--accent)] underline underline-offset-2">
-                    {p.player.name}
-                  </Link>
-                  {!p.isOut && p.ballsFaced > 0 && <span className="ml-1 text-xs text-[var(--muted-foreground)]">*</span>}
-                  {p.isOut && p.dismissalType && (
-                    <span className="ml-1 text-[10px] text-[var(--muted-foreground)]">({p.dismissalType})</span>
-                  )}
-                </td>
-                <td className="p-2 text-center font-bold">{p.battingRuns}</td>
-                <td className="p-2 text-center">{p.ballsFaced}</td>
-                <td className="p-2 text-center text-blue-600 dark:text-blue-400">{p.fours}</td>
-                <td className="p-2 text-center text-purple-600 dark:text-purple-400">{p.sixes}</td>
-                <td className="p-2 text-center font-mono">{p.ballsFaced > 0 ? ((p.battingRuns / p.ballsFaced) * 100).toFixed(1) : "-"}</td>
-              </tr>
-            ))}
+            {batters.map(p => {
+              const dismissText = getDismissalText(p, allPerformances)
+              return (
+                <tr key={p.id} className="border-b border-[var(--border)] last:border-b-0">
+                  <td className="p-2 font-medium">
+                    <Link href={`/players/${p.playerId}`} className="hover:text-[var(--accent)] underline underline-offset-2">
+                      {p.player.name}
+                    </Link>
+                    {dismissText && (
+                      <span className="ml-1 text-[10px] text-[var(--muted-foreground)]">
+                        {dismissText === "not out" ? "*" : `(${dismissText})`}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-2 text-center font-bold">{p.battingRuns}</td>
+                  <td className="p-2 text-center">{p.ballsFaced}</td>
+                  <td className="p-2 text-center text-blue-600 dark:text-blue-400">{p.fours}</td>
+                  <td className="p-2 text-center text-purple-600 dark:text-purple-400">{p.sixes}</td>
+                  <td className="p-2 text-center font-mono">{p.ballsFaced > 0 ? ((p.battingRuns / p.ballsFaced) * 100).toFixed(1) : "-"}</td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -57,14 +81,14 @@ function BattingTable({ performances, heading }: { performances: (PlayerMatch & 
   )
 }
 
-function BowlingTable({ performances, heading }: { performances: (PlayerMatch & { player: Player })[], heading?: string }) {
+function BowlingTable({ performances, heading }: { performances: Perf[], heading?: string }) {
   const bowlers = performances.filter(p => p.ballsBowled > 0).sort((a, b) => b.bowlingWickets - a.bowlingWickets)
   if (bowlers.length === 0) return null
   return (
     <div className="mb-6">
       {heading && <h3 className="mb-2 font-semibold">{heading}</h3>}
       <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-        <table className="w-full min-w-[400px] text-sm">
+        <table className="w-full min-w-[500px] text-sm">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
               <th className="p-2 text-left">Bowler</th>
@@ -72,6 +96,8 @@ function BowlingTable({ performances, heading }: { performances: (PlayerMatch & 
               <th className="p-2 text-center">Mdns</th>
               <th className="p-2 text-center">Runs</th>
               <th className="p-2 text-center">Wkts</th>
+              <th className="p-2 text-center">Wd</th>
+              <th className="p-2 text-center">Nb</th>
               <th className="p-2 text-center">Econ</th>
             </tr>
           </thead>
@@ -87,6 +113,8 @@ function BowlingTable({ performances, heading }: { performances: (PlayerMatch & 
                 <td className="p-2 text-center">{p.maidens}</td>
                 <td className="p-2 text-center">{p.bowlingRuns}</td>
                 <td className="p-2 text-center font-bold text-green-600 dark:text-green-400">{p.bowlingWickets}</td>
+                <td className="p-2 text-center text-orange-600 dark:text-orange-400">{p.wides || "-"}</td>
+                <td className="p-2 text-center text-rose-600 dark:text-rose-400">{p.noBalls || "-"}</td>
                 <td className="p-2 text-center font-mono">{p.ballsBowled > 0 ? (p.bowlingRuns / (p.ballsBowled / 6)).toFixed(2) : "-"}</td>
               </tr>
             ))}
@@ -97,41 +125,102 @@ function BowlingTable({ performances, heading }: { performances: (PlayerMatch & 
   )
 }
 
-function PartnershipCard({ battingPerformances, inning }: { battingPerformances: (PlayerMatch & { player: Player })[], inning: Inning | undefined }) {
+function PartnershipCard({ battingPerformances, allPerformances, inning }: { battingPerformances: Perf[], allPerformances: Perf[], inning: Inning | undefined }) {
   const batters = battingPerformances.filter(p => p.ballsFaced > 0)
   if (batters.length === 0) return null
   const totalRuns = batters.reduce((s, p) => s + p.battingRuns, 0)
   const totalBalls = batters.reduce((s, p) => s + p.ballsFaced, 0)
   const totalFours = batters.reduce((s, p) => s + p.fours, 0)
   const totalSixes = batters.reduce((s, p) => s + p.sixes, 0)
+  const maxRuns = Math.max(...batters.map(p => p.battingRuns), 1)
   return (
     <div className="mb-8">
       <h3 className="mb-2 font-semibold">Partnership</h3>
       <div className="rounded-xl border border-[var(--border)] p-4">
-        <div className="flex items-center justify-between gap-4">
-          {batters.map((p, i) => (
-            <div key={p.id} className={`flex flex-col ${i === 0 ? "items-start" : "items-end"}`}>
-              <Link href={`/players/${p.playerId}`} className="text-sm font-medium hover:text-[var(--accent)] underline underline-offset-2">
-                {p.player.name}
-              </Link>
-              <span className="text-sm text-[var(--muted-foreground)]">{p.battingRuns} ({p.ballsFaced})</span>
+        {batters.map((p, i) => {
+          const pct = (p.battingRuns / totalRuns) * 100
+          return (
+            <div key={p.id} className="mb-2">
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <Link href={`/players/${p.playerId}`} className="font-medium hover:text-[var(--accent)] underline underline-offset-2">
+                  {p.player.name}
+                </Link>
+                <span className="text-[var(--muted-foreground)]">
+                  {p.battingRuns} ({p.ballsFaced}){p.isOut ? ` ${getDismissalText(p, allPerformances)}` : " *"}
+                </span>
+              </div>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${pct}%`,
+                    backgroundColor: i === 0 ? "var(--accent)" : "#22c55e",
+                  }}
+                />
+              </div>
             </div>
-          ))}
-        </div>
-        <div className="mt-3 border-t border-[var(--border)] pt-3 text-center">
-          <span className="text-xl font-bold">{totalRuns}</span>
-          <span className="mx-1.5 text-xs text-[var(--muted-foreground)]">runs off</span>
-          <span className="text-base font-semibold">{totalBalls}</span>
-          <span className="mx-1.5 text-xs text-[var(--muted-foreground)]">balls</span>
-          <span className="text-xs text-[var(--muted-foreground)]">
-            ({totalFours}×4, {totalSixes}×6) &middot; SR {totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(1) : "-"}
-          </span>
-        </div>
-        {inning && (
-          <div className="mt-1 text-center text-xs text-[var(--muted-foreground)]">
-            Extras: {inning.extras} &middot; Total: {inning.runs}/{inning.wickets} ({Math.floor(inning.balls / 6)}.{inning.balls % 6} overs)
+          )
+        })}
+        <div className="mt-3 border-t border-[var(--border)] pt-3">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <span className="text-lg font-bold">{totalRuns}</span>
+            <span className="text-[var(--muted-foreground)]">runs</span>
+            <span className="text-[var(--muted-foreground)]">|</span>
+            <span className="font-semibold">{totalBalls}</span>
+            <span className="text-[var(--muted-foreground)]">balls</span>
+            <span className="text-[var(--muted-foreground)]">|</span>
+            <span>{totalFours}×4, {totalSixes}×6</span>
+            <span className="text-[var(--muted-foreground)]">|</span>
+            <span className="font-mono">SR {totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(1) : "-"}</span>
           </div>
-        )}
+          <div className="flex items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
+            <span>RR {inning && inning.balls > 0 ? (inning.runs / (inning.balls / 6)).toFixed(2) : "-"}</span>
+            {inning && (
+              <>
+                <span>|</span>
+                <span>Extras: {inning.extras}</span>
+                <span>|</span>
+                <span>Total: {inning.runs}/{inning.wickets} ({Math.floor(inning.balls / 6)}.{inning.balls % 6} ov)</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FallOfWickets({ battingPerformances, allPerformances, inning }: { battingPerformances: Perf[], allPerformances: Perf[], inning: Inning | undefined }) {
+  const outPlayers = battingPerformances.filter(p => p.isOut)
+  if (outPlayers.length === 0) return null
+  return (
+    <div className="mb-6">
+      <h3 className="mb-2 font-semibold">Fall of Wickets</h3>
+      <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+              <th className="p-2 text-center">Wkt</th>
+              <th className="p-2 text-left">Batter</th>
+              <th className="p-2 text-left">Dismissal</th>
+              <th className="p-2 text-center">Runs</th>
+            </tr>
+          </thead>
+          <tbody>
+            {outPlayers.map((p, idx) => (
+              <tr key={p.id} className="border-b border-[var(--border)] last:border-b-0">
+                <td className="p-2 text-center font-bold text-[var(--muted-foreground)]">{idx + 1}</td>
+                <td className="p-2 font-medium">
+                  <Link href={`/players/${p.playerId}`} className="hover:text-[var(--accent)] underline underline-offset-2">
+                    {p.player.name}
+                  </Link>
+                </td>
+                <td className="p-2 text-xs text-[var(--muted-foreground)]">{getDismissalText(p, allPerformances)}</td>
+                <td className="p-2 text-center font-semibold">{p.battingRuns}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
@@ -152,8 +241,9 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
   if (!match) notFound()
 
   const m: MatchWithRelations = match
-  const team1Performances = m.performances.filter(p => p.teamId === m.team1Id)
-  const team2Performances = m.performances.filter(p => p.teamId === m.team2Id)
+  const allPerfs = m.performances
+  const team1Performances = allPerfs.filter(p => p.teamId === m.team1Id)
+  const team2Performances = allPerfs.filter(p => p.teamId === m.team2Id)
   const team1Inning = m.innings.find(i => i.teamId === m.team1Id)
   const team2Inning = m.innings.find(i => i.teamId === m.team2Id)
 
@@ -214,7 +304,6 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
             </p>
           )}
 
-          {/* Score summary cards */}
           <div className="mb-6 grid gap-4 md:grid-cols-2">
             <div className={`rounded-xl border p-4 ${team1BatFirst ? "border-[var(--accent)]" : "border-[var(--border)]"}`}>
               <div className="mb-2 flex items-center gap-2">
@@ -264,17 +353,19 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           {/* 1st Innings */}
           <div className="mb-8 rounded-xl border-2 border-[var(--accent)] p-4">
             <h2 className="mb-4 text-lg font-bold">{firstBattingTeam.name} Innings</h2>
-            {BattingTable({ performances: firstBattingPerf, heading: "Batting" })}
+            {BattingTable({ performances: firstBattingPerf, allPerformances: allPerfs, heading: "Batting" })}
+            {FallOfWickets({ battingPerformances: firstBattingPerf, allPerformances: allPerfs, inning: firstInning })}
             {BowlingTable({ performances: firstBowlingPerf, heading: "Bowling" })}
-            {PartnershipCard({ battingPerformances: firstBattingPerf, inning: firstInning })}
+            {PartnershipCard({ battingPerformances: firstBattingPerf, allPerformances: allPerfs, inning: firstInning })}
           </div>
 
           {/* 2nd Innings */}
           <div className="mb-8 rounded-xl border-2 border-[var(--border)] p-4">
             <h2 className="mb-4 text-lg font-bold">{secondBattingTeam.name} Innings</h2>
-            {BattingTable({ performances: secondBattingPerf, heading: "Batting" })}
+            {BattingTable({ performances: secondBattingPerf, allPerformances: allPerfs, heading: "Batting" })}
+            {FallOfWickets({ battingPerformances: secondBattingPerf, allPerformances: allPerfs, inning: secondInning })}
             {BowlingTable({ performances: secondBowlingPerf, heading: "Bowling" })}
-            {PartnershipCard({ battingPerformances: secondBattingPerf, inning: secondInning })}
+            {PartnershipCard({ battingPerformances: secondBattingPerf, allPerformances: allPerfs, inning: secondInning })}
           </div>
 
           {m.youtubeUrl && (

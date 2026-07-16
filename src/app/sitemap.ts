@@ -1,6 +1,6 @@
 const baseUrl = "https://green-stars-cricket-league.vercel.app"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 300
 
 export default async function sitemap() {
   const { prisma } = await import("@/lib/prisma")

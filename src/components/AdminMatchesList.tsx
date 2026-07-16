@@ -116,10 +116,14 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         twos: parseInt(s(p.id, "2s")) || 0,
         isOut: s(p.id, "out") === "1",
         dismissalType: s(p.id, "dismissal") || "",
+        dismissedByBowlerId: s(p.id, "dismissalBowler") || "",
+        dismissedByFielderId: s(p.id, "dismissalFielder") || "",
         bowlingWickets: parseInt(s(p.id, "wkts")) || 0,
         bowlingRuns: parseInt(s(p.id, "br")) || 0,
         ballsBowled: parseInt(s(p.id, "bb")) || 0,
         maidens: parseInt(s(p.id, "mdns")) || 0,
+        wides: parseInt(s(p.id, "wides")) || 0,
+        noBalls: parseInt(s(p.id, "noBalls")) || 0,
         catches: parseInt(s(p.id, "ct")) || 0,
         stumpings: parseInt(s(p.id, "st")) || 0,
         runOuts: parseInt(s(p.id, "ro")) || 0,
@@ -130,8 +134,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         playerId: n.playerId,
         teamId: m.team1.id,
         battingRuns: 0, ballsFaced: 0, fours: 0, sixes: 0, ones: 0, twos: 0,
-        isOut: false, dismissalType: "",
-        bowlingWickets: 0, bowlingRuns: 0, ballsBowled: 0, maidens: 0,
+        isOut: false, dismissalType: "", dismissedByBowlerId: "", dismissedByFielderId: "",
+        bowlingWickets: 0, bowlingRuns: 0, ballsBowled: 0, maidens: 0, wides: 0, noBalls: 0,
         catches: parseInt(n.ct) || 0,
         stumpings: parseInt(n.st) || 0,
         runOuts: parseInt(n.ro) || 0,
@@ -252,7 +256,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     router.refresh()
   }
 
-  function PlayerTable(players: Player[], teamName: string) {
+  function PlayerTable(players: Player[], teamName: string, opposingPlayers: Player[]) {
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
@@ -267,10 +271,14 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium" title="Twos (2 runs)">2s</th>
               <th className="py-1 px-1 text-center font-medium">Out</th>
               <th className="py-1 px-1 text-center font-medium">Dismissal</th>
+              <th className="py-1 px-1 text-center font-medium" title="Dismissed By Bowler">Bowler</th>
+              <th className="py-1 px-1 text-center font-medium" title="Dismissed By Fielder">Fielder</th>
               <th className="py-1 px-1 text-center font-medium" title="Bowling Wickets">Wkts</th>
               <th className="py-1 px-1 text-center font-medium" title="Runs Conceded">Runs</th>
               <th className="py-1 px-1 text-center font-medium" title="Balls Bowled">Balls</th>
               <th className="py-1 px-1 text-center font-medium" title="Maidens">Mdns</th>
+              <th className="py-1 px-1 text-center font-medium" title="Wides">Wd</th>
+              <th className="py-1 px-1 text-center font-medium" title="No Balls">Nb</th>
               <th className="py-1 px-1 text-center font-medium" title="Catches">Ct</th>
               <th className="py-1 px-1 text-center font-medium" title="Stumpings">St</th>
               <th className="py-1 px-1 text-center font-medium" title="Run Outs">RO</th>
@@ -288,7 +296,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "2s")} onChange={e => set(p.id, "2s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1 text-center"><input type="checkbox" checked={s(p.id, "out") === "1"} onChange={() => toggleOut(p.id)} className="h-3 w-3" /></td>
                 <td className="py-1 px-1">
-                  <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-16 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                  <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                     <option value="">-</option>
                     <option value="bowled">Bowled</option>
                     <option value="caught">Caught</option>
@@ -299,10 +307,36 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     <option value="hit wicket">Hit Wkt</option>
                   </select>
                 </td>
+                <td className="py-1 px-1">
+                  {s(p.id, "out") === "1" && s(p.id, "dismissal") && s(p.id, "dismissal") !== "run out" && s(p.id, "dismissal") !== "retired" ? (
+                    <select value={s(p.id, "dismissalBowler")} onChange={e => set(p.id, "dismissalBowler", e.target.value)} className="w-16 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                      <option value="">-</option>
+                      {opposingPlayers.map(op => (
+                        <option key={op.id} value={op.id}>{op.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="text-[10px] text-[var(--muted-foreground)]">-</span>
+                  )}
+                </td>
+                <td className="py-1 px-1">
+                  {s(p.id, "out") === "1" && (s(p.id, "dismissal") === "caught" || s(p.id, "dismissal") === "stumped" || s(p.id, "dismissal") === "run out") ? (
+                    <select value={s(p.id, "dismissalFielder")} onChange={e => set(p.id, "dismissalFielder", e.target.value)} className="w-16 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                      <option value="">-</option>
+                      {opposingPlayers.map(op => (
+                        <option key={op.id} value={op.id}>{op.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="text-[10px] text-[var(--muted-foreground)]">-</span>
+                  )}
+                </td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wkts")} onChange={e => set(p.id, "wkts", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "br")} onChange={e => set(p.id, "br", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Runs Conceded" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "bb")} onChange={e => set(p.id, "bb", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Legal deliveries only (exclude wides/no-balls)" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "mdns")} onChange={e => set(p.id, "mdns", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
+                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wides")} onChange={e => set(p.id, "wides", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
+                <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "noBalls")} onChange={e => set(p.id, "noBalls", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "ct")} onChange={e => set(p.id, "ct", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "st")} onChange={e => set(p.id, "st", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "ro")} onChange={e => set(p.id, "ro", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
@@ -543,7 +577,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                     <p className="text-sm font-semibold">{m.team1.name} — Batting & Bowling</p>
                   </div>
-                  {PlayerTable(team1Players, m.team1.name)}
+                  {PlayerTable(team1Players, m.team1.name, team2Players)}
                 </div>
               )}
               {team2Players.length > 0 && (
@@ -552,7 +586,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                     <p className="text-sm font-semibold">{m.team2.name} — Batting & Bowling</p>
                   </div>
-                  {PlayerTable(team2Players, m.team2.name)}
+                  {PlayerTable(team2Players, m.team2.name, team1Players)}
                 </div>
               )}
 
