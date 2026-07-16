@@ -99,8 +99,6 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             <StatCard label="SR" value={bowlingSr} title="Strike Rate" />
             <StatCard label="Avg" value={bowlingAvg} title="Bowling Average" />
             <StatCard label="Econ" value={econ} title="Economy Rate" />
-            <StatCard label="4w" value={player.fourWickets} title="4 Wickets in an Innings" />
-            <StatCard label="5w" value={player.fiveWickets} title="5 Wickets in an Innings" />
             <StatCard label="Wkts/M" value={wktsPerMatch} title="Wickets per Match" />
           </div>
         </div>

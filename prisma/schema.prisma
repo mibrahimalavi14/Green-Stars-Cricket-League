@@ -112,8 +112,7 @@ model Player {
   runOuts             Int     @default(0)
   notOuts             Int     @default(0)
   ducks               Int     @default(0)
-  fourWickets         Int     @default(0)
-  fiveWickets         Int     @default(0)
+
 
   performances PlayerMatch[]
 

@@ -31,8 +31,7 @@ export interface PlayerData {
   matchesPlayed: number
   notOuts: number
   ducks: number
-  fourWickets: number
-  fiveWickets: number
+
   fifties: number
   hundreds: number
   team?: TeamData

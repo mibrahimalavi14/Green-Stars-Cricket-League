@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
+import { recalcPointsTable } from "@/lib/stats"
 
 export const revalidate = 30
 
@@ -23,7 +24,6 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
   const teamIds = season.teams.map(t => t.id)
   const allPlayers = season.teams.flatMap(t => t.players)
 
-  const { recalcPointsTable } = await import("@/lib/stats")
   const standings = await recalcPointsTable(season.id)
 
   // Fetch performances only for matches in this season
@@ -68,32 +68,48 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
 
       {/* Tournament Leaders */}
       {allPlayers.length > 0 && (() => {
-        const getInnings = (pId: string) => perfByPlayer.get(pId)?.length || 0
-        const getDismissals = (pId: string) => Math.max(perfByPlayer.get(pId)?.filter(x => x.isOut).length || 1, 1)
+        const ss = new Map<string, { runs: number; balls: number; fours: number; sixes: number; wickets: number; rc: number; bb: number; dismissals: number; inns: number }>()
+        for (const p of allPlayers) {
+          const perfs = perfByPlayer.get(p.id) || []
+          ss.set(p.id, {
+            runs: perfs.reduce((s, x) => s + x.battingRuns, 0),
+            balls: perfs.reduce((s, x) => s + x.ballsFaced, 0),
+            fours: perfs.reduce((s, x) => s + x.fours, 0),
+            sixes: perfs.reduce((s, x) => s + x.sixes, 0),
+            wickets: perfs.reduce((s, x) => s + x.bowlingWickets, 0),
+            rc: perfs.reduce((s, x) => s + x.bowlingRuns, 0),
+            bb: perfs.reduce((s, x) => s + x.ballsBowled, 0),
+            dismissals: perfs.filter(x => x.isOut).length,
+            inns: perfs.filter(x => x.ballsFaced > 0).length,
+          })
+        }
 
-        const tR = allPlayers.filter(p => p.runs > 0).sort((a, b) => b.runs - a.runs)[0]
-        const m4 = allPlayers.filter(p => p.fours > 0).sort((a, b) => b.fours - a.fours)[0]
-        const m6 = allPlayers.filter(p => p.sixes > 0).sort((a, b) => b.sixes - a.sixes)[0]
-        const bA = allPlayers.filter(p => getInnings(p.id) >= 3 && p.runs > 0).sort((a, b) => (b.runs / getDismissals(b.id)) - (a.runs / getDismissals(a.id)))[0]
-        const sR = allPlayers.filter(p => p.ballsFaced >= 10).sort((a, b) => (b.runs / b.ballsFaced) - (a.runs / a.ballsFaced))[0]
-        const tW = allPlayers.filter(p => p.wickets > 0).sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)[0]
-        const bA2 = (allPlayers.filter(p => p.wickets >= 3).sort((a, b) => (a.runsConceded / a.wickets) - (b.runsConceded / b.wickets))[0] || tW)
-        const eR = allPlayers.filter(p => p.ballsBowled >= 12).sort((a, b) => (a.runsConceded / (a.ballsBowled / 6)) - (b.runsConceded / (b.ballsBowled / 6)))[0]
-        const aR = allPlayers.filter(p => p.runs >= 20 && p.wickets >= 2).sort((a, b) => (b.runs + b.wickets * 20) - (a.runs + a.wickets * 20))[0]
+        const tR = [...ss.entries()].filter(([_, s]) => s.runs > 0).sort((a, b) => b[1].runs - a[1].runs)[0]
+        const m4 = [...ss.entries()].filter(([_, s]) => s.fours > 0).sort((a, b) => b[1].fours - a[1].fours)[0]
+        const m6 = [...ss.entries()].filter(([_, s]) => s.sixes > 0).sort((a, b) => b[1].sixes - a[1].sixes)[0]
+        const bA = [...ss.entries()].filter(([_, s]) => s.inns >= 3 && s.runs > 0).sort((a, b) => (b[1].runs / Math.max(b[1].dismissals, 1)) - (a[1].runs / Math.max(a[1].dismissals, 1)))[0]
+        const sR = [...ss.entries()].filter(([_, s]) => s.balls >= 10).sort((a, b) => (b[1].runs / b[1].balls) - (a[1].runs / a[1].balls))[0]
+        const tW = [...ss.entries()].filter(([_, s]) => s.wickets > 0).sort((a, b) => b[1].wickets - a[1].wickets || a[1].rc - b[1].rc)[0]
+        const bA2 = [...ss.entries()].filter(([_, s]) => s.wickets >= 3).sort((a, b) => (a[1].rc / a[1].wickets) - (b[1].rc / b[1].wickets))[0] || tW
+        const eR = [...ss.entries()].filter(([_, s]) => s.bb >= 12).sort((a, b) => (a[1].rc / (a[1].bb / 6)) - (b[1].rc / (b[1].bb / 6)))[0]
+        const aR = [...ss.entries()].filter(([_, s]) => s.runs >= 20 && s.wickets >= 2).sort((a, b) => (b[1].runs + b[1].wickets * 20) - (a[1].runs + a[1].wickets * 20))[0]
+
+        const pMap = new Map(allPlayers.map(p => [p.id, p]))
+        const getP = (id: string) => pMap.get(id)
 
         return (
           <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold">Tournament Leaders</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <LeaderCard label="Orange Cap" stat="Runs" value={tR ? String(tR.runs) : "-"} name={tR?.name || "Yet to be decided"} color="orange" />
-              <LeaderCard label="Most Fours" stat="Fours" value={m4 ? String(m4.fours) : "-"} name={m4?.name || "Yet to be decided"} color="blue" />
-              <LeaderCard label="Most Sixes" stat="Sixes" value={m6 ? String(m6.sixes) : "-"} name={m6?.name || "Yet to be decided"} color="purple" />
-              <LeaderCard label="Best Strike Rate" stat="SR" value={sR ? ((sR.runs / sR.ballsFaced) * 100).toFixed(1) : "-"} name={sR?.name || "Yet to be decided"} color="cyan" sub="min 10 balls" />
-              <LeaderCard label="Best Batting Avg" stat="Avg" value={bA ? (bA.runs / getDismissals(bA.id)).toFixed(2) : "-"} name={bA?.name || "Yet to be decided"} color="emerald" sub="min 3 inns" />
-              <LeaderCard label="Purple Cap" stat="Wickets" value={tW ? String(tW.wickets) : "-"} name={tW?.name || "Yet to be decided"} color="violet" />
-              <LeaderCard label="Best Bowling Avg" stat="Avg" value={bA2 ? (bA2.runsConceded / bA2.wickets).toFixed(2) : "-"} name={bA2?.name || "Yet to be decided"} color="red" sub="min 3 wkts" />
-              <LeaderCard label="Best Economy" stat="Econ" value={eR ? (eR.runsConceded / (eR.ballsBowled / 6)).toFixed(2) : "-"} name={eR?.name || "Yet to be decided"} color="teal" sub="min 2 ov" />
-              <LeaderCard label="Best All-Rounder" stat="Pts" value={aR ? String(aR.runs + aR.wickets * 20) : "-"} name={aR?.name || "Yet to be decided"} color="amber" sub="min 20r 2w" />
+              <LeaderCard label="Orange Cap" stat="Runs" value={tR ? String(tR[1].runs) : "-"} name={getP(tR?.[0] ?? "")?.name || "Yet to be decided"} color="orange" />
+              <LeaderCard label="Most Fours" stat="Fours" value={m4 ? String(m4[1].fours) : "-"} name={getP(m4?.[0] ?? "")?.name || "Yet to be decided"} color="blue" />
+              <LeaderCard label="Most Sixes" stat="Sixes" value={m6 ? String(m6[1].sixes) : "-"} name={getP(m6?.[0] ?? "")?.name || "Yet to be decided"} color="purple" />
+              <LeaderCard label="Best Strike Rate" stat="SR" value={sR ? ((sR[1].runs / sR[1].balls) * 100).toFixed(1) : "-"} name={getP(sR?.[0] ?? "")?.name || "Yet to be decided"} color="cyan" sub="min 10 balls" />
+              <LeaderCard label="Best Batting Avg" stat="Avg" value={bA ? (bA[1].runs / Math.max(bA[1].dismissals, 1)).toFixed(2) : "-"} name={getP(bA?.[0] ?? "")?.name || "Yet to be decided"} color="emerald" sub="min 3 inns" />
+              <LeaderCard label="Purple Cap" stat="Wickets" value={tW ? String(tW[1].wickets) : "-"} name={getP(tW?.[0] ?? "")?.name || "Yet to be decided"} color="violet" />
+              <LeaderCard label="Best Bowling Avg" stat="Avg" value={bA2 ? (bA2[1].rc / bA2[1].wickets).toFixed(2) : "-"} name={getP(bA2?.[0] ?? "")?.name || "Yet to be decided"} color="red" sub="min 3 wkts" />
+              <LeaderCard label="Best Economy" stat="Econ" value={eR ? (eR[1].rc / (eR[1].bb / 6)).toFixed(2) : "-"} name={getP(eR?.[0] ?? "")?.name || "Yet to be decided"} color="teal" sub="min 2 ov" />
+              <LeaderCard label="Best All-Rounder" stat="Pts" value={aR ? String(aR[1].runs + aR[1].wickets * 20) : "-"} name={getP(aR?.[0] ?? "")?.name || "Yet to be decided"} color="amber" sub="min 20r 2w" />
             </div>
           </section>
         )
@@ -275,40 +291,57 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                   </tr>
                 </thead>
                 <tbody>
-                  {allPlayers.filter(p => (perfByPlayer.get(p.id)?.filter(x => x.ballsFaced > 0)?.length ?? 0) > 0).sort((a, b) => b.runs - a.runs).map((p, i) => {
-                    const perfs = perfByPlayer.get(p.id) || []
-                    const inns = perfs.filter(x => x.ballsFaced > 0).length
-                    const dismissals = perfs.filter(x => x.isOut).length || inns
-                    const avg = dismissals > 0 ? (p.runs / dismissals).toFixed(2) : "-"
-                    const hs = Math.max(...perfs.map(x => x.battingRuns), 0)
-                    return (
-                      <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
-                        <td className="p-3 text-center font-medium text-[var(--muted-foreground)]">{i + 1}</td>
-                        <td className="p-3 font-medium">{p.name}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1.5">
-                            {season.teams.find(t => t.id === p.teamId)?.logo && (
-                              <img src={season.teams.find(t => t.id === p.teamId)!.logo} alt="" className="h-5 w-5 rounded-full object-cover" />
-                            )}
-                            <span className="text-[var(--muted-foreground)]">{season.teams.find(t => t.id === p.teamId)?.name}</span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-center">{p.matchesPlayed}</td>
-                        <td className="p-3 text-center">{inns}</td>
-                        <td className="p-3 text-center font-bold">{p.runs}</td>
-                        <td className="p-3 text-center">{p.ballsFaced}</td>
-                        <td className="p-3 text-center font-medium">{hs}</td>
-                        <td className="p-3 text-center font-mono">{avg}</td>
-                        <td className="p-3 text-center font-mono">{p.ballsFaced > 0 ? ((p.runs / p.ballsFaced) * 100).toFixed(1) : "-"}</td>
-                        <td className="p-3 text-center text-blue-600 dark:text-blue-400">{p.fours}</td>
-                        <td className="p-3 text-center text-purple-600 dark:text-purple-400">{p.sixes}</td>
-                        <td className="p-3 text-center">{p.notOuts}</td>
-                        <td className="p-3 text-center">{p.ducks}</td>
-                        <td className="p-3 text-center text-yellow-600 dark:text-yellow-400">{p.fifties}</td>
-                        <td className="p-3 text-center text-green-600 dark:text-green-400">{p.hundreds}</td>
-                      </tr>
-                    )
-                  })}
+                  {allPlayers.filter(p => (perfByPlayer.get(p.id)?.filter(x => x.ballsFaced > 0)?.length ?? 0) > 0)
+                    .map(p => {
+                      const perfs = perfByPlayer.get(p.id) || []
+                      return {
+                        p,
+                        runs: perfs.reduce((s, x) => s + x.battingRuns, 0),
+                        balls: perfs.reduce((s, x) => s + x.ballsFaced, 0),
+                        fours: perfs.reduce((s, x) => s + x.fours, 0),
+                        sixes: perfs.reduce((s, x) => s + x.sixes, 0),
+                        inns: perfs.filter(x => x.ballsFaced > 0).length,
+                        dismissals: perfs.filter(x => x.isOut).length,
+                        hs: Math.max(...perfs.map(x => x.battingRuns), 0),
+                        notOuts: perfs.filter(x => x.ballsFaced > 0 && !x.isOut).length,
+                        ducks: perfs.filter(x => x.battingRuns === 0 && x.isOut).length,
+                        fifties: perfs.filter(x => x.battingRuns >= 50 && x.battingRuns < 100).length,
+                        hundreds: perfs.filter(x => x.battingRuns >= 100).length,
+                        matches: new Set(perfs.map(x => x.matchId)).size,
+                      }
+                    })
+                    .sort((a, b) => b.runs - a.runs)
+                    .map((s, i) => {
+                      const avg = s.runs > 0 && s.dismissals > 0 ? (s.runs / s.dismissals).toFixed(2) : "-"
+                      const sr = s.balls > 0 ? ((s.runs / s.balls) * 100).toFixed(1) : "-"
+                      return (
+                        <tr key={s.p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
+                          <td className="p-3 text-center font-medium text-[var(--muted-foreground)]">{i + 1}</td>
+                          <td className="p-3 font-medium">{s.p.name}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1.5">
+                              {season.teams.find(t => t.id === s.p.teamId)?.logo && (
+                                <img src={season.teams.find(t => t.id === s.p.teamId)!.logo} alt="" className="h-5 w-5 rounded-full object-cover" />
+                              )}
+                              <span className="text-[var(--muted-foreground)]">{season.teams.find(t => t.id === s.p.teamId)?.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">{s.matches}</td>
+                          <td className="p-3 text-center">{s.inns}</td>
+                          <td className="p-3 text-center font-bold">{s.runs}</td>
+                          <td className="p-3 text-center">{s.balls}</td>
+                          <td className="p-3 text-center font-medium">{s.hs}</td>
+                          <td className="p-3 text-center font-mono">{avg}</td>
+                          <td className="p-3 text-center font-mono">{sr}</td>
+                          <td className="p-3 text-center text-blue-600 dark:text-blue-400">{s.fours}</td>
+                          <td className="p-3 text-center text-purple-600 dark:text-purple-400">{s.sixes}</td>
+                          <td className="p-3 text-center">{s.notOuts}</td>
+                          <td className="p-3 text-center">{s.ducks}</td>
+                          <td className="p-3 text-center text-yellow-600 dark:text-yellow-400">{s.fifties}</td>
+                          <td className="p-3 text-center text-green-600 dark:text-green-400">{s.hundreds}</td>
+                        </tr>
+                      )
+                    })}
                   {allPlayers.filter(p => (perfByPlayer.get(p.id)?.length ?? 0) > 0).length === 0 && (
                     <tr><td colSpan={16} className="p-4 text-center text-[var(--muted-foreground)]">No batting data yet.</td></tr>
                   )}
@@ -332,51 +365,63 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     <th className="p-3 text-center" title="Wickets">Wkts</th>
                     <th className="p-3 text-center">Runs</th>
                     <th className="p-3 text-center" title="Best Bowling">BB</th>
-                    <th className="p-3 text-center" title="4 Wickets">4w</th>
-                    <th className="p-3 text-center" title="5 Wickets">5w</th>
                     <th className="p-3 text-center" title="Strike Rate">SR</th>
                     <th className="p-3 text-center" title="Average">Avg</th>
                     <th className="p-3 text-center" title="Economy Rate">Econ</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {allPlayers.filter(p => p.wickets > 0).sort((a, b) => b.wickets - a.wickets).map((p, i) => {
-                    const perfs = perfByPlayer.get(p.id) || []
-                    const inns = perfs.filter(x => x.ballsBowled > 0).length
-                    const overs = Math.floor(p.ballsBowled / 6) + "." + (p.ballsBowled % 6)
-                    const bestWkts = Math.max(...perfs.map(x => x.bowlingWickets), 0)
-                    const bestRuns = perfs.filter(x => x.bowlingWickets === bestWkts).reduce((min, x) => Math.min(min, x.bowlingRuns), Infinity)
-                    const bb = bestWkts > 0 ? `${bestWkts}/${bestRuns}` : "-"
-                    const sr = p.wickets > 0 ? (p.ballsBowled / p.wickets).toFixed(1) : "-"
-                    const avg = p.wickets > 0 ? (p.runsConceded / p.wickets).toFixed(2) : "-"
-                    return (
-                      <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
-                        <td className="p-3 text-center font-medium text-[var(--muted-foreground)]">{i + 1}</td>
-                        <td className="p-3 font-medium">{p.name}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1.5">
-                            {season.teams.find(t => t.id === p.teamId)?.logo && (
-                              <img src={season.teams.find(t => t.id === p.teamId)!.logo} alt="" className="h-5 w-5 rounded-full object-cover" />
-                            )}
-                            <span className="text-[var(--muted-foreground)]">{season.teams.find(t => t.id === p.teamId)?.name}</span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-center">{p.matchesPlayed}</td>
-                        <td className="p-3 text-center">{inns}</td>
-                        <td className="p-3 text-center font-mono">{overs}</td>
-                        <td className="p-3 text-center font-bold text-green-600 dark:text-green-400">{p.wickets}</td>
-                        <td className="p-3 text-center">{p.runsConceded}</td>
-                        <td className="p-3 text-center font-medium">{bb}</td>
-                        <td className="p-3 text-center font-bold text-orange-600 dark:text-orange-400">{p.fourWickets}</td>
-                        <td className="p-3 text-center font-bold text-red-600 dark:text-red-400">{p.fiveWickets}</td>
-                        <td className="p-3 text-center font-mono">{sr}</td>
-                        <td className="p-3 text-center font-mono">{avg}</td>
-                        <td className="p-3 text-center font-mono">{p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-"}</td>
-                      </tr>
-                    )
-                  })}
+                  {allPlayers.filter(p => (perfByPlayer.get(p.id)?.filter(x => x.ballsBowled > 0)?.length ?? 0) > 0)
+                    .map(p => {
+                      const perfs = perfByPlayer.get(p.id) || []
+                      return {
+                        p,
+                        wickets: perfs.reduce((s, x) => s + x.bowlingWickets, 0),
+                        runsConceded: perfs.reduce((s, x) => s + x.bowlingRuns, 0),
+                        ballsBowled: perfs.reduce((s, x) => s + x.ballsBowled, 0),
+                        inns: perfs.filter(x => x.ballsBowled > 0).length,
+                        bestWkts: Math.max(...perfs.map(x => x.bowlingWickets), 0),
+                        bestRuns: (() => {
+                          const bw = Math.max(...perfs.map(x => x.bowlingWickets), 0)
+                          return perfs.filter(x => x.bowlingWickets === bw).reduce((min, x) => Math.min(min, x.bowlingRuns), Infinity)
+                        })(),
+                        matches: new Set(perfs.map(x => x.matchId)).size,
+                      }
+                    })
+                    .filter(s => s.wickets > 0)
+                    .sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)
+                    .map((s, i) => {
+                      const overs = Math.floor(s.ballsBowled / 6) + "." + (s.ballsBowled % 6)
+                      const bb = s.bestWkts > 0 ? `${s.bestWkts}/${s.bestRuns}` : "-"
+                      const sr = s.wickets > 0 ? (s.ballsBowled / s.wickets).toFixed(1) : "-"
+                      const avg = s.wickets > 0 ? (s.runsConceded / s.wickets).toFixed(2) : "-"
+                      const econ = s.ballsBowled > 0 ? (s.runsConceded / (s.ballsBowled / 6)).toFixed(2) : "-"
+                      return (
+                        <tr key={s.p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
+                          <td className="p-3 text-center font-medium text-[var(--muted-foreground)]">{i + 1}</td>
+                          <td className="p-3 font-medium">{s.p.name}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1.5">
+                              {season.teams.find(t => t.id === s.p.teamId)?.logo && (
+                                <img src={season.teams.find(t => t.id === s.p.teamId)!.logo} alt="" className="h-5 w-5 rounded-full object-cover" />
+                              )}
+                              <span className="text-[var(--muted-foreground)]">{season.teams.find(t => t.id === s.p.teamId)?.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">{s.matches}</td>
+                          <td className="p-3 text-center">{s.inns}</td>
+                          <td className="p-3 text-center font-mono">{overs}</td>
+                          <td className="p-3 text-center font-bold text-green-600 dark:text-green-400">{s.wickets}</td>
+                          <td className="p-3 text-center">{s.runsConceded}</td>
+                          <td className="p-3 text-center font-medium">{bb}</td>
+                          <td className="p-3 text-center font-mono">{sr}</td>
+                          <td className="p-3 text-center font-mono">{avg}</td>
+                          <td className="p-3 text-center font-mono">{econ}</td>
+                        </tr>
+                      )
+                    })}
                   {allPlayers.filter(p => p.wickets > 0).length === 0 && (
-                    <tr><td colSpan={14} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
+                    <tr><td colSpan={12} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
                   )}
                 </tbody>
               </table>
