@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 export function AdminPlayerForm() {
   const router = useRouter()
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([])
-  const [form, setForm] = useState({ name: "", role: "Batsman", teamId: "" })
+  const [form, setForm] = useState({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast" })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { fetch("/api/teams").then(r => r.json()).then(setTeams) }, [])
@@ -35,6 +35,23 @@ export function AdminPlayerForm() {
         <select value={form.role} onChange={e => setForm({...form, role: e.target.value})}
           className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
           <option>Batsman</option><option>Bowler</option><option>All-rounder</option><option>Wicket-keeper</option>
+        </select>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs">Batting Style</label>
+        <select value={form.battingStyle} onChange={e => setForm({...form, battingStyle: e.target.value})}
+          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
+          <option>Right-handed</option><option>Left-handed</option>
+        </select>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs">Bowling Style</label>
+        <select value={form.bowlingStyle} onChange={e => setForm({...form, bowlingStyle: e.target.value})}
+          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
+          <option>Right-arm fast</option><option>Right-arm fast-medium</option><option>Right-arm medium</option>
+          <option>Left-arm fast</option><option>Left-arm fast-medium</option><option>Left-arm medium</option>
+          <option>Right-arm off break</option><option>Left-arm orthodox</option><option>Leg break googly</option>
+          <option>Slow left-arm chinaman</option><option>Right-arm leg break</option>
         </select>
       </div>
       <div>

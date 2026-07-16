@@ -24,10 +24,11 @@ async function AdminPlayersPage() {
                 ) : (
                   <img src="/placeholder-player.svg" alt="" className="h-8 w-8 rounded-full bg-[var(--muted)] p-1" />
                 )}
-                <div>
-                  <p className="font-medium text-sm">{p.name}</p>
-                  <p className="text-xs text-[var(--muted-foreground)]">{p.role} &middot; {p.team?.shortName}</p>
-                </div>
+                  <div>
+                    <p className="font-medium text-sm">{p.name}</p>
+                    <p className="text-xs text-[var(--muted-foreground)]">{p.role} &middot; {p.team?.shortName}</p>
+                    <p className="text-[10px] text-[var(--muted-foreground)]">Bat: {p.battingStyle} &middot; Bowl: {p.bowlingStyle}</p>
+                  </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex gap-4 text-xs text-[var(--muted-foreground)]">

@@ -7,6 +7,8 @@ interface Player {
   id: string
   name: string
   role: string
+  battingStyle: string
+  bowlingStyle: string
   teamId: string
   team: { id: string; name: string; shortName: string }
   runs: number
@@ -17,7 +19,7 @@ interface Team { id: string; name: string }
 
 export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team[] }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ name: player.name, role: player.role, teamId: player.teamId })
+  const [form, setForm] = useState({ name: player.name, role: player.role, battingStyle: player.battingStyle, bowlingStyle: player.bowlingStyle, teamId: player.teamId })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -49,6 +51,17 @@ export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team
       <select value={form.role} onChange={e => setForm({...form, role: e.target.value})}
         className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
         <option>Batsman</option><option>Bowler</option><option>All-rounder</option><option>Wicket-keeper</option>
+      </select>
+      <select value={form.battingStyle} onChange={e => setForm({...form, battingStyle: e.target.value})}
+        className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
+        <option>Right-handed</option><option>Left-handed</option>
+      </select>
+      <select value={form.bowlingStyle} onChange={e => setForm({...form, bowlingStyle: e.target.value})}
+        className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
+        <option>Right-arm fast</option><option>Right-arm fast-medium</option><option>Right-arm medium</option>
+        <option>Left-arm fast</option><option>Left-arm fast-medium</option><option>Left-arm medium</option>
+        <option>Right-arm off break</option><option>Left-arm orthodox</option><option>Leg break googly</option>
+        <option>Slow left-arm chinaman</option><option>Right-arm leg break</option>
       </select>
       <select value={form.teamId} onChange={e => setForm({...form, teamId: e.target.value})}
         className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">

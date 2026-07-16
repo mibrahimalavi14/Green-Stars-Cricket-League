@@ -15,6 +15,23 @@ type MatchWithRelations = Match & {
 
 export const revalidate = 30
 
+function bowlerShort(style: string) {
+  const map: Record<string, string> = {
+    "Right-arm fast": "RAF",
+    "Right-arm fast-medium": "RAF-M",
+    "Right-arm medium": "RAM",
+    "Left-arm fast": "LAF",
+    "Left-arm fast-medium": "LAF-M",
+    "Left-arm medium": "LAM",
+    "Right-arm off break": "OB",
+    "Left-arm orthodox": "LAO",
+    "Leg break googly": "LBG",
+    "Slow left-arm chinaman": "SLA",
+    "Right-arm leg break": "LB",
+  }
+  return map[style] || style
+}
+
 function getDismissalText(p: Perf, allPerfs: Perf[]) {
   if (!p.isOut) return p.ballsFaced > 0 ? "not out" : ""
   const bowlerName = p.dismissedByBowlerId ? allPerfs.find(pp => pp.playerId === p.dismissedByBowlerId)?.player.name : null
@@ -60,6 +77,11 @@ function BattingTable({ performances, allPerformances, heading }: { performances
                     <Link href={`/players/${p.playerId}`} className="hover:text-[var(--accent)] underline underline-offset-2">
                       {p.player.name}
                     </Link>
+                    {p.player.battingStyle && (
+                      <span className="ml-1 rounded bg-[var(--muted)] px-1 text-[9px] font-medium text-[var(--muted-foreground)]">
+                        {p.player.battingStyle === "Left-handed" ? "LHB" : "RHB"}
+                      </span>
+                    )}
                     {dismissText && (
                       <span className="ml-1 text-[10px] text-[var(--muted-foreground)]">
                         {dismissText === "not out" ? "*" : `(${dismissText})`}
@@ -108,6 +130,11 @@ function BowlingTable({ performances, heading }: { performances: Perf[], heading
                   <Link href={`/players/${p.playerId}`} className="hover:text-[var(--accent)] underline underline-offset-2">
                     {p.player.name}
                   </Link>
+                  {p.player.bowlingStyle && (
+                    <span className="ml-1 rounded bg-[var(--muted)] px-1 text-[9px] font-medium text-[var(--muted-foreground)]">
+                      {bowlerShort(p.player.bowlingStyle)}
+                    </span>
+                  )}
                 </td>
                 <td className="p-2 text-center font-mono">{Math.floor(p.ballsBowled / 6)}.{p.ballsBowled % 6}</td>
                 <td className="p-2 text-center">{p.maidens}</td>
