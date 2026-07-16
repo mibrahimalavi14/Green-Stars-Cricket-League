@@ -200,7 +200,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                       <div className="mb-2 text-xs text-[var(--muted-foreground)]">
                         {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
                         {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })} &middot;{" "}
-                        {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2" onClick={e => e.stopPropagation()}>{venue}</a> : <>{venue}</> })(match.venue)}
+                        {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}
                       </div>
                       {/* Teams & scores */}
                       <div className="flex items-center justify-between gap-2">
