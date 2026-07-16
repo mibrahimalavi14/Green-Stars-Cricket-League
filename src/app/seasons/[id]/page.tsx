@@ -194,7 +194,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">League Stage</h3>
                 <div className="space-y-3">
                   {season.matches.filter(match => match.date < new Date("2026-08-16T00:00:00.000Z")).map((match) => (
-                    <Link key={match.id} href={`/matches/${match.id}`} className="block rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4 transition-colors hover:bg-[var(--muted)]">
+                    <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
                       {/* Date & venue row */}
                       <div className="mb-2 text-xs text-[var(--muted-foreground)]">
@@ -229,7 +229,12 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                       {match.status === "completed" && match.result && (
                         <div className="mt-2 text-center text-xs font-medium text-green-600 dark:text-green-400">{match.result}</div>
                       )}
-                    </Link>
+                      <div className="mt-3 text-center">
+                        <Link href={`/matches/${match.id}`} className="inline-block rounded-md bg-[var(--accent)] px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90">
+                          Scorecard &rarr;
+                        </Link>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
