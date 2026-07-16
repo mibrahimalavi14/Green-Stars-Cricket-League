@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 import { recalcPointsTable } from "@/lib/stats"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

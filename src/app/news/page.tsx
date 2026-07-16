@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { formatDate } from "@/lib/utils"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function NewsPage() {
   const newsList = await prisma.news.findMany({
@@ -25,7 +25,7 @@ async function NewsPage() {
               className="group rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden transition-all hover:border-[var(--accent)] hover:shadow-lg"
             >
               <div className="aspect-video bg-[var(--muted)] flex items-center justify-center">
-                <span className="text-5xl">🏏</span>
+                <span className="text-5xl">ðŸ</span>
               </div>
               <div className="p-5">
                 <p className="mb-2 text-xs text-[var(--muted-foreground)]">{formatDate(news.createdAt)} &middot; {news.author}</p>

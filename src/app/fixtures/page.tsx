@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
 import { getVenueMapsUrl } from "@/lib/utils"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function FixturesPage() {
   const matches = await prisma.match.findMany({
@@ -72,11 +72,11 @@ async function FixturesPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">Season 1 — Full Schedule</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">6 teams • 5-over format • Double Round Robin • 30 league matches</p>
+      <h1 className="mb-2 text-3xl font-bold">Season 1 â€” Full Schedule</h1>
+      <p className="mb-8 text-[var(--muted-foreground)]">6 teams â€¢ 5-over format â€¢ Double Round Robin â€¢ 30 league matches</p>
 
       <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-300">
-        <p className="font-medium">Note: Starter Phase — Neutral Fielders</p>
+        <p className="font-medium">Note: Starter Phase â€” Neutral Fielders</p>
         <p className="mt-1">During the starter phase of GSCL, players from non-participating teams may act as neutral fielders and wicketkeepers. Their fielding performances are recorded in the scorebook but do not affect their team's points or standings.</p>
       </div>
 

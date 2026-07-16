@@ -7,7 +7,7 @@ import { NewsCard } from "@/components/NewsCard"
 import { StarRating } from "@/components/StarRating"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function HomePage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })
@@ -43,7 +43,7 @@ async function HomePage() {
             Green Stars <span className="text-gscl-gold">Cricket League</span>
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-white/80">
-            {season?.name || "Welcome to the most exciting cricket league"} — Where champions rise and legends are made.
+            {season?.name || "Welcome to the most exciting cricket league"} â€” Where champions rise and legends are made.
           </p>
           <div className="flex justify-center gap-4">
             <Link href="/fixtures" className="rounded-lg bg-gscl-gold px-6 py-3 font-semibold text-gscl-dark transition-opacity hover:opacity-90">

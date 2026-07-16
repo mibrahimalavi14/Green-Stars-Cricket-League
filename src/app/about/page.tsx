@@ -1,13 +1,13 @@
 import { Shield, Users, Trophy, Star, Target, Heart } from "lucide-react"
 
-export const revalidate = 30
+export const revalidate = 300
 
 function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-2 text-3xl font-bold">About GSCL</h1>
       <p className="mb-10 text-[var(--muted-foreground)]">
-        Green Stars Cricket League — a vision born in Lahore, powered by passion.
+        Green Stars Cricket League â€” a vision born in Lahore, powered by passion.
       </p>
 
       <div className="mb-12 overflow-hidden rounded-xl border border-[var(--border)]">
@@ -32,7 +32,7 @@ function AboutPage() {
             <h2 className="mb-1 text-center text-xl font-bold">Chairman</h2>
             <p className="mb-3 text-center text-sm font-bold text-[var(--muted-foreground)]">Muhammad Ibrahim Alavi</p>
             <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
-              GSCL is not just a league — it is a platform for the youth of Lahore to showcase their talent and
+              GSCL is not just a league â€” it is a platform for the youth of Lahore to showcase their talent and
               pursue their dreams. My vision is to build a cricket ecosystem where every player, regardless of
               their background, gets a fair chance to rise. The passion I see in these young cricketers reminds
               me why we started this journey.
@@ -52,7 +52,7 @@ function AboutPage() {
             <h2 className="mb-1 text-center text-xl font-bold">General Secretary</h2>
             <p className="mb-3 text-center text-sm font-bold text-[var(--muted-foreground)]">Malik Taha Qaiser</p>
             <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
-              Every match, every run, every wicket — it is all about building a community that lives and breathes
+              Every match, every run, every wicket â€” it is all about building a community that lives and breathes
               cricket. My goal is to ensure GSCL runs smoothly, fairly, and professionally so that the players
               can focus on what they do best: playing the game they love. This league is for the players, by the
               players.
@@ -72,7 +72,7 @@ function AboutPage() {
           Our league is built on the values of sportsmanship, competition, and community. Every season, 6
           teams battle through a double round-robin league stage, followed by playoffs, culminating in a
           grand final to crown the champion. From raw pace to classic swing, from powerful hitting to
-          clever spin — GSCL is where the future stars of Pakistan cricket rise.
+          clever spin â€” GSCL is where the future stars of Pakistan cricket rise.
         </p>
         <p>
           With live scoring, player statistics, and real-time standings, GSCL offers fans a complete
@@ -106,7 +106,7 @@ function AboutPage() {
           </div>
           <h3 className="mb-1 font-semibold">5-Over Format</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
-            Fast-paced, action-packed cricket where every ball counts — perfect for modern audiences and players alike.
+            Fast-paced, action-packed cricket where every ball counts â€” perfect for modern audiences and players alike.
           </p>
         </div>
       </div>
@@ -121,7 +121,7 @@ function AboutPage() {
             <div>
               <h4 className="mb-1 font-medium">Double Round Robin</h4>
               <p className="text-xs text-[var(--muted-foreground)]">
-                Each team plays every other team twice — once home, once away. A total of 30 league matches.
+                Each team plays every other team twice â€” once home, once away. A total of 30 league matches.
               </p>
             </div>
           </div>

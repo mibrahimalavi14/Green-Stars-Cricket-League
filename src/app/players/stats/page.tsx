@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function PlayerStatsPage() {
   const players = await prisma.player.findMany({

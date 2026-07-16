@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

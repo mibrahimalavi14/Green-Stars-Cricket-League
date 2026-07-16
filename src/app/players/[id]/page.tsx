@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -133,7 +133,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
                   <div>
                     <span className="text-[var(--muted-foreground)]">Bat: </span>
                     <span className="font-medium">{p.battingRuns}</span>
-                    <span className="text-[var(--muted-foreground)]"> ({p.ballsFaced} balls, {p.fours}×4, {p.sixes}×6)</span>
+                    <span className="text-[var(--muted-foreground)]"> ({p.ballsFaced} balls, {p.fours}Ã—4, {p.sixes}Ã—6)</span>
                     {p.isOut && <span className="text-red-500"> {p.dismissalType}</span>}
                     {!p.isOut && <span className="text-green-500"> not out</span>}
                   </div>

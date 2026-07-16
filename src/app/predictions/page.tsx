@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { PredictionsClient } from "@/components/PredictionsClient"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function PredictionsPage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })

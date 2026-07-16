@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { LiveScoreClient } from "@/components/LiveScoreClient"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function LivePage() {
   const liveMatch = await prisma.match.findFirst({

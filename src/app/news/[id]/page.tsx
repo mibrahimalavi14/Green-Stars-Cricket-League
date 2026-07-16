@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { formatDate } from "@/lib/utils"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -13,7 +13,7 @@ async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         <div className="aspect-video bg-[var(--muted)] flex items-center justify-center">
-          <span className="text-6xl">🏏</span>
+          <span className="text-6xl">ðŸ</span>
         </div>
         <div className="p-8">
           <p className="mb-2 text-sm text-[var(--muted-foreground)]">{formatDate(news.createdAt)} &middot; {news.author}</p>

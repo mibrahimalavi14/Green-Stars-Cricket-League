@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
-export const revalidate = 30
+export const revalidate = 300
 
 async function TeamsPage() {
   const teams = await prisma.team.findMany({
