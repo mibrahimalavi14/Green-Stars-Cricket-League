@@ -170,55 +170,39 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                   {season.matches.filter(match => match.date < new Date("2026-08-16T00:00:00.000Z")).map((match) => (
                     <Link key={match.id} href={`/matches/${match.id}`} className="block rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4 transition-colors hover:bg-[var(--muted)]">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
-                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                        {/* Team 1 */}
-                        <div className="order-1 flex min-w-0 flex-1 items-center gap-2">
+                      {/* Date & venue row */}
+                      <div className="mb-2 text-xs text-[var(--muted-foreground)]">
+                        {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
+                        {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })} &middot;{" "}
+                        {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2" onClick={e => e.stopPropagation()}>{venue}</a> : <>{venue}</> })(match.venue)}
+                      </div>
+                      {/* Teams & scores */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-1 flex-col items-start gap-0.5">
                           <div className="flex items-center gap-2">
-                            {match.team1.logo && <img src={match.team1.logo} alt={match.team1.name} className="h-7 w-7 shrink-0 rounded-full object-cover sm:h-8 sm:w-8" />}
-                            <span className="truncate text-sm font-medium sm:text-base">{match.team1.name}</span>
+                            {match.team1.logo && <img src={match.team1.logo} alt={match.team1.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
+                            <span className="text-sm font-medium">{match.team1.name}</span>
                           </div>
                           {match.status === "completed" && match.team1Score && (
-                            <span className="text-xs font-semibold sm:text-sm">{match.team1Score}</span>
+                            <span className="ml-8 text-base font-bold">{match.team1Score}</span>
                           )}
                         </div>
-                        {/* VS - visible on mobile, hidden on desktop (shown in center below) */}
-                        <div className="order-2 text-center sm:hidden">
+                        <div className="shrink-0 text-center">
                           <div className="text-xs font-bold text-[var(--accent)]">VS</div>
                         </div>
-                        {/* Date - visible on mobile (between VS and Team 2), hidden on desktop */}
-                        <div className="order-3 text-center sm:hidden">
-                          <div className="text-xs text-[var(--muted-foreground)]">
-                            {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
-                            {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
-                          </div>
-                        </div>
-                        {/* Team 2 */}
-                        <div className="order-4 flex min-w-0 flex-1 items-center justify-end gap-2 sm:order-5">
+                        <div className="flex flex-1 flex-col items-end gap-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="truncate text-sm font-medium sm:text-base">{match.team2.name}</span>
-                            {match.team2.logo && <img src={match.team2.logo} alt={match.team2.name} className="h-7 w-7 shrink-0 rounded-full object-cover sm:h-8 sm:w-8" />}
+                            <span className="text-sm font-medium">{match.team2.name}</span>
+                            {match.team2.logo && <img src={match.team2.logo} alt={match.team2.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
                           </div>
                           {match.status === "completed" && match.team2Score && (
-                            <span className="text-xs font-semibold sm:text-sm">{match.team2Score}</span>
-                          )}
-                        </div>
-                        {/* Center (date, VS, venue) - hidden on mobile, visible on desktop */}
-                        <div className="order-5 shrink-0 text-center sm:order-3">
-                          <div className="hidden text-xs text-[var(--muted-foreground)] sm:block">
-                            {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
-                            {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
-                          </div>
-                          <div className="my-1 hidden text-xs font-bold text-[var(--accent)] sm:block">VS</div>
-                          <div className="hidden text-xs text-[var(--muted-foreground)] sm:block">{(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</div>
-                          {/* Venue - visible on mobile (below team 2), hidden on desktop */}
-                          <div className="mt-0.5 sm:hidden">
-                            <div className="text-xs text-[var(--muted-foreground)]">{(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</div>
-                          </div>
-                          {match.status === "completed" && match.result && (
-                            <div className="mt-1 text-xs font-medium text-green-600 dark:text-green-400">{match.result}</div>
+                            <span className="mr-8 text-base font-bold">{match.team2Score}</span>
                           )}
                         </div>
                       </div>
+                      {match.status === "completed" && match.result && (
+                        <div className="mt-2 text-center text-xs font-medium text-green-600 dark:text-green-400">{match.result}</div>
+                      )}
                     </Link>
                   ))}
                 </div>
