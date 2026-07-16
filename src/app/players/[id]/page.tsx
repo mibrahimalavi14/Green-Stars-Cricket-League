@@ -95,7 +95,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
             <StatCard label="Overs" value={overs} />
             <StatCard label="Wickets" value={player.wickets} />
             <StatCard label="Runs" value={player.runsConceded} />
-            <StatCard label="BB" value={bb} title="Best Bowling" />
+            <StatCard label="BBI" value={bb} title="Best Bowling Innings" />
             <StatCard label="SR" value={bowlingSr} title="Strike Rate" />
             <StatCard label="Avg" value={bowlingAvg} title="Bowling Average" />
             <StatCard label="Econ" value={econ} title="Economy Rate" />

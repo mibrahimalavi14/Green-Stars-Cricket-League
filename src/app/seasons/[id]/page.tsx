@@ -7,45 +7,46 @@ import { recalcPointsTable } from "@/lib/stats"
 export const revalidate = 30
 
 async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params
-    const season = await prisma.season.findUnique({
-      where: { id },
-      include: {
-        teams: { include: { players: true } },
-        matches: {
-          orderBy: { date: "asc" },
-          include: { team1: true, team2: true },
-        },
+  const { id } = await params
+  const season = await prisma.season.findUnique({
+    where: { id },
+    include: {
+      teams: { include: { players: true } },
+      matches: {
+        orderBy: { date: "asc" },
+        include: { team1: true, team2: true },
       },
-    })
+    },
+  })
 
-    if (!season) notFound()
+  if (!season) notFound()
 
-    const allPlayers = season.teams.flatMap(t => t.players)
+  const teamIds = season.teams.map(t => t.id)
+  const allPlayers = season.teams.flatMap(t => t.players)
 
-    const standings = await recalcPointsTable(season.id)
+  const standings = await recalcPointsTable(season.id)
 
-    const seasonMatchIds = season.matches.map(match => match.id)
-    const allPerformances = await prisma.playerMatch.findMany({
-      where: { matchId: { in: seasonMatchIds } },
-    })
-    const perfByPlayer = new Map<string, typeof allPerformances>()
-    for (const p of allPerformances) {
-      if (!perfByPlayer.has(p.playerId)) perfByPlayer.set(p.playerId, [])
-      perfByPlayer.get(p.playerId)!.push(p)
-    }
+  // Fetch performances only for matches in this season
+  const seasonMatchIds = season.matches.map(match => match.id)
+  const allPerformances = await prisma.playerMatch.findMany({
+    where: { matchId: { in: seasonMatchIds } },
+  })
+  const perfByPlayer = new Map<string, typeof allPerformances>()
+  for (const p of allPerformances) {
+    if (!perfByPlayer.has(p.playerId)) perfByPlayer.set(p.playerId, [])
+    perfByPlayer.get(p.playerId)!.push(p)
+  }
 
-    function playoffLabel(d: Date) {
-      const iso = d.toISOString()
-      if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
-      if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
-      if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
-      if (iso.startsWith("2026-08-23T")) return "Final"
-      return ""
-    }
+  function playoffLabel(d: Date) {
+    const iso = d.toISOString()
+    if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
+    if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
+    if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
+    if (iso.startsWith("2026-08-23T")) return "Final"
+    return ""
+  }
 
-    return (
+  return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <Link href="/seasons" className="mb-4 inline-block text-sm text-[var(--accent)] hover:underline">&larr; All Seasons</Link>
       <h1 className="mb-1 text-3xl font-bold">{season.name}</h1>
@@ -361,9 +362,10 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     <th className="p-3 text-center">M</th>
                     <th className="p-3 text-center" title="Innings">Inn</th>
                     <th className="p-3 text-center">Overs</th>
+                    <th className="p-3 text-center" title="Maidens">Mdns</th>
                     <th className="p-3 text-center" title="Wickets">Wkts</th>
                     <th className="p-3 text-center">Runs</th>
-                    <th className="p-3 text-center" title="Best Bowling">BB</th>
+                    <th className="p-3 text-center" title="Best Bowling Innings">BBI</th>
                     <th className="p-3 text-center" title="Strike Rate">SR</th>
                     <th className="p-3 text-center" title="Average">Avg</th>
                     <th className="p-3 text-center" title="Economy Rate">Econ</th>
@@ -378,6 +380,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                         wickets: perfs.reduce((s, x) => s + x.bowlingWickets, 0),
                         runsConceded: perfs.reduce((s, x) => s + x.bowlingRuns, 0),
                         ballsBowled: perfs.reduce((s, x) => s + x.ballsBowled, 0),
+                        maidens: perfs.reduce((s, x) => s + x.maidens, 0),
                         inns: perfs.filter(x => x.ballsBowled > 0).length,
                         bestWkts: Math.max(...perfs.map(x => x.bowlingWickets), 0),
                         bestRuns: (() => {
@@ -391,7 +394,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                     .sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)
                     .map((s, i) => {
                       const overs = Math.floor(s.ballsBowled / 6) + "." + (s.ballsBowled % 6)
-                      const bb = s.bestWkts > 0 ? `${s.bestWkts}/${s.bestRuns}` : "-"
+                      const bbi = s.bestWkts > 0 ? `${s.bestWkts}/${s.bestRuns}` : "-"
                       const sr = s.wickets > 0 ? (s.ballsBowled / s.wickets).toFixed(1) : "-"
                       const avg = s.wickets > 0 ? (s.runsConceded / s.wickets).toFixed(2) : "-"
                       const econ = s.ballsBowled > 0 ? (s.runsConceded / (s.ballsBowled / 6)).toFixed(2) : "-"
@@ -410,9 +413,10 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                           <td className="p-3 text-center">{s.matches}</td>
                           <td className="p-3 text-center">{s.inns}</td>
                           <td className="p-3 text-center font-mono">{overs}</td>
+                          <td className="p-3 text-center">{s.maidens}</td>
                           <td className="p-3 text-center font-bold text-green-600 dark:text-green-400">{s.wickets}</td>
                           <td className="p-3 text-center">{s.runsConceded}</td>
-                          <td className="p-3 text-center font-medium">{bb}</td>
+                          <td className="p-3 text-center font-medium">{bbi}</td>
                           <td className="p-3 text-center font-mono">{sr}</td>
                           <td className="p-3 text-center font-mono">{avg}</td>
                           <td className="p-3 text-center font-mono">{econ}</td>
@@ -420,7 +424,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                       )
                     })}
                   {allPlayers.filter(p => p.wickets > 0).length === 0 && (
-                    <tr><td colSpan={12} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
+                    <tr><td colSpan={13} className="p-4 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -430,10 +434,6 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
       )}
     </div>
   )
-  } catch (e: any) {
-    console.error("=== SEASON PAGE ERROR ===", e)
-    return <div className="p-8 text-red-600"><h1 className="text-xl font-bold">Server Error</h1><p className="mt-2">{e?.message || String(e)}</p><pre className="mt-4 text-xs whitespace-pre-wrap">{e?.stack || ""}</pre></div>
-  }
 }
 
 export default SeasonDetailPage
