@@ -51,7 +51,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setSavedInnings(m.innings || [])
     setSuperOver({ t1Runs: "", t1Wkts: "", t2Runs: "", t2Wkts: "" })
     const others = allPlayers.filter(p => p.teamId !== m.team1.id && p.teamId !== m.team2.id)
-    setNeutralFielders(others.map((p, i) => ({ playerId: p.id, ct: "", st: "", ro: "", wk: i === 0 })))
+    setNeutralFielders(others.length > 0 ? others.map((p, i) => ({ playerId: p.id, ct: "", st: "", ro: "", wk: i === 0 })) : [{ playerId: "", ct: "", st: "", ro: "", wk: false }])
   }
 
   function calcTeamStats(teamId: string) {
