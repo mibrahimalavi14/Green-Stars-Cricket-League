@@ -168,7 +168,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">League Stage</h3>
                 <div className="space-y-3">
                   {season.matches.filter(match => match.date < new Date("2026-08-16T00:00:00.000Z")).map((match) => (
-                    <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
+                    <Link key={match.id} href={`/matches/${match.id}`} className="block rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4 transition-colors hover:bg-[var(--muted)]">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         {/* Team 1 */}
@@ -219,7 +219,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                           )}
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
