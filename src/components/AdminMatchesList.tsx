@@ -42,7 +42,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setScoring(id)
     setForm({
       team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "",
-      tossWinner: m.tossWinner || "", tossDecision: m.tossDecision || "",
+      tossWinner: "", tossDecision: "",
       venue: m.venue || "",
       inn1Wides: inn1?.extras?.toString() || "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
       inn2Wides: inn2?.extras?.toString() || "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
