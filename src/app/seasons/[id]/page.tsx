@@ -196,11 +196,11 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                   {season.matches.filter(match => match.date < new Date("2026-08-16T00:00:00.000Z")).map((match) => (
                     <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
-                      <div className="mb-1 text-xs text-[var(--muted-foreground)]">
+                      <div className="mb-1 text-center text-xs text-[var(--muted-foreground)]">
                         {(() => { const r = relativeDateLabel(new Date(match.date)); return r.label ? <span className={r.className}>{r.label}</span> : <>{new Date(match.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short" })}</>; })()} &middot;{" "}
                         {new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}
                       </div>
-                      <div className="mb-2 text-xs text-[var(--muted-foreground)]">
+                      <div className="mb-2 text-center text-xs text-[var(--muted-foreground)]">
                         {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}
                       </div>
                       {/* Teams & scores */}
