@@ -31,7 +31,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
       <div className="mb-6">
         <h3 className="mb-2 font-semibold">{teamName} — Batting</h3>
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[400px] text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                 <th className="p-2 text-left">Batter</th>
@@ -75,7 +75,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
       <div className="mb-6">
         <h3 className="mb-2 font-semibold">{teamName} — Bowling</h3>
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[400px] text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                 <th className="p-2 text-left">Bowler</th>
@@ -115,7 +115,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
       <div className="mb-6">
         <h3 className="mb-2 font-semibold">{teamName} — Fielding</h3>
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[400px] text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                 <th className="p-2 text-left">Fielder</th>
@@ -240,6 +240,8 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
               Player of the Match: <span className="font-semibold">{m.manOfMatch}</span>
             </p>
           )}
+
+          <h2 className="mb-4 text-lg font-semibold">Scorecard</h2>
 
           {team1BatFirst ? (
             <>
