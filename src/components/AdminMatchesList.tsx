@@ -485,20 +485,47 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <label className="mb-1 block text-xs">Result</label>
                 <p className="rounded border border-[var(--border)] bg-[var(--muted)] px-2 py-1 text-sm text-[var(--muted-foreground)]">{autoResult() || "\u00a0"}</p>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {[m.team1, m.team2].map(t => {
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[m.team1, m.team2].map((t, idx) => {
                   const st = calcTeamStats(t.id)
-                  const extras = calcFieldExtras(t.id === m.team1.id ? "inn1" : "inn2")
+                  const innKey = idx === 0 ? "inn1" : "inn2"
+                  const extras = calcFieldExtras(innKey)
                   const total = st.runs + extras
+                  const f = form as any
                   return (
                     <div key={t.id} className="rounded border border-[var(--border)] bg-[var(--muted)] p-2">
-                      <p className="mb-1 font-semibold text-sm">{t.name}</p>
-                      <div className="grid grid-cols-5 gap-1 text-xs text-center">
+                      <p className="mb-2 font-semibold text-sm">{t.name}</p>
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 text-center text-xs">
                         <div><p className="text-[var(--muted-foreground)]">Runs</p><p className="font-medium">{st.runs}</p></div>
                         <div><p className="text-[var(--muted-foreground)]">Wkts</p><p className="font-medium">{st.wickets}</p></div>
                         <div><p className="text-[var(--muted-foreground)]">Overs</p><p className="font-medium">{st.balls ? `${Math.floor(st.balls / 6)}.${st.balls % 6}` : "0.0"}</p></div>
-                        <div><p className="text-[var(--muted-foreground)]">Extras</p><p className="font-medium">{extras}</p></div>
-                        <div><p className="text-[var(--muted-foreground)]">Total</p><p className="font-medium">{total}</p></div>
+                        <div className="hidden sm:block"><p className="text-[var(--muted-foreground)]">Extras</p><p className="font-medium">{extras}</p></div>
+                        <div className="hidden sm:block"><p className="text-[var(--muted-foreground)]">Total</p><p className="font-medium">{total}</p></div>
+                      </div>
+                      <div className="mt-2 border-t border-[var(--border)] pt-2">
+                        <p className="mb-1 text-[10px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Extras</p>
+                        <div className="grid grid-cols-4 gap-1 text-center text-xs">
+                          <div>
+                            <p className="text-[10px] text-[var(--muted-foreground)]">Wd</p>
+                            <input type="number" min="0" value={f[`${innKey}Wides`]} onChange={e => setForm({...form, [`${innKey}Wides`]: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-[var(--muted-foreground)]">Nb</p>
+                            <input type="number" min="0" value={f[`${innKey}NoBalls`]} onChange={e => setForm({...form, [`${innKey}NoBalls`]: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-[var(--muted-foreground)]">Byes</p>
+                            <input type="number" min="0" value={f[`${innKey}Byes`]} onChange={e => setForm({...form, [`${innKey}Byes`]: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-[var(--muted-foreground)]">L Byes</p>
+                            <input type="number" min="0" value={f[`${innKey}LegByes`]} onChange={e => setForm({...form, [`${innKey}LegByes`]: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-1 flex justify-between border-t border-[var(--border)] pt-1 text-xs">
+                        <span className="text-[var(--muted-foreground)]">Total</span>
+                        <span className="font-bold">{total}/{st.wickets} ({st.balls ? `${Math.floor(st.balls / 6)}.${st.balls % 6}` : "0.0"})</span>
                       </div>
                     </div>
                   )
@@ -509,15 +536,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   const firstTotal = calcTeamStats(firstTeam.id).runs + calcFieldExtras(firstTeam.id === m.team1.id ? "inn1" : "inn2")
                   const secondTeam = t1BattingFirst ? m.team2 : m.team1
                   return (
-                    <div className="col-span-2 text-xs text-center">
+                    <div className="sm:col-span-2 text-center text-xs">
                       <span className="font-medium">{secondTeam.name} need <strong>{firstTotal + 1}</strong> runs to win</span>
                     </div>
                   )
                 })()}
                 {autoResult() === "Match Tied" && (
-                  <div className="col-span-2 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-700/40 dark:bg-amber-900/10">
+                  <div className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-700/40 dark:bg-amber-900/10">
                     <p className="mb-2 text-xs font-semibold text-amber-700 dark:text-amber-400">Super Over</p>
-                    <div className="grid gap-2 md:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                       <div>
                         <label className="mb-1 block text-xs">{m.team1.name} Runs</label>
                         <input type="number" min="0" value={superOver.t1Runs} onChange={e => setSuperOver({...superOver, t1Runs: e.target.value})}
@@ -541,34 +568,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                     </div>
                   </div>
                 )}
-                <fieldset className="rounded border border-[var(--border)] p-3">
-                  <legend className="px-2 text-sm font-semibold">Extras</legend>
-                  <div className="grid grid-cols-4 gap-1 text-center text-xs">
-                    <div className="font-semibold text-[var(--foreground)]">Wides</div>
-                    <div className="font-semibold text-[var(--foreground)]">No Balls</div>
-                    <div className="font-semibold text-[var(--foreground)]">Byes</div>
-                    <div className="font-semibold text-[var(--foreground)]">Leg Byes</div>
-                    <input type="number" min="0" value={form.inn1Wides} onChange={e => setForm({...form, inn1Wides: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                    <input type="number" min="0" value={form.inn1NoBalls} onChange={e => setForm({...form, inn1NoBalls: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                    <input type="number" min="0" value={form.inn1Byes} onChange={e => setForm({...form, inn1Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                    <input type="number" min="0" value={form.inn1LegByes} onChange={e => setForm({...form, inn1LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                  </div>
-                  <div className="mt-1 text-center text-xs font-semibold text-[var(--foreground)]">{m.team1.name}</div>
-                </fieldset>
-                <fieldset className="rounded border border-[var(--border)] p-3">
-                  <legend className="px-2 text-sm font-semibold">Extras</legend>
-                  <div className="grid grid-cols-4 gap-1 text-center text-xs">
-                    <div className="font-semibold text-[var(--foreground)]">Wides</div>
-                    <div className="font-semibold text-[var(--foreground)]">No Balls</div>
-                    <div className="font-semibold text-[var(--foreground)]">Byes</div>
-                    <div className="font-semibold text-[var(--foreground)]">Leg Byes</div>
-                    <input type="number" min="0" value={form.inn2Wides} onChange={e => setForm({...form, inn2Wides: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                    <input type="number" min="0" value={form.inn2NoBalls} onChange={e => setForm({...form, inn2NoBalls: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                    <input type="number" min="0" value={form.inn2Byes} onChange={e => setForm({...form, inn2Byes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                    <input type="number" min="0" value={form.inn2LegByes} onChange={e => setForm({...form, inn2LegByes: e.target.value})} className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-1 py-1 text-center text-sm" />
-                  </div>
-                  <div className="mt-1 text-center text-xs font-semibold text-[var(--foreground)]">{m.team2.name}</div>
-                </fieldset>
               </div>
 
               {team1Players.length > 0 && (
