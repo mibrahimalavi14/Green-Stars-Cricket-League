@@ -52,18 +52,6 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
             <p className="mt-1 font-semibold">{team.captainName}</p>
           </div>
         )}
-        {team.headCoach && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-center">
-            <p className="text-xs text-[var(--muted-foreground)]">Head Coach</p>
-            <p className="mt-1 font-semibold">{team.headCoach}</p>
-          </div>
-        )}
-        {team.location && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-center">
-            <p className="text-xs text-[var(--muted-foreground)]">Location</p>
-            <p className="mt-1 font-semibold">{team.location}</p>
-          </div>
-        )}
       </div>
 
       <div className="mb-8">

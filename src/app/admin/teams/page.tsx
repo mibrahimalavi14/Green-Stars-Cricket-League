@@ -30,8 +30,6 @@ async function AdminTeamsPage() {
             </div>
             <div className="mt-2 flex flex-wrap gap-4 text-xs text-[var(--muted-foreground)]">
               {t.captainName && <span>Captain: {t.captainName}</span>}
-              {t.headCoach && <span>Coach: {t.headCoach}</span>}
-              {t.location && <span>Location: {t.location}</span>}
               {t.season && <span>Season: {t.season.name}</span>}
             </div>
           </div>
