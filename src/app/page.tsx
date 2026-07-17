@@ -5,7 +5,6 @@ import { MatchCard } from "@/components/MatchCard"
 import { NewsNotification } from "@/components/NewsNotification"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
-import { StarRating } from "@/components/StarRating"
 import { ReviewsSection } from "@/components/ReviewsSection"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
@@ -189,13 +188,6 @@ async function HomePage() {
       </section>
 
       <ReviewsSection />
-
-      <section className="border-t border-[var(--border)] py-10">
-        <div className="mx-auto max-w-md px-4">
-          <h3 className="mb-1 text-center text-sm font-semibold text-[var(--muted-foreground)]">Rate this website</h3>
-          <StarRating />
-        </div>
-      </section>
     </>
   )
 }
