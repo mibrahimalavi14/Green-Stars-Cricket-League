@@ -12,7 +12,6 @@ async function AdminPage() {
     matches: await prisma.match.count(),
     news: await prisma.news.count(),
     contacts: await prisma.contact.count(),
-    predictions: await prisma.seasonPrediction.count(),
   }
 
   return (
@@ -42,12 +41,7 @@ async function AdminPage() {
           <p className="text-sm text-[var(--muted-foreground)]">Manage fixtures & scores</p>
         </Link>
 
-          <Link href="/admin/predictions" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
-            <Calendar className="mb-3 h-8 w-8 text-[var(--accent)]" />
-            <h3 className="text-lg font-semibold">Predictions</h3>
-            <p className="text-2xl font-bold">{counts.predictions ?? 0}</p>
-            <p className="text-sm text-[var(--muted-foreground)]">View all season votes</p>
-          </Link>
+
 
           <Link href="/admin/seasons" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Calendar className="mb-3 h-8 w-8 text-[var(--accent)]" />

@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react"
 
-export function GoogleSignIn({ callbackUrl = "/predictions" }: { callbackUrl?: string }) {
+export function GoogleSignIn({ callbackUrl = "/" }: { callbackUrl?: string }) {
   return (
     <button
       onClick={() => signIn("google", { callbackUrl, redirect: true })}
