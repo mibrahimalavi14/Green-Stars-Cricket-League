@@ -4,61 +4,61 @@
 ================================================================================
 
 Friday, 17 July 2026
-  M1  Alpha Warriors       vs Power Panthers          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M2  Dragon Knights       vs Legends XI              5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M3  Elite Rangers        vs Falcon Strikers         6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M4  Alpha Warriors       vs Legends XI              7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M1  Alpha Warriors       vs Power Panthers          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M2  Dragon Knights       vs Legends XI              5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M3  Elite Rangers        vs Falcon Strikers         6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M4  Alpha Warriors       vs Legends XI              7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Saturday, 18 July 2026
-  M5  Power Panthers       vs Falcon Strikers         4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M6  Dragon Knights       vs Elite Rangers           5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M7  Alpha Warriors       vs Falcon Strikers         6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M8  Legends XI           vs Elite Rangers           7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M5  Power Panthers       vs Falcon Strikers         4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M6  Dragon Knights       vs Elite Rangers           5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M7  Alpha Warriors       vs Falcon Strikers         6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M8  Legends XI           vs Elite Rangers           7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Sunday, 19 July 2026
-  M9  Power Panthers       vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M10 Alpha Warriors       vs Elite Rangers           5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M11 Falcon Strikers      vs Dragon Knights          6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M12 Legends XI           vs Power Panthers          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M9  Power Panthers       vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M10 Alpha Warriors       vs Elite Rangers           5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M11 Falcon Strikers      vs Dragon Knights          6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M12 Legends XI           vs Power Panthers          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Friday, 24 July 2026
-  M13 Alpha Warriors       vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M14 Elite Rangers        vs Power Panthers          5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M15 Falcon Strikers      vs Legends XI              6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M16 Power Panthers       vs Alpha Warriors          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M13 Alpha Warriors       vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M14 Elite Rangers        vs Power Panthers          5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M15 Falcon Strikers      vs Legends XI              6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M16 Power Panthers       vs Alpha Warriors          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Saturday, 25 July 2026
-  M17 Legends XI           vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M18 Falcon Strikers      vs Elite Rangers           5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M19 Legends XI           vs Alpha Warriors          6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M20 Falcon Strikers      vs Power Panthers          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M17 Legends XI           vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M18 Falcon Strikers      vs Elite Rangers           5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M19 Legends XI           vs Alpha Warriors          6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M20 Falcon Strikers      vs Power Panthers          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Sunday, 26 July 2026
-  M21 Elite Rangers        vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M22 Falcon Strikers      vs Alpha Warriors          5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M23 Elite Rangers        vs Legends XI              6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M24 Dragon Knights       vs Power Panthers          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M21 Elite Rangers        vs Dragon Knights          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M22 Falcon Strikers      vs Alpha Warriors          5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M23 Elite Rangers        vs Legends XI              6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M24 Dragon Knights       vs Power Panthers          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Friday, 31 July 2026
-  M25 Elite Rangers        vs Alpha Warriors          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M26 Dragon Knights       vs Falcon Strikers         5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M27 Power Panthers       vs Legends XI              6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M28 Dragon Knights       vs Alpha Warriors          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M25 Elite Rangers        vs Alpha Warriors          4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M26 Dragon Knights       vs Falcon Strikers         5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M27 Power Panthers       vs Legends XI              6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M28 Dragon Knights       vs Alpha Warriors          7:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Sunday, 2 August 2026
-  M29 Power Panthers       vs Elite Rangers           4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M30 Legends XI           vs Falcon Strikers         5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M29 Power Panthers       vs Elite Rangers           4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M30 Legends XI           vs Falcon Strikers         5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 ================================================================================
                           PLAYOFFS
 ================================================================================
 
 Sunday, 9 August 2026
-  M31 Qualifier 1           TBD vs TBD                4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M32 Eliminator            TBD vs TBD                5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
-  M33 Qualifier 2           TBD vs TBD                6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M31 Qualifier 1           TBD vs TBD                4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M32 Eliminator            TBD vs TBD                5:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
+  M33 Qualifier 2           TBD vs TBD                6:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 Sunday, 16 August 2026
-  M34 FINAL                 TBD vs TBD                4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan
+  M34 FINAL                 TBD vs TBD                4:00 PM  |  Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan
 
 ================================================================================

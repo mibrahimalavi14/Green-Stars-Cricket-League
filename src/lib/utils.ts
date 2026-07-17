@@ -39,7 +39,7 @@ export function relativeDateLabel(date: Date, timeZone = "Asia/Karachi") {
 }
 
 const venueCoordinates: Record<string, string> = {
-  "Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan": "Plot+134+Block+B+AWT+Housing+Scheme+Phase+2+Lahore",
+  "Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Haripur, Pakistan": "Plot+134+Block+B+AWT+Housing+Scheme+Phase+2+Haripur",
 }
 
 export function getVenueMapsUrl(venue: string): string | null {

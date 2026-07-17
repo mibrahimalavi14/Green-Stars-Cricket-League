@@ -68,7 +68,7 @@ async function HomePage() {
               { label: "Players", value: playerCount, icon: Trophy },
               { label: "Matches", value: matchCount, icon: Calendar },
               { label: "Season", value: season?.year || 2026, icon: Trophy },
-              { label: "Founded", value: "Lahore", icon: MapPin },
+              { label: "Founded", value: "Haripur", icon: MapPin },
             ].map((s) => (
               <div key={s.label} className="rounded-lg bg-[var(--muted)] p-4 text-center">
                 <s.icon className="mx-auto mb-1 h-5 w-5 text-[var(--accent)]" />

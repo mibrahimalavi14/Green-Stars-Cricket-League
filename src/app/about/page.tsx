@@ -1,4 +1,4 @@
-import { Shield, Users, Trophy, Star, Target, Heart } from "lucide-react"
+import { Users, Star, Heart } from "lucide-react"
 
 export const revalidate = 300
 
@@ -7,7 +7,7 @@ function AboutPage() {
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-2 text-3xl font-bold">About GSCL</h1>
       <p className="mb-10 text-[var(--muted-foreground)]">
-        Green Stars Cricket League â€” a vision born in Lahore, powered by passion.
+        Green Stars Cricket League — a vision born in Haripur, powered by passion.
       </p>
 
       <div className="mb-12 overflow-hidden rounded-xl border border-[var(--border)]">
@@ -32,30 +32,10 @@ function AboutPage() {
             <h2 className="mb-1 text-center text-xl font-bold">Chairman</h2>
             <p className="mb-3 text-center text-sm font-bold text-[var(--muted-foreground)]">Muhammad Ibrahim Alavi</p>
             <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
-              GSCL is not just a league â€” it is a platform for the youth of Lahore to showcase their talent and
+              GSCL is not just a league — it is a platform for the youth of Haripur to showcase their talent and
               pursue their dreams. My vision is to build a cricket ecosystem where every player, regardless of
               their background, gets a fair chance to rise. The passion I see in these young cricketers reminds
               me why we started this journey.
-            </p>
-          </div>
-        </div>
-        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
-          <div className="relative bg-gradient-to-br from-gscl-gold/20 via-gscl-dark to-gscl-gold/10 p-6">
-            <div className="absolute inset-0 opacity-10" style={{backgroundImage: "radial-gradient(circle at 30% 50%, rgba(255,215,0,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.3) 0%, transparent 50%)"}} />
-            <img
-              src="/images/management/General Secretary Malik Taha Qaiser.png"
-              alt="General Secretary Malik Taha Qaiser"
-              className="relative w-full rounded-xl shadow-lg"
-            />
-          </div>
-          <div className="p-6">
-            <h2 className="mb-1 text-center text-xl font-bold">General Secretary</h2>
-            <p className="mb-3 text-center text-sm font-bold text-[var(--muted-foreground)]">Malik Taha Qaiser</p>
-            <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
-              Every match, every run, every wicket â€” it is all about building a community that lives and breathes
-              cricket. My goal is to ensure GSCL runs smoothly, fairly, and professionally so that the players
-              can focus on what they do best: playing the game they love. This league is for the players, by the
-              players.
             </p>
           </div>
         </div>
@@ -64,7 +44,7 @@ function AboutPage() {
       <div className="mb-12 space-y-6 text-sm leading-relaxed text-[var(--muted-foreground)]">
         <p>
           The <strong className="text-[var(--foreground)]">Green Stars Cricket League (GSCL)</strong> is a
-          fast-growing grassroots cricket league based in Lahore, Pakistan. Founded with the mission to
+          fast-growing grassroots cricket league based in Haripur, Pakistan. Founded with the mission to
           discover and nurture local cricketing talent, GSCL brings together teams from across the region
           to compete in an exciting, high-energy 5-over format.
         </p>
@@ -84,20 +64,11 @@ function AboutPage() {
       <div className="mb-12 grid gap-6 md:grid-cols-3">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/10">
-            <Trophy className="h-6 w-6 text-[var(--accent)]" />
-          </div>
-          <h3 className="mb-1 font-semibold">Our Mission</h3>
-          <p className="text-xs text-[var(--muted-foreground)]">
-            To provide a competitive platform for local cricketers and promote the sport at the grassroots level in Pakistan.
-          </p>
-        </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/10">
             <Users className="h-6 w-6 text-[var(--accent)]" />
           </div>
-          <h3 className="mb-1 font-semibold">          6 Teams</h3>
+          <h3 className="mb-1 font-semibold">8 Teams</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
-                Each representing a unique identity, with their own captain, and squad of passionate players.
+                Each with a unique identity and a squad of passionate players.
           </p>
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
@@ -111,63 +82,13 @@ function AboutPage() {
         </div>
       </div>
 
-      <div className="mb-12 rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
-        <h2 className="mb-6 text-xl font-bold">League Format</h2>
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
-              1
-            </div>
-            <div>
-              <h4 className="mb-1 font-medium">Double Round Robin</h4>
-              <p className="text-xs text-[var(--muted-foreground)]">
-                Each team plays every other team twice â€” once home, once away. A total of 30 league matches.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
-              2
-            </div>
-            <div>
-              <h4 className="mb-1 font-medium">Points System</h4>
-              <p className="text-xs text-[var(--muted-foreground)]">
-                Win = 2 points, Tie/No Result = 1 point, Loss = 0 points. Net Run Rate decides ties.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
-              3
-            </div>
-            <div>
-              <h4 className="mb-1 font-medium">Playoffs</h4>
-              <p className="text-xs text-[var(--muted-foreground)]">
-                Top 4 teams qualify. Qualifier 1, Eliminator, Qualifier 2, and the Grand Final.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
-              4
-            </div>
-            <div>
-              <h4 className="mb-1 font-medium">Player Stats</h4>
-              <p className="text-xs text-[var(--muted-foreground)]">
-                Every run, wicket, and catch tracked. Batting, bowling, and fielding leaderboards updated live.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
         <div className="flex items-center gap-3 mb-4">
           <Heart className="h-5 w-5 text-[var(--accent)]" />
           <h2 className="text-xl font-bold">Contact & Follow</h2>
         </div>
         <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-          Based in Lahore, Pakistan. Follow us on social media for the latest updates, live scores, and behind-the-scenes content.
+          Based in Haripur, Pakistan. Follow us on social media for the latest updates, live scores, and behind-the-scenes content.
         </p>
         <div className="flex flex-wrap gap-4 text-sm">
           <a href="https://www.facebook.com/greenstarscricketleague" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
