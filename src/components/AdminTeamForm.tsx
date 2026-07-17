@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 export function AdminTeamForm() {
   const router = useRouter()
   const [seasons, setSeasons] = useState<{ id: string; name: string }[]>([])
-  const [form, setForm] = useState({ name: "", shortName: "", color: "#1e3a5f", seasonId: "", captainName: "", headCoach: "", location: "" })
+  const [form, setForm] = useState({ name: "", shortName: "", color: "#1e3a5f", seasonId: "" })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { fetch("/api/seasons").then(r => r.json()).then(setSeasons) }, [])
@@ -20,7 +20,7 @@ export function AdminTeamForm() {
       body: JSON.stringify(form),
     })
     setLoading(false)
-    setForm({ name: "", shortName: "", color: "#1e3a5f", seasonId: form.seasonId, captainName: "", headCoach: "", location: "" })
+    setForm({ name: "", shortName: "", color: "#1e3a5f", seasonId: form.seasonId })
     router.refresh()
   }
 
@@ -48,21 +48,6 @@ export function AdminTeamForm() {
           <option value="">Select</option>
           {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
-      </div>
-      <div>
-        <label className="mb-1 block text-xs">Captain</label>
-        <input value={form.captainName} onChange={e => setForm({...form, captainName: e.target.value})}
-          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm w-40" />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs">Head Coach</label>
-        <input value={form.headCoach} onChange={e => setForm({...form, headCoach: e.target.value})}
-          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm w-40" />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs">Location</label>
-        <input value={form.location} onChange={e => setForm({...form, location: e.target.value})}
-          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm w-40" />
       </div>
       <button type="submit" disabled={loading}
         className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50">

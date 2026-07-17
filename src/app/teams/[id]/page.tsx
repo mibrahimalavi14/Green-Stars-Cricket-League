@@ -46,12 +46,6 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
       </div>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        {team.captainName && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-center">
-            <p className="text-xs text-[var(--muted-foreground)]">Captain</p>
-            <p className="mt-1 font-semibold">{team.captainName}</p>
-          </div>
-        )}
       </div>
 
       <div className="mb-8">
