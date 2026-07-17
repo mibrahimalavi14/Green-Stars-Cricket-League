@@ -134,8 +134,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
                     <span className="text-[var(--muted-foreground)]">Bat: </span>
                     <span className="font-medium">{p.battingRuns}</span>
                     <span className="text-[var(--muted-foreground)]"> ({p.ballsFaced} balls, {p.fours}Ã—4, {p.sixes}Ã—6)</span>
-                    {p.isOut && <span className="text-red-500"> {p.dismissalType}</span>}
-                    {!p.isOut && <span className="text-green-500"> not out</span>}
+                    {(() => { const wk = (p as any).wicketsLost || 0; if (wk === 0) return <span className="text-green-500"> not out</span>; const parts: string[] = []; if (p.dismissalType) parts.push(p.dismissalType); if (wk >= 2 && (p as any).secondDismissalType) parts.push((p as any).secondDismissalType); return <span className="text-red-500"> {parts.join(", ")}{wk > 1 ? ` (${wk}w)` : ""}</span>; })()}
                   </div>
                   <div>
                     <span className="text-[var(--muted-foreground)]">Bowl: </span>

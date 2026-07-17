@@ -32,13 +32,13 @@ function bowlerShort(style: string) {
   return map[style] || style
 }
 
-function getDismissalText(p: Perf, allPerfs: Perf[]) {
-  if (!p.isOut) return p.ballsFaced > 0 ? "not out" : ""
-  const bowlerName = p.dismissedByBowlerId ? allPerfs.find(pp => pp.playerId === p.dismissedByBowlerId)?.player.name : null
-  const fielderName = p.dismissedByFielderId ? allPerfs.find(pp => pp.playerId === p.dismissedByFielderId)?.player.name : null
+function dismissText(p: Perf, allPerfs: Perf[], type: string, bowlerId: string, fielderId: string) {
+  if (!type) return ""
+  const bowlerName = bowlerId ? allPerfs.find(pp => pp.playerId === bowlerId)?.player.name : null
+  const fielderName = fielderId ? allPerfs.find(pp => pp.playerId === fielderId)?.player.name : null
   const bn = bowlerName || ""
   const fn = fielderName || ""
-  switch (p.dismissalType) {
+  switch (type) {
     case "bowled": return `b ${bn}`
     case "caught": return `c ${fn} b ${bn}`
     case "lbw": return `lbw b ${bn}`
@@ -46,8 +46,17 @@ function getDismissalText(p: Perf, allPerfs: Perf[]) {
     case "run out": return `run out (${fn || bn})`
     case "hit wicket": return `hit wicket b ${bn}`
     case "retired": return "retired hurt"
-    default: return p.dismissalType
+    default: return type
   }
+}
+
+function getDismissalText(p: Perf, allPerfs: Perf[]) {
+  const wk = (p as any).wicketsLost || (p.isOut ? 1 : 0)
+  if (wk === 0) return p.ballsFaced > 0 ? "not out" : ""
+  const parts: string[] = []
+  if (wk >= 1 && p.dismissalType) parts.push(dismissText(p, allPerfs, p.dismissalType, p.dismissedByBowlerId, p.dismissedByFielderId))
+  if (wk >= 2 && (p as any).secondDismissalType) parts.push(dismissText(p, allPerfs, (p as any).secondDismissalType, (p as any).secondDismissedByBowlerId, (p as any).secondDismissedByFielderId))
+  return parts.join(", ")
 }
 
 function BattingTable({ performances, allPerformances, heading }: { performances: Perf[], allPerformances: Perf[], heading?: string }) {

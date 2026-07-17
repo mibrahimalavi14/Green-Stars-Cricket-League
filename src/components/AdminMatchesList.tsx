@@ -86,11 +86,17 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     }))
   }
 
-  function toggleOut(playerId: string) {
-    setStats(prev => ({
-      ...prev,
-      [playerId]: { ...(prev[playerId] || {}), out: prev[playerId]?.out === "1" ? "" : "1" },
-    }))
+  function setWicketsLost(playerId: string, val: string) {
+    const w = parseInt(val) || 0
+    setStats(prev => {
+      const cur = prev[playerId] || {}
+      const upd: Record<string, string> = { ...cur, wktsLost: val }
+      if (w < 1) { upd.dismissal = ""; upd.dismissalBowler = ""; upd.dismissalFielder = "" }
+      if (w < 2) { upd.dismissal2 = ""; upd.dismissalBowler2 = ""; upd.dismissalFielder2 = "" }
+      if (w >= 1 && !cur.dismissal) upd.dismissal = "bowled"
+      if (w >= 2 && !cur.dismissal2) upd.dismissal2 = "bowled"
+      return { ...prev, [playerId]: upd }
+    })
   }
 
   async function updateStatus(id: string, status: string) {
@@ -114,10 +120,14 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         sixes: parseInt(s(p.id, "6s")) || 0,
         ones: parseInt(s(p.id, "1s")) || 0,
         twos: parseInt(s(p.id, "2s")) || 0,
-        isOut: s(p.id, "out") === "1",
+        isOut: parseInt(s(p.id, "wktsLost")) > 0,
+        wicketsLost: parseInt(s(p.id, "wktsLost")) || 0,
         dismissalType: s(p.id, "dismissal") || "",
         dismissedByBowlerId: s(p.id, "dismissalBowler") || "",
         dismissedByFielderId: s(p.id, "dismissalFielder") || "",
+        secondDismissalType: s(p.id, "dismissal2") || "",
+        secondDismissedByBowlerId: s(p.id, "dismissalBowler2") || "",
+        secondDismissedByFielderId: s(p.id, "dismissalFielder2") || "",
         bowlingWickets: parseInt(s(p.id, "wkts")) || 0,
         bowlingRuns: parseInt(s(p.id, "br")) || 0,
         ballsBowled: parseInt(s(p.id, "bb")) || 0,
@@ -134,7 +144,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         playerId: n.playerId,
         teamId: m.team1.id,
         battingRuns: 0, ballsFaced: 0, fours: 0, sixes: 0, ones: 0, twos: 0,
-        isOut: false, dismissalType: "", dismissedByBowlerId: "", dismissedByFielderId: "",
+        isOut: false, wicketsLost: 0, dismissalType: "", dismissedByBowlerId: "", dismissedByFielderId: "",
+        secondDismissalType: "", secondDismissedByBowlerId: "", secondDismissedByFielderId: "",
         bowlingWickets: 0, bowlingRuns: 0, ballsBowled: 0, maidens: 0, wides: 0, noBalls: 0,
         catches: parseInt(n.ct) || 0,
         stumpings: parseInt(n.st) || 0,
@@ -147,7 +158,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       let bestScore = -Infinity
       for (const p of playersData) {
         const player = allPlayers.find(x => x.id === p.playerId)
-        const battingImpact = p.battingRuns + p.fours * 2 + p.sixes * 4 - (p.isOut ? 5 : 0)
+        const battingImpact = p.battingRuns + p.fours * 2 + p.sixes * 4 - (p.wicketsLost || 0) * 5
         const bowlingImpact = p.bowlingWickets * 25 - p.bowlingRuns
         const fieldingImpact = p.catches * 10 + p.stumpings * 15 + p.runOuts * 15
         const total = battingImpact + bowlingImpact + fieldingImpact
@@ -269,10 +280,13 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium" title="Sixes">6s</th>
               <th className="py-1 px-1 text-center font-medium" title="Ones (1 run)">1s</th>
               <th className="py-1 px-1 text-center font-medium" title="Twos (2 runs)">2s</th>
-              <th className="py-1 px-1 text-center font-medium">Out</th>
-              <th className="py-1 px-1 text-center font-medium">Dismissal</th>
-              <th className="py-1 px-1 text-center font-medium" title="Dismissed By Bowler">Bowler</th>
-              <th className="py-1 px-1 text-center font-medium" title="Dismissed By Fielder">Fielder</th>
+              <th className="py-1 px-1 text-center font-medium" title="Wickets Lost (0/1/2)">W</th>
+              <th className="py-1 px-1 text-center font-medium">1st D</th>
+              <th className="py-1 px-1 text-center font-medium">1st B</th>
+              <th className="py-1 px-1 text-center font-medium">1st F</th>
+              <th className="py-1 px-1 text-center font-medium">2nd D</th>
+              <th className="py-1 px-1 text-center font-medium">2nd B</th>
+              <th className="py-1 px-1 text-center font-medium">2nd F</th>
               <th className="py-1 px-1 text-center font-medium" title="Bowling Wickets">Wkts</th>
               <th className="py-1 px-1 text-center font-medium" title="Runs Conceded">Runs</th>
               <th className="py-1 px-1 text-center font-medium" title="Balls Bowled">Balls</th>
@@ -294,42 +308,62 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "6s")} onChange={e => set(p.id, "6s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "1s")} onChange={e => set(p.id, "1s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "2s")} onChange={e => set(p.id, "2s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
-                <td className="py-1 px-1 text-center"><input type="checkbox" checked={s(p.id, "out") === "1"} onChange={() => toggleOut(p.id)} className="h-3 w-3" /></td>
-                <td className="py-1 px-1">
-                  <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
-                    <option value="">-</option>
-                    <option value="bowled">Bowled</option>
-                    <option value="caught">Caught</option>
-                    <option value="lbw">LBW</option>
-                    <option value="stumped">Stumped</option>
-                    <option value="run out">Run Out</option>
-                    <option value="retired">Retired</option>
-                    <option value="hit wicket">Hit Wkt</option>
+                <td className="py-1 px-1 text-center">
+                  <select value={s(p.id, "wktsLost") || "0"} onChange={e => setWicketsLost(p.id, e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
                   </select>
                 </td>
                 <td className="py-1 px-1">
-                  {s(p.id, "out") === "1" && s(p.id, "dismissal") && s(p.id, "dismissal") !== "run out" && s(p.id, "dismissal") !== "retired" ? (
-                    <select value={s(p.id, "dismissalBowler")} onChange={e => set(p.id, "dismissalBowler", e.target.value)} className="w-16 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 1 ? (
+                    <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-12 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                       <option value="">-</option>
-                      {opposingPlayers.map(op => (
-                        <option key={op.id} value={op.id}>{op.name}</option>
-                      ))}
+                      <option value="bowled">B</option><option value="caught">C</option><option value="lbw">L</option>
+                      <option value="stumped">St</option><option value="run out">RO</option>
+                      <option value="retired">Ret</option><option value="hit wicket">HW</option>
                     </select>
-                  ) : (
-                    <span className="text-[10px] text-[var(--muted-foreground)]">-</span>
-                  )}
+                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
                 </td>
                 <td className="py-1 px-1">
-                  {s(p.id, "out") === "1" && (s(p.id, "dismissal") === "caught" || s(p.id, "dismissal") === "stumped" || s(p.id, "dismissal") === "run out") ? (
-                    <select value={s(p.id, "dismissalFielder")} onChange={e => set(p.id, "dismissalFielder", e.target.value)} className="w-16 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 1 && s(p.id, "dismissal") && s(p.id, "dismissal") !== "run out" && s(p.id, "dismissal") !== "retired" ? (
+                    <select value={s(p.id, "dismissalBowler")} onChange={e => set(p.id, "dismissalBowler", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                       <option value="">-</option>
-                      {opposingPlayers.map(op => (
-                        <option key={op.id} value={op.id}>{op.name}</option>
-                      ))}
+                      {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
                     </select>
-                  ) : (
-                    <span className="text-[10px] text-[var(--muted-foreground)]">-</span>
-                  )}
+                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
+                </td>
+                <td className="py-1 px-1">
+                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 1 && (s(p.id, "dismissal") === "caught" || s(p.id, "dismissal") === "stumped" || s(p.id, "dismissal") === "run out") ? (
+                    <select value={s(p.id, "dismissalFielder")} onChange={e => set(p.id, "dismissalFielder", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                      <option value="">-</option>
+                      {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
+                    </select>
+                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
+                </td>
+                <td className="py-1 px-1">
+                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 2 ? (
+                    <select value={s(p.id, "dismissal2")} onChange={e => set(p.id, "dismissal2", e.target.value)} className="w-12 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                      <option value="">-</option>
+                      <option value="bowled">B</option><option value="caught">C</option><option value="lbw">L</option>
+                      <option value="stumped">St</option><option value="run out">RO</option>
+                      <option value="retired">Ret</option><option value="hit wicket">HW</option>
+                    </select>
+                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
+                </td>
+                <td className="py-1 px-1">
+                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 2 && s(p.id, "dismissal2") && s(p.id, "dismissal2") !== "run out" && s(p.id, "dismissal2") !== "retired" ? (
+                    <select value={s(p.id, "dismissalBowler2")} onChange={e => set(p.id, "dismissalBowler2", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                      <option value="">-</option>
+                      {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
+                    </select>
+                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
+                </td>
+                <td className="py-1 px-1">
+                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 2 && (s(p.id, "dismissal2") === "caught" || s(p.id, "dismissal2") === "stumped" || s(p.id, "dismissal2") === "run out") ? (
+                    <select value={s(p.id, "dismissalFielder2")} onChange={e => set(p.id, "dismissalFielder2", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
+                      <option value="">-</option>
+                      {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
+                    </select>
+                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
                 </td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "wkts")} onChange={e => set(p.id, "wkts", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "br")} onChange={e => set(p.id, "br", e.target.value)} className="w-10 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" title="Runs Conceded" /></td>
