@@ -240,14 +240,14 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 </div>
               </div>
             )}
-            {season.matches.some(match => match.date >= new Date("2026-08-16T00:00:00.000Z")) && (
+            {season.matches.some(match => match.date >= new Date("2026-08-23T00:00:00.000Z")) && (
               <div>
                 <h3 className="mb-1 text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Playoffs</h3>
                 <p className="mb-3 text-xs text-[var(--muted-foreground)]">
                   Top 4 teams from the Points Table will qualify for the Playoffs.
                 </p>
                 <div className="space-y-3">
-                  {season.matches.filter(match => match.date >= new Date("2026-08-16T00:00:00.000Z")).map((match) => (
+                  {season.matches.filter(match => match.date >= new Date("2026-08-23T00:00:00.000Z")).map((match) => (
                     <div key={match.id} className="rounded-xl border border-amber-200 bg-[var(--card)] p-3 sm:p-4 dark:border-amber-800/40">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">Match {match.matchNo}</div>}
                       <div className="mb-1">
@@ -263,8 +263,8 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex flex-1 flex-col items-start gap-0.5">
                           <div className="flex items-center gap-2">
-                            {match.team1.logo && <img src={match.team1.logo} alt={match.team1.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
-                            <span className="text-sm font-medium">{match.team1.name}</span>
+                            {match.team1.logo && match.status === "completed" && <img src={match.team1.logo} alt={match.team1.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
+                            <span className="text-sm font-medium">{match.status === "upcoming" ? "TBD" : match.team1.name}</span>
                           </div>
                           {match.status === "completed" && match.team1Score && (
                             <span className="ml-8 text-base font-bold">{match.team1Score}</span>
@@ -275,8 +275,8 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                         </div>
                         <div className="flex flex-1 flex-col items-end gap-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{match.team2.name}</span>
-                            {match.team2.logo && <img src={match.team2.logo} alt={match.team2.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
+                            <span className="text-sm font-medium">{match.status === "upcoming" ? "TBD" : match.team2.name}</span>
+                            {match.team2.logo && match.status === "completed" && <img src={match.team2.logo} alt={match.team2.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />}
                           </div>
                           {match.status === "completed" && match.team2Score && (
                             <span className="mr-8 text-base font-bold">{match.team2Score}</span>
