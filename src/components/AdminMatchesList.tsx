@@ -278,6 +278,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium" title="Sixes">6s</th>
               <th className="py-1 px-1 text-center font-medium" title="Ones (1 run)">1s</th>
               <th className="py-1 px-1 text-center font-medium" title="Twos (2 runs)">2s</th>
+              <th className="py-1 px-1 text-center font-medium" title="Half Century">50</th>
+              <th className="py-1 px-1 text-center font-medium" title="Century">100</th>
                <th className="py-1 px-1 text-center font-medium" title="Out">Out</th>
               <th className="py-1 px-1 text-center font-medium">Dismissal</th>
               <th className="py-1 px-1 text-center font-medium">Bowler</th>
@@ -303,6 +305,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "6s")} onChange={e => set(p.id, "6s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "1s")} onChange={e => set(p.id, "1s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "2s")} onChange={e => set(p.id, "2s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
+                <td className="py-1 px-1 text-center text-green-600 font-bold">{parseInt(s(p.id, "runs")) >= 50 ? "✓" : "-"}</td>
+                <td className="py-1 px-1 text-center text-purple-600 font-bold">{parseInt(s(p.id, "runs")) >= 100 ? "✓" : "-"}</td>
                 <td className="py-1 px-1 text-center">
                   <input type="checkbox" checked={s(p.id, "out") === "1"} onChange={e => setOut(p.id, e.target.checked)} className="h-4 w-4" />
                 </td>
