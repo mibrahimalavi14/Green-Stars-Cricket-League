@@ -6,6 +6,7 @@ import { NewsNotification } from "@/components/NewsNotification"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { StarRating } from "@/components/StarRating"
+import { ReviewsSection } from "@/components/ReviewsSection"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
 
 export const revalidate = 300
@@ -186,6 +187,8 @@ async function HomePage() {
           </a>
         </div>
       </section>
+
+      <ReviewsSection />
 
       <section className="border-t border-[var(--border)] py-10">
         <div className="mx-auto max-w-md px-4">

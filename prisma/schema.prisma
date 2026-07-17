@@ -249,6 +249,17 @@ model PredictionLock {
   createdAt DateTime @default(now())
 }
 
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @default("")
+  rating    Int
+  comment   String
+  approved  Boolean  @default(false)
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+}
+
 model Rating {
   id        String   @id @default(cuid())
   value     Int

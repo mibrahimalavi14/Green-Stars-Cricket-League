@@ -10,7 +10,7 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--card)]">
       <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-5">
           <div>
             <div className="mb-3 flex items-center gap-2">
               <img src="/images/logo/gscl-logo.png" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
@@ -28,6 +28,15 @@ export function Footer() {
               <Link href="/points-table" className="transition-colors hover:text-[var(--accent)]">Standings</Link>
               <Link href="/toss-analysis" className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
               <Link href="/about" className="transition-colors hover:text-[var(--accent)]">About</Link>
+              <Link href="/contact" className="transition-colors hover:text-[var(--accent)]">Contact</Link>
+            </div>
+          </div>
+          <div>
+            <h4 className="mb-3 font-semibold">More</h4>
+            <div className="flex flex-col gap-2 text-sm text-[var(--muted-foreground)]">
+              <Link href="/news" className="transition-colors hover:text-[var(--accent)]">News</Link>
+              <Link href="/players/stats" className="transition-colors hover:text-[var(--accent)]">Stats</Link>
+              <Link href="/seasons" className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
             </div>
           </div>
           <div>
