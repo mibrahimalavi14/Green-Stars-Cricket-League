@@ -173,9 +173,13 @@ model PlayerMatch {
   ones           Int @default(0)
   twos           Int @default(0)
   isOut          Boolean @default(false)
+  wicketsLost    Int     @default(0)
   dismissalType  String @default("")
   dismissedByBowlerId  String @default("")
   dismissedByFielderId String @default("")
+  secondDismissalType  String @default("")
+  secondDismissedByBowlerId String @default("")
+  secondDismissedByFielderId String @default("")
 
   bowlingWickets    Int @default(0)
   bowlingRuns       Int @default(0)
