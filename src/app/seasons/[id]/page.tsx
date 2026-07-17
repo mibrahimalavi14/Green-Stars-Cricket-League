@@ -65,10 +65,10 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
 
   function playoffLabel(d: Date) {
     const iso = d.toISOString()
-    if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
-    if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
-    if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
-    if (iso.startsWith("2026-08-23T")) return "Final"
+    if (iso.startsWith("2026-08-09T11:")) return "Qualifier 1"
+    if (iso.startsWith("2026-08-09T12:")) return "Eliminator"
+    if (iso.startsWith("2026-08-09T13:")) return "Qualifier 2"
+    if (iso.startsWith("2026-08-16T")) return "Final"
     return ""
   }
 
@@ -189,11 +189,11 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
           <p className="text-[var(--muted-foreground)]">No matches scheduled.</p>
         ) : (
           <>
-            {season.matches.some(match => match.date < new Date("2026-08-16T00:00:00.000Z")) && (
+            {season.matches.some(match => match.date < new Date("2026-08-09T00:00:00.000Z")) && (
               <div className="mb-6">
                 <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">League Stage</h3>
                 <div className="space-y-3">
-                  {season.matches.filter(match => match.date < new Date("2026-08-16T00:00:00.000Z")).map((match) => (
+                  {season.matches.filter(match => match.date < new Date("2026-08-09T00:00:00.000Z")).map((match) => (
                     <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
                       <div className="mb-1 text-center text-xs text-[var(--muted-foreground)]">
@@ -240,14 +240,14 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 </div>
               </div>
             )}
-            {season.matches.some(match => match.date >= new Date("2026-08-23T00:00:00.000Z")) && (
+            {season.matches.some(match => match.date >= new Date("2026-08-09T00:00:00.000Z")) && (
               <div>
                 <h3 className="mb-1 text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Playoffs</h3>
                 <p className="mb-3 text-xs text-[var(--muted-foreground)]">
                   Top 4 teams from the Points Table will qualify for the Playoffs.
                 </p>
                 <div className="space-y-3">
-                  {season.matches.filter(match => match.date >= new Date("2026-08-23T00:00:00.000Z")).map((match) => (
+                  {season.matches.filter(match => match.date >= new Date("2026-08-09T00:00:00.000Z")).map((match) => (
                     <div key={match.id} className="rounded-xl border border-amber-200 bg-[var(--card)] p-3 sm:p-4 dark:border-amber-800/40">
                       {match.matchNo > 0 && <div className="-mt-1 mb-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">Match {match.matchNo}</div>}
                       <div className="mb-1">

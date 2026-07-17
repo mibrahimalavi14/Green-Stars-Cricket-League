@@ -86,15 +86,17 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     }))
   }
 
-  function setWicketsLost(playerId: string, val: string) {
-    const w = parseInt(val) || 0
+  function setOut(playerId: string, checked: boolean) {
     setStats(prev => {
       const cur = prev[playerId] || {}
-      const upd: Record<string, string> = { ...cur, wktsLost: val }
-      if (w < 1) { upd.dismissal = ""; upd.dismissalBowler = ""; upd.dismissalFielder = "" }
-      if (w < 2) { upd.dismissal2 = ""; upd.dismissalBowler2 = ""; upd.dismissalFielder2 = "" }
-      if (w >= 1 && !cur.dismissal) upd.dismissal = "bowled"
-      if (w >= 2 && !cur.dismissal2) upd.dismissal2 = "bowled"
+      const upd: Record<string, string> = { ...cur, out: checked ? "1" : "0" }
+      if (checked) {
+        if (!cur.dismissal) upd.dismissal = "bowled"
+      } else {
+        upd.dismissal = ""
+        upd.dismissalBowler = ""
+        upd.dismissalFielder = ""
+      }
       return { ...prev, [playerId]: upd }
     })
   }
@@ -120,14 +122,11 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         sixes: parseInt(s(p.id, "6s")) || 0,
         ones: parseInt(s(p.id, "1s")) || 0,
         twos: parseInt(s(p.id, "2s")) || 0,
-        isOut: parseInt(s(p.id, "wktsLost")) > 0,
-        wicketsLost: parseInt(s(p.id, "wktsLost")) || 0,
+        isOut: s(p.id, "out") === "1",
+        wicketsLost: s(p.id, "out") === "1" ? 1 : 0,
         dismissalType: s(p.id, "dismissal") || "",
         dismissedByBowlerId: s(p.id, "dismissalBowler") || "",
         dismissedByFielderId: s(p.id, "dismissalFielder") || "",
-        secondDismissalType: s(p.id, "dismissal2") || "",
-        secondDismissedByBowlerId: s(p.id, "dismissalBowler2") || "",
-        secondDismissedByFielderId: s(p.id, "dismissalFielder2") || "",
         bowlingWickets: parseInt(s(p.id, "wkts")) || 0,
         bowlingRuns: parseInt(s(p.id, "br")) || 0,
         ballsBowled: parseInt(s(p.id, "bb")) || 0,
@@ -145,7 +144,6 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         teamId: m.team1.id,
         battingRuns: 0, ballsFaced: 0, fours: 0, sixes: 0, ones: 0, twos: 0,
         isOut: false, wicketsLost: 0, dismissalType: "", dismissedByBowlerId: "", dismissedByFielderId: "",
-        secondDismissalType: "", secondDismissedByBowlerId: "", secondDismissedByFielderId: "",
         bowlingWickets: 0, bowlingRuns: 0, ballsBowled: 0, maidens: 0, wides: 0, noBalls: 0,
         catches: parseInt(n.ct) || 0,
         stumpings: parseInt(n.st) || 0,
@@ -280,13 +278,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               <th className="py-1 px-1 text-center font-medium" title="Sixes">6s</th>
               <th className="py-1 px-1 text-center font-medium" title="Ones (1 run)">1s</th>
               <th className="py-1 px-1 text-center font-medium" title="Twos (2 runs)">2s</th>
-              <th className="py-1 px-1 text-center font-medium" title="Wickets Lost (0/1/2)">W</th>
-              <th className="py-1 px-1 text-center font-medium">1st D</th>
-              <th className="py-1 px-1 text-center font-medium">1st B</th>
-              <th className="py-1 px-1 text-center font-medium">1st F</th>
-              <th className="py-1 px-1 text-center font-medium">2nd D</th>
-              <th className="py-1 px-1 text-center font-medium">2nd B</th>
-              <th className="py-1 px-1 text-center font-medium">2nd F</th>
+               <th className="py-1 px-1 text-center font-medium" title="Out">Out</th>
+              <th className="py-1 px-1 text-center font-medium">Dismissal</th>
+              <th className="py-1 px-1 text-center font-medium">Bowler</th>
+              <th className="py-1 px-1 text-center font-medium">Fielder</th>
               <th className="py-1 px-1 text-center font-medium" title="Bowling Wickets">Wkts</th>
               <th className="py-1 px-1 text-center font-medium" title="Runs Conceded">Runs</th>
               <th className="py-1 px-1 text-center font-medium" title="Balls Bowled">Balls</th>
@@ -309,12 +304,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "1s")} onChange={e => set(p.id, "1s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1"><input type="number" min="0" value={s(p.id, "2s")} onChange={e => set(p.id, "2s", e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center" /></td>
                 <td className="py-1 px-1 text-center">
-                  <select value={s(p.id, "wktsLost") || "0"} onChange={e => setWicketsLost(p.id, e.target.value)} className="w-8 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
-                    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-                  </select>
+                  <input type="checkbox" checked={s(p.id, "out") === "1"} onChange={e => setOut(p.id, e.target.checked)} className="h-4 w-4" />
                 </td>
                 <td className="py-1 px-1">
-                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 1 ? (
+                  {s(p.id, "out") === "1" ? (
                     <select value={s(p.id, "dismissal")} onChange={e => set(p.id, "dismissal", e.target.value)} className="w-12 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                       <option value="">-</option>
                       <option value="bowled">B</option><option value="caught">C</option><option value="lbw">L</option>
@@ -324,7 +317,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
                 </td>
                 <td className="py-1 px-1">
-                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 1 && s(p.id, "dismissal") && s(p.id, "dismissal") !== "run out" && s(p.id, "dismissal") !== "retired" ? (
+                  {s(p.id, "out") === "1" && s(p.id, "dismissal") && s(p.id, "dismissal") !== "run out" && s(p.id, "dismissal") !== "retired" ? (
                     <select value={s(p.id, "dismissalBowler")} onChange={e => set(p.id, "dismissalBowler", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                       <option value="">-</option>
                       {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
@@ -332,34 +325,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
                 </td>
                 <td className="py-1 px-1">
-                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 1 && (s(p.id, "dismissal") === "caught" || s(p.id, "dismissal") === "stumped" || s(p.id, "dismissal") === "run out") ? (
+                  {s(p.id, "out") === "1" && (s(p.id, "dismissal") === "caught" || s(p.id, "dismissal") === "stumped" || s(p.id, "dismissal") === "run out") ? (
                     <select value={s(p.id, "dismissalFielder")} onChange={e => set(p.id, "dismissalFielder", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
-                      <option value="">-</option>
-                      {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
-                    </select>
-                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
-                </td>
-                <td className="py-1 px-1">
-                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 2 ? (
-                    <select value={s(p.id, "dismissal2")} onChange={e => set(p.id, "dismissal2", e.target.value)} className="w-12 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
-                      <option value="">-</option>
-                      <option value="bowled">B</option><option value="caught">C</option><option value="lbw">L</option>
-                      <option value="stumped">St</option><option value="run out">RO</option>
-                      <option value="retired">Ret</option><option value="hit wicket">HW</option>
-                    </select>
-                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
-                </td>
-                <td className="py-1 px-1">
-                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 2 && s(p.id, "dismissal2") && s(p.id, "dismissal2") !== "run out" && s(p.id, "dismissal2") !== "retired" ? (
-                    <select value={s(p.id, "dismissalBowler2")} onChange={e => set(p.id, "dismissalBowler2", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
-                      <option value="">-</option>
-                      {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
-                    </select>
-                  ) : (<span className="text-[10px] text-[var(--muted-foreground)]">-</span>)}
-                </td>
-                <td className="py-1 px-1">
-                  {(parseInt(s(p.id, "wktsLost")) || 0) >= 2 && (s(p.id, "dismissal2") === "caught" || s(p.id, "dismissal2") === "stumped" || s(p.id, "dismissal2") === "run out") ? (
-                    <select value={s(p.id, "dismissalFielder2")} onChange={e => set(p.id, "dismissalFielder2", e.target.value)} className="w-14 rounded border border-[var(--border)] bg-[var(--card)] px-1 py-0.5 text-center text-[10px]">
                       <option value="">-</option>
                       {opposingPlayers.map(op => (<option key={op.id} value={op.id}>{op.name}</option>))}
                     </select>
@@ -385,15 +352,15 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   return (
     <div className="space-y-3">
       {matches.map((m) => {
-        const playoffCutoff = new Date("2026-08-16T00:00:00.000Z")
+        const playoffCutoff = new Date("2026-08-09T00:00:00.000Z")
         const md = new Date(m.date)
         const isPlayoff = md >= playoffCutoff
         function playoffLabel(d: Date) {
           const iso = d.toISOString()
-          if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
-          if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
-          if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
-          if (iso.startsWith("2026-08-23T")) return "Final"
+          if (iso.startsWith("2026-08-09T11:")) return "Qualifier 1"
+          if (iso.startsWith("2026-08-09T12:")) return "Eliminator"
+          if (iso.startsWith("2026-08-09T13:")) return "Qualifier 2"
+          if (iso.startsWith("2026-08-16T")) return "Final"
           return ""
         }
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)

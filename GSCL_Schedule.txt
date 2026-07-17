@@ -1,63 +1,64 @@
 ================================================================================
          GREEN STARS CRICKET LEAGUE - SEASON 1 - FULL SCHEDULE
-         6 Teams | 5-over Format | 30 League + 4 Playoff Matches
+         6 Teams | 5-over Single Wicket | 30 League + 4 Playoff Matches
 ================================================================================
 
-
 Friday, 17 July 2026
-  Alpha Warriors         vs Dragon Knights          4:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Elite Rangers          vs Power Panthers          5:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Falcon Strikers        vs Legends XI              6:00 PM  |  Al-Kabir Cricket Road, Lahore
+  M1  Alpha Warriors       vs Power Panthers          4:00 PM  |  AWT Shift, Lahore
+  M2  Dragon Knights       vs Legends XI              5:00 PM  |  AWT Shift, Lahore
+  M3  Elite Rangers        vs Falcon Strikers         6:00 PM  |  AWT Shift, Lahore
+  M4  Alpha Warriors       vs Legends XI              7:00 PM  |  AWT Shift, Lahore
 
 Saturday, 18 July 2026
-  Alpha Warriors         vs Power Panthers          4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Dragon Knights         vs Legends XI              5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Elite Rangers          vs Falcon Strikers         6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  M5  Power Panthers       vs Falcon Strikers         4:00 PM  |  AWT Shift, Lahore
+  M6  Dragon Knights       vs Elite Rangers           5:00 PM  |  AWT Shift, Lahore
+  M7  Alpha Warriors       vs Falcon Strikers         6:00 PM  |  AWT Shift, Lahore
+  M8  Legends XI           vs Elite Rangers           7:00 PM  |  AWT Shift, Lahore
 
 Sunday, 19 July 2026
-  Alpha Warriors         vs Legends XI              4:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Power Panthers         vs Falcon Strikers         5:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Dragon Knights         vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road, Lahore
+  M9  Power Panthers       vs Dragon Knights          4:00 PM  |  AWT Shift, Lahore
+  M10 Alpha Warriors       vs Elite Rangers           5:00 PM  |  AWT Shift, Lahore
+  M11 Falcon Strikers      vs Dragon Knights          6:00 PM  |  AWT Shift, Lahore
+  M12 Legends XI           vs Power Panthers          7:00 PM  |  AWT Shift, Lahore
 
 Friday, 24 July 2026
-  Alpha Warriors         vs Falcon Strikers         4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Legends XI             vs Elite Rangers           5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Power Panthers         vs Dragon Knights          6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  M13 Alpha Warriors       vs Dragon Knights          4:00 PM  |  AWT Shift, Lahore
+  M14 Elite Rangers        vs Power Panthers          5:00 PM  |  AWT Shift, Lahore
+  M15 Falcon Strikers      vs Legends XI              6:00 PM  |  AWT Shift, Lahore
+  M16 Power Panthers       vs Alpha Warriors          7:00 PM  |  AWT Shift, Lahore
 
 Saturday, 25 July 2026
-  Alpha Warriors         vs Elite Rangers           4:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Falcon Strikers        vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Legends XI             vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road, Lahore
+  M17 Legends XI           vs Dragon Knights          4:00 PM  |  AWT Shift, Lahore
+  M18 Falcon Strikers      vs Elite Rangers           5:00 PM  |  AWT Shift, Lahore
+  M19 Legends XI           vs Alpha Warriors          6:00 PM  |  AWT Shift, Lahore
+  M20 Falcon Strikers      vs Power Panthers          7:00 PM  |  AWT Shift, Lahore
 
 Sunday, 26 July 2026
-  Dragon Knights         vs Alpha Warriors          4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Power Panthers         vs Elite Rangers           5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Legends XI             vs Falcon Strikers         6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  M21 Elite Rangers        vs Dragon Knights          4:00 PM  |  AWT Shift, Lahore
+  M22 Falcon Strikers      vs Alpha Warriors          5:00 PM  |  AWT Shift, Lahore
+  M23 Elite Rangers        vs Legends XI              6:00 PM  |  AWT Shift, Lahore
+  M24 Dragon Knights       vs Power Panthers          7:00 PM  |  AWT Shift, Lahore
 
 Friday, 31 July 2026
-  Power Panthers         vs Alpha Warriors          4:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Legends XI             vs Dragon Knights          5:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Falcon Strikers        vs Elite Rangers           6:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Elite Rangers          vs Alpha Warriors          7:00 PM  |  Al-Kabir Cricket Road, Lahore
+  M25 Elite Rangers        vs Alpha Warriors          4:00 PM  |  AWT Shift, Lahore
+  M26 Dragon Knights       vs Falcon Strikers         5:00 PM  |  AWT Shift, Lahore
+  M27 Power Panthers       vs Legends XI              6:00 PM  |  AWT Shift, Lahore
+  M28 Dragon Knights       vs Alpha Warriors          7:00 PM  |  AWT Shift, Lahore
 
 Sunday, 2 August 2026
-  Legends XI             vs Alpha Warriors          4:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Falcon Strikers        vs Power Panthers          5:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Elite Rangers          vs Dragon Knights          6:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
-  Dragon Knights         vs Falcon Strikers         7:00 PM  |  AWT Cricket Ground, Plot 134 Block B AWT Housing Scheme Phase 2, Lahore
+  M29 Power Panthers       vs Elite Rangers           4:00 PM  |  AWT Shift, Lahore
+  M30 Legends XI           vs Falcon Strikers         5:00 PM  |  AWT Shift, Lahore
+
+================================================================================
+                          PLAYOFFS
+================================================================================
 
 Sunday, 9 August 2026
-  Falcon Strikers        vs Alpha Warriors          4:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Elite Rangers          vs Legends XI              5:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Dragon Knights         vs Power Panthers          6:00 PM  |  Al-Kabir Cricket Road, Lahore
-  Power Panthers         vs Legends XI              7:00 PM  |  Al-Kabir Cricket Road, Lahore
+  M31 Qualifier 1           TBD vs TBD                4:00 PM  |  AWT Shift, Lahore
+  M32 Eliminator            TBD vs TBD                5:00 PM  |  AWT Shift, Lahore
+  M33 Qualifier 2           TBD vs TBD                6:00 PM  |  AWT Shift, Lahore
 
 Sunday, 16 August 2026
-  Qualifier 1               TBD                     4:00 PM  |  TBD
-  Eliminator                TBD                     5:00 PM  |  TBD
-  Qualifier 2               TBD                     6:00 PM  |  TBD
-
-Sunday, 23 August 2026
-  FINAL                     TBD                     5:00 PM  |  TBD
+  M34 FINAL                 TBD vs TBD                4:00 PM  |  AWT Shift, Lahore
 
 ================================================================================
