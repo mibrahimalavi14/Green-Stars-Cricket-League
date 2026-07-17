@@ -102,7 +102,7 @@ const timeSlots = [
   "2026-07-31T11:00:00.000Z","2026-07-31T12:00:00.000Z","2026-07-31T13:00:00.000Z","2026-07-31T14:00:00.000Z",
   "2026-08-02T11:00:00.000Z","2026-08-02T12:00:00.000Z",
 ]
-const venues = ["AWT Shift", "AWT Shift"]
+const venues = ["Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan", "Plot 134, Block B Awt Housing Scheme Phase 2 AWT Phase 2, Lahore, Pakistan"]
 let matchNo = 1
 for (let i = 0; i < allMatches.length; i++) {
   const [t1, t2] = allMatches[i]
