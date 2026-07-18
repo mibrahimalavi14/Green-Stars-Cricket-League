@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
+import { H2H } from "@/components/H2H"
 
 type Perf = PlayerMatch & { player: Player }
 
@@ -316,6 +317,8 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           {m.venue}
         </p>
       </div>
+
+      <H2H team1Id={m.team1Id} team2Id={m.team2Id} matchId={m.id} />
 
       {m.status === "upcoming" && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">

@@ -78,6 +78,8 @@ export function Header() {
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
           <Link href="/about" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">About</Link>
           <Link href="/contact" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Contact</Link>
+          <Link href="/compare" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Compare</Link>
+          <Link href="/faq" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">FAQ</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -105,6 +107,8 @@ export function Header() {
             <Link href="/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
             <Link href="/about" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">About</Link>
             <Link href="/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
+            <Link href="/compare" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Compare</Link>
+            <Link href="/faq" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">FAQ</Link>
           </div>
         </nav>
       )}

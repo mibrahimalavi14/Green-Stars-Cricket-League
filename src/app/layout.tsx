@@ -6,6 +6,7 @@ import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { ScrollToTop } from "@/components/ScrollToTop"
 import { SearchOverlay } from "@/components/SearchOverlay"
+import { CookieConsent } from "@/components/CookieConsent"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Footer />
             <ScrollToTop />
             <SearchOverlay />
+            <CookieConsent />
           </div>
         </ThemeProvider>
       </body>
