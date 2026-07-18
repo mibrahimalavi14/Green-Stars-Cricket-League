@@ -7,6 +7,7 @@ import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { ReviewsSection } from "@/components/ReviewsSection"
 import { CountdownTimer } from "@/components/CountdownTimer"
+import { AnimatedCounter } from "@/components/AnimatedCounter"
 import { FadeInView } from "@/components/FadeInView"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award, Timer } from "lucide-react"
 
@@ -75,7 +76,7 @@ async function HomePage() {
             ].map((s) => (
               <div key={s.label} className="rounded-lg bg-[var(--muted)] p-4 text-center">
                 <s.icon className="mx-auto mb-1 h-5 w-5 text-[var(--accent)]" />
-                <div className="text-2xl font-bold">{s.value}</div>
+                <div className="text-2xl font-bold">{typeof s.value === "number" ? <AnimatedCounter value={s.value} /> : s.value}</div>
                 <div className="text-xs text-[var(--muted-foreground)]">{s.label}</div>
               </div>
             ))}
@@ -204,6 +205,26 @@ async function HomePage() {
           >
             <Youtube className="h-5 w-5" /> Subscribe to GSCL
           </a>
+        </div>
+      </section>
+      </FadeInView>
+
+      <FadeInView>
+      <section className="border-t border-[var(--border)] py-10">
+        <div className="mx-auto max-w-7xl px-4 text-center">
+          <h2 className="mb-6 text-xl font-bold">Our Partners</h2>
+          <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
+            <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-6 py-4">
+              <img src="/images/logo/gscl-logo.png" alt="" className="h-10 w-10 rounded-full object-cover" />
+              <span className="font-semibold text-sm">GSCL</span>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-6 py-4">
+              <p className="text-sm font-semibold text-[var(--muted-foreground)]">Partner &#8470; 1</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-6 py-4">
+              <p className="text-sm font-semibold text-[var(--muted-foreground)]">Partner &#8470; 2</p>
+            </div>
+          </div>
         </div>
       </section>
       </FadeInView>

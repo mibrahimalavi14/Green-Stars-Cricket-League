@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { ScrollToTop } from "@/components/ScrollToTop"
+import { SearchOverlay } from "@/components/SearchOverlay"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
     icon: [{ url: "/images/logo/gscl-logo.png", type: "image/png" }],
     apple: "/images/logo/gscl-logo.png",
   },
+  manifest: "/manifest.json",
   openGraph: {
     title: "Green Stars Cricket League",
     description: "Official website of the Green Stars Cricket League - Live scores, fixtures, points table, and more.",
@@ -41,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="flex-1">{children}</main>
             <Footer />
             <ScrollToTop />
+            <SearchOverlay />
           </div>
         </ThemeProvider>
       </body>

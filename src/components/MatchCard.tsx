@@ -1,17 +1,23 @@
 "use client"
 import { formatDate, relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 import { MatchData } from "@/types"
+import { Trophy } from "lucide-react"
 
 export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchNo?: boolean }) {
   const date = new Date(match.date)
   const rel = relativeDateLabel(date)
   const navHref = match.status === "live" ? "/live" : "/fixtures"
 
+  const team1Won = match.status === "completed" && match.result?.startsWith(match.team1.name)
+  const team2Won = match.status === "completed" && match.result?.startsWith(match.team2.name)
+
   return (
     <div
       onClick={() => { window.location.href = navHref }}
-      className={`group cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg ${
-        match.status === "live" ? "ring-2 ring-red-500" : ""
+      className={`group cursor-pointer rounded-lg border bg-[var(--card)] p-4 transition-all hover:shadow-lg ${
+        match.status === "live" ? "border-red-500 ring-2 ring-red-500" :
+        match.status === "completed" ? "border-[var(--border)]" :
+        "border-[var(--border)] hover:border-[var(--accent)]"
       }`}
     >
       {(match.status === "live" || showMatchNo) && (
@@ -21,7 +27,7 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
         </div>
       )}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className={`flex min-w-0 flex-1 items-center gap-3 rounded-lg p-2 ${team1Won ? "bg-green-500/10" : ""}`}>
           {match.team1.logo ? (
             <img src={match.team1.logo} alt={match.team1.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
           ) : (
@@ -30,7 +36,10 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
             </div>
           )}
           <div className="min-w-0 text-right">
-            <p className="truncate text-sm font-medium">{match.team1.name}</p>
+            <p className="flex items-center justify-end gap-1.5 truncate text-sm font-medium">
+              {match.team1.name}
+              {team1Won && <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
+            </p>
             {match.team1Score && <p className="text-lg font-bold">{match.team1Score}</p>}
           </div>
         </div>
@@ -46,9 +55,12 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
             </div>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+        <div className={`flex min-w-0 flex-1 items-center justify-end gap-3 rounded-lg p-2 ${team2Won ? "bg-green-500/10" : ""}`}>
           <div className="min-w-0 text-left">
-            <p className="truncate text-sm font-medium">{match.team2.name}</p>
+            <p className="flex items-center gap-1.5 truncate text-sm font-medium">
+              {match.team2.name}
+              {team2Won && <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
+            </p>
             {match.team2Score && <p className="text-lg font-bold">{match.team2Score}</p>}
           </div>
           {match.team2.logo ? (

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Search } from "lucide-react"
 
 export function Header() {
   const [open, setOpen] = useState(false)
@@ -78,6 +78,9 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <button onClick={() => window.dispatchEvent(new CustomEvent("open-search"))} className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--muted)] transition-colors hover:bg-[var(--accent)]" aria-label="Search">
+            <Search className="h-4 w-4" />
+          </button>
           <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
