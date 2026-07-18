@@ -6,7 +6,9 @@ import { NewsNotification } from "@/components/NewsNotification"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { ReviewsSection } from "@/components/ReviewsSection"
-import { Youtube, Trophy, Users, Calendar, MapPin, Award } from "lucide-react"
+import { CountdownTimer } from "@/components/CountdownTimer"
+import { FadeInView } from "@/components/FadeInView"
+import { Youtube, Trophy, Users, Calendar, MapPin, Award, Timer } from "lucide-react"
 
 export const revalidate = 300
 
@@ -60,6 +62,7 @@ async function HomePage() {
         </div>
       </section>
 
+      <FadeInView>
       <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
@@ -95,8 +98,10 @@ async function HomePage() {
           )}
         </div>
       </section>
+      </FadeInView>
 
       {players.length > 0 && (
+        <FadeInView>
         <section className="border-t border-[var(--border)] py-10">
           <div className="mx-auto max-w-7xl px-4">
             <div className="mb-6 flex items-center justify-between">
@@ -121,15 +126,24 @@ async function HomePage() {
             </div>
           </div>
         </section>
+        </FadeInView>
       )}
 
       {matches.length > 0 && (
+        <FadeInView>
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold">Upcoming Matches</h2>
               <Link href="/fixtures" className="text-sm text-[var(--accent)] hover:underline">View All</Link>
             </div>
+            {matches[0] && (
+              <div className="mb-6 flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-sm">
+                <Timer className="h-4 w-4 text-[var(--accent)]" />
+                <span className="text-[var(--muted-foreground)]">Next match in:</span>
+                <span className="font-bold tabular-nums"><CountdownTimer targetDate={matches[0].date.toISOString()} /></span>
+              </div>
+            )}
             <div className="grid gap-4 md:grid-cols-2">
               {matches.map((match) => (
                 <MatchCard key={match.id} match={match as any} showMatchNo={true} />
@@ -137,8 +151,10 @@ async function HomePage() {
             </div>
           </div>
         </section>
+        </FadeInView>
       )}
 
+      <FadeInView>
       <section className="border-t border-[var(--border)] bg-[var(--card)] py-12">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-6 flex items-center justify-between">
@@ -152,7 +168,9 @@ async function HomePage() {
           </div>
         </div>
       </section>
+      </FadeInView>
 
+      <FadeInView>
       <section className="border-t border-[var(--border)] bg-[var(--card)] py-12">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-6 flex items-center justify-between">
@@ -170,7 +188,9 @@ async function HomePage() {
           )}
         </div>
       </section>
+      </FadeInView>
 
+      <FadeInView>
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <Youtube className="mx-auto mb-4 h-12 w-12 text-red-500" />
@@ -186,6 +206,7 @@ async function HomePage() {
           </a>
         </div>
       </section>
+      </FadeInView>
 
       <ReviewsSection />
     </>
