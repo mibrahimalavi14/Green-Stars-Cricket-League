@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
+import { BotCheck } from "@/components/BotCheck"
 
 function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
@@ -34,9 +35,10 @@ function ContactPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">Contact Us</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">Get in touch with the GSCL team</p>
+    <BotCheck>
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <h1 className="mb-2 text-3xl font-bold">Contact Us</h1>
+        <p className="mb-8 text-[var(--muted-foreground)]">Get in touch with the GSCL team</p>
 
       {sent ? (
         <div className="rounded-xl border border-green-500/50 bg-green-500/10 p-8 text-center">
@@ -86,6 +88,7 @@ function ContactPage() {
         </form>
       )}
     </div>
+    </BotCheck>
   )
 }
 

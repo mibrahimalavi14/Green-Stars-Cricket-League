@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
+import { BotCheck } from "@/components/BotCheck"
 
 type Review = { id: string; name: string; rating: number; comment: string; createdAt: string }
 
@@ -98,7 +99,8 @@ export function ReviewsSection() {
             <p className="text-sm text-[var(--muted-foreground)]">It will appear after approval.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <BotCheck storageKey="review_verified">
+            <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
             <h3 className="text-center font-semibold">Leave a Review</h3>
 
             <div>
@@ -138,6 +140,7 @@ export function ReviewsSection() {
               {sending ? "Submitting..." : "Submit Review"}
             </button>
           </form>
+          </BotCheck>
         )}
       </div>
     </section>
