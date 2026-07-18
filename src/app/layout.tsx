@@ -19,6 +19,8 @@ export const metadata: Metadata = {
     apple: "/images/logo/gscl-logo.png",
   },
   manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "GSCL", statusBarStyle: "black-translucent" },
+  other: { "theme-color": "#ffd700" },
   openGraph: {
     title: "Green Stars Cricket League",
     description: "Official website of the Green Stars Cricket League - Live scores, fixtures, points table, and more.",
@@ -37,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js')` }} />
         <ThemeProvider>
           <div className="flex min-h-screen flex-col overflow-x-hidden">
             <Header />
