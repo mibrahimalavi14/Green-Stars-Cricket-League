@@ -87,6 +87,7 @@ export function Header() {
                   <Link href="/seasons" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Seasons</Link>
                   <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Toss Analysis</Link>
                   <Link href="/compare" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Compare</Link>
+                  <Link href="/teams/stats" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Team Stats</Link>
                   <Link href="/about" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">About</Link>
                   <Link href="/contact" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Contact</Link>
                   <Link href="/faq" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">FAQ</Link>
@@ -121,6 +122,7 @@ export function Header() {
             <Link href="/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
             <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
             <Link href="/compare" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Compare</Link>
+            <Link href="/teams/stats" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Team Stats</Link>
             <Link href="/about" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">About</Link>
             <Link href="/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
             <Link href="/faq" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">FAQ</Link>
