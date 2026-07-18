@@ -75,7 +75,7 @@ async function FixturesPage() {
     <div className="mx-auto max-w-7xl px-4 py-12">
       <Breadcrumbs items={[{ label: "Fixtures" }]} />
       <h1 className="mb-2 text-3xl font-bold">Season 1 — Full Schedule</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">6 teams • 5-over format • Double Round Robin • 30 league matches</p>
+      <p className="mb-8 text-[var(--muted-foreground)]">8 teams • 5-over format • Double Round Robin • 30 league matches</p>
 
       <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-300">
         <p className="font-medium">Note: Starter Phase — Neutral Fielders</p>

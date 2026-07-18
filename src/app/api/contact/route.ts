@@ -19,7 +19,10 @@ async function verifyCaptcha(token: string): Promise<boolean> {
   } catch { return false }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const cookie = req.headers.get("cookie") || ""
+  const isAdmin = cookie.includes("admin_token=true")
+  if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const contacts = await prisma.contact.findMany({ orderBy: { createdAt: "desc" } })
   return NextResponse.json(contacts)
 }

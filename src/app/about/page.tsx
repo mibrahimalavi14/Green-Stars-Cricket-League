@@ -1,4 +1,4 @@
-import { Users, Star, Heart } from "lucide-react"
+import { Users, Star, Heart, MapPin } from "lucide-react"
 
 export const revalidate = 300
 
@@ -49,10 +49,10 @@ function AboutPage() {
           to compete in an exciting, high-energy 5-over format.
         </p>
         <p>
-          Our league is built on the values of sportsmanship, competition, and community. Every season, 6
-          teams battle through a double round-robin league stage, followed by playoffs, culminating in a
-          grand final to crown the champion. From raw pace to classic swing, from powerful hitting to
-          clever spin — GSCL is where the future stars of Pakistan cricket rise.
+        Our league is built on the values of sportsmanship, competition, and community. Every season, 8
+        teams battle through a double round-robin league stage, followed by playoffs, culminating in a
+        grand final to crown the champion. From raw pace to classic swing, from powerful hitting to
+        clever spin — GSCL is where the future stars of Pakistan cricket rise.
         </p>
         <p>
           With live scoring, player statistics, and real-time standings, GSCL offers fans a complete
@@ -68,7 +68,7 @@ function AboutPage() {
           </div>
           <h3 className="mb-1 font-semibold">8 Teams</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
-                Each with a unique identity and a squad of passionate players.
+            Each with a unique identity and a squad of passionate players.
           </p>
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
@@ -78,6 +78,15 @@ function AboutPage() {
           <h3 className="mb-1 font-semibold">5-Over Format</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
             Fast-paced, action-packed cricket where every ball counts — perfect for modern audiences and players alike.
+          </p>
+        </div>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/10">
+            <MapPin className="h-6 w-6 text-[var(--accent)]" />
+          </div>
+          <h3 className="mb-1 font-semibold">Haripur, Pakistan</h3>
+          <p className="text-xs text-[var(--muted-foreground)]">
+            A grassroots league rooted in the local community, nurturing talent from the region.
           </p>
         </div>
       </div>
