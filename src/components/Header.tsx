@@ -4,11 +4,12 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search } from "lucide-react"
+import { Menu, X, Search, ChevronDown } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
   const [open, setOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const pathname = usePathname()
   const isAdmin = pathname.startsWith("/admin")
 
@@ -70,16 +71,25 @@ export function Header() {
         <nav className="hidden items-center gap-6 md:flex">
           <Link href="/" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Home</Link>
           <Link href="/teams" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Teams</Link>
-          <Link href="/seasons" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Seasons</Link>
           <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
-          <Link href="/toss-analysis" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Toss</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
-          <Link href="/about" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">About</Link>
-          <Link href="/contact" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Contact</Link>
-          <Link href="/compare" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Compare</Link>
-          <Link href="/faq" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">FAQ</Link>
+          <div className="relative" onMouseEnter={() => setMoreOpen(true)} onMouseLeave={() => setMoreOpen(false)}>
+            <button onClick={() => setMoreOpen(!moreOpen)} className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-[var(--accent)]">
+              More <ChevronDown className={`h-3 w-3 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
+            </button>
+            {moreOpen && (
+              <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-xl">
+                <Link href="/seasons" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Seasons</Link>
+                <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Toss Analysis</Link>
+                <Link href="/compare" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Compare</Link>
+                <Link href="/about" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">About</Link>
+                <Link href="/contact" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Contact</Link>
+                <Link href="/faq" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">FAQ</Link>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -99,15 +109,16 @@ export function Header() {
           <div className="flex flex-col gap-3 text-sm font-medium">
             <Link href="/" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Home</Link>
             <Link href="/teams" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Teams</Link>
-            <Link href="/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
             <Link href="/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
             <Link href="/fixtures" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
             <Link href="/points-table" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Standings</Link>
-            <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss</Link>
             <Link href="/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
+            <hr className="border-[var(--border)]" />
+            <Link href="/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
+            <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
+            <Link href="/compare" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Compare</Link>
             <Link href="/about" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">About</Link>
             <Link href="/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
-            <Link href="/compare" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Compare</Link>
             <Link href="/faq" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">FAQ</Link>
           </div>
         </nav>
