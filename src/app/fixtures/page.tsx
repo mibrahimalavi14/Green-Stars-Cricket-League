@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
 import { getVenueMapsUrl } from "@/lib/utils"
+import { Breadcrumbs } from "@/components/Breadcrumbs"
 
 export const revalidate = 300
 
@@ -72,6 +73,7 @@ async function FixturesPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
+      <Breadcrumbs items={[{ label: "Fixtures" }]} />
       <h1 className="mb-2 text-3xl font-bold">Season 1 â€” Full Schedule</h1>
       <p className="mb-8 text-[var(--muted-foreground)]">6 teams â€¢ 5-over format â€¢ Double Round Robin â€¢ 30 league matches</p>
 

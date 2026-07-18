@@ -114,7 +114,7 @@ export function LiveScoreClient({
             </div>
             <p className="text-3xl font-bold">{match.team1Score || battingTeam?.runs.toString() || "0"}</p>
             <p className="text-sm text-[var(--muted-foreground)]">
-              {battingTeam ? `${battingTeam.wickets}/${battingTeam.runs} (${overs} ov)` : "Yet to bat"}
+              {battingTeam ? `${battingTeam.runs}/${battingTeam.wickets} (${overs} ov)` : "Yet to bat"}
             </p>
           </div>
 

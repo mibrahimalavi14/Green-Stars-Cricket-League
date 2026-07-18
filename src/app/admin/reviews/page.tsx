@@ -1,9 +1,31 @@
-import { prisma } from "@/lib/prisma"
+"use client"
 
-export const dynamic = "force-dynamic"
+import { useState, useEffect } from "react"
 
-async function AdminReviewsPage() {
-  const reviews = await prisma.review.findMany({ orderBy: { createdAt: "desc" } })
+type Review = { id: string; name: string; email: string; rating: number; comment: string; approved: boolean; createdAt: string }
+
+function AdminReviewsPage() {
+  const [reviews, setReviews] = useState<Review[]>([])
+
+  async function load() {
+    const res = await fetch("/api/reviews")
+    const d = await res.json()
+    setReviews(d.reviews)
+  }
+
+  useEffect(() => { load() }, [])
+
+  async function toggleApproval(id: string, approved: boolean) {
+    await fetch(`/api/reviews/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved }) })
+    load()
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Delete this review?")) return
+    await fetch(`/api/reviews/${id}`, { method: "DELETE" })
+    load()
+  }
+
   const approvedCount = reviews.filter(r => r.approved).length
 
   return (
@@ -27,6 +49,16 @@ async function AdminReviewsPage() {
               </div>
               <p className="text-sm text-[var(--muted-foreground)]">{r.comment}</p>
               {r.email && <p className="mt-1 text-xs text-[var(--muted-foreground)]">{r.email}</p>}
+              <div className="mt-3 flex gap-2">
+                <button onClick={() => toggleApproval(r.id, !r.approved)}
+                  className={`rounded px-3 py-1 text-xs font-semibold transition-opacity hover:opacity-80 ${r.approved ? "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" : "bg-green-500/20 text-green-700 dark:text-green-400"}`}>
+                  {r.approved ? "Unapprove" : "Approve"}
+                </button>
+                <button onClick={() => remove(r.id)}
+                  className="rounded bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-700 transition-opacity hover:opacity-80 dark:text-red-400">
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

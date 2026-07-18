@@ -12,8 +12,12 @@ async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-        <div className="aspect-video bg-[var(--muted)] flex items-center justify-center">
-          <span className="text-6xl">ðŸ</span>
+        <div className="aspect-video bg-[var(--muted)] flex items-center justify-center overflow-hidden">
+          {news.image && news.image !== "/placeholder-news.png" ? (
+            <img src={news.image} alt={news.title} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-6xl">🏏</span>
+          )}
         </div>
         <div className="p-8">
           <p className="mb-2 text-sm text-[var(--muted-foreground)]">{formatDate(news.createdAt)} &middot; {news.author}</p>
