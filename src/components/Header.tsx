@@ -75,19 +75,23 @@ export function Header() {
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
-          <div className="relative" onMouseEnter={() => setMoreOpen(true)} onMouseLeave={() => setMoreOpen(false)}>
+          <div className="relative">
             <button onClick={() => setMoreOpen(!moreOpen)} className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-[var(--accent)]">
               More <ChevronDown className={`h-3 w-3 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
             </button>
             {moreOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-xl">
-                <Link href="/seasons" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Seasons</Link>
-                <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Toss Analysis</Link>
-                <Link href="/compare" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Compare</Link>
-                <Link href="/about" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">About</Link>
-                <Link href="/contact" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Contact</Link>
-                <Link href="/faq" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">FAQ</Link>
-              </div>
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
+                <div
+                  className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-xl" >
+                  <Link href="/seasons" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Seasons</Link>
+                  <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Toss Analysis</Link>
+                  <Link href="/compare" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Compare</Link>
+                  <Link href="/about" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">About</Link>
+                  <Link href="/contact" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Contact</Link>
+                  <Link href="/faq" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">FAQ</Link>
+                </div>
+              </>
             )}
           </div>
         </nav>
