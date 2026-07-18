@@ -8,7 +8,11 @@ import { ScrollToTop } from "@/components/ScrollToTop"
 import { SearchOverlay } from "@/components/SearchOverlay"
 import { CookieConsent } from "@/components/CookieConsent"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+})
 
 export const metadata: Metadata = {
   title: "Green Stars Cricket League",

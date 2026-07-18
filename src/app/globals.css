@@ -44,3 +44,10 @@
     height: auto;
   }
 }
+
+@layer utilities {
+  .content-visibility-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 500px;
+  }
+}

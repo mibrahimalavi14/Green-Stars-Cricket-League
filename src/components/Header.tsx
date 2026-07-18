@@ -18,7 +18,7 @@ export function Header() {
       <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link href="/admin" className="flex items-center gap-2">
-            <img src="/images/logo/gscl-logo.png" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
+            <img src="/images/optimized/gscl-logo.webp" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
             <span className="text-sm font-semibold">Admin Panel</span>
           </Link>
           <nav className="hidden items-center gap-5 md:flex">

@@ -13,7 +13,7 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-5">
           <div>
             <div className="mb-3 flex items-center gap-2">
-              <img src="/images/logo/gscl-logo.png" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
+              <img src="/images/optimized/gscl-logo.webp" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
               <h3 className="text-lg font-bold text-[var(--accent)]">GSCL</h3>
             </div>
             <p className="text-sm text-[var(--muted-foreground)]">

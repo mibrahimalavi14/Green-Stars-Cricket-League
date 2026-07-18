@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Users, Star, Heart, MapPin } from "lucide-react"
 
 export const revalidate = 300
@@ -22,9 +23,11 @@ function AboutPage() {
         <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
           <div className="relative bg-gradient-to-br from-gscl-gold/20 via-gscl-dark to-gscl-gold/10 p-6">
             <div className="absolute inset-0 opacity-10" style={{backgroundImage: "radial-gradient(circle at 30% 50%, rgba(255,215,0,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.3) 0%, transparent 50%)"}} />
-            <img
-              src="/images/management/Chairman Muhammad Ibrahim Alavi.png"
+            <Image
+              src="/images/optimized/chairman.webp"
               alt="Chairman Muhammad Ibrahim Alavi"
+              width={600}
+              height={600}
               className="relative w-full rounded-xl shadow-lg"
             />
           </div>

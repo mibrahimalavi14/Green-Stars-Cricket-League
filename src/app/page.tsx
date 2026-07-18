@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 
 import { MatchCard } from "@/components/MatchCard"
@@ -15,14 +16,16 @@ export const revalidate = 300
 
 async function HomePage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })
-  const [matches, teams, news, winners, matchCount, allTeams, players] = await Promise.all([
+  const [allTeamsData, matches, news, winners, matchCount, players] = await Promise.all([
+    prisma.team.findMany({
+      include: { players: true, _count: { select: { players: true } } },
+    }),
     prisma.match.findMany({
       take: 6,
       where: { status: { not: "completed" } },
       orderBy: { date: "asc" },
       include: { team1: true, team2: true },
     }),
-    prisma.team.findMany({ take: 8, include: { players: true } }),
     prisma.news.findMany({ where: { published: true }, take: 3, orderBy: { createdAt: "desc" } }),
     prisma.season.findMany({
       where: { winnerId: { not: "" } },
@@ -30,12 +33,12 @@ async function HomePage() {
       orderBy: { year: "desc" },
     }),
     prisma.match.count(),
-    prisma.team.findMany({ include: { _count: { select: { players: true } } } }),
     season ? prisma.player.findMany({ where: { team: { seasonId: season.id } }, include: { team: true } }) : Promise.resolve([]),
   ])
 
-  const teamCount = allTeams.length
-  const playerCount = allTeams.reduce((a, b) => a + b._count.players, 0)
+  const teams = allTeamsData.slice(0, 8)
+  const teamCount = allTeamsData.length
+  const playerCount = allTeamsData.reduce((a, b) => a + b._count.players, 0)
 
   const latestNews = news.length > 0 ? news[0] : null
 
@@ -43,7 +46,7 @@ async function HomePage() {
     <>
       <NewsNotification news={latestNews ? { id: latestNews.id, title: latestNews.title, excerpt: latestNews.excerpt || "", createdAt: latestNews.createdAt.toISOString(), type: latestNews.type } : null} />
       <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
-        <img src="/images/teams/Banner.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <Image src="/images/optimized/banner.webp" alt="" fill className="object-cover" priority />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative mx-auto max-w-7xl px-4 text-center">
           <h1 className="mb-4 text-5xl font-bold text-white md:text-7xl">
@@ -156,7 +159,7 @@ async function HomePage() {
       )}
 
       <FadeInView>
-      <section className="border-t border-[var(--border)] bg-[var(--card)] py-12">
+      <section className="content-visibility-auto border-t border-[var(--border)] bg-[var(--card)] py-12">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold">Teams</h2>
@@ -172,7 +175,7 @@ async function HomePage() {
       </FadeInView>
 
       <FadeInView>
-      <section className="border-t border-[var(--border)] bg-[var(--card)] py-12">
+      <section className="content-visibility-auto border-t border-[var(--border)] bg-[var(--card)] py-12">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold">Latest News</h2>
@@ -192,7 +195,7 @@ async function HomePage() {
       </FadeInView>
 
       <FadeInView>
-      <section className="py-12">
+      <section className="content-visibility-auto py-12">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <Youtube className="mx-auto mb-4 h-12 w-12 text-red-500" />
           <h2 className="mb-2 text-2xl font-bold">Live on YouTube</h2>
@@ -210,12 +213,12 @@ async function HomePage() {
       </FadeInView>
 
       <FadeInView>
-      <section className="border-t border-[var(--border)] py-10">
+      <section className="content-visibility-auto border-t border-[var(--border)] py-10">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <h2 className="mb-6 text-xl font-bold">Our Partners</h2>
             <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
               <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-6 py-4">
-                <img src="/images/logo/gscl-logo.png" alt="" className="h-10 w-10 rounded-full object-cover" />
+                <img src="/images/optimized/gscl-logo.webp" alt="" className="h-10 w-10 rounded-full object-cover" />
                 <span className="font-semibold text-sm">GSCL</span>
               </div>
               <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--muted)] px-6 py-4">
