@@ -52,7 +52,7 @@ function AboutPage() {
           Our league is built on the values of sportsmanship, competition, and community. Every season, 6
           teams battle through a double round-robin league stage, followed by playoffs, culminating in a
           grand final to crown the champion. From raw pace to classic swing, from powerful hitting to
-          clever spin â€” GSCL is where the future stars of Pakistan cricket rise.
+          clever spin — GSCL is where the future stars of Pakistan cricket rise.
         </p>
         <p>
           With live scoring, player statistics, and real-time standings, GSCL offers fans a complete
@@ -77,7 +77,7 @@ function AboutPage() {
           </div>
           <h3 className="mb-1 font-semibold">5-Over Format</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
-            Fast-paced, action-packed cricket where every ball counts â€” perfect for modern audiences and players alike.
+            Fast-paced, action-packed cricket where every ball counts — perfect for modern audiences and players alike.
           </p>
         </div>
       </div>

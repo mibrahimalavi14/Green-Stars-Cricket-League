@@ -5,6 +5,7 @@ import { ThemeToggle } from "./ThemeToggle"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
+import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
   const [open, setOpen] = useState(false)
@@ -28,6 +29,7 @@ export function Header() {
             <Link href="/admin/news" className="text-sm transition-colors hover:text-[var(--accent)]">News</Link>
             <Link href="/admin/contact" className="text-sm transition-colors hover:text-[var(--accent)]">Contact</Link>
             <Link href="/admin/reviews" className="text-sm transition-colors hover:text-[var(--accent)]">Reviews</Link>
+            <Link href="/admin/notifications" className="text-sm transition-colors hover:text-[var(--accent)]">Notifications</Link>
             <Link href="/" className="text-sm transition-colors hover:text-[var(--accent)]">View Site</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -48,6 +50,7 @@ export function Header() {
               <Link href="/admin/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
               <Link href="/admin/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
               <Link href="/admin/reviews" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Reviews</Link>
+              <Link href="/admin/notifications" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Notifications</Link>
               <Link href="/" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">View Site</Link>
             </div>
           </nav>
@@ -78,6 +81,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <button onClick={() => window.dispatchEvent(new CustomEvent("open-search"))} className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--muted)] transition-colors hover:bg-[var(--accent)]" aria-label="Search">
             <Search className="h-4 w-4" />
           </button>
