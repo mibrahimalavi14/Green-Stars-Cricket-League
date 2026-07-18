@@ -77,7 +77,7 @@ function ContactPage() {
           </div>
 
           {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-            <ReCAPTCHA sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY} ref={recaptchaRef} />
+            <div className="overflow-x-auto pb-1"><ReCAPTCHA sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY} ref={recaptchaRef} /></div>
           )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}

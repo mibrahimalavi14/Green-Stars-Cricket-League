@@ -14,7 +14,7 @@ async function AdminContactPage() {
         <div className="space-y-3">
           {messages.map((msg) => (
             <div key={msg.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="font-medium text-sm">{msg.name}</p>
                   <p className="text-xs text-[var(--muted-foreground)]">{msg.email}</p>

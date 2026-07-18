@@ -44,7 +44,7 @@ function StatRow({ label, a, b }: { label: string; a: number; b: number }) {
 function PlayerCard({ player, onRemove }: { player: Player; onRemove: () => void }) {
   return (
     <div className="relative rounded-xl border-2 border-[var(--accent)]/30 bg-[var(--card)] p-4 text-center">
-      <button onClick={onRemove} className="absolute right-2 top-2 rounded-full bg-red-500/20 p-1 text-red-500 transition-colors hover:bg-red-500/30"><X className="h-3 w-3" /></button>
+      <button onClick={onRemove} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500/20 text-red-500 transition-colors hover:bg-red-500/30"><X className="h-3 w-3" /></button>
       <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full" style={{ backgroundColor: player.team.color }}>
         <span className="text-2xl font-bold text-white">{player.name.charAt(0)}</span>
       </div>
@@ -118,9 +118,9 @@ export default function ComparePage() {
 
       {player1 && player2 ? (
         <div className="overflow-hidden rounded-2xl border border-[var(--border)]">
-          <div className="grid grid-cols-3 border-b border-[var(--border)] bg-[var(--muted)]">
+          <div className="grid grid-cols-1 border-b border-[var(--border)] bg-[var(--muted)] sm:grid-cols-3">
             <div className="p-4"><PlayerCard player={player1} onRemove={() => setPlayer1(null)} /></div>
-            <div className="flex items-center justify-center p-4"><span className="text-2xl font-bold text-[var(--muted-foreground)]">VS</span></div>
+            <div className="order-first flex items-center justify-center border-b border-[var(--border)] p-4 sm:order-none sm:border-b-0 sm:border-x"><span className="text-2xl font-bold text-[var(--muted-foreground)]">VS</span></div>
             <div className="p-4"><PlayerCard player={player2} onRemove={() => setPlayer2(null)} /></div>
           </div>
 

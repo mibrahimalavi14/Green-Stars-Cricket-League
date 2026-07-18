@@ -36,7 +36,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
-        <div className="mb-8 flex items-center gap-6">
+        <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
           {player.photo && player.photo !== "/placeholder-player.svg" ? (
             <img src={player.photo} alt={player.name} className="h-24 w-24 rounded-full object-cover" />
           ) : (
@@ -129,8 +129,8 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
                   </span>
                   <span className="text-[var(--muted-foreground)]">{new Date(p.match.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
-                <div className="flex gap-6 text-sm">
-                  <div>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                  <div className="min-w-0">
                     <span className="text-[var(--muted-foreground)]">Bat: </span>
                     <span className="font-medium">{p.battingRuns}</span>
                     <span className="text-[var(--muted-foreground)]"> ({p.ballsFaced} balls, {p.fours}Ã—4, {p.sixes}Ã—6)</span>

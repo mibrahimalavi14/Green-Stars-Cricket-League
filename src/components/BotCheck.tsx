@@ -32,7 +32,7 @@ export function BotCheck({ children, storageKey = "bot_verified" }: { children: 
         </div>
         <h2 className="mb-2 text-lg font-bold">Verify You Are Human</h2>
         <p className="mb-6 text-sm text-[var(--muted-foreground)]">Please complete the security check to access this page.</p>
-        <div className="flex justify-center">
+        <div className="flex justify-center overflow-x-auto pb-1 w-full">
           <ReCAPTCHA
             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
             ref={recaptchaRef}

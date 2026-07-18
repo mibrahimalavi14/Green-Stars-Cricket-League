@@ -106,15 +106,15 @@ async function FixturesPage() {
                   {dayMatches.map((match) => (
                     <div key={match.id} className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3 transition-colors hover:border-[var(--accent)]/30">
                       {match.matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {match.matchNo}</div>}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {match.team1.logo ? <img src={match.team1.logo} alt={match.team1.name} className="h-7 w-7 rounded-full object-cover" /> : <div className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: match.team1.color }}>{match.team1.shortName?.charAt(0)}</div>}
-                          <span className="text-sm font-medium">{match.team1.name}</span>
+                      <div className="flex min-w-0 items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          {match.team1.logo ? <img src={match.team1.logo} alt={match.team1.name} className="h-7 w-7 shrink-0 rounded-full object-cover" /> : <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: match.team1.color }}>{match.team1.shortName?.charAt(0)}</div>}
+                          <span className="truncate text-sm font-medium">{match.team1.name}</span>
                         </div>
-                        <span className="text-[10px] text-[var(--muted-foreground)]">vs</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{match.team2.name}</span>
-                          {match.team2.logo ? <img src={match.team2.logo} alt={match.team2.name} className="h-7 w-7 rounded-full object-cover" /> : <div className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: match.team2.color }}>{match.team2.shortName?.charAt(0)}</div>}
+                        <span className="shrink-0 text-[10px] text-[var(--muted-foreground)]">vs</span>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="truncate text-sm font-medium">{match.team2.name}</span>
+                          {match.team2.logo ? <img src={match.team2.logo} alt={match.team2.name} className="h-7 w-7 shrink-0 rounded-full object-cover" /> : <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ backgroundColor: match.team2.color }}>{match.team2.shortName?.charAt(0)}</div>}
                         </div>
                       </div>
                       <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">

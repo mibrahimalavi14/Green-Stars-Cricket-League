@@ -17,8 +17,8 @@ async function AdminPlayersPage() {
       <div className="space-y-2">
         {players.map((p) => (
           <div key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-3">
                 {p.photo && p.photo !== "/placeholder-player.svg" ? (
                   <img src={p.photo} alt="" className="h-8 w-8 rounded-full object-cover" />
                 ) : (
@@ -30,8 +30,8 @@ async function AdminPlayersPage() {
                     <p className="text-[10px] text-[var(--muted-foreground)]">Bat: {p.battingStyle} &middot; Bowl: {p.bowlingStyle}</p>
                   </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex gap-4 text-xs text-[var(--muted-foreground)]">
+              <div className="flex shrink-0 items-center gap-2">
+                <div className="flex gap-2 text-xs text-[var(--muted-foreground)]">
                   <span>{p.runs} runs</span>
                   <span>{p.wickets} wkts</span>
                 </div>
