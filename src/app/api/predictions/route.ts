@@ -1,26 +1,40 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
 
 export async function GET() {
   const predictions = await prisma.prediction.findMany({
-    include: { user: { select: { name: true, image: true } }, match: { include: { team1: true, team2: true } } },
+    include: { match: { include: { team1: true, team2: true } } },
     orderBy: { createdAt: "desc" },
   })
   return NextResponse.json(predictions)
 }
 
 export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { matchId, teamId, userId, name, email } = await req.json()
 
-  const { matchId, teamId } = await req.json()
+  if (!matchId || !teamId) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+  }
 
   const season = await prisma.season.findFirst({ where: { isActive: true } })
-  if (season?.scheduleAnnounced) return NextResponse.json({ error: "Predictions locked" }, { status: 403 })
+  if (season?.scheduleAnnounced) {
+    return NextResponse.json({ error: "Predictions locked" }, { status: 403 })
+  }
+
+  let uid = userId
+  if (uid) {
+    const existing = await prisma.user.findUnique({ where: { id: uid } })
+    if (!existing) {
+      await prisma.user.create({
+        data: { id: uid, name: name || "Guest", email: email || `${uid}@guest.gscl` },
+      })
+    }
+  } else {
+    uid = ""
+  }
 
   const existing = await prisma.prediction.findFirst({
-    where: { userId: session.user.id, matchId },
+    where: { userId: uid, matchId },
   })
 
   if (existing) {
@@ -32,7 +46,7 @@ export async function POST(req: Request) {
   }
 
   const pred = await prisma.prediction.create({
-    data: { userId: session.user.id, matchId, predictedTeamId: teamId },
+    data: { userId: uid, matchId, predictedTeamId: teamId },
   })
   return NextResponse.json(pred)
 }
