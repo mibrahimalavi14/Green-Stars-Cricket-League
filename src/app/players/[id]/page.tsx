@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import { ShareButtons } from "@/components/ShareButtons"
 
 export const revalidate = 300
 
@@ -49,6 +50,9 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
               {player.team?.logo && <img src={player.team.logo} alt="" className="mr-1 inline-block h-6 w-6 rounded-full object-cover" />}
               {player.team?.name}
             </p>
+            <div className="mt-1">
+              <ShareButtons url={`/players/${player.id}`} title={`${player.name} - ${player.role} - GSCL`} />
+            </div>
             <div className="mt-1 text-sm text-[var(--muted-foreground)]">
               <span>Bat: {player.battingStyle}</span>
               {(player.role === "All-rounder" || player.role === "Bowler") && <span className="ml-4">Bowl: {player.bowlingStyle}</span>}

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { DownloadCSVButton } from "@/components/DownloadCSVButton"
 
 export const revalidate = 300
 
@@ -14,8 +15,16 @@ async function PlayerStatsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">Player Stats</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">Batting and bowling statistics</p>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Player Stats</h1>
+          <p className="text-[var(--muted-foreground)]">Batting and bowling statistics</p>
+        </div>
+        <div className="flex gap-2">
+          <DownloadCSVButton data={batting.map(p => ({ name: p.name, team: p.team?.shortName, runs: p.runs, balls: p.ballsFaced, fours: p.fours, sixes: p.sixes, fifties: p.fifties, hundreds: p.hundreds, sr: p.ballsFaced > 0 ? ((p.runs / p.ballsFaced) * 100).toFixed(1) : "-" }))} filename="gscl-batting-stats.csv" columns={[{ key: "name", label: "Player" }, { key: "team", label: "Team" }, { key: "runs", label: "Runs" }, { key: "balls", label: "Balls" }, { key: "fours", label: "4s" }, { key: "sixes", label: "6s" }, { key: "fifties", label: "50s" }, { key: "hundreds", label: "100s" }, { key: "sr", label: "SR" }]} />
+          <DownloadCSVButton data={bowling.map(p => ({ name: p.name, team: p.team?.shortName, wickets: p.wickets, runs: p.runsConceded, balls: p.ballsBowled, sr: p.wickets > 0 ? (p.ballsBowled / p.wickets).toFixed(1) : "-", econ: p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-" }))} filename="gscl-bowling-stats.csv" columns={[{ key: "name", label: "Player" }, { key: "team", label: "Team" }, { key: "wickets", label: "Wkts" }, { key: "runs", label: "Runs" }, { key: "balls", label: "Balls" }, { key: "sr", label: "SR" }, { key: "econ", label: "Econ" }]} />
+        </div>
+      </div>
 
       <div className="mb-12">
         <h2 className="mb-4 text-xl font-semibold">Most Runs (Batting)</h2>

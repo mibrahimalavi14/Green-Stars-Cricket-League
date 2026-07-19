@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
 import { H2H } from "@/components/H2H"
+import { ShareButtons } from "@/components/ShareButtons"
 
 function getYoutubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -321,6 +322,9 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot;{" "}
           {m.venue}
         </p>
+        <div className="mt-2">
+          <ShareButtons url={`/matches/${m.id}`} title={`${m.team1.name} vs ${m.team2.name} - ${m.season.name}`} />
+        </div>
       </div>
 
       <H2H team1Id={m.team1Id} team2Id={m.team2Id} matchId={m.id} />
