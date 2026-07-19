@@ -115,6 +115,39 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
 
       {performances.length > 0 && (
         <div className="mt-8">
+          <h2 className="mb-4 text-xl font-semibold">Form Guide — Last 5</h2>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {performances.slice(0, 5).map((p, i) => {
+              const runs = p.battingRuns
+              const wkts = p.bowlingWickets
+              const isGood = runs >= 20 || wkts >= 2
+              const isAvg = runs >= 10 || wkts >= 1
+              const isOut = (p as any).wicketsLost > 0 || p.isOut
+              return (
+                <div
+                  key={i}
+                  className="flex h-14 w-14 flex-col items-center justify-center rounded-lg border text-xs font-bold"
+                  style={{
+                    backgroundColor: isGood ? "var(--accent)" : isAvg ? "orange" : "var(--muted)",
+                    color: isGood || isAvg ? "white" : "var(--foreground)",
+                    borderColor: isGood ? "var(--accent)" : isAvg ? "orange" : "var(--border)",
+                  }}
+                  title={`${runs} runs, ${wkts} wkts ${!isOut ? "(not out)" : ""}`}
+                >
+                  <span>{runs}</span>
+                  <span className="text-[10px] opacity-80">{isOut ? "●" : "○"}</span>
+                </div>
+              )
+            })}
+            <div className="flex items-center gap-2 pl-2 text-[11px] text-[var(--muted-foreground)]">
+              <span className="inline-block h-3 w-3 rounded bg-[var(--accent)]" /> Good
+              <span className="inline-block h-3 w-3 rounded bg-orange-500" /> Avg
+              <span className="inline-block h-3 w-3 rounded bg-[var(--muted)]" /> Poor
+              <span className="ml-2">● Out</span>
+              <span>○ Not out</span>
+            </div>
+          </div>
+
           <h2 className="mb-4 text-xl font-semibold">Match Log</h2>
           <div className="space-y-3">
             {performances.map((p) => (

@@ -4,6 +4,11 @@ import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 
+function getYoutubeId(url: string) {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+  return match ? match[1] : url
+}
+
 type Perf = PlayerMatch & { player: Player }
 
 type MatchWithRelations = Match & {
@@ -409,8 +414,17 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
 
           {m.youtubeUrl && (
             <div className="mt-6">
-              <a href={m.youtubeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
-                Watch on YouTube
+              <h3 className="mb-3 text-lg font-semibold">Match Highlights</h3>
+              <div className="overflow-hidden rounded-xl aspect-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${getYoutubeId(m.youtubeUrl)}`}
+                  className="h-full w-full"
+                  allowFullScreen
+                  title="Match Highlights"
+                />
+              </div>
+              <a href={m.youtubeUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700">
+                Watch on YouTube &rarr;
               </a>
             </div>
           )}
