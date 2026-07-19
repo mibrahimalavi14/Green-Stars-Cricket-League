@@ -1,8 +1,0 @@
-fix:
-predictions
-use
-name/email
-instead
-of
-Google
-OAuth
