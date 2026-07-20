@@ -269,6 +269,17 @@ model Rating {
   @@unique([ip])
 }
 
+model EmailOtp {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, otp])
+}
+
 model Notification {
   id        String   @id @default(cuid())
   title     String
