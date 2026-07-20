@@ -1,7 +1,0 @@
-fix:
-mobile
-responsive
-notifications
-dropdown
-and
-page
