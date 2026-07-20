@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trophy, Check, Loader2, Mail, KeyRound, Users } from "lucide-react"
+import { Trophy, Check, Loader2, Mail, KeyRound, Lock } from "lucide-react"
 
 export default function PredictionsPage() {
   const [teams, setTeams] = useState<any[]>([])
   const [season, setSeason] = useState<any>(null)
   const [predictedTeamId, setPredictedTeamId] = useState<string | null>(null)
+  const [predictedTeamName, setPredictedTeamName] = useState("")
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [otp, setOtp] = useState("")
@@ -35,7 +36,11 @@ export default function PredictionsPage() {
     const data = await res.json()
     if (data.teams) setTeams(data.teams)
     if (data.season) setSeason(data.season)
-    if (data.prediction) setPredictedTeamId(data.prediction.predictedTeamId)
+    if (data.prediction) {
+      setPredictedTeamId(data.prediction.predictedTeamId)
+      const t = data.teams?.find((t: any) => t.id === data.prediction.predictedTeamId)
+      if (t) setPredictedTeamName(t.name)
+    }
   }
 
   async function sendOtp() {
@@ -76,15 +81,6 @@ export default function PredictionsPage() {
     setLoading(false)
   }
 
-  function signOutUser() {
-    localStorage.removeItem("gscl_user")
-    setName("")
-    setEmail("")
-    setOtp("")
-    setStep("signin")
-    setPredictedTeamId(null)
-  }
-
   function resendOtp() {
     setOtp("")
     setStep("signin")
@@ -102,9 +98,10 @@ export default function PredictionsPage() {
     if (!res.ok) {
       setError(data.error || "Failed to save")
     } else {
+      const t = teams.find(t => t.id === teamId)
       setPredictedTeamId(teamId)
+      setPredictedTeamName(t?.name || "")
       setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
     }
     setSaving(false)
   }
@@ -120,24 +117,13 @@ export default function PredictionsPage() {
             {season ? `Predict the winner of ${season.name} (${season.year})` : "Predict the season winner"}
           </p>
         </div>
-        {step === "done" ? (
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)]/20 text-sm font-bold text-[var(--accent)]">
-              {name.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-sm font-medium">{name}</span>
-            <button onClick={signOutUser} className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">
-              Sign Out
-            </button>
-          </div>
-        ) : null}
       </div>
 
       {step === "signin" ? (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
           <Mail className="mx-auto mb-3 h-10 w-10 text-[var(--muted-foreground)]" />
           <h2 className="mb-2 text-lg font-semibold">Verify your email</h2>
-          <p className="mb-6 text-sm text-[var(--muted-foreground)]">Each email can predict once per season</p>
+          <p className="mb-6 text-sm text-[var(--muted-foreground)]">One vote per email &mdash; prediction cannot be changed later</p>
           <div className="mx-auto max-w-sm space-y-3">
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
@@ -162,7 +148,7 @@ export default function PredictionsPage() {
             {error && <p className="text-sm text-red-500">{error}</p>}
             <button onClick={verifyOtp} disabled={otp.length !== 6 || loading}
               className="w-full rounded-lg bg-[var(--accent)] px-5 py-2.5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50">
-              {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Verify & Start Predicting"}
+              {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Verify & Vote"}
             </button>
             <button onClick={resendOtp} className="text-sm text-[var(--accent)] hover:underline">Use a different email</button>
           </div>
@@ -174,33 +160,39 @@ export default function PredictionsPage() {
       ) : (
         <div>
           {alreadyPredicted ? (
-            <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/20 p-4 text-center">
-              <Check className="mx-auto mb-1 h-5 w-5 text-green-500" />
-              <p className="font-medium">Your prediction is locked in!</p>
-              <p className="text-sm text-[var(--muted-foreground)]">You predicted <strong>{teams.find(t => t.id === predictedTeamId)?.name}</strong> will win {season?.name}. {error && <span className="text-red-500">({error})</span>}</p>
+            <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/20 p-6 text-center">
+              <Lock className="mx-auto mb-2 h-6 w-6 text-green-500" />
+              <h3 className="text-lg font-bold">Your vote is locked!</h3>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                You predicted <strong>{predictedTeamName}</strong> will win {season?.name}.
+                This cannot be changed.
+              </p>
+              <div className="mt-3 flex items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
+                <span>Voted as <strong>{name}</strong></span>
+                <span className="text-[var(--border)]">|</span>
+                <span><strong>{email}</strong></span>
+              </div>
             </div>
-          ) : error && <div className="mb-4 text-center text-sm text-red-500">{error}</div>}
-
-          <p className="mb-4 text-sm text-[var(--muted-foreground)]">Pick the team you think will win the season:</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {teams.map(t => (
-              <button
-                key={t.id}
-                onClick={() => submitPrediction(t.id)}
-                disabled={saving || alreadyPredicted}
-                className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
-                  predictedTeamId === t.id
-                    ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                    : "border-[var(--border)] hover:border-[var(--accent)]/50"
-                } ${alreadyPredicted ? "cursor-default opacity-60" : ""}`}
-              >
-                {t.logo && <img src={t.logo} alt="" className="h-10 w-10 rounded-full object-cover" />}
-                <span className="font-medium">{t.name}</span>
-                {predictedTeamId === t.id && saved && <Check className="ml-auto h-5 w-5 text-green-500" />}
-              </button>
-            ))}
-          </div>
-          {saving && <Loader2 className="mx-auto mt-4 h-5 w-5 animate-spin text-[var(--accent)]" />}
+          ) : (
+            <>
+              {error && <div className="mb-4 text-center text-sm text-red-500">{error}</div>}
+              <p className="mb-4 text-sm text-[var(--muted-foreground)]">Pick the team you think will win the season. You can only vote once.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {teams.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => submitPrediction(t.id)}
+                    disabled={saving}
+                    className="flex items-center gap-3 rounded-xl border-2 border-[var(--border)] p-4 text-left transition-all hover:border-[var(--accent)]/50 disabled:opacity-50"
+                  >
+                    {t.logo && <img src={t.logo} alt="" className="h-10 w-10 rounded-full object-cover" />}
+                    <span className="font-medium">{t.name}</span>
+                  </button>
+                ))}
+              </div>
+              {saving && <Loader2 className="mx-auto mt-4 h-5 w-5 animate-spin text-[var(--accent)]" />}
+            </>
+          )}
         </div>
       )}
     </div>

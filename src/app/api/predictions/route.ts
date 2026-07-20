@@ -46,10 +46,16 @@ export async function POST(req: Request) {
   })
   if (!team) return NextResponse.json({ error: "Invalid team" }, { status: 400 })
 
-  const prediction = await prisma.seasonPrediction.upsert({
+  const existing = await prisma.seasonPrediction.findUnique({
     where: { email_seasonId: { email, seasonId: season.id } },
-    update: { predictedTeamId, name },
-    create: { email, name, seasonId: season.id, predictedTeamId },
+  })
+
+  if (existing) {
+    return NextResponse.json({ error: "This email has already voted. Predictions cannot be changed." }, { status: 403 })
+  }
+
+  const prediction = await prisma.seasonPrediction.create({
+    data: { email, name, seasonId: season.id, predictedTeamId },
   })
 
   return NextResponse.json(prediction)

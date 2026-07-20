@@ -1,0 +1,12 @@
+feat:
+lock
+predictions
+permanently
+-
+no
+changing
+vote
+no
+sign-out
+after
+voting
