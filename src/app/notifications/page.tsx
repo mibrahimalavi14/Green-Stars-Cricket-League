@@ -37,16 +37,16 @@ export default function NotificationsPage() {
       ) : (
         <div className="space-y-3">
           {notifs.map((n) => (
-            <div key={n.id} onClick={() => { if (!n.read) markRead(n.id) }} className={`cursor-pointer rounded-lg border p-4 transition-colors hover:bg-[var(--muted)]/30 ${n.read ? "border-[var(--border)]" : "border-[var(--accent)]/30 bg-[var(--accent)]/5"}`}>
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  {!n.read && <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />}
-                  <span className={`truncate text-sm font-semibold ${n.read ? "text-[var(--muted-foreground)]" : ""}`}>{n.title}</span>
+            <div key={n.id} onClick={() => { if (!n.read) markRead(n.id) }} className={`cursor-pointer rounded-lg border p-3 sm:p-4 transition-colors hover:bg-[var(--muted)]/30 ${n.read ? "border-[var(--border)]" : "border-[var(--accent)]/30 bg-[var(--accent)]/5"}`}>
+              <div className="mb-1 flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2 min-w-0">
+                  {!n.read && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />}
+                  <span className={`text-sm font-semibold break-words ${n.read ? "text-[var(--muted-foreground)]" : ""}`}>{n.title}</span>
                 </div>
                 <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold ${typeColors[n.type] || typeColors.info}`}>{n.type}</span>
               </div>
-              <p className="text-sm text-[var(--muted-foreground)]">{n.body}</p>
-              <div className="mt-2 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+              <p className="text-sm text-[var(--muted-foreground)] break-words">{n.body}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted-foreground)]">
                 <span>{new Date(n.createdAt).toLocaleString("en-PK", { timeZone: "Asia/Karachi" })}</span>
                 {n.link && <Link href={n.link} className="text-[var(--accent)] hover:underline" onClick={(e) => e.stopPropagation()}>View details →</Link>}
               </div>

@@ -49,13 +49,16 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(320px,calc(100vw-2rem))] rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-2xl">
+        <div className="fixed left-4 right-4 top-1/2 z-50 -translate-y-1/2 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[min(400px,calc(100vw-2rem))] sm:-translate-y-0 rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-2xl">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
             <span className="text-sm font-semibold">Notifications</span>
-            {unread > 0 && <button onClick={markAllRead} className="text-xs text-[var(--accent)] hover:underline">Mark all read</button>}
+            <div className="flex items-center gap-2">
+              {unread > 0 && <button onClick={markAllRead} className="text-xs text-[var(--accent)] hover:underline">Mark all read</button>}
+              <button onClick={() => setOpen(false)} className="rounded-full p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] sm:hidden" aria-label="Close"><svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto overscroll-contain">
             {notifs.length === 0 ? (
               <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">No notifications yet.</p>
             ) : (
@@ -64,7 +67,7 @@ export function NotificationBell() {
                   <div className={`flex gap-3 border-b border-[var(--border)] px-4 py-3 transition-colors hover:bg-[var(--muted)]/50 ${n.read ? "" : "bg-[var(--accent)]/5"}`}>
                     <div className={`mt-1 h-2 w-2 shrink-0 rounded-full ${n.read ? "bg-transparent" : "bg-[var(--accent)]"}`} />
                     <div className="min-w-0 flex-1">
-                      <p className={`truncate text-sm ${n.read ? "" : "font-semibold"}`}>{n.title}</p>
+                      <p className={`text-sm ${n.read ? "" : "font-semibold"}`}>{n.title}</p>
                       <p className="line-clamp-2 text-xs text-[var(--muted-foreground)]">{n.body}</p>
                       <p className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">{new Date(n.createdAt).toLocaleDateString("en-PK")}</p>
                     </div>
