@@ -67,6 +67,18 @@ async function AdminPage() {
           <p className="text-sm text-[var(--muted-foreground)]">Manage photo gallery</p>
         </Link>
 
+        <Link href="/admin/sponsors" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Users className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Sponsors</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage sponsors</p>
+        </Link>
+
+        <Link href="/admin/squad" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Users className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Squad</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Set playing XI per match</p>
+        </Link>
+
         <Link href="/admin/news" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Newspaper className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">News</h3>

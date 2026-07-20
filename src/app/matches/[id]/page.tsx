@@ -283,6 +283,11 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
   })
   if (!match) notFound()
 
+  const squad = await prisma.squadMember.findMany({
+    where: { matchId: id },
+    include: { player: { select: { name: true, role: true, photo: true } } },
+  })
+
   const m: MatchWithRelations = match
   const allPerfs = m.performances
   const team1Performances = allPerfs.filter(p => p.teamId === m.team1Id)
@@ -350,6 +355,23 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
             <p className="mb-4 text-sm text-[var(--muted-foreground)]">
               Toss: {m.tossWinner} elected to {m.tossDecision} first
             </p>
+          )}
+
+          {squad.length > 0 && (
+            <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+              <h3 className="mb-3 text-sm font-semibold">Playing XI</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+                {squad.map(s => (
+                  <div key={s.id} className="flex items-center gap-2">
+                    {s.player.photo && s.player.photo !== "/placeholder-player.svg"
+                      ? <img src={s.player.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
+                      : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold">{s.player.name.charAt(0)}</div>}
+                    <span>{s.player.name}</span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">{s.player.role}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           <div className="mb-6 grid gap-4 md:grid-cols-2">

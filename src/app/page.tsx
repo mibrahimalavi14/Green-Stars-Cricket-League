@@ -7,6 +7,7 @@ import { NewsNotification } from "@/components/NewsNotification"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
 import { ReviewsSection } from "@/components/ReviewsSection"
+import { SponsorsSection } from "@/components/SponsorsSection"
 import { CountdownTimer } from "@/components/CountdownTimer"
 import { AnimatedCounter } from "@/components/AnimatedCounter"
 import { FadeInView } from "@/components/FadeInView"
@@ -236,6 +237,7 @@ async function HomePage() {
       </section>
       </FadeInView>
 
+      <SponsorsSection />
       <ReviewsSection />
     </>
   )

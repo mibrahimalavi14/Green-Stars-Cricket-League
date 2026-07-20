@@ -115,6 +115,7 @@ model Player {
 
 
   performances PlayerMatch[]
+  squadMembers SquadMember[]
 
   createdAt DateTime @default(now())
 }
@@ -247,6 +248,29 @@ model PredictionLock {
   seasonId  String
   locked    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Sponsor {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String   @default("")
+  website   String   @default("")
+  tier      String   @default("platinum")
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model SquadMember {
+  id        String   @id @default(cuid())
+  matchId   String
+  playerId  String
+  teamId    String
+  role      String   @default("playing")
+  createdAt DateTime @default(now())
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, playerId])
 }
 
 model Review {

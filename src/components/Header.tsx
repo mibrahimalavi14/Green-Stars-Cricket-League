@@ -33,6 +33,8 @@ export function Header() {
             <Link href="/admin/predictions" className="text-sm transition-colors hover:text-[var(--accent)]">Predictions</Link>
             <Link href="/admin/notifications" className="text-sm transition-colors hover:text-[var(--accent)]">Notifications</Link>
             <Link href="/admin/gallery" className="text-sm transition-colors hover:text-[var(--accent)]">Gallery</Link>
+            <Link href="/admin/sponsors" className="text-sm transition-colors hover:text-[var(--accent)]">Sponsors</Link>
+            <Link href="/admin/squad" className="text-sm transition-colors hover:text-[var(--accent)]">Squad</Link>
             <Link href="/" className="text-sm transition-colors hover:text-[var(--accent)]">View Site</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -56,6 +58,8 @@ export function Header() {
               <Link href="/admin/predictions" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
               <Link href="/admin/notifications" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Notifications</Link>
               <Link href="/admin/gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Gallery</Link>
+              <Link href="/admin/sponsors" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Sponsors</Link>
+              <Link href="/admin/squad" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Squad</Link>
               <Link href="/" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">View Site</Link>
             </div>
           </nav>
@@ -102,6 +106,7 @@ export function Header() {
                   <Link href="/faq" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">FAQ</Link>
                   <Link href="/performers" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Top Performers</Link>
                   <Link href="/gallery" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Gallery</Link>
+                  <Link href="/hall-of-fame" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Hall of Fame</Link>
                 </div>
               </>
             )}
@@ -143,6 +148,7 @@ export function Header() {
             <Link href="/faq" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">FAQ</Link>
             <Link href="/performers" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Top Performers</Link>
             <Link href="/gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Gallery</Link>
+            <Link href="/hall-of-fame" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Hall of Fame</Link>
           </div>
         </nav>
       )}
