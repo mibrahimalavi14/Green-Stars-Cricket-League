@@ -43,6 +43,18 @@ async function HomePage() {
 
   const latestNews = news.length > 0 ? news[0] : null
 
+  let moment = await prisma.momentOfTheDay.findFirst({
+    where: { active: true },
+    orderBy: { date: "desc" },
+  })
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayMoment = await prisma.momentOfTheDay.findFirst({
+    where: { active: true, date: { gte: todayStart } },
+    orderBy: { date: "desc" },
+  })
+  if (todayMoment) moment = todayMoment
+
   return (
     <>
       <NewsNotification news={latestNews ? { id: latestNews.id, title: latestNews.title, excerpt: latestNews.excerpt || "", createdAt: latestNews.createdAt.toISOString(), type: latestNews.type } : null} />
@@ -75,6 +87,47 @@ async function HomePage() {
           </div>
         </div>
       </section>
+
+      {moment && (
+        <FadeInView>
+          <section className="relative overflow-hidden border-b border-[var(--border)]">
+            {moment.imageUrl && (
+              <div className="absolute inset-0">
+                <img src={moment.imageUrl} alt="" className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+              </div>
+            )}
+            <div className={`relative mx-auto max-w-7xl px-4 py-10 ${!moment.imageUrl ? "bg-gradient-to-r from-[var(--card)] via-[var(--card)]/95 to-[var(--muted)]" : ""}`}>
+              <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
+                <div className="flex-1 text-center md:text-left">
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gscl-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gscl-gold">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gscl-gold" />
+                    Moment of the Day
+                  </div>
+                  <h2 className="mb-2 text-2xl font-bold md:text-3xl">{moment.title}</h2>
+                  {moment.description && (
+                    <p className={`mb-4 max-w-xl text-sm leading-relaxed ${moment.imageUrl ? "text-white/80" : "text-[var(--muted-foreground)]"}`}>
+                      {moment.description}
+                    </p>
+                  )}
+                  {moment.link && (
+                    <a href={moment.link} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg bg-gscl-gold px-5 py-2.5 text-sm font-semibold text-gscl-dark transition-all hover:scale-105 hover:opacity-90">
+                      Learn More →
+                    </a>
+                  )}
+                </div>
+                {moment.imageUrl && (
+                  <div className="relative h-48 w-48 flex-shrink-0 overflow-hidden rounded-xl md:h-56 md:w-56">
+                    <img src={moment.imageUrl} alt={moment.title} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        </FadeInView>
+      )}
 
       <FadeInView>
       <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">

@@ -4,6 +4,7 @@ import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 import { ShareButtons } from "@/components/ShareButtons"
+import { Star } from "lucide-react"
 
 function getYoutubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -413,10 +414,18 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           )}
 
           {m.manOfMatch && (
-            <p className="mb-6 text-sm">
+            <p className="mb-4 text-sm">
               Player of the Match: <span className="font-semibold">{m.manOfMatch}</span>
             </p>
           )}
+
+          <Link
+            href={`/matches/${m.id}/potm`}
+            className="mb-6 inline-flex items-center gap-2 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-5 py-2.5 text-sm font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+          >
+            <Star className="h-4 w-4" />
+            Vote for Player of the Match
+          </Link>
 
           <h2 className="mb-6 text-lg font-bold text-center">Scorecard</h2>
 

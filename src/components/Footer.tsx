@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Instagram, Youtube, Mail, MapPin, Phone, Users, Trophy, Calendar } from "lucide-react"
+import { PushSubscribe } from "./PushSubscribe"
 
 export function Footer() {
   const pathname = usePathname()
@@ -81,6 +82,10 @@ export function Footer() {
             </div>
           </div>
         )}
+
+        <div className="mt-6 flex justify-center">
+          <PushSubscribe />
+        </div>
 
         <div className="mt-6 border-t border-[var(--border)] pt-6 text-center text-sm text-[var(--muted-foreground)]">
           &copy; {new Date().getFullYear()} Green Stars Cricket League. All rights reserved.

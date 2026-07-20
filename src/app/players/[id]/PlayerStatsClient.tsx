@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ShareButtons } from "@/components/ShareButtons"
+import { Trophy, Zap, Target, Star, Medal } from "lucide-react"
 
 type PerfMin = { battingRuns: number; ballsFaced: number; fours: number; sixes: number; isOut: boolean; wicketsLost: number; dismissalType: string; secondDismissalType: string; bowlingWickets: number; bowlingRuns: number; ballsBowled: number; catches: number; dismissedByBowlerId: string; dismissedByFielderId: string; secondDismissedByBowlerId: string; secondDismissedByFielderId: string; match: { id: string; team1: { logo: string; shortName: string }; team2: { logo: string; shortName: string }; seasonId: string; date: string } }
 type SeasonStat = { seasonId: string; seasonName: string; seasonYear: number; inns: number; runs: number; ballsFaced: number; wickets: number; ballsBowled: number; runsConceded: number; fours: number; sixes: number; dismissals: number; catches: number; stumpings: number; hs: number }
@@ -125,6 +126,8 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="Run Outs" value={selPerfs.reduce((a, x) => a + (x as any).runOuts || 0, 0)} />
           </div>
         </div>
+
+        <CareerMilestones player={p} />
       </div>
 
       {performances.length > 0 && (
@@ -202,6 +205,62 @@ function StatCard({ label, value, title }: { label: string; value: string | numb
     <div className="rounded-lg bg-[var(--muted)] p-3 text-center">
       <p className="text-xl font-bold">{value}</p>
       <p className="text-xs text-[var(--muted-foreground)]" title={title || label}>{label}</p>
+    </div>
+  )
+}
+
+function CareerMilestones({ player }: { player: any }) {
+  const milestones = [
+    { name: "1000 Runs", current: player.runs, target: 1000, icon: Trophy, color: "text-yellow-400" },
+    { name: "500 Runs", current: player.runs, target: 500, icon: Trophy, color: "text-yellow-400" },
+    { name: "100 Fours", current: player.fours, target: 100, icon: Zap, color: "text-cyan-400" },
+    { name: "50 Sixes", current: player.sixes, target: 50, icon: Zap, color: "text-purple-400" },
+    { name: "100 Wickets", current: player.wickets, target: 100, icon: Target, color: "text-red-400" },
+    { name: "50 Wickets", current: player.wickets, target: 50, icon: Target, color: "text-red-400" },
+    { name: "50 Catches", current: player.catches, target: 50, icon: Star, color: "text-green-400" },
+    { name: "10 Fifties", current: player.fifties, target: 10, icon: Medal, color: "text-orange-400" },
+    { name: "5 Hundreds", current: player.hundreds, target: 5, icon: Medal, color: "text-yellow-400" },
+    { name: "50 Matches", current: player.matchesPlayed, target: 50, icon: Trophy, color: "text-blue-400" },
+  ]
+
+  return (
+    <div className="mt-8 border-t border-[var(--border)] pt-6">
+      <h2 className="mb-4 text-lg font-semibold">Career Milestones</h2>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {milestones.map((m) => {
+          const pct = Math.min((m.current / m.target) * 100, 100)
+          const achieved = m.current >= m.target
+          const Icon = m.icon
+          return (
+            <div key={m.name} className={`rounded-lg border p-4 transition-all ${achieved ? "border-green-500/30 bg-green-900/10" : "border-[var(--border)] bg-[var(--muted)]"}`}>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Icon className={`h-4 w-4 ${achieved ? "text-green-400" : m.color}`} />
+                  <span className="text-sm font-medium">{m.name}</span>
+                </div>
+                {achieved && (
+                  <span className="flex items-center gap-1 text-xs font-semibold text-green-400">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Achieved!
+                  </span>
+                )}
+              </div>
+              <div className="mb-1 flex items-baseline justify-between text-xs text-[var(--muted-foreground)]">
+                <span>{m.current} / {m.target}</span>
+                <span>{pct.toFixed(0)}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-[var(--background)]">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${achieved ? "bg-green-500" : "bg-[var(--accent)]"}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

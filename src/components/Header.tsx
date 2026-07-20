@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -31,7 +31,9 @@ export function Header() {
             <Link href="/admin/contact" className="text-sm transition-colors hover:text-[var(--accent)]">Contact</Link>
             <Link href="/admin/reviews" className="text-sm transition-colors hover:text-[var(--accent)]">Reviews</Link>
             <Link href="/admin/predictions" className="text-sm transition-colors hover:text-[var(--accent)]">Predictions</Link>
-            <Link href="/admin/notifications" className="text-sm transition-colors hover:text-[var(--accent)]">Notifications</Link>
+            <Link href="/admin/quiz" className="text-sm transition-colors hover:text-[var(--accent)]">Quiz</Link>
+            <Link href="/admin/potm" className="flex items-center gap-1 text-sm transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM</Link>
+            <Link href="/admin/notifications" className="flex items-center gap-1 text-sm transition-colors hover:text-[var(--accent)]"><Bell className="h-3 w-3" /> Notifications</Link>
             <Link href="/admin/gallery" className="text-sm transition-colors hover:text-[var(--accent)]">Gallery</Link>
             <Link href="/admin/sponsors" className="text-sm transition-colors hover:text-[var(--accent)]">Sponsors</Link>
             <Link href="/admin/squad" className="text-sm transition-colors hover:text-[var(--accent)]">Squad</Link>
@@ -56,7 +58,9 @@ export function Header() {
               <Link href="/admin/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
               <Link href="/admin/reviews" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Reviews</Link>
               <Link href="/admin/predictions" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
-              <Link href="/admin/notifications" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Notifications</Link>
+              <Link href="/admin/quiz" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Quiz</Link>
+              <Link href="/admin/potm" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM</Link>
+              <Link href="/admin/notifications" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Bell className="h-3 w-3" /> Notifications</Link>
               <Link href="/admin/gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Gallery</Link>
               <Link href="/admin/sponsors" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Sponsors</Link>
               <Link href="/admin/squad" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Squad</Link>
@@ -83,6 +87,7 @@ export function Header() {
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
+          <Link href="/quiz" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Quiz</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
           <div className="relative">
             <button onClick={() => setMoreOpen(!moreOpen)} className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-[var(--accent)]">
@@ -98,8 +103,10 @@ export function Header() {
                   <Link href="/awards" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Awards</Link>
                   <Link href="/venues" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Venues</Link>
                   <Link href="/potm-gallery" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">POTM Gallery</Link>
+                  <Link href="/fixtures?potm=true" onClick={() => setMoreOpen(false)} className="flex items-center gap-1 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM Voting</Link>
                   <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Toss Analysis</Link>
-                  <Link href="/compare" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Compare</Link>
+                  <Link href="/compare" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
+                  <Link href="/head-to-head" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>
                   <Link href="/teams/stats" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Team Stats</Link>
                   <Link href="/about" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">About</Link>
                   <Link href="/contact" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Contact</Link>
@@ -134,14 +141,17 @@ export function Header() {
             <Link href="/fixtures" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
             <Link href="/points-table" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Standings</Link>
             <Link href="/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
+            <Link href="/quiz" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Quiz</Link>
             <hr className="border-[var(--border)]" />
             <Link href="/dream-team" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Dream Team</Link>
             <Link href="/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
             <Link href="/awards" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Awards</Link>
             <Link href="/venues" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Venues</Link>
             <Link href="/potm-gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">POTM Gallery</Link>
+            <Link href="/fixtures?potm=true" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM Voting</Link>
             <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
-            <Link href="/compare" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Compare</Link>
+            <Link href="/compare" onClick={() => setOpen(false)} className="flex items-center gap-2 transition-colors hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
+            <Link href="/head-to-head" onClick={() => setOpen(false)} className="flex items-center gap-2 transition-colors hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>
             <Link href="/teams/stats" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Team Stats</Link>
             <Link href="/about" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">About</Link>
             <Link href="/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>

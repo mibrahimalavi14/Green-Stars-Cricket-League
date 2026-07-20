@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -73,10 +73,22 @@ async function AdminPage() {
           <p className="text-sm text-[var(--muted-foreground)]">Manage sponsors</p>
         </Link>
 
+        <Link href="/admin/quiz" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Brain className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Quizzes</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Create & manage match quizzes</p>
+        </Link>
+
         <Link href="/admin/squad" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Users className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Squad</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Set playing XI per match</p>
+        </Link>
+
+        <Link href="/admin/potm" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Star className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">POTM Voting</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">View votes & set official MOTM</p>
         </Link>
 
         <Link href="/admin/news" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
@@ -84,6 +96,12 @@ async function AdminPage() {
           <h3 className="text-lg font-semibold">News</h3>
           <p className="text-2xl font-bold">{counts.news}</p>
           <p className="text-sm text-[var(--muted-foreground)]">Manage news articles</p>
+        </Link>
+
+        <Link href="/admin/moments" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Sparkles className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Moment of the Day</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Feature daily highlights & milestones</p>
         </Link>
 
         <Link href="/admin/matches?action=add" className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
