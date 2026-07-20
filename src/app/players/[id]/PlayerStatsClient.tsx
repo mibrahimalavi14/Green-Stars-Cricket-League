@@ -1,0 +1,207 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { ShareButtons } from "@/components/ShareButtons"
+
+type PerfMin = { battingRuns: number; ballsFaced: number; fours: number; sixes: number; isOut: boolean; wicketsLost: number; dismissalType: string; secondDismissalType: string; bowlingWickets: number; bowlingRuns: number; ballsBowled: number; catches: number; dismissedByBowlerId: string; dismissedByFielderId: string; secondDismissedByBowlerId: string; secondDismissedByFielderId: string; match: { id: string; team1: { logo: string; shortName: string }; team2: { logo: string; shortName: string }; seasonId: string; date: string } }
+type SeasonStat = { seasonId: string; seasonName: string; seasonYear: number; inns: number; runs: number; ballsFaced: number; wickets: number; ballsBowled: number; runsConceded: number; fours: number; sixes: number; dismissals: number; catches: number; stumpings: number; hs: number }
+
+export function PlayerStatsClient({ player, performances, seasonStats, activePerfs }: { player: any; performances: PerfMin[]; seasonStats: SeasonStat[]; activePerfs: PerfMin[] }) {
+  const [view, setView] = useState<string>("all")
+
+  const p = player
+  const selPerfs = view === "all" ? performances : view === "latest" ? activePerfs : performances.filter(x => x.match.seasonId === view)
+  const selStat = view === "all" ? null : view === "latest" ? seasonStats.find(s => s.seasonId === p.team?.seasonId) || seasonStats[0] : seasonStats.find(s => s.seasonId === view)
+
+  const inns = selPerfs.length
+  const dismissals = selPerfs.filter(x => x.isOut).length || inns
+  const runs = selPerfs.reduce((a, x) => a + x.battingRuns, 0)
+  const ballsFaced = selPerfs.reduce((a, x) => a + x.ballsFaced, 0)
+  const wickets = selPerfs.reduce((a, x) => a + x.bowlingWickets, 0)
+  const ballsBowled = selPerfs.reduce((a, x) => a + x.ballsBowled, 0)
+  const runsConceded = selPerfs.reduce((a, x) => a + x.bowlingRuns, 0)
+  const fours = selPerfs.reduce((a, x) => a + x.fours, 0)
+  const sixes = selPerfs.reduce((a, x) => a + x.sixes, 0)
+  const catches = selPerfs.reduce((a, x) => a + x.catches, 0)
+  const fifties = selPerfs.filter(x => x.battingRuns >= 50 && x.battingRuns < 100).length
+  const hundreds = selPerfs.filter(x => x.battingRuns >= 100).length
+  const ducks = selPerfs.filter(x => x.battingRuns === 0 && x.isOut).length
+
+  const battingAvg = dismissals > 0 ? (runs / dismissals).toFixed(2) : "-"
+  const sr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(1) : "-"
+  const econ = ballsBowled > 0 ? (runsConceded / (ballsBowled / 6)).toFixed(2) : "-"
+  const bowlingAvg = wickets > 0 ? (runsConceded / wickets).toFixed(2) : "-"
+  const overs = Math.floor(ballsBowled / 6) + "." + (ballsBowled % 6)
+  const hs = Math.max(...selPerfs.map(x => x.battingRuns), 0)
+  const ballsPerBoundary = (fours + sixes) > 0 ? (ballsFaced / (fours + sixes)).toFixed(1) : "-"
+  const bowlingSr = wickets > 0 ? (ballsBowled / wickets).toFixed(1) : "-"
+  const wktsPerMatch = selPerfs.length > 0 ? (wickets / selPerfs.length).toFixed(2) : "-"
+
+  const tabs = [
+    { id: "all", label: "All Time" },
+    ...(activePerfs.length > 0 ? [{ id: "latest", label: "Current Season" }] : []),
+    ...seasonStats.map(s => ({ id: s.seasonId, label: `${s.seasonName} (${s.seasonYear})` })),
+  ]
+  if (tabs.length > 5) {
+    tabs.splice(5, tabs.length - 5, { id: "more", label: "More..." })
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-12">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
+        <div className="mb-4 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+          {p.photo && p.photo !== "/placeholder-player.svg" ? (
+            <img src={p.photo} alt={p.name} className="h-24 w-24 rounded-full object-cover" />
+          ) : (
+            <img src="/placeholder-player.svg" alt={p.name} className="h-24 w-24 rounded-full bg-[var(--muted)] p-4" />
+          )}
+          <div>
+            <h1 className="text-3xl font-bold">{p.name}</h1>
+            <p className="text-lg text-[var(--muted-foreground)]">
+              {p.role} &middot;
+              {p.team?.logo && <img src={p.team.logo} alt="" className="mr-1 inline-block h-6 w-6 rounded-full object-cover" />}
+              {p.team?.name}
+            </p>
+            <div className="mt-1">
+              <ShareButtons url={`/players/${p.id}`} title={`${p.name} - ${p.role} - GSCL`} />
+            </div>
+            <div className="mt-1 text-sm text-[var(--muted-foreground)]">
+              <span>Bat: {p.battingStyle}</span>
+              {(p.role === "All-rounder" || p.role === "Bowler") && <span className="ml-4">Bowl: {p.bowlingStyle}</span>}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--border)] pb-3">
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setView(t.id)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${view === t.id ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "bg-[var(--muted)] hover:bg-[var(--muted)]/70"}`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-6">
+          <h2 className="mb-3 text-lg font-semibold">Batting {selStat && <span className="text-sm font-normal text-[var(--muted-foreground)]">({selStat.seasonName} {selStat.seasonYear})</span>}</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <StatCard label="Matches" value={selPerfs.length} />
+            <StatCard label="Innings" value={inns} />
+            <StatCard label="Runs" value={runs} />
+            <StatCard label="HS" value={hs} />
+            <StatCard label="Avg" value={battingAvg} />
+            <StatCard label="SR" value={sr} />
+            <StatCard label="4s" value={fours} />
+            <StatCard label="6s" value={sixes} />
+            <StatCard label="Fifties" value={fifties} />
+            <StatCard label="100s" value={hundreds} />
+            <StatCard label="Not Outs" value={selPerfs.filter(x => !x.isOut && x.ballsFaced > 0).length} />
+            <StatCard label="Ducks" value={ducks} />
+            <StatCard label="Balls/B" value={ballsPerBoundary} />
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h2 className="mb-3 text-lg font-semibold">Bowling {selStat && <span className="text-sm font-normal text-[var(--muted-foreground)]">({selStat.seasonName} {selStat.seasonYear})</span>}</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <StatCard label="Matches" value={selPerfs.length} />
+            <StatCard label="Innings" value={selPerfs.filter(x => x.ballsBowled > 0).length} />
+            <StatCard label="Overs" value={overs} />
+            <StatCard label="Wickets" value={wickets} />
+            <StatCard label="Runs" value={runsConceded} />
+            <StatCard label="BBI" value={`${Math.max(...selPerfs.map(x => x.bowlingWickets), 0)}/${selPerfs.filter(x => x.bowlingWickets === Math.max(...selPerfs.map(y => y.bowlingWickets), 0)).sort((a, b) => a.bowlingRuns - b.bowlingRuns)[0]?.bowlingRuns || 0}`} />
+            <StatCard label="SR" value={bowlingSr} />
+            <StatCard label="Avg" value={bowlingAvg} />
+            <StatCard label="Econ" value={econ} />
+            <StatCard label="Wkts/M" value={wktsPerMatch} />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">Fielding {selStat && <span className="text-sm font-normal text-[var(--muted-foreground)]">({selStat.seasonName} {selStat.seasonYear})</span>}</h2>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+            <StatCard label="Catches" value={catches} />
+            <StatCard label="Stumpings" value={selPerfs.reduce((a, x) => a + (x as any).stumpings || 0, 0)} />
+            <StatCard label="Run Outs" value={selPerfs.reduce((a, x) => a + (x as any).runOuts || 0, 0)} />
+          </div>
+        </div>
+      </div>
+
+      {performances.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-4 text-xl font-semibold">Form Guide — Last 5</h2>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {performances.slice(0, 5).map((p, i) => {
+              const isGood = p.battingRuns >= 20 || p.bowlingWickets >= 2
+              const isAvg = p.battingRuns >= 10 || p.bowlingWickets >= 1
+              const isOut = p.wicketsLost > 0 || p.isOut
+              return (
+                <div key={i} className="flex h-14 w-14 flex-col items-center justify-center rounded-lg border text-xs font-bold"
+                  style={{
+                    backgroundColor: isGood ? "var(--accent)" : isAvg ? "orange" : "var(--muted)",
+                    color: isGood || isAvg ? "white" : "var(--foreground)",
+                    borderColor: isGood ? "var(--accent)" : isAvg ? "orange" : "var(--border)",
+                  }}
+                  title={`${p.battingRuns} runs, ${p.bowlingWickets} wkts ${!isOut ? "(not out)" : ""}`}>
+                  <span>{p.battingRuns}</span>
+                  <span className="text-[10px] opacity-80">{isOut ? "●" : "○"}</span>
+                </div>
+              )
+            })}
+            <div className="flex items-center gap-2 pl-2 text-[11px] text-[var(--muted-foreground)]">
+              <span className="inline-block h-3 w-3 rounded bg-[var(--accent)]" /> Good
+              <span className="inline-block h-3 w-3 rounded bg-orange-500" /> Avg
+              <span className="inline-block h-3 w-3 rounded bg-[var(--muted)]" /> Poor
+              <span className="ml-2">● Out</span>
+              <span>○ Not out</span>
+            </div>
+          </div>
+
+          <h2 className="mb-4 text-xl font-semibold">Match Log</h2>
+          <div className="space-y-3">
+            {performances.map((p) => (
+              <div key={p.match.id + p.battingRuns + p.bowlingWickets} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    {p.match.team1.logo && <img src={p.match.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                    {p.match.team1.shortName}
+                    <span className="text-[var(--muted-foreground)]">vs</span>
+                    {p.match.team2.shortName}
+                    {p.match.team2.logo && <img src={p.match.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                  </span>
+                  <span className="text-[var(--muted-foreground)]">{new Date(p.match.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                </div>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                  <div>
+                    <span className="text-[var(--muted-foreground)]">Bat: </span>
+                    <span className="font-medium">{p.battingRuns}</span>
+                    <span className="text-[var(--muted-foreground)]"> ({p.ballsFaced} balls, {p.fours}×4, {p.sixes}×6)</span>
+                    {(() => { const wk = p.wicketsLost || 0; if (wk === 0 && p.ballsFaced > 0) return <span className="text-green-500"> not out</span>; if (p.dismissalType) return <span className="text-red-500"> {p.dismissalType}{wk > 1 ? ` (${wk}w)` : ""}</span>; return null; })()}
+                  </div>
+                  <div>
+                    <span className="text-[var(--muted-foreground)]">Bowl: </span>
+                    <span className="font-medium">{p.bowlingWickets}/{p.bowlingRuns}</span>
+                    <span className="text-[var(--muted-foreground)]"> ({p.ballsBowled} balls)</span>
+                  </div>
+                  <div>
+                    <span className="text-[var(--muted-foreground)]">Catches: </span>
+                    <span className="font-medium">{p.catches}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function StatCard({ label, value, title }: { label: string; value: string | number; title?: string }) {
+  return (
+    <div className="rounded-lg bg-[var(--muted)] p-3 text-center">
+      <p className="text-xl font-bold">{value}</p>
+      <p className="text-xs text-[var(--muted-foreground)]" title={title || label}>{label}</p>
+    </div>
+  )
+}

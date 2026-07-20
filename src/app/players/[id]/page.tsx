@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { ShareButtons } from "@/components/ShareButtons"
+import { PlayerStatsClient } from "./PlayerStatsClient"
 
 export const revalidate = 300
 
@@ -10,194 +11,50 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
     where: { id },
     include: { team: true },
   })
-
   if (!player) notFound()
 
   const performances = await prisma.playerMatch.findMany({
     where: { playerId: player.id },
     include: {
-      match: { include: { team1: true, team2: true } },
+      match: { include: { team1: true, team2: true, season: true } },
     },
     orderBy: { match: { date: "desc" } },
   })
 
-  const inns = performances.length
-  const dismissals = performances.filter(x => x.isOut).length || inns
-  const battingAvg = dismissals > 0 ? (player.runs / dismissals).toFixed(2) : "-"
-  const sr = player.ballsFaced > 0 ? ((player.runs / player.ballsFaced) * 100).toFixed(1) : "-"
-  const econ = player.ballsBowled > 0 ? (player.runsConceded / (player.ballsBowled / 6)).toFixed(2) : "-"
-  const bowlingAvg = player.wickets > 0 ? (player.runsConceded / player.wickets).toFixed(2) : "-"
-  const overs = Math.floor(player.ballsBowled / 6) + "." + (player.ballsBowled % 6)
-  const hs = Math.max(...performances.map(x => x.battingRuns), 0)
-  const bb = player.bestBowlingWickets > 0 ? `${player.bestBowlingWickets}/${player.bestBowlingRuns}` : "-"
-  const bowlingSr = player.wickets > 0 ? (player.ballsBowled / player.wickets).toFixed(1) : "-"
-  const ballsPerBoundary = (player.fours + player.sixes) > 0 ? (player.ballsFaced / (player.fours + player.sixes)).toFixed(1) : "-"
-  const wktsPerMatch = player.matchesPlayed > 0 ? (player.wickets / player.matchesPlayed).toFixed(2) : "-"
+  const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
+
+  const seasonStats = seasons.map(s => {
+    const p = performances.filter(x => x.match.seasonId === s.id)
+    const runs = p.reduce((a, x) => a + x.battingRuns, 0)
+    const ballsFaced = p.reduce((a, x) => a + x.ballsFaced, 0)
+    const wickets = p.reduce((a, x) => a + x.bowlingWickets, 0)
+    const ballsBowled = p.reduce((a, x) => a + x.ballsBowled, 0)
+    const runsConceded = p.reduce((a, x) => a + x.bowlingRuns, 0)
+    const fours = p.reduce((a, x) => a + x.fours, 0)
+    const sixes = p.reduce((a, x) => a + x.sixes, 0)
+    const dismissals = p.filter(x => x.isOut).length
+    const catches = p.reduce((a, x) => a + x.catches, 0)
+    const stumpings = p.reduce((a, x) => a + x.stumpings, 0)
+    const inns = p.length
+    return {
+      seasonId: s.id,
+      seasonName: s.name,
+      seasonYear: s.year,
+      inns, runs, ballsFaced, wickets, ballsBowled, runsConceded,
+      fours, sixes, dismissals, catches, stumpings,
+      hs: Math.max(...p.map(x => x.battingRuns), 0),
+    }
+  }).filter(s => s.inns > 0)
+
+  const activePerfs = performances.filter(x => x.match.season?.isActive)
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
-        <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-          {player.photo && player.photo !== "/placeholder-player.svg" ? (
-            <img src={player.photo} alt={player.name} className="h-24 w-24 rounded-full object-cover" />
-          ) : (
-            <img src="/placeholder-player.svg" alt={player.name} className="h-24 w-24 rounded-full bg-[var(--muted)] p-4" />
-          )}
-          <div>
-            <h1 className="text-3xl font-bold">{player.name}</h1>
-            <p className="text-lg text-[var(--muted-foreground)]">
-              {player.role} &middot;
-              {player.team?.logo && <img src={player.team.logo} alt="" className="mr-1 inline-block h-6 w-6 rounded-full object-cover" />}
-              {player.team?.name}
-            </p>
-            <div className="mt-1">
-              <ShareButtons url={`/players/${player.id}`} title={`${player.name} - ${player.role} - GSCL`} />
-            </div>
-            <div className="mt-1 text-sm text-[var(--muted-foreground)]">
-              <span>Bat: {player.battingStyle}</span>
-              {(player.role === "All-rounder" || player.role === "Bowler") && <span className="ml-4">Bowl: {player.bowlingStyle}</span>}
-            </div>
-            <div className="mt-2 text-xs text-[var(--muted-foreground)]">
-              <span className="font-medium text-[var(--foreground)]">Experience</span>
-              <div className="mt-1 flex items-center gap-2">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--muted)]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 transition-all"
-                    style={{ width: `${Math.min((player.matchesPlayed / 30) * 100, 100)}%` }}
-                  />
-                </div>
-                <span className="text-xs font-semibold">{player.matchesPlayed} matches</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="mb-3 text-lg font-semibold">Batting</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            <StatCard label="Matches" value={player.matchesPlayed} />
-            <StatCard label="Innings" value={inns} />
-            <StatCard label="Runs" value={player.runs} />
-            <StatCard label="HS" value={hs} title="Highest Score" />
-            <StatCard label="Avg" value={battingAvg} title="Batting Average" />
-            <StatCard label="SR" value={sr} title="Strike Rate" />
-            <StatCard label="4s" value={player.fours} title="Fours" />
-            <StatCard label="6s" value={player.sixes} title="Sixes" />
-            <StatCard label="Fifties" value={player.fifties} />
-            <StatCard label="100s" value={player.hundreds} />
-            <StatCard label="Not Outs" value={player.notOuts} />
-            <StatCard label="Ducks" value={player.ducks} />
-            <StatCard label="Balls/B" value={ballsPerBoundary} />
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h2 className="mb-3 text-lg font-semibold">Bowling</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            <StatCard label="Matches" value={player.matchesPlayed} />
-            <StatCard label="Innings" value={performances.filter(x => x.ballsBowled > 0).length} />
-            <StatCard label="Overs" value={overs} />
-            <StatCard label="Wickets" value={player.wickets} />
-            <StatCard label="Runs" value={player.runsConceded} />
-            <StatCard label="BBI" value={bb} title="Best Bowling Innings" />
-            <StatCard label="SR" value={bowlingSr} title="Strike Rate" />
-            <StatCard label="Avg" value={bowlingAvg} title="Bowling Average" />
-            <StatCard label="Econ" value={econ} title="Economy Rate" />
-            <StatCard label="Wkts/M" value={wktsPerMatch} title="Wickets per Match" />
-          </div>
-        </div>
-
-        <div>
-          <h2 className="mb-3 text-lg font-semibold">Fielding</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-            <StatCard label="Catches" value={player.catches} />
-            <StatCard label="Stumpings" value={player.stumpings} />
-            <StatCard label="Run Outs" value={player.runOuts} />
-          </div>
-        </div>
-      </div>
-
-      {performances.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold">Form Guide — Last 5</h2>
-          <div className="mb-6 flex flex-wrap gap-2">
-            {performances.slice(0, 5).map((p, i) => {
-              const runs = p.battingRuns
-              const wkts = p.bowlingWickets
-              const isGood = runs >= 20 || wkts >= 2
-              const isAvg = runs >= 10 || wkts >= 1
-              const isOut = (p as any).wicketsLost > 0 || p.isOut
-              return (
-                <div
-                  key={i}
-                  className="flex h-14 w-14 flex-col items-center justify-center rounded-lg border text-xs font-bold"
-                  style={{
-                    backgroundColor: isGood ? "var(--accent)" : isAvg ? "orange" : "var(--muted)",
-                    color: isGood || isAvg ? "white" : "var(--foreground)",
-                    borderColor: isGood ? "var(--accent)" : isAvg ? "orange" : "var(--border)",
-                  }}
-                  title={`${runs} runs, ${wkts} wkts ${!isOut ? "(not out)" : ""}`}
-                >
-                  <span>{runs}</span>
-                  <span className="text-[10px] opacity-80">{isOut ? "●" : "○"}</span>
-                </div>
-              )
-            })}
-            <div className="flex items-center gap-2 pl-2 text-[11px] text-[var(--muted-foreground)]">
-              <span className="inline-block h-3 w-3 rounded bg-[var(--accent)]" /> Good
-              <span className="inline-block h-3 w-3 rounded bg-orange-500" /> Avg
-              <span className="inline-block h-3 w-3 rounded bg-[var(--muted)]" /> Poor
-              <span className="ml-2">● Out</span>
-              <span>○ Not out</span>
-            </div>
-          </div>
-
-          <h2 className="mb-4 text-xl font-semibold">Match Log</h2>
-          <div className="space-y-3">
-            {performances.map((p) => (
-              <div key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    {p.match.team1.logo && <img src={p.match.team1.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-                    {p.match.team1.shortName}
-                    <span className="text-[var(--muted-foreground)]">vs</span>
-                    {p.match.team2.shortName}
-                    {p.match.team2.logo && <img src={p.match.team2.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-                  </span>
-                  <span className="text-[var(--muted-foreground)]">{new Date(p.match.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
-                </div>
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                  <div className="min-w-0">
-                    <span className="text-[var(--muted-foreground)]">Bat: </span>
-                    <span className="font-medium">{p.battingRuns}</span>
-                    <span className="text-[var(--muted-foreground)]"> ({p.ballsFaced} balls, {p.fours}×4, {p.sixes}×6)</span>
-                    {(() => { const wk = (p as any).wicketsLost || 0; if (wk === 0) return <span className="text-green-500"> not out</span>; const parts: string[] = []; if (p.dismissalType) parts.push(p.dismissalType); if (wk >= 2 && (p as any).secondDismissalType) parts.push((p as any).secondDismissalType); return <span className="text-red-500"> {parts.join(", ")}{wk > 1 ? ` (${wk}w)` : ""}</span>; })()}
-                  </div>
-                  <div>
-                    <span className="text-[var(--muted-foreground)]">Bowl: </span>
-                    <span className="font-medium">{p.bowlingWickets}/{p.bowlingRuns}</span>
-                    <span className="text-[var(--muted-foreground)]"> ({p.ballsBowled} balls)</span>
-                  </div>
-                  <div>
-                    <span className="text-[var(--muted-foreground)]">Catches: </span>
-                    <span className="font-medium">{p.catches}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function StatCard({ label, value, title }: { label: string; value: string | number; title?: string }) {
-  return (
-    <div className="rounded-lg bg-[var(--muted)] p-3 text-center">
-      <p className="text-xl font-bold">{value}</p>
-      <p className="text-xs text-[var(--muted-foreground)]" title={title || label}>{label}</p>
-    </div>
+    <PlayerStatsClient
+      player={JSON.parse(JSON.stringify(player))}
+      performances={JSON.parse(JSON.stringify(performances))}
+      seasonStats={JSON.parse(JSON.stringify(seasonStats))}
+      activePerfs={JSON.parse(JSON.stringify(activePerfs))}
+    />
   )
 }
 

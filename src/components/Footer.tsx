@@ -2,10 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone, Users, Trophy, Calendar } from "lucide-react"
 
 export function Footer() {
   const pathname = usePathname()
+  const [stats, setStats] = useState<{ season: string; year: number; teams: number; players: number; matches: number } | null>(null)
+
+  useEffect(() => {
+    fetch("/api/footer-stats").then(r => r.json()).then(setStats).catch(() => {})
+  }, [])
+
   if (pathname.startsWith("/admin")) return null
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--card)]">
@@ -38,6 +45,8 @@ export function Footer() {
               <Link href="/news" className="transition-colors hover:text-[var(--accent)]">News</Link>
               <Link href="/players/stats" className="transition-colors hover:text-[var(--accent)]">Stats</Link>
               <Link href="/seasons" className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
+              <Link href="/predictions" className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
+              <Link href="/dream-team" className="transition-colors hover:text-[var(--accent)]">Dream Team</Link>
             </div>
           </div>
           <div>
@@ -66,7 +75,19 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-8 border-t border-[var(--border)] pt-6 text-center text-sm text-[var(--muted-foreground)]">
+
+        {stats && (
+          <div className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--muted)] p-4">
+            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">{stats.season} ({stats.year}) — Season Stats</p>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+              <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-[var(--accent)]" /> <strong>{stats.teams}</strong> Teams</span>
+              <span className="flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5 text-[var(--accent)]" /> <strong>{stats.players}</strong> Players</span>
+              <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-[var(--accent)]" /> <strong>{stats.matches}</strong> Matches</span>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 border-t border-[var(--border)] pt-6 text-center text-sm text-[var(--muted-foreground)]">
           &copy; {new Date().getFullYear()} Green Stars Cricket League. All rights reserved.
         </div>
       </div>
