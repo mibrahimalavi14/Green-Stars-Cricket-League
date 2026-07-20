@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Loader2, Mail, KeyRound, Check, Lock, Clock, Trophy } from "lucide-react"
+import { Confetti } from "@/components/CoolEffects"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -144,6 +145,8 @@ export default function PredictionsPage() {
 
   if (success) {
     return (
+      <>
+      <Confetti trigger={success} />
       <div className="mx-auto max-w-4xl px-4 py-12">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
           <Lock className="mx-auto mb-3 h-10 w-10 text-green-500" />
@@ -163,6 +166,7 @@ export default function PredictionsPage() {
           <PredictionsList predictions={predictions} />
         </div>
       </div>
+      </>
     )
   }
 

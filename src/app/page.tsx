@@ -49,18 +49,27 @@ async function HomePage() {
       <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
         <Image src="/images/optimized/banner.webp" alt="" fill className="object-cover" priority />
         <div className="absolute inset-0 bg-black/50" />
+        {/* Floating cricket balls */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-[10%] top-[20%] h-3 w-3 animate-bounce rounded-full border-2 border-white/20" style={{ animationDuration: "3s" }} />
+          <div className="absolute right-[15%] top-[30%] h-2 w-2 animate-bounce rounded-full border-2 border-gscl-gold/30" style={{ animationDuration: "4s", animationDelay: "0.5s" }} />
+          <div className="absolute left-[20%] bottom-[25%] h-4 w-4 animate-bounce rounded-full border-2 border-white/10" style={{ animationDuration: "3.5s", animationDelay: "1s" }} />
+          <div className="absolute right-[25%] bottom-[35%] h-2.5 w-2.5 animate-bounce rounded-full border-2 border-gscl-gold/20" style={{ animationDuration: "4.5s", animationDelay: "0.3s" }} />
+          <div className="absolute left-[45%] top-[15%] h-1.5 w-1.5 animate-ping rounded-full bg-white/20" style={{ animationDuration: "2s", animationDelay: "0.8s" }} />
+          <div className="absolute right-[40%] bottom-[20%] h-1.5 w-1.5 animate-ping rounded-full bg-gscl-gold/20" style={{ animationDuration: "2.5s", animationDelay: "1.2s" }} />
+        </div>
         <div className="relative mx-auto max-w-7xl px-4 text-center">
           <h1 className="mb-4 text-5xl font-bold text-white md:text-7xl">
-            Green Stars <span className="text-gscl-gold">Cricket League</span>
+            Green Stars <span className="animate-gradient bg-gradient-to-r from-gscl-gold via-yellow-300 to-gscl-gold bg-clip-text text-transparent">Cricket League</span>
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-white/80">
             {season?.name || "Welcome to the most exciting cricket league"} — Where champions rise and legends are made.
           </p>
           <div className="flex justify-center gap-4">
-            <Link href="/fixtures" className="rounded-lg bg-gscl-gold px-6 py-3 font-semibold text-gscl-dark transition-opacity hover:opacity-90">
+            <Link href="/fixtures" className="animate-float rounded-lg bg-gscl-gold px-6 py-3 font-semibold text-gscl-dark transition-all hover:scale-105 hover:opacity-90">
               View Fixtures
             </Link>
-            <Link href="/live" className="rounded-lg border border-white/30 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10">
+            <Link href="/live" className="animate-glow-pulse rounded-lg border border-white/30 px-6 py-3 font-semibold text-white transition-all hover:scale-105 hover:bg-white/10" style={{ animationDelay: "0.5s" }}>
               Live Scores
             </Link>
           </div>
@@ -261,14 +270,15 @@ function LeaderCard({ label, stat, value, name, team, color }: { label: string; 
     amber: "text-amber-600 dark:text-amber-400",
   }
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
-      <div className={`mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${circleMap[color] || circleMap.orange}`}>
+    <div className="group relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg">
+      <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-[var(--accent)]/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className={`relative mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-transform duration-300 group-hover:scale-110 ${circleMap[color] || circleMap.orange}`}>
         {name.charAt(0)}
       </div>
-      <div className={`text-[10px] font-semibold uppercase tracking-wider ${labelMap[color] || labelMap.orange}`}>{label}</div>
-      <div className="mt-1 truncate text-sm font-bold">{name}</div>
-      <div className="text-lg font-bold">{value}</div>
-      <div className="text-[10px] text-[var(--muted-foreground)]">{team || stat}</div>
+      <div className={`relative text-[10px] font-semibold uppercase tracking-wider ${labelMap[color] || labelMap.orange}`}>{label}</div>
+      <div className="relative mt-1 truncate text-sm font-bold">{name}</div>
+      <div className="relative text-lg font-bold">{value}</div>
+      <div className="relative text-[10px] text-[var(--muted-foreground)]">{team || stat}</div>
     </div>
   )
 }

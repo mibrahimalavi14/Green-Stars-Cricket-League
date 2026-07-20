@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer"
 import { ScrollToTop } from "@/components/ScrollToTop"
 import { SearchOverlay } from "@/components/SearchOverlay"
 import { CookieConsent } from "@/components/CookieConsent"
+import { PageTransition } from "@/components/PageTransition"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <div className="flex min-h-screen flex-col overflow-x-hidden">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1"><PageTransition>{children}</PageTransition></main>
             <Footer />
             <ScrollToTop />
             <SearchOverlay />
