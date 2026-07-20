@@ -30,6 +30,7 @@ export function Header() {
             <Link href="/admin/news" className="text-sm transition-colors hover:text-[var(--accent)]">News</Link>
             <Link href="/admin/contact" className="text-sm transition-colors hover:text-[var(--accent)]">Contact</Link>
             <Link href="/admin/reviews" className="text-sm transition-colors hover:text-[var(--accent)]">Reviews</Link>
+            <Link href="/admin/predictions" className="text-sm transition-colors hover:text-[var(--accent)]">Predictions</Link>
             <Link href="/admin/notifications" className="text-sm transition-colors hover:text-[var(--accent)]">Notifications</Link>
             <Link href="/" className="text-sm transition-colors hover:text-[var(--accent)]">View Site</Link>
           </nav>
@@ -51,6 +52,7 @@ export function Header() {
               <Link href="/admin/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
               <Link href="/admin/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
               <Link href="/admin/reviews" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Reviews</Link>
+              <Link href="/admin/predictions" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
               <Link href="/admin/notifications" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Notifications</Link>
               <Link href="/" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">View Site</Link>
             </div>
