@@ -11,7 +11,7 @@ export default function PredictionsPage() {
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [otp, setOtp] = useState("")
-  const [step, setStep] = useState<"signin" | "otp" | "done">("signin")
+  const [step, setStep] = useState<"loading" | "signin" | "otp" | "done">("loading")
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -23,16 +23,14 @@ export default function PredictionsPage() {
       const u = JSON.parse(stored)
       setName(u.name)
       setEmail(u.email)
-      setStep("done")
-      fetchData(u.email)
+      initUser(u.email)
     } else {
-      fetchData()
+      setStep("signin")
     }
   }, [])
 
-  async function fetchData(emailParam?: string) {
-    const url = emailParam ? `/api/predictions?email=${encodeURIComponent(emailParam)}` : "/api/predictions"
-    const res = await fetch(url)
+  async function initUser(emailParam: string) {
+    const res = await fetch(`/api/predictions?email=${encodeURIComponent(emailParam)}`)
     const data = await res.json()
     if (data.teams) setTeams(data.teams)
     if (data.season) setSeason(data.season)
@@ -41,6 +39,7 @@ export default function PredictionsPage() {
       const t = data.teams?.find((t: any) => t.id === data.prediction.predictedTeamId)
       if (t) setPredictedTeamName(t.name)
     }
+    setStep("done")
   }
 
   async function sendOtp() {
@@ -75,8 +74,7 @@ export default function PredictionsPage() {
       setError(data.error || "Invalid OTP")
     } else {
       localStorage.setItem("gscl_user", JSON.stringify({ name: data.name, email: email.trim(), id: data.userId }))
-      setStep("done")
-      fetchData(email.trim())
+      initUser(email.trim())
     }
     setLoading(false)
   }
@@ -107,6 +105,14 @@ export default function PredictionsPage() {
   }
 
   const alreadyPredicted = !!predictedTeamId
+
+  if (step === "loading") {
+    return (
+      <div className="mx-auto flex max-w-4xl items-center justify-center px-4 py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--accent)]" />
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -153,7 +159,7 @@ export default function PredictionsPage() {
             <button onClick={resendOtp} className="text-sm text-[var(--accent)] hover:underline">Use a different email</button>
           </div>
         </div>
-      ) : teams.length === 0 ? (
+      ) : teams.length === 0 && !alreadyPredicted ? (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
           <p className="text-[var(--muted-foreground)]">No teams found for the current season.</p>
         </div>
