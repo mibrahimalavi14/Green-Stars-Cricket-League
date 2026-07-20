@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   const email = searchParams.get("email")
 
   const season = await prisma.season.findFirst({ where: { isActive: true } })
-  if (!season) return NextResponse.json({ teams: [], season: null, prediction: null })
+  if (!season) return NextResponse.json({ teams: [], season: null, prediction: null, teamVotes: [], predictions: [] })
 
   const teams = await prisma.team.findMany({
     where: { seasonId: season.id },
@@ -21,10 +21,30 @@ export async function GET(req: Request) {
     })
   }
 
+  const allPredictions = await prisma.seasonPrediction.findMany({
+    where: { seasonId: season.id },
+    orderBy: { createdAt: "desc" },
+  })
+
+  const teamVotes = teams.map(t => ({
+    teamId: t.id,
+    teamName: t.name,
+    shortName: t.shortName,
+    count: allPredictions.filter(p => p.predictedTeamId === t.id).length,
+  }))
+
+  const predictionsList = allPredictions.map(p => ({
+    name: p.name,
+    teamName: teams.find(t => t.id === p.predictedTeamId)?.name || "Unknown",
+    createdAt: p.createdAt.toISOString(),
+  }))
+
   return NextResponse.json({
     season: { id: season.id, name: season.name, year: season.year },
     teams,
     prediction,
+    teamVotes,
+    predictions: predictionsList,
   })
 }
 
@@ -51,12 +71,12 @@ export async function POST(req: Request) {
   })
 
   if (existing) {
-    return NextResponse.json({ error: "This email has already voted. Predictions cannot be changed." }, { status: 403 })
+    return NextResponse.json({ error: "This email has already voted" }, { status: 403 })
   }
 
-  const prediction = await prisma.seasonPrediction.create({
+  const pred = await prisma.seasonPrediction.create({
     data: { email, name, seasonId: season.id, predictedTeamId },
   })
 
-  return NextResponse.json(prediction)
+  return NextResponse.json(pred)
 }
