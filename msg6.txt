@@ -1,9 +1,0 @@
-feat:
-email
-OTP
-verification
-for
-predictions
-+
-anti-duplicate
-voting
