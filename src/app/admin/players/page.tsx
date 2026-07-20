@@ -12,7 +12,10 @@ async function AdminPlayersPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="mb-8 text-3xl font-bold">Manage Players</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Manage Players</h1>
+        <a href="/api/export/players" className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)]">Download CSV</a>
+      </div>
       <div className="mb-8"><AdminPlayerForm /></div>
       <div className="space-y-2">
         {players.map((p) => (

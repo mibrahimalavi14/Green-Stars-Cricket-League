@@ -1,0 +1,96 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Trophy, Award, Target, Loader2 } from "lucide-react"
+
+export default function PerformersPage() {
+  const [data, setData] = useState<any>(null)
+  const [tab, setTab] = useState<"batting" | "bowling" | "fielding">("batting")
+
+  useEffect(() => {
+    fetch("/api/performers").then(r => r.json()).then(setData)
+  }, [])
+
+  if (!data) {
+    return (
+      <div className="mx-auto flex max-w-6xl items-center justify-center px-4 py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--accent)]" />
+      </div>
+    )
+  }
+
+  const tabs = [
+    { key: "batting", label: "Batting", icon: Award, list: data.batsmen, cols: ["Runs", "SR", "Avg", "4s", "6s", "50s"] },
+    { key: "bowling", label: "Bowling", icon: Target, list: data.bowlers, cols: ["Wkts", "Avg", "Econ", "BBI", "Balls"] },
+    { key: "fielding", label: "Fielding", icon: Trophy, list: data.fielders, cols: ["Ct", "St", "RO", "Total"] },
+  ]
+
+  const active = tabs.find(t => t.key === tab)!
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="mb-2 text-3xl font-bold">Top Performers</h1>
+      <p className="mb-8 text-[var(--muted-foreground)]">All-time leading performers across the league</p>
+
+      <div className="mb-6 flex gap-2">
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as any)}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              tab === t.key ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "border border-[var(--border)] hover:bg-[var(--muted)]"
+            }`}>
+            <t.icon className="h-4 w-4" /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-[var(--muted)] text-left">
+              <th className="px-4 py-3 font-medium">#</th>
+              <th className="px-4 py-3 font-medium">Player</th>
+              <th className="px-4 py-3 font-medium">Team</th>
+              {active.cols.map(c => <th key={c} className="px-4 py-3 text-right font-medium">{c}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {active.list.map((p: any, i: number) => (
+              <tr key={p.id} className="border-t border-[var(--border)]">
+                <td className="px-4 py-3 text-[var(--muted-foreground)]">{i + 1}</td>
+                <td className="px-4 py-3 font-medium">{p.name}</td>
+                <td className="px-4 py-3 text-[var(--muted-foreground)]">{p.team}</td>
+                {tab === "batting" && (
+                  <>
+                    <td className="px-4 py-3 text-right font-bold">{p.runs}</td>
+                    <td className="px-4 py-3 text-right">{p.strikeRate}</td>
+                    <td className="px-4 py-3 text-right">{p.average}</td>
+                    <td className="px-4 py-3 text-right">{p.fours}</td>
+                    <td className="px-4 py-3 text-right">{p.sixes}</td>
+                    <td className="px-4 py-3 text-right">{p.fifties + p.hundreds}</td>
+                  </>
+                )}
+                {tab === "bowling" && (
+                  <>
+                    <td className="px-4 py-3 text-right font-bold">{p.wickets}</td>
+                    <td className="px-4 py-3 text-right">{p.average}</td>
+                    <td className="px-4 py-3 text-right">{p.economy}</td>
+                    <td className="px-4 py-3 text-right">{p.bestBowling}</td>
+                    <td className="px-4 py-3 text-right">{p.ballsBowled}</td>
+                  </>
+                )}
+                {tab === "fielding" && (
+                  <>
+                    <td className="px-4 py-3 text-right">{p.catches}</td>
+                    <td className="px-4 py-3 text-right">{p.stumpings}</td>
+                    <td className="px-4 py-3 text-right">{p.runOuts}</td>
+                    <td className="px-4 py-3 text-right font-bold">{p.total}</td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
