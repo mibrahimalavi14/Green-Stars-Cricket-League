@@ -1,22 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trophy, Check, Loader2, User, Mail, KeyRound } from "lucide-react"
+import { Trophy, Check, Loader2, Mail, KeyRound, Users } from "lucide-react"
 
 export default function PredictionsPage() {
-  const [matches, setMatches] = useState<any[]>([])
-  const [predictions, setPredictions] = useState<Record<string, string>>({})
-  const [saving, setSaving] = useState<string | null>(null)
-  const [saved, setSaved] = useState<string | null>(null)
-  const [name, setName] = useState("")
+  const [teams, setTeams] = useState<any[]>([])
+  const [season, setSeason] = useState<any>(null)
+  const [predictedTeamId, setPredictedTeamId] = useState<string | null>(null)
   const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
   const [otp, setOtp] = useState("")
   const [step, setStep] = useState<"signin" | "otp" | "done">("signin")
-  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [otpSent, setOtpSent] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
-  const [verifiedEmail, setVerifiedEmail] = useState("")
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem("gscl_user")
@@ -24,27 +22,21 @@ export default function PredictionsPage() {
       const u = JSON.parse(stored)
       setName(u.name)
       setEmail(u.email)
-      setVerifiedEmail(u.email)
-      setUserId(u.id)
       setStep("done")
+      fetchData(u.email)
+    } else {
+      fetchData()
     }
-    fetch("/api/matches").then(r => r.json()).then(data => {
-      const upcoming = (Array.isArray(data) ? data : []).filter((m: any) => m.status === "upcoming")
-      setMatches(upcoming)
-    })
   }, [])
 
-  useEffect(() => {
-    if (userId) {
-      fetch("/api/predictions").then(r => r.json()).then((data: any) => {
-        const map: Record<string, string> = {}
-        if (Array.isArray(data)) data.forEach((p: any) => {
-          if (p.userId === userId) map[p.matchId] = p.predictedTeamId
-        })
-        setPredictions(map)
-      })
-    }
-  }, [userId])
+  async function fetchData(emailParam?: string) {
+    const url = emailParam ? `/api/predictions?email=${encodeURIComponent(emailParam)}` : "/api/predictions"
+    const res = await fetch(url)
+    const data = await res.json()
+    if (data.teams) setTeams(data.teams)
+    if (data.season) setSeason(data.season)
+    if (data.prediction) setPredictedTeamId(data.prediction.predictedTeamId)
+  }
 
   async function sendOtp() {
     if (!name.trim() || !email.trim()) return
@@ -59,7 +51,6 @@ export default function PredictionsPage() {
     if (!res.ok) {
       setError(data.error || "Failed to send OTP")
     } else {
-      setOtpSent(true)
       setStep("otp")
     }
     setLoading(false)
@@ -79,9 +70,8 @@ export default function PredictionsPage() {
       setError(data.error || "Invalid OTP")
     } else {
       localStorage.setItem("gscl_user", JSON.stringify({ name: data.name, email: email.trim(), id: data.userId }))
-      setUserId(data.userId)
-      setVerifiedEmail(email.trim())
       setStep("done")
+      fetchData(email.trim())
     }
     setLoading(false)
   }
@@ -92,39 +82,43 @@ export default function PredictionsPage() {
     setEmail("")
     setOtp("")
     setStep("signin")
-    setUserId(null)
-    setPredictions({})
-    setVerifiedEmail("")
+    setPredictedTeamId(null)
   }
 
   function resendOtp() {
     setOtp("")
-    setOtpSent(false)
     setStep("signin")
   }
 
-  async function predict(matchId: string, teamId: string) {
-    if (!userId) return
-    setSaving(matchId)
+  async function submitPrediction(teamId: string) {
+    setSaving(true)
+    setError("")
     const res = await fetch("/api/predictions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ matchId, teamId, userId, name, email }),
+      body: JSON.stringify({ email, name, predictedTeamId: teamId }),
     })
-    if (res.ok) {
-      setPredictions(prev => ({ ...prev, [matchId]: teamId }))
-      setSaved(matchId)
-      setTimeout(() => setSaved(null), 2000)
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error || "Failed to save")
+    } else {
+      setPredictedTeamId(teamId)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
     }
-    setSaving(null)
+    setSaving(false)
   }
+
+  const alreadyPredicted = !!predictedTeamId
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Match Predictions</h1>
-          <p className="text-[var(--muted-foreground)]">Predict the winner for upcoming matches</p>
+          <h1 className="text-3xl font-bold">Season Prediction</h1>
+          <p className="text-[var(--muted-foreground)]">
+            {season ? `Predict the winner of ${season.name} (${season.year})` : "Predict the season winner"}
+          </p>
         </div>
         {step === "done" ? (
           <div className="flex items-center gap-3">
@@ -143,7 +137,7 @@ export default function PredictionsPage() {
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
           <Mail className="mx-auto mb-3 h-10 w-10 text-[var(--muted-foreground)]" />
           <h2 className="mb-2 text-lg font-semibold">Verify your email</h2>
-          <p className="mb-6 text-sm text-[var(--muted-foreground)]">Enter your details and we'll send a one-time code to your email</p>
+          <p className="mb-6 text-sm text-[var(--muted-foreground)]">Each email can predict once per season</p>
           <div className="mx-auto max-w-sm space-y-3">
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
@@ -173,57 +167,40 @@ export default function PredictionsPage() {
             <button onClick={resendOtp} className="text-sm text-[var(--accent)] hover:underline">Use a different email</button>
           </div>
         </div>
-      ) : matches.length === 0 ? (
+      ) : teams.length === 0 ? (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
-          <p className="text-[var(--muted-foreground)]">No upcoming matches to predict.</p>
+          <p className="text-[var(--muted-foreground)]">No teams found for the current season.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {matches.map((m: any) => (
-            <div key={m.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-              <div className="mb-1 text-xs text-[var(--muted-foreground)]">
-                {new Date(m.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} &middot; {m.venue}
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <button
-                  onClick={() => predict(m.id, m.team1Id)}
-                  disabled={saving === m.id}
-                  className={`flex flex-1 items-center gap-2 rounded-lg border-2 p-3 text-left transition-all ${
-                    predictions[m.id] === m.team1Id
-                      ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                      : "border-[var(--border)] hover:border-[var(--accent)]/50"
-                  }`}
-                >
-                  {m.team1.logo && <img src={m.team1.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
-                  <span className="font-medium">{m.team1.name}</span>
-                  {predictions[m.id] === m.team1Id && saved === m.id && <Check className="ml-auto h-4 w-4 text-green-500" />}
-                  {saving === m.id && <Loader2 className="ml-auto h-4 w-4 animate-spin" />}
-                </button>
-                <span className="text-xs font-semibold text-[var(--muted-foreground)]">VS</span>
-                <button
-                  onClick={() => predict(m.id, m.team2Id)}
-                  disabled={saving === m.id}
-                  className={`flex flex-1 items-center gap-2 rounded-lg border-2 p-3 text-left transition-all ${
-                    predictions[m.id] === m.team2Id
-                      ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                      : "border-[var(--border)] hover:border-[var(--accent)]/50"
-                  }`}
-                >
-                  {m.team2.logo && <img src={m.team2.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
-                  <span className="font-medium">{m.team2.name}</span>
-                  {predictions[m.id] === m.team2Id && saved === m.id && <Check className="ml-auto h-4 w-4 text-green-500" />}
-                  {saving === m.id && <Loader2 className="ml-auto h-4 w-4 animate-spin" />}
-                </button>
-              </div>
+        <div>
+          {alreadyPredicted ? (
+            <div className="mb-6 rounded-lg bg-green-500/10 border border-green-500/20 p-4 text-center">
+              <Check className="mx-auto mb-1 h-5 w-5 text-green-500" />
+              <p className="font-medium">Your prediction is locked in!</p>
+              <p className="text-sm text-[var(--muted-foreground)]">You predicted <strong>{teams.find(t => t.id === predictedTeamId)?.name}</strong> will win {season?.name}. {error && <span className="text-red-500">({error})</span>}</p>
             </div>
-          ))}
-        </div>
-      )}
+          ) : error && <div className="mb-4 text-center text-sm text-red-500">{error}</div>}
 
-      {step === "done" && Object.keys(predictions).length > 0 && (
-        <div className="mt-4 rounded-lg bg-[var(--muted)] p-3 text-sm text-center text-[var(--muted-foreground)]">
-          <Check className="mr-1 inline h-3.5 w-3.5 text-green-500" />
-          You have predicted {Object.keys(predictions).length} match{Object.keys(predictions).length !== 1 ? "es" : ""}
+          <p className="mb-4 text-sm text-[var(--muted-foreground)]">Pick the team you think will win the season:</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {teams.map(t => (
+              <button
+                key={t.id}
+                onClick={() => submitPrediction(t.id)}
+                disabled={saving || alreadyPredicted}
+                className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
+                  predictedTeamId === t.id
+                    ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                    : "border-[var(--border)] hover:border-[var(--accent)]/50"
+                } ${alreadyPredicted ? "cursor-default opacity-60" : ""}`}
+              >
+                {t.logo && <img src={t.logo} alt="" className="h-10 w-10 rounded-full object-cover" />}
+                <span className="font-medium">{t.name}</span>
+                {predictedTeamId === t.id && saved && <Check className="ml-auto h-5 w-5 text-green-500" />}
+              </button>
+            ))}
+          </div>
+          {saving && <Loader2 className="mx-auto mt-4 h-5 w-5 animate-spin text-[var(--accent)]" />}
         </div>
       )}
     </div>

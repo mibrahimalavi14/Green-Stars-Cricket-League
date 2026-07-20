@@ -1,52 +1,56 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET() {
-  const predictions = await prisma.prediction.findMany({
-    include: { match: { include: { team1: true, team2: true } } },
-    orderBy: { createdAt: "desc" },
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const email = searchParams.get("email")
+
+  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  if (!season) return NextResponse.json({ teams: [], season: null, prediction: null })
+
+  const teams = await prisma.team.findMany({
+    where: { seasonId: season.id },
+    select: { id: true, name: true, shortName: true, logo: true },
+    orderBy: { name: "asc" },
   })
-  return NextResponse.json(predictions)
+
+  let prediction = null
+  if (email) {
+    prediction = await prisma.seasonPrediction.findUnique({
+      where: { email_seasonId: { email, seasonId: season.id } },
+    })
+  }
+
+  return NextResponse.json({
+    season: { id: season.id, name: season.name, year: season.year },
+    teams,
+    prediction,
+  })
 }
 
 export async function POST(req: Request) {
-  const { matchId, teamId, userId, name, email } = await req.json()
+  const { email, name, predictedTeamId } = await req.json()
 
-  if (!matchId || !teamId) {
+  if (!email || !predictedTeamId) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 })
   }
 
   const season = await prisma.season.findFirst({ where: { isActive: true } })
-  if (season?.scheduleAnnounced) {
+  if (!season) return NextResponse.json({ error: "No active season" }, { status: 404 })
+  if (season.scheduleAnnounced) {
     return NextResponse.json({ error: "Predictions locked" }, { status: 403 })
   }
 
-  let uid = userId
-  if (uid) {
-    const existing = await prisma.user.findUnique({ where: { id: uid } })
-    if (!existing) {
-      await prisma.user.create({
-        data: { id: uid, name: name || "Guest", email: email || `${uid}@guest.gscl` },
-      })
-    }
-  } else {
-    uid = ""
-  }
+  const team = await prisma.team.findFirst({
+    where: { id: predictedTeamId, seasonId: season.id },
+  })
+  if (!team) return NextResponse.json({ error: "Invalid team" }, { status: 400 })
 
-  const existing = await prisma.prediction.findFirst({
-    where: { userId: uid, matchId },
+  const prediction = await prisma.seasonPrediction.upsert({
+    where: { email_seasonId: { email, seasonId: season.id } },
+    update: { predictedTeamId, name },
+    create: { email, name, seasonId: season.id, predictedTeamId },
   })
 
-  if (existing) {
-    const pred = await prisma.prediction.update({
-      where: { id: existing.id },
-      data: { predictedTeamId: teamId },
-    })
-    return NextResponse.json(pred)
-  }
-
-  const pred = await prisma.prediction.create({
-    data: { userId: uid, matchId, predictedTeamId: teamId },
-  })
-  return NextResponse.json(pred)
+  return NextResponse.json(prediction)
 }
