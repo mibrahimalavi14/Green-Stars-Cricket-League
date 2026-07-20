@@ -103,9 +103,7 @@ function AboutPage() {
           Based in Haripur, Pakistan. Follow us on social media for the latest updates, live scores, and behind-the-scenes content.
         </p>
         <div className="flex flex-wrap gap-4 text-sm">
-          <a href="https://www.facebook.com/greenstarscricketleague" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
-            Facebook
-          </a>
+
           <a href="https://www.instagram.com/green_stars_cricket_league" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
             Instagram
           </a>

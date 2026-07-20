@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone, Users, Trophy, Calendar } from "lucide-react"
+import { Instagram, Youtube, Mail, MapPin, Phone, Users, Trophy, Calendar } from "lucide-react"
 
 export function Footer() {
   const pathname = usePathname()
@@ -60,12 +60,7 @@ export function Footer() {
           <div>
             <h4 className="mb-3 font-semibold">Follow Us</h4>
             <div className="flex gap-3">
-              <a href="https://www.facebook.com/greenstarscricketleague" target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a href="https://x.com/greenstarscric" target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
-                <Twitter className="h-4 w-4" />
-              </a>
+
               <a href="https://www.instagram.com/green_stars_cricket_league" target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
                 <Instagram className="h-4 w-4" />
               </a>
