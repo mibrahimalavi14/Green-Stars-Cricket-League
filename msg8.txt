@@ -1,7 +1,0 @@
-feat:
-admin
-predictions
-page
-with
-team
-breakdown
