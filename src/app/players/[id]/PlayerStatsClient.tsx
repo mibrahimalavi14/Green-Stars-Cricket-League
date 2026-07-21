@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ShareButtons } from "@/components/ShareButtons"
-import { Trophy, Zap, Target, Star, Medal } from "lucide-react"
+import { Trophy, Zap, Target, Star, Medal, ArrowUp, CircleDot } from "lucide-react"
 
 type PerfMin = { battingRuns: number; ballsFaced: number; fours: number; sixes: number; isOut: boolean; wicketsLost: number; dismissalType: string; secondDismissalType: string; bowlingWickets: number; bowlingRuns: number; ballsBowled: number; catches: number; dismissedByBowlerId: string; dismissedByFielderId: string; secondDismissedByBowlerId: string; secondDismissedByFielderId: string; match: { id: string; team1: { logo: string; shortName: string }; team2: { logo: string; shortName: string }; seasonId: string; date: string } }
 type SeasonStat = { seasonId: string; seasonName: string; seasonYear: number; inns: number; runs: number; ballsFaced: number; wickets: number; ballsBowled: number; runsConceded: number; fours: number; sixes: number; dismissals: number; catches: number; stumpings: number; hs: number }
@@ -28,16 +28,34 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
   const fifties = selPerfs.filter(x => x.battingRuns >= 50 && x.battingRuns < 100).length
   const hundreds = selPerfs.filter(x => x.battingRuns >= 100).length
   const ducks = selPerfs.filter(x => x.battingRuns === 0 && x.isOut).length
+  const threes = selPerfs.reduce((a, x) => a + (x as any).threes || 0, 0)
+  const dotBalls = selPerfs.reduce((a, x) => a + (x as any).dotBalls || 0, 0)
+  const maidens = selPerfs.reduce((a, x) => a + (x as any).maidens || 0, 0)
+  const wides = selPerfs.reduce((a, x) => a + (x as any).wides || 0, 0)
+  const noBalls = selPerfs.reduce((a, x) => a + (x as any).noBalls || 0, 0)
+  const fiveWickets = selPerfs.filter(x => x.bowlingWickets >= 5).length
+  const fourWickets = selPerfs.filter(x => x.bowlingWickets >= 4).length
+  const hattricks = selPerfs.reduce((a, x) => a + ((x as any).hattricks || 0), 0)
+  const timesBowled = selPerfs.filter(x => x.dismissalType === "bowled" || x.secondDismissalType === "bowled").length
+  const timesCaught = selPerfs.filter(x => x.dismissalType === "caught" || x.secondDismissalType === "caught").length
+  const timesLbw = selPerfs.filter(x => x.dismissalType === "lbw" || x.secondDismissalType === "lbw").length
+  const timesStumped = selPerfs.filter(x => x.dismissalType === "stumped" || x.secondDismissalType === "stumped").length
+  const timesRunOut = selPerfs.filter(x => x.dismissalType === "run out" || x.secondDismissalType === "run out").length
 
   const battingAvg = dismissals > 0 ? (runs / dismissals).toFixed(2) : "-"
-  const sr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(1) : "-"
+  const sr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
   const econ = ballsBowled > 0 ? (runsConceded / (ballsBowled / 6)).toFixed(2) : "-"
   const bowlingAvg = wickets > 0 ? (runsConceded / wickets).toFixed(2) : "-"
+  const battingSr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
   const overs = Math.floor(ballsBowled / 6) + "." + (ballsBowled % 6)
   const hs = Math.max(...selPerfs.map(x => x.battingRuns), 0)
   const ballsPerBoundary = (fours + sixes) > 0 ? (ballsFaced / (fours + sixes)).toFixed(1) : "-"
-  const bowlingSr = wickets > 0 ? (ballsBowled / wickets).toFixed(1) : "-"
+  const bowlingSr = wickets > 0 ? (ballsBowled / wickets).toFixed(2) : "-"
   const wktsPerMatch = selPerfs.length > 0 ? (wickets / selPerfs.length).toFixed(2) : "-"
+  const boundaryPct = runs > 0 ? (((fours * 4 + sixes * 6) / runs) * 100).toFixed(2) : "-"
+  const dotBallPct = ballsFaced > 0 ? ((dotBalls / ballsFaced) * 100).toFixed(2) : "-"
+  const bestBbiWkts = Math.max(...selPerfs.map(x => x.bowlingWickets), 0)
+  const bestBbiRuns = selPerfs.filter(x => x.bowlingWickets === bestBbiWkts).sort((a, b) => a.bowlingRuns - b.bowlingRuns)[0]?.bowlingRuns || 0
 
   const tabs = [
     { id: "all", label: "All Time" },
@@ -94,6 +112,10 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="SR" value={sr} />
             <StatCard label="4s" value={fours} />
             <StatCard label="6s" value={sixes} />
+            <StatCard label="3s" value={threes} />
+            <StatCard label="Dot Balls" value={dotBalls} />
+            <StatCard label="Dot%" value={dotBallPct} />
+            <StatCard label="Boundary%" value={boundaryPct} />
             <StatCard label="Fifties" value={fifties} />
             <StatCard label="100s" value={hundreds} />
             <StatCard label="Not Outs" value={selPerfs.filter(x => !x.isOut && x.ballsFaced > 0).length} />
@@ -108,22 +130,33 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="Matches" value={selPerfs.length} />
             <StatCard label="Innings" value={selPerfs.filter(x => x.ballsBowled > 0).length} />
             <StatCard label="Overs" value={overs} />
+            <StatCard label="Maidens" value={maidens} />
             <StatCard label="Wickets" value={wickets} />
             <StatCard label="Runs" value={runsConceded} />
-            <StatCard label="BBI" value={`${Math.max(...selPerfs.map(x => x.bowlingWickets), 0)}/${selPerfs.filter(x => x.bowlingWickets === Math.max(...selPerfs.map(y => y.bowlingWickets), 0)).sort((a, b) => a.bowlingRuns - b.bowlingRuns)[0]?.bowlingRuns || 0}`} />
+            <StatCard label="Wides" value={wides} />
+            <StatCard label="No Balls" value={noBalls} />
+            <StatCard label="BBI" value={`${bestBbiWkts}/${bestBbiRuns}`} />
             <StatCard label="SR" value={bowlingSr} />
             <StatCard label="Avg" value={bowlingAvg} />
             <StatCard label="Econ" value={econ} />
+            <StatCard label="5w" value={fiveWickets} />
+            <StatCard label="4w" value={fourWickets} />
+            <StatCard label="Hattricks" value={hattricks} />
             <StatCard label="Wkts/M" value={wktsPerMatch} />
           </div>
         </div>
 
-        <div>
+        <div className="mb-6">
           <h2 className="mb-3 text-lg font-semibold">Fielding {selStat && <span className="text-sm font-normal text-[var(--muted-foreground)]">({selStat.seasonName} {selStat.seasonYear})</span>}</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
             <StatCard label="Catches" value={catches} />
             <StatCard label="Stumpings" value={selPerfs.reduce((a, x) => a + (x as any).stumpings || 0, 0)} />
             <StatCard label="Run Outs" value={selPerfs.reduce((a, x) => a + (x as any).runOuts || 0, 0)} />
+            <StatCard label="Bowled" value={timesBowled} />
+            <StatCard label="Caught" value={timesCaught} />
+            <StatCard label="LBW" value={timesLbw} />
+            <StatCard label="Stumped" value={timesStumped} />
+            <StatCard label="Run Out" value={timesRunOut} />
           </div>
         </div>
 

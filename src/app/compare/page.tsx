@@ -7,9 +7,12 @@ type TeamInfo = { id: string; name: string; shortName: string; color: string; lo
 type Player = {
   id: string; name: string; role: string; battingStyle: string; bowlingStyle: string; photo: string; teamId: string; team: TeamInfo
   runs: number; ballsFaced: number; fours: number; sixes: number; ones: number; twos: number
+  threes: number; dotBalls: number; highestScore: number
   fifties: number; hundreds: number; wickets: number; ballsBowled: number; runsConceded: number
+  maidens: number; wides: number; noBalls: number; fiveWickets: number; fourWickets: number; hattricks: number
   matchesPlayed: number; bestBowlingWickets: number; bestBowlingRuns: number
   catches: number; stumpings: number; runOuts: number; notOuts: number; ducks: number
+  timesBowled: number; timesCaught: number; timesLbw: number; timesStumped: number; timesRunOut: number
 }
 
 const RADAR_STATS = ["Runs", "Average", "Strike Rate", "Wickets", "Economy", "Catches"] as const
@@ -252,34 +255,56 @@ const BATTING_STATS: StatDef[] = [
   { label: "Balls Faced", key: "ballsFaced" },
   { label: "Fours", key: "fours" },
   { label: "Sixes", key: "sixes" },
+  { label: "Threes", key: "threes" },
+  { label: "Dot Balls", key: "dotBalls" },
+  { label: "Highest Score", key: "highestScore" },
   { label: "50s", key: "fifties" },
   { label: "100s", key: "hundreds" },
   { label: "Not Outs", key: "notOuts" },
   { label: "Ducks", key: "ducks", higherBetter: false },
   {
     label: "Average", key: "_avg",
-    format: (v: number) => v.toFixed(1),
+    format: (v: number) => v.toFixed(2),
   },
   {
     label: "Strike Rate", key: "_sr",
-    format: (v: number) => v.toFixed(1),
+    format: (v: number) => v.toFixed(2),
+  },
+  {
+    label: "Boundary%", key: "_bdry",
+    format: (_v: number, p?: Player) => p && p.runs > 0 ? (((p.fours * 4 + p.sixes * 6) / p.runs) * 100).toFixed(2) : "-",
   },
 ]
 const BOWLING_STATS: StatDef[] = [
   { label: "Wickets", key: "wickets" },
   { label: "Balls Bowled", key: "ballsBowled" },
   { label: "Runs Conceded", key: "runsConceded", higherBetter: false },
+  { label: "Maidens", key: "maidens" },
+  { label: "Wides", key: "wides", higherBetter: false },
+  { label: "No Balls", key: "noBalls", higherBetter: false },
+  { label: "5 Wickets", key: "fiveWickets" },
+  { label: "4 Wickets", key: "fourWickets" },
+  { label: "Hattricks", key: "hattricks" },
   { label: "Best Bowling", key: "_bb", format: (_: number, p?: Player) => p ? `${p.bestBowlingWickets}/${p.bestBowlingRuns}` : "-" },
   { label: "Economy", key: "_econ", format: (v: number) => v.toFixed(2) },
   {
     label: "Bowling Avg", key: "_bowlavg",
-    format: (v: number) => v.toFixed(1),
+    format: (v: number) => v.toFixed(2),
+  },
+  {
+    label: "Bowling SR", key: "_bowlsr",
+    format: (v: number) => v.toFixed(2),
   },
 ]
 const FIELDING_STATS: StatDef[] = [
   { label: "Catches", key: "catches" },
   { label: "Stumpings", key: "stumpings" },
   { label: "Run Outs", key: "runOuts" },
+  { label: "Times Bowled", key: "timesBowled" },
+  { label: "Times Caught", key: "timesCaught" },
+  { label: "Times LBW", key: "timesLbw" },
+  { label: "Times Stumped", key: "timesStumped" },
+  { label: "Times Run Out", key: "timesRunOut" },
 ]
 
 function getStatValue(player: Player, key: string): number {
@@ -289,6 +314,7 @@ function getStatValue(player: Player, key: string): number {
     case "_sr": return calcStrikeRate(p.runs, p.ballsFaced)
     case "_econ": return calcEconomy(p.runsConceded, p.ballsBowled)
     case "_bowlavg": return p.wickets > 0 ? p.runsConceded / p.wickets : 0
+    case "_bowlsr": return p.wickets > 0 ? p.ballsBowled / p.wickets : 0
     default: return p[key] ?? 0
   }
 }

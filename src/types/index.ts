@@ -40,6 +40,7 @@ export interface PlayerData {
 export interface MatchData {
   id: string
   matchNo: number
+  stage: string
   seasonId: string
   team1Id: string
   team2Id: string

@@ -20,10 +20,22 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
         "border-[var(--border)] hover:border-[var(--accent)]"
       }`}
     >
-      {(match.status === "live" || showMatchNo) && (
+      {(match.status === "live" || showMatchNo || match.stage !== "league") && (
         <div className="mb-2 flex items-center gap-2">
           {match.status === "live" && <><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /><span className="text-xs font-semibold text-red-500">LIVE</span></>}
           {showMatchNo && match.matchNo > 0 && <span className="text-xs text-[var(--muted-foreground)]">Match {match.matchNo}</span>}
+          {match.stage !== "league" && (
+            <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+              match.stage === "final" ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
+              match.stage === "qualifier1" || match.stage === "qualifier2" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+              "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            }`}>
+              {match.stage === "qualifier1" ? "Qualifier 1" :
+               match.stage === "qualifier2" ? "Qualifier 2" :
+               match.stage === "eliminator" ? "Eliminator" :
+               match.stage === "final" ? "Final" : match.stage}
+            </span>
+          )}
         </div>
       )}
       <div className="flex items-center justify-between gap-4">

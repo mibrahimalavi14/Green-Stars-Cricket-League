@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 
 interface Match {
-  id: string; matchNo: number; date: string; status: string; result: string; team1Score: string; team2Score: string
+  id: string; matchNo: number; stage: string; date: string; status: string; result: string; team1Score: string; team2Score: string
   tossWinner: string; tossDecision: string; manOfMatch: string; venue: string
   team1: { id: string; shortName: string; name: string; color: string; logo: string }
   team2: { id: string; shortName: string; name: string; color: string; logo: string }
@@ -25,6 +25,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const [form, setForm] = useState({
     team1Score: "", team2Score: "", result: "",
     tossWinner: "", tossDecision: "", venue: "",
+    matchNo: "", stage: "league",
     inn1Wides: "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
     inn2Wides: "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
   })
@@ -45,6 +46,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       team1Score: m.team1Score || "", team2Score: m.team2Score || "", result: m.result || "",
       tossWinner: "", tossDecision: "",
       venue: m.venue || "",
+      matchNo: m.matchNo?.toString() || "", stage: m.stage || "league",
       inn1Wides: inn1?.extras?.toString() || "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
       inn2Wides: inn2?.extras?.toString() || "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
     })
@@ -214,6 +216,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id, status: "completed",
+        matchNo: form.matchNo ? parseInt(form.matchNo) : undefined,
+        stage: form.stage,
         team1Score: `${s1Total}/${s1Wkts}${t1Balls ? ` (${Math.floor(t1Balls / 6)}.${t1Balls % 6})` : ""}`,
         team2Score: `${s2Total}/${s2Wkts}${t2Balls ? ` (${Math.floor(t2Balls / 6)}.${t2Balls % 6})` : ""}`,
         result,
@@ -248,6 +252,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     setForm({
       team1Score: "", team2Score: "", result: "",
       tossWinner: "", tossDecision: "", venue: "",
+      matchNo: "", stage: "league",
       inn1Wides: "", inn1NoBalls: "", inn1Byes: "", inn1LegByes: "",
       inn2Wides: "", inn2NoBalls: "", inn2Byes: "", inn2LegByes: "",
     })
@@ -357,17 +362,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
   return (
     <div className="space-y-3">
       {matches.map((m) => {
-        const playoffCutoff = new Date("2026-08-09T00:00:00.000Z")
-        const md = new Date(m.date)
-        const isPlayoff = md >= playoffCutoff
-        function playoffLabel(d: Date) {
-          const iso = d.toISOString()
-          if (iso.startsWith("2026-08-09T11:")) return "Qualifier 1"
-          if (iso.startsWith("2026-08-09T12:")) return "Eliminator"
-          if (iso.startsWith("2026-08-09T13:")) return "Qualifier 2"
-          if (iso.startsWith("2026-08-16T")) return "Final"
-          return ""
+        const stageLabel: Record<string, string> = {
+          league: "", qualifier1: "Qualifier 1", eliminator: "Eliminator", qualifier2: "Qualifier 2", final: "Final",
         }
+        const isPlayoff = m.stage !== "league"
         const team1Players = allPlayers.filter(p => p.teamId === m.team1.id)
         const team2Players = allPlayers.filter(p => p.teamId === m.team2.id)
         function autoResult() {
@@ -418,10 +416,10 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         <div key={m.id} className={`rounded-lg border p-3 sm:p-4 ${isPlayoff ? 'border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10' : 'border-[var(--border)] bg-[var(--card)]'}`}>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">{isPlayoff ? 'Playoffs' : `${m.season.name} \u00b7 Match ${m.matchNo}`} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
+              <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">{isPlayoff ? `${stageLabel[m.stage] || m.stage}` : `${m.season.name} \u00b7 Match ${m.matchNo}`} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
               {isPlayoff ? (
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(md)}</span>
+                  <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{stageLabel[m.stage] || m.stage}</span>
                   <span className="text-xs text-[var(--muted-foreground)]">&middot;</span>
                   <p className="font-bold text-amber-600 dark:text-amber-400">TBD</p>
                   <span className="text-xs text-amber-600 dark:text-amber-400">vs</span>
@@ -489,6 +487,25 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   <input value={form.venue} onChange={e => setForm({...form, venue: e.target.value})}
                     placeholder="Main Stadium"
                     className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs">Match Number</label>
+                  <input type="number" min="0" value={form.matchNo} onChange={e => setForm({...form, matchNo: e.target.value})}
+                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs">Stage</label>
+                  <select value={form.stage} onChange={e => setForm({...form, stage: e.target.value})}
+                    className="w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-sm">
+                    <option value="league">League</option>
+                    <option value="qualifier1">Qualifier 1</option>
+                    <option value="eliminator">Eliminator</option>
+                    <option value="qualifier2">Qualifier 2</option>
+                    <option value="final">Final</option>
+                  </select>
                 </div>
               </div>
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trophy, Award, Target, Loader2 } from "lucide-react"
+import { Trophy, Award, Target, Loader2, Eye, Crosshair, UserCheck } from "lucide-react"
 
 export default function PerformersPage() {
   const [data, setData] = useState<any>(null)
@@ -20,9 +20,9 @@ export default function PerformersPage() {
   }
 
   const tabs = [
-    { key: "batting", label: "Batting", icon: Award, list: data.batsmen, cols: ["Runs", "SR", "Avg", "4s", "6s", "50s"] },
-    { key: "bowling", label: "Bowling", icon: Target, list: data.bowlers, cols: ["Wkts", "Avg", "Econ", "BBI", "Balls"] },
-    { key: "fielding", label: "Fielding", icon: Trophy, list: data.fielders, cols: ["Ct", "St", "RO", "Total"] },
+    { key: "batting", label: "Batting", icon: Award, list: data.batsmen, cols: ["Mat", "Runs", "HS", "Avg", "SR", "4s", "6s", "Ducks", "Dot%", "Bdy%"] },
+    { key: "bowling", label: "Bowling", icon: Target, list: data.bowlers, cols: ["Mat", "Wkts", "Ov", "Mdns", "Avg", "Econ", "5w", "4w", "Wd", "Nb", "HT"] },
+    { key: "fielding", label: "Fielding", icon: Trophy, list: data.fielders, cols: ["Ct", "St", "RO", "Bwd", "LBW", "Total"] },
   ]
 
   const active = tabs.find(t => t.key === tab)!
@@ -61,21 +61,31 @@ export default function PerformersPage() {
                 <td className="px-4 py-3 text-[var(--muted-foreground)]">{p.team}</td>
                 {tab === "batting" && (
                   <>
+                    <td className="px-4 py-3 text-right">{p.matches}</td>
                     <td className="px-4 py-3 text-right font-bold">{p.runs}</td>
-                    <td className="px-4 py-3 text-right">{p.strikeRate}</td>
+                    <td className="px-4 py-3 text-right">{p.highestScore}</td>
                     <td className="px-4 py-3 text-right">{p.average}</td>
+                    <td className="px-4 py-3 text-right">{p.strikeRate}</td>
                     <td className="px-4 py-3 text-right">{p.fours}</td>
                     <td className="px-4 py-3 text-right">{p.sixes}</td>
-                    <td className="px-4 py-3 text-right">{p.fifties + p.hundreds}</td>
+                    <td className="px-4 py-3 text-right">{p.ducks}</td>
+                    <td className="px-4 py-3 text-right">{p.dotBallPct}</td>
+                    <td className="px-4 py-3 text-right">{p.boundaryPct}</td>
                   </>
                 )}
                 {tab === "bowling" && (
                   <>
+                    <td className="px-4 py-3 text-right">{p.matches}</td>
                     <td className="px-4 py-3 text-right font-bold">{p.wickets}</td>
+                    <td className="px-4 py-3 text-right">{p.overs}</td>
+                    <td className="px-4 py-3 text-right">{p.maidens}</td>
                     <td className="px-4 py-3 text-right">{p.average}</td>
                     <td className="px-4 py-3 text-right">{p.economy}</td>
-                    <td className="px-4 py-3 text-right">{p.bestBowling}</td>
-                    <td className="px-4 py-3 text-right">{p.ballsBowled}</td>
+                    <td className="px-4 py-3 text-right">{p.fiveWickets}</td>
+                    <td className="px-4 py-3 text-right">{p.fourWickets}</td>
+                    <td className="px-4 py-3 text-right">{p.wides}</td>
+                    <td className="px-4 py-3 text-right">{p.noBalls}</td>
+                    <td className="px-4 py-3 text-right">{p.hattricks}</td>
                   </>
                 )}
                 {tab === "fielding" && (
@@ -83,6 +93,8 @@ export default function PerformersPage() {
                     <td className="px-4 py-3 text-right">{p.catches}</td>
                     <td className="px-4 py-3 text-right">{p.stumpings}</td>
                     <td className="px-4 py-3 text-right">{p.runOuts}</td>
+                    <td className="px-4 py-3 text-right">{p.timesBowled}</td>
+                    <td className="px-4 py-3 text-right">{p.timesLbw}</td>
                     <td className="px-4 py-3 text-right font-bold">{p.total}</td>
                   </>
                 )}

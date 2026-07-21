@@ -20,10 +20,8 @@ async function FixturesPage() {
   const completed = matches.filter((match) => match.status === "completed").reverse()
   const upcoming = matches.filter((match) => match.status === "upcoming")
 
-  const playoffCutoff = new Date("2026-08-16T00:00:00.000Z")
-
-  const leagueUpcoming = upcoming.filter((match) => match.date < playoffCutoff)
-  const playoffUpcoming = upcoming.filter((match) => match.date >= playoffCutoff)
+  const leagueUpcoming = upcoming.filter((match) => match.stage === "league")
+  const playoffUpcoming = upcoming.filter((match) => match.stage !== "league")
 
   const groups: Record<string, typeof matches> = {}
   for (const m of leagueUpcoming) {
@@ -39,18 +37,11 @@ async function FixturesPage() {
     playoffGroups[dateKey].push(m)
   }
 
-  function playoffLabel(d: Date) {
-    const iso = d.toISOString()
-    if (iso.startsWith("2026-08-16T11:")) return "Qualifier 1"
-    if (iso.startsWith("2026-08-16T12:")) return "Eliminator"
-    if (iso.startsWith("2026-08-16T13:")) return "Qualifier 2"
-    if (iso.startsWith("2026-08-23T")) return "Final"
-    return ""
-  }
-
-  const playoffRoundLabels: Record<string, string> = {
-    "16 August": "Qualifier 1, Eliminator & Qualifier 2",
-    "23 August": "Final",
+  function stageLabel(stage: string): string {
+    return stage === "qualifier1" ? "Qualifier 1" :
+           stage === "qualifier2" ? "Qualifier 2" :
+           stage === "eliminator" ? "Eliminator" :
+           stage === "final" ? "Final" : stage
   }
 
   const weekDays: Record<string, string> = {
@@ -135,9 +126,6 @@ async function FixturesPage() {
           </div>
           <div className="divide-y divide-[var(--border)]">
             {Object.entries(playoffGroups).map(([dateKey, dayMatches]) => {
-              const dayNum = dateKey.match(/\d+/)?.[0] || ""
-              const month = dateKey.match(/[A-Z]\w+/)?.[0] || ""
-              const label = playoffRoundLabels[`${dayNum} ${month}`] || ""
               return (
                 <div key={dateKey} className="px-6 py-4">
                   <div className="mb-3 flex items-center gap-3">
@@ -146,7 +134,6 @@ async function FixturesPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{dateKey}</p>
-                      {label && <p className="text-xs font-medium text-amber-600 dark:text-amber-400">{label}</p>}
                     </div>
                   </div>
                   <div className="grid gap-3 md:grid-cols-3">
@@ -154,7 +141,7 @@ async function FixturesPage() {
                       <div key={match.id} className="rounded-xl border border-amber-200 bg-[var(--background)] p-3 dark:border-amber-800/40">
                         {match.matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">Match {match.matchNo}</div>}
                         <div className="mb-1">
-                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{playoffLabel(new Date(match.date))}</span>
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{stageLabel(match.stage)}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex flex-1 items-center gap-2">

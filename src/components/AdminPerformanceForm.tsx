@@ -30,6 +30,9 @@ interface SavedPerf {
   maidens: number
   wides: number
   noBalls: number
+  threes: number
+  dotBalls: number
+  hattricks: number
   catches: number
   stumpings: number
   runOuts: number
@@ -54,6 +57,9 @@ interface PlayerForm {
   maidens: string
   wides: string
   noBalls: string
+  threes: string
+  dotBalls: string
+  hattricks: string
   catches: string
   stumpings: string
   runOuts: string
@@ -107,6 +113,9 @@ export function AdminPerformanceForm({ match }: {
           maidens: String(saved?.maidens ?? ""),
           wides: String(saved?.wides ?? ""),
           noBalls: String(saved?.noBalls ?? ""),
+          threes: String(saved?.threes ?? ""),
+          dotBalls: String(saved?.dotBalls ?? ""),
+          hattricks: String(saved?.hattricks ?? ""),
           catches: String(saved?.catches ?? ""),
           stumpings: String(saved?.stumpings ?? ""),
           runOuts: String(saved?.runOuts ?? ""),
@@ -141,6 +150,9 @@ export function AdminPerformanceForm({ match }: {
           maidens: parseInt(p.maidens) || 0,
           wides: parseInt(p.wides) || 0,
           noBalls: parseInt(p.noBalls) || 0,
+          threes: parseInt(p.threes) || 0,
+          dotBalls: parseInt(p.dotBalls) || 0,
+          hattricks: parseInt(p.hattricks) || 0,
           catches: parseInt(p.catches) || 0,
           stumpings: parseInt(p.stumpings) || 0,
           runOuts: parseInt(p.runOuts) || 0,
@@ -248,6 +260,16 @@ function renderPlayerForm(
           <input type="number" min="0" value={data.twos} onChange={e => update("twos", e.target.value)}
             className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" />
         </div>
+        <div>
+          <label className="block text-[var(--muted-foreground)]" title="Threes (3 runs)">3s</label>
+          <input type="number" min="0" value={data.threes} onChange={e => update("threes", e.target.value)}
+            className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" />
+        </div>
+        <div>
+          <label className="block text-[var(--muted-foreground)]" title="Dot Balls">Dots</label>
+          <input type="number" min="0" value={data.dotBalls} onChange={e => update("dotBalls", e.target.value)}
+            className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" />
+        </div>
         <div className="flex items-center gap-1">
           <input type="checkbox" checked={isOut} onChange={e => update("isOut", e.target.checked)}
             className="h-3 w-3" />
@@ -296,6 +318,11 @@ function renderPlayerForm(
         <div>
           <label className="block text-[var(--muted-foreground)]" title="No Balls">Nb</label>
           <input type="number" min="0" value={data.noBalls} onChange={e => update("noBalls", e.target.value)}
+            className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" />
+        </div>
+        <div>
+          <label className="block text-[var(--muted-foreground)]" title="Hattricks">HT</label>
+          <input type="number" min="0" value={data.hattricks} onChange={e => update("hattricks", e.target.value)}
             className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-xs" />
         </div>
         <div>
