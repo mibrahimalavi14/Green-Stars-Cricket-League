@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -23,6 +23,7 @@ export function Header() {
           </Link>
           <nav className="hidden items-center gap-5 md:flex">
             <Link href="/admin/matches" className="text-sm transition-colors hover:text-[var(--accent)]">Matches</Link>
+            <Link href="/admin/matches" className="flex items-center gap-1 text-sm transition-colors hover:text-[var(--accent)]"><Activity className="h-3 w-3" /> Live Scoring</Link>
             <Link href="/admin/players" className="text-sm transition-colors hover:text-[var(--accent)]">Players</Link>
             <Link href="/admin/teams" className="text-sm transition-colors hover:text-[var(--accent)]">Teams</Link>
             <Link href="/admin/seasons" className="text-sm transition-colors hover:text-[var(--accent)]">Seasons</Link>
@@ -50,6 +51,7 @@ export function Header() {
           <nav className="border-t border-[var(--border)] px-4 py-3 md:hidden">
             <div className="flex flex-col gap-3 text-sm font-medium">
               <Link href="/admin/matches" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Matches</Link>
+              <Link href="/admin/matches" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Activity className="h-3 w-3" /> Live Scoring</Link>
               <Link href="/admin/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
               <Link href="/admin/teams" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Teams</Link>
               <Link href="/admin/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>

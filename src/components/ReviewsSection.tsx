@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
 import { BotCheck } from "@/components/BotCheck"
 
-type Review = { id: string; name: string; rating: number; comment: string; createdAt: string }
+type Review = { id: string; name: string; city: string; rating: number; comment: string; createdAt: string }
 
 export function ReviewsSection() {
   const [reviews, setReviews] = useState<Review[]>([])
@@ -12,6 +12,7 @@ export function ReviewsSection() {
   const [total, setTotal] = useState(0)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [city, setCity] = useState("")
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState("")
   const [hover, setHover] = useState(0)
@@ -35,14 +36,12 @@ export function ReviewsSection() {
     setError("")
 
     let captchaToken = ""
-    if (recaptchaRef) {
-      captchaToken = recaptchaRef.getValue() || ""
-    }
+    if (recaptchaRef) captchaToken = recaptchaRef.getValue() || ""
 
     const res = await fetch("/api/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, rating, comment, captchaToken }),
+      body: JSON.stringify({ name, email, city, rating, comment, captchaToken }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || "Failed to submit"); setSending(false); return }
@@ -81,9 +80,17 @@ export function ReviewsSection() {
         {reviews.length > 0 && (
           <div className="mb-10 grid gap-4 md:grid-cols-2">
             {reviews.map(r => (
-              <div key={r.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-semibold">{r.name}</span>
+              <div key={r.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)]/50">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
+                      {r.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{r.name}</p>
+                      {r.city && <p className="text-xs text-[var(--muted-foreground)]">{r.city}</p>}
+                    </div>
+                  </div>
                   <span className="text-xs text-[var(--muted-foreground)]">{new Date(r.createdAt).toLocaleDateString("en-PK")}</span>
                 </div>
                 {renderStars(r.rating)}
@@ -115,7 +122,13 @@ export function ReviewsSection() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-medium">Email (optional)</label>
+              <label className="mb-1 block text-xs font-medium">City (optional)</label>
+              <input value={city} onChange={e => setCity(e.target.value)} maxLength={100}
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium">Email (optional, not shown publicly)</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
             </div>

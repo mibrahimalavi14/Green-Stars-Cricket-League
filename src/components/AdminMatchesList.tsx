@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface Match {
   id: string; matchNo: number; date: string; status: string; result: string; team1Score: string; team2Score: string
@@ -446,6 +447,11 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               }`}>{m.status}</span>
               {m.status === "upcoming" && (
                 <button onClick={() => updateStatus(m.id, "live")} className="rounded bg-red-500 px-2 py-1 text-xs text-white whitespace-nowrap">Set Live</button>
+              )}
+              {m.status === "live" && (
+                <Link href={`/admin/live-scoring/${m.id}`} className="rounded bg-purple-600 px-2 py-1 text-xs text-white whitespace-nowrap hover:bg-purple-700">
+                  Live Scoring
+                </Link>
               )}
               {!scoring && (
                 <button onClick={() => openScoring(m.id, m)} className="rounded bg-green-500 px-2 py-1 text-xs text-white whitespace-nowrap">

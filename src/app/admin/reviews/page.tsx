@@ -8,7 +8,7 @@ function AdminReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([])
 
   async function load() {
-    const res = await fetch("/api/reviews")
+    const res = await fetch("/api/reviews?admin=true")
     const d = await res.json()
     setReviews(d.reviews)
   }

@@ -146,6 +146,7 @@ model Match {
   performances  PlayerMatch[]
   quizzes       Quiz[]
   potmVotes     PotmVote[]
+  ballEvents    BallEvent[]
 }
 
 model Inning {
@@ -280,6 +281,7 @@ model Review {
   id        String   @id @default(cuid())
   name      String
   email     String   @default("")
+  city      String   @default("")
   rating    Int
   comment   String
   approved  Boolean  @default(false)
@@ -365,6 +367,29 @@ model PotmVote {
   createdAt DateTime @default(now())
 
   @@unique([matchId, email])
+}
+
+model BallEvent {
+  id             String   @id @default(cuid())
+  matchId        String
+  match          Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  innings        Int      @default(1)
+  overNumber     Int
+  ballNumber     Int
+  bowlerId       String
+  batsmanId      String
+  nonStrikerId   String   @default("")
+  runs           Int      @default(0)
+  extraRuns      Int      @default(0)
+  extraType      String   @default("")
+  wicketType     String   @default("")
+  wicketPlayerId String   @default("")
+  fielderId      String   @default("")
+  isFour         Boolean  @default(false)
+  isSix          Boolean  @default(false)
+  commentary     String   @default("")
+  total          Int      @default(0)
+  createdAt      DateTime @default(now())
 }
 
 model PushSubscription {

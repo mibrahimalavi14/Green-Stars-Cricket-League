@@ -19,10 +19,15 @@ async function verifyCaptcha(token: string): Promise<boolean> {
   } catch { return false }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const isAdmin = url.searchParams.get("admin") === "true"
+
+  const where = isAdmin ? {} : { approved: true }
+
   const [reviews, agg] = await Promise.all([
     prisma.review.findMany({
-      where: { approved: true },
+      where,
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
@@ -32,8 +37,20 @@ export async function GET() {
       _count: true,
     }),
   ])
+
+  const sanitized = reviews.map(r => ({
+    id: r.id,
+    name: r.name,
+    city: r.city,
+    rating: r.rating,
+    comment: r.comment,
+    approved: r.approved,
+    createdAt: r.createdAt,
+    ...(isAdmin ? { email: r.email } : {}),
+  }))
+
   return NextResponse.json({
-    reviews,
+    reviews: sanitized,
     average: agg._avg.rating ? Math.round(agg._avg.rating * 10) / 10 : 0,
     total: agg._count,
   })
@@ -47,7 +64,7 @@ export async function POST(req: Request) {
   })
   if (recentCount >= 3) return NextResponse.json({ error: "Too many reviews. Try again later." }, { status: 429 })
 
-  const { name, email, rating, comment, captchaToken } = await req.json()
+  const { name, email, city, rating, comment, captchaToken } = await req.json()
 
   if (!name || !name.trim() || name.length > 100) return NextResponse.json({ error: "Invalid name" }, { status: 400 })
   if (!rating || rating < 1 || rating > 5) return NextResponse.json({ error: "Invalid rating" }, { status: 400 })
@@ -63,6 +80,7 @@ export async function POST(req: Request) {
     data: {
       name: name.trim(),
       email: email?.trim() || "",
+      city: city?.trim() || "",
       rating,
       comment: comment.trim(),
       ip,
@@ -70,5 +88,5 @@ export async function POST(req: Request) {
     },
   })
 
-  return NextResponse.json({ success: true, review: { id: review.id, name: review.name, rating: review.rating, comment: review.comment, createdAt: review.createdAt } })
+  return NextResponse.json({ success: true, review: { id: review.id, name: review.name, city: review.city, rating: review.rating, comment: review.comment, createdAt: review.createdAt } })
 }

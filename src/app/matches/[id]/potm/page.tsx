@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { Star, Medal, ThumbsUp, Trophy, Users, Vote, Loader2, Check } from "lucide-react"
+import { Star, Medal, ThumbsUp, Trophy, Users, Vote, Loader2, Check, X } from "lucide-react"
 
 interface PlayerWithVotes {
   id: string
@@ -112,6 +112,15 @@ export default function PotmVotePage() {
       setSubmitting(false)
     }
   }
+
+  const closeModal = useCallback(() => { setShowForm(false); setSelectedPlayer(null) }, [])
+
+  useEffect(() => {
+    if (!showForm) return
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeModal() }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [showForm, closeModal])
 
   if (loading) {
     return (
@@ -226,10 +235,7 @@ export default function PotmVotePage() {
 
         {!userVote && (
           <button
-            onClick={() => {
-              setSelectedPlayer(player.id)
-              setShowForm(true)
-            }}
+            onClick={() => setSelectedPlayer(player.id)}
             disabled={!!userVote}
             className={`w-full rounded-lg py-2 text-sm font-semibold transition-colors ${
               isSelected
@@ -300,42 +306,74 @@ export default function PotmVotePage() {
         <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-500">{error}</div>
       )}
 
-      {showForm && !userVote && (
-        <div className="mb-6 rounded-xl border border-[var(--accent)] bg-[var(--card)] p-4">
-          <h3 className="mb-3 font-semibold">Enter your details to vote</h3>
-          <div className="space-y-3">
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="Your email (required)"
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-            />
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Your name (optional)"
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-            />
-            <div className="flex gap-2">
+      {showForm && !userVote && selectedPlayer && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}
+        >
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-bold">Vote for POTM</h3>
+              </div>
               <button
-                onClick={handleVote}
-                disabled={!email.trim() || !selectedPlayer || submitting}
-                className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-6 py-2 text-sm font-semibold text-[var(--accent-foreground)] disabled:opacity-50"
+                onClick={closeModal}
+                className="rounded-lg p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
               >
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
-                Submit Vote
+                <X className="h-5 w-5" />
               </button>
-              <button
-                onClick={() => { setShowForm(false); setSelectedPlayer(null) }}
-                className="rounded-lg bg-[var(--muted)] px-4 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
-              >
-                Cancel
-              </button>
+            </div>
+
+            <div className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-2 text-sm">
+              Voting for: <span className="font-semibold text-[var(--accent)]">{players.find(p => p.id === selectedPlayer)?.name || "Unknown"}</span>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Your email (required)"
+                autoFocus
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
+              />
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Your name (optional)"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
+              />
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={handleVote}
+                  disabled={!email.trim() || !selectedPlayer || submitting}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--accent-foreground)] transition-colors hover:opacity-90 disabled:opacity-50"
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
+                  Submit Vote
+                </button>
+                <button
+                  onClick={closeModal}
+                  className="rounded-lg bg-[var(--muted)] px-4 py-2.5 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {selectedPlayer && !showForm && !userVote && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-foreground)] shadow-lg transition-transform hover:scale-105"
+        >
+          <Vote className="h-4 w-4" />
+          Vote Now
+        </button>
       )}
 
       <div className="mb-8">
