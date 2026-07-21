@@ -154,8 +154,8 @@ export default function LiveScoringPage() {
 
   useEffect(() => {
     if (!summary) return
-    setTossWinner(summary.match.tossWinner || "")
-    setTossDecision(summary.match.tossDecision || "")
+    if (summary.match.tossWinner && !tossWinner) setTossWinner(summary.match.tossWinner)
+    if (summary.match.tossDecision && !tossDecision) setTossDecision(summary.match.tossDecision)
     if (summary.innings.length === 0) {
       const m = summary.match
       if (m.tossWinner && m.tossDecision) {
