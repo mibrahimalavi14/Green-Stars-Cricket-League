@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   await prisma.match.updateMany({
     where: { status: "upcoming", date: { lte: new Date() } },
