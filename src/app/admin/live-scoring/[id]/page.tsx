@@ -44,6 +44,7 @@ interface BallEvent {
   isNoBall: boolean
   byes: number
   legByes: number
+  region: string
 }
 
 interface Innings {
@@ -66,6 +67,8 @@ interface MatchData {
   status: string
   result: string
   venue: string
+  tossWinner: string
+  tossDecision: string
 }
 
 interface SummaryData {
@@ -115,11 +118,14 @@ export default function LiveScoringPage() {
   const [wicketFielder, setWicketFielder] = useState("")
   const [pendingExtraRuns, setPendingExtraRuns] = useState<number | null>(null)
   const [pendingExtraType, setPendingExtraType] = useState<string | null>(null)
+  const [ballRegion, setBallRegion] = useState("")
 
   const [activeInnings, setActiveInnings] = useState<Innings | null>(null)
   const [inningsNum, setInningsNum] = useState(1)
   const [endMatchConfirm, setEndMatchConfirm] = useState(false)
   const [endingMatch, setEndingMatch] = useState(false)
+  const [tossWinner, setTossWinner] = useState("")
+  const [tossDecision, setTossDecision] = useState("")
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -143,9 +149,20 @@ export default function LiveScoringPage() {
 
   useEffect(() => {
     if (!summary) return
+    setTossWinner(summary.match.tossWinner || "")
+    setTossDecision(summary.match.tossDecision || "")
     if (summary.innings.length === 0) {
-      setBattingTeamId(summary.match.team1.id)
-      setBowlingTeamId(summary.match.team2.id)
+      const m = summary.match
+      if (m.tossWinner && m.tossDecision) {
+        const t1BattingFirst = m.tossDecision === "bat"
+          ? m.tossWinner === m.team1.id
+          : m.tossWinner === m.team2.id
+        setBattingTeamId(t1BattingFirst ? m.team1.id : m.team2.id)
+        setBowlingTeamId(t1BattingFirst ? m.team2.id : m.team1.id)
+      } else {
+        setBattingTeamId(m.team1.id)
+        setBowlingTeamId(m.team2.id)
+      }
       setInningsNum(1)
     } else if (summary.innings.length === 1) {
       const inn = summary.innings[0]
@@ -252,6 +269,12 @@ export default function LiveScoringPage() {
         setWicketFielder("")
         setPendingExtraRuns(null)
         setPendingExtraType(null)
+        setBallRegion("")
+        fetch("/api/live/sync-stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchId }),
+        })
         await fetchSummary()
         if (ball.wicket) {
           setStrikerId("")
@@ -275,6 +298,11 @@ export default function LiveScoringPage() {
         body: JSON.stringify({ inningsId: activeInnings.id }),
       })
       if (res.ok) {
+        fetch("/api/live/sync-stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchId }),
+        })
         await fetchSummary()
       }
     } catch {}
@@ -296,6 +324,7 @@ export default function LiveScoringPage() {
         isNoBall: false,
         byes: 0,
         legByes: 0,
+        region: ballRegion,
       })
     } else {
       addBall({
@@ -311,6 +340,7 @@ export default function LiveScoringPage() {
         isNoBall: false,
         byes: 0,
         legByes: 0,
+        region: ballRegion,
       })
     }
   }
@@ -330,6 +360,7 @@ export default function LiveScoringPage() {
         isNoBall: type === "noball",
         byes: 0,
         legByes: 0,
+        region: ballRegion,
       })
     } else {
       setPendingExtraType(type)
@@ -352,6 +383,7 @@ export default function LiveScoringPage() {
       isNoBall: false,
       byes: pendingExtraType === "bye" ? runs : 0,
       legByes: pendingExtraType === "legbye" ? runs : 0,
+      region: ballRegion,
     })
   }
 
@@ -529,6 +561,8 @@ export default function LiveScoringPage() {
           id: matchId,
           status: "completed",
           result,
+          tossWinner: summary.match.tossWinner || tossWinner,
+          tossDecision: summary.match.tossDecision || tossDecision,
           team1Score: `${t1Total}/${t1Wkts}${t1Balls ? ` (${formatOvers(t1Balls)} ov)` : ""}`,
           team2Score: `${t2Total}/${t2Wkts}${t2Balls ? ` (${formatOvers(t2Balls)} ov)` : ""}`,
         }),
@@ -631,6 +665,11 @@ export default function LiveScoringPage() {
           {match.result && (
             <p className="mt-2 text-center text-sm font-medium text-[var(--accent)]">{match.result}</p>
           )}
+          {(tossWinner || summary.match.tossWinner) && (
+            <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">
+              Toss: {(tossWinner || summary.match.tossWinner) === match.team1.id ? match.team1.name : match.team2.name} won & elected to {tossDecision || summary.match.tossDecision} first
+            </p>
+          )}
         </div>
 
         <div className="grid gap-4 lg:grid-cols-5">
@@ -670,6 +709,74 @@ export default function LiveScoringPage() {
                     <option value={match.team2.id}>{match.team2.name}</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="mb-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/30 p-3">
+                <div className="flex items-center justify-between">
+                  <p className="flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
+                    <Trophy className="h-3 w-3 text-yellow-500" /> TOSS
+                  </p>
+                  {tossWinner && (
+                    <span className="rounded-full bg-yellow-500/20 px-2 py-0.5 text-[10px] font-bold text-yellow-600">
+                      {tossWinner === match.team1.id ? match.team1.shortName : match.team2.shortName} elected to {tossDecision} first
+                    </span>
+                  )}
+                </div>
+                {(!tossWinner || !tossDecision) && activeInnings && activeInnings.ballsData.length === 0 && (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="mb-1 block text-[10px] text-[var(--muted-foreground)]">Toss Winner</label>
+                      <select
+                        value={tossWinner}
+                        onChange={(e) => setTossWinner(e.target.value)}
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs"
+                      >
+                        <option value="">Select winner</option>
+                        <option value={match.team1.id}>{match.team1.name}</option>
+                        <option value={match.team2.id}>{match.team2.name}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] text-[var(--muted-foreground)]">Decision</label>
+                      <div className="flex gap-1">
+                        <select
+                          value={tossDecision}
+                          onChange={(e) => setTossDecision(e.target.value)}
+                          disabled={!tossWinner}
+                          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs disabled:opacity-40"
+                        >
+                          <option value="">Select</option>
+                          <option value="bat">Bat</option>
+                          <option value="bowl">Bowl</option>
+                        </select>
+                        {tossWinner && tossDecision && (
+                          <button
+                            onClick={async () => {
+                              const t1BattingFirst = tossDecision === "bat"
+                                ? tossWinner === match.team1.id
+                                : tossWinner === match.team2.id
+                              setBattingTeamId(t1BattingFirst ? match.team1.id : match.team2.id)
+                              setBowlingTeamId(t1BattingFirst ? match.team2.id : match.team1.id)
+                              await fetch("/api/matches", {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: matchId, tossWinner, tossDecision }),
+                              })
+                            }}
+                            className="rounded-lg bg-yellow-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-yellow-600"
+                          >
+                            Set
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {tossWinner && tossDecision && activeInnings && activeInnings.ballsData.length > 0 && (
+                  <p className="mt-1 text-[10px] text-[var(--muted-foreground)]">
+                    Toss set — {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won & elected to {tossDecision} first
+                  </p>
+                )}
               </div>
 
               <div className="mb-3 grid grid-cols-3 gap-3">
@@ -798,6 +905,32 @@ export default function LiveScoringPage() {
                   </div>
                 </div>
               )}
+
+              <div className="mb-3">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-xs font-semibold text-[var(--muted-foreground)]">FIELD</span>
+                  {ballRegion && (
+                    <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-medium text-green-600">
+                      {ballRegion}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {["", "Off", "Cover", "Mid Off", "Mid On", "Leg", "Fine Leg", "Square Leg", "Mid Wkt", "Long On", "Long Off", "Third", "Point", "Gully", "Slip", "Straight"].map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setBallRegion(r)}
+                      className={`rounded px-2 py-1 text-[10px] font-medium transition-all ${
+                        ballRegion === r
+                          ? "bg-green-500 text-white"
+                          : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
+                      }`}
+                    >
+                      {r || "All"}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="mb-2 text-xs font-semibold text-[var(--muted-foreground)]">
                 RUNS
@@ -1004,6 +1137,8 @@ export default function LiveScoringPage() {
                         <th className="py-1 text-left font-medium">Batsman</th>
                         <th className="py-1 text-center font-medium">R</th>
                         <th className="py-1 text-center font-medium">B</th>
+                        <th className="py-1 text-center font-medium">1s</th>
+                        <th className="py-1 text-center font-medium">2s</th>
                         <th className="py-1 text-center font-medium">4s</th>
                         <th className="py-1 text-center font-medium">6s</th>
                         <th className="py-1 text-center font-medium">SR</th>
@@ -1024,6 +1159,9 @@ export default function LiveScoringPage() {
                           const legalBalls = balls.filter(
                             (b) => !b.isWide && !b.isNoBall
                           ).length
+                          const ones = balls.filter((b) => b.runs === 1).length
+                          const twos = balls.filter((b) => b.runs === 2).length
+                          const threes = balls.filter((b) => b.runs === 3).length
                           const fours = balls.filter((b) => b.runs === 4).length
                           const sixes = balls.filter((b) => b.runs === 6).length
                           const isOut = activeInnings.ballsData.some(
@@ -1038,6 +1176,8 @@ export default function LiveScoringPage() {
                               </td>
                               <td className="py-1 text-center">{runs}</td>
                               <td className="py-1 text-center">{legalBalls}</td>
+                              <td className="py-1 text-center text-blue-400">{ones}</td>
+                              <td className="py-1 text-center text-yellow-400">{twos}</td>
                               <td className="py-1 text-center">{fours}</td>
                               <td className="py-1 text-center">{sixes}</td>
                               <td className="py-1 text-center">{sr}</td>
