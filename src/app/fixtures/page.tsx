@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { MatchCard } from "@/components/MatchCard"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { Breadcrumbs } from "@/components/Breadcrumbs"
+import { AutoRefresh } from "@/components/AutoRefresh"
 
 export const dynamic = "force-dynamic"
 
@@ -64,6 +65,7 @@ async function FixturesPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
+      <AutoRefresh interval={30000} />
       <Breadcrumbs items={[{ label: "Fixtures" }]} />
       <h1 className="mb-2 text-3xl font-bold">Season 1 — Full Schedule</h1>
       <p className="mb-8 text-[var(--muted-foreground)]">8 teams • 5-over format • Double Round Robin • 30 league matches</p>

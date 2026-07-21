@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { AutoRefresh } from "@/components/AutoRefresh"
 
 export const dynamic = "force-dynamic"
 
@@ -11,6 +12,7 @@ async function TeamsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
+      <AutoRefresh interval={30000} />
       <h1 className="mb-2 text-3xl font-bold">Teams</h1>
       <p className="mb-8 text-[var(--muted-foreground)]">Meet the teams competing in Green Stars Cricket League</p>
       {teams.length === 0 ? (

@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { PlayersList } from "@/components/PlayersList"
+import { AutoRefresh } from "@/components/AutoRefresh"
 
 export const dynamic = "force-dynamic"
 
@@ -25,6 +26,7 @@ async function PlayersPage() {
           <Link href="/players/stats" className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-foreground)] transition-colors hover:opacity-90">Top Stats</Link>
         </div>
       </div>
+      <AutoRefresh interval={30000} />
       <PlayersList players={players.map((p) => ({
         id: p.id,
         name: p.name,
