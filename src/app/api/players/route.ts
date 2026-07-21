@@ -16,9 +16,24 @@ export async function POST(req: Request) {
   return NextResponse.json(player)
 }
 
+const STAT_FIELDS = ["runs","ballsFaced","fours","sixes","threes","dotBalls","ones","twos","fifties","hundreds","highestScore","notOuts","ducks","matchesPlayed","wickets","ballsBowled","runsConceded","maidens","wides","noBalls","fiveWickets","fourWickets","hattricks","bestBowlingWickets","bestBowlingRuns","catches","stumpings","runOuts","timesBowled","timesCaught","timesLbw","timesStumped","timesRunOut"]
+
 export async function PATCH(req: Request) {
   const body = await req.json()
   const { id, ...data } = body
+
+  if (data.resetStats) {
+    const reset = Object.fromEntries(STAT_FIELDS.map(f => [f, 0]))
+    const player = await prisma.player.update({ where: { id }, data: reset })
+    return NextResponse.json(player)
+  }
+
+  if (data.resetTeamStats) {
+    const reset = Object.fromEntries(STAT_FIELDS.map(f => [f, 0]))
+    await prisma.player.updateMany({ where: { teamId: data.teamId }, data: reset })
+    return NextResponse.json({ success: true })
+  }
+
   const player = await prisma.player.update({ where: { id }, data })
   if (data.isCaptain) {
     await prisma.player.updateMany({ where: { teamId: player.teamId, id: { not: player.id } }, data: { isCaptain: false } })

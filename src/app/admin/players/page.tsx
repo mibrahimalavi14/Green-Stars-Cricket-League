@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { AdminPlayerForm } from "@/components/AdminPlayerForm"
 import { AdminPlayerEdit } from "@/components/AdminPlayerEdit"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
+import { AdminResetStats } from "@/components/AdminResetStats"
 import { Trophy } from "lucide-react"
 
 export const dynamic = "force-dynamic"
@@ -43,12 +44,15 @@ async function AdminPlayersPage() {
         if (players.length === 0) return null
         return (
           <div key={team.id} className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-            <div className="flex items-center gap-3 border-b border-[var(--border)] bg-[var(--muted)] px-5 py-3">
-              {team.logo && <img src={team.logo} alt="" className="h-7 w-7 rounded-full object-cover" />}
-              <div>
-                <h2 className="font-semibold">{team.name} ({team.shortName})</h2>
-                <p className="text-xs text-[var(--muted-foreground)]">{players.length} players</p>
+            <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--muted)] px-5 py-3">
+              <div className="flex items-center gap-3">
+                {team.logo && <img src={team.logo} alt="" className="h-7 w-7 rounded-full object-cover" />}
+                <div>
+                  <h2 className="font-semibold">{team.name} ({team.shortName})</h2>
+                  <p className="text-xs text-[var(--muted-foreground)]">{players.length} players</p>
+                </div>
               </div>
+              <AdminResetStats teamId={team.id} />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -105,9 +109,10 @@ async function AdminPlayersPage() {
                             <span className="w-6 text-right text-xs font-mono">{bowling}%</span>
                           </div>
                         </td>
-                        <td className="p-3 text-right">
+                          <td className="p-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <AdminPlayerEdit player={p as any} teams={teams} />
+                            <AdminResetStats id={p.id} />
                             <AdminDeleteButton api="/api/players" id={p.id} label="player" />
                           </div>
                         </td>
