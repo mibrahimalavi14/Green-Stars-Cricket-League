@@ -105,7 +105,7 @@ export function Header() {
                   <Link href="/awards" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Awards</Link>
                   <Link href="/venues" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Venues</Link>
                   <Link href="/potm-gallery" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">POTM Gallery</Link>
-                  <Link href="/fixtures?potm=true" onClick={() => setMoreOpen(false)} className="flex items-center gap-1 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM Voting</Link>
+                  <Link href="/matches/potm" onClick={() => setMoreOpen(false)} className="flex items-center gap-1 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM Voting</Link>
                   <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="block px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">Toss Analysis</Link>
                   <Link href="/compare" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
                   <Link href="/head-to-head" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>
@@ -150,7 +150,7 @@ export function Header() {
             <Link href="/awards" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Awards</Link>
             <Link href="/venues" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Venues</Link>
             <Link href="/potm-gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">POTM Gallery</Link>
-            <Link href="/fixtures?potm=true" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM Voting</Link>
+            <Link href="/matches/potm" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM Voting</Link>
             <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
             <Link href="/compare" onClick={() => setOpen(false)} className="flex items-center gap-2 transition-colors hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
             <Link href="/head-to-head" onClick={() => setOpen(false)} className="flex items-center gap-2 transition-colors hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>

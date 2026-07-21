@@ -8,10 +8,14 @@ export function PushSubscribe() {
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState("")
+  const [vapidKey, setVapidKey] = useState("")
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return
     setSupported(true)
+    fetch("/api/notifications/vapid-public-key").then(r => r.json()).then(d => {
+      setVapidKey(d.publicKey)
+    }).catch(() => {})
     navigator.serviceWorker.ready.then((reg) => {
       reg.pushManager.getSubscription().then((sub) => {
         setSubscribed(!!sub)
@@ -52,9 +56,10 @@ export function PushSubscribe() {
       }
 
       const reg = await navigator.serviceWorker.ready
+      if (!vapidKey) { setMsg("VAPID key not loaded"); setLoading(false); return }
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: "BEl62iZR8e8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8RZ8",
+        applicationServerKey: vapidKey,
       })
 
       const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } }
