@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 export function AdminPlayerForm() {
   const router = useRouter()
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([])
-  const [form, setForm] = useState({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast" })
+  const [form, setForm] = useState({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast", isCaptain: false })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { fetch("/api/teams").then(r => r.json()).then(setTeams) }, [])
@@ -61,6 +61,13 @@ export function AdminPlayerForm() {
           <option value="">Select</option>
           {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
+      </div>
+      <div className="flex items-end pb-1">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" checked={form.isCaptain} onChange={e => setForm({...form, isCaptain: e.target.checked})}
+            className="h-4 w-4" />
+          <span className="text-xs font-medium">Captain</span>
+        </label>
       </div>
       <button type="submit" disabled={loading}
         className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50">

@@ -19,7 +19,7 @@ interface Team { id: string; name: string }
 
 export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team[] }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ name: player.name, role: player.role, battingStyle: player.battingStyle, bowlingStyle: player.bowlingStyle, teamId: player.teamId })
+  const [form, setForm] = useState({ name: player.name, role: player.role, battingStyle: player.battingStyle, bowlingStyle: player.bowlingStyle, teamId: player.teamId, isCaptain: (player as any).isCaptain })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -67,6 +67,10 @@ export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team
         className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
         {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
+      <label className="flex items-center gap-1 text-xs cursor-pointer">
+        <input type="checkbox" checked={form.isCaptain} onChange={e => setForm({...form, isCaptain: e.target.checked})} className="h-3 w-3" />
+        Captain
+      </label>
       <button onClick={handleSave} disabled={loading}
         className="rounded bg-green-600 px-2 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50">
         {loading ? "..." : "Save"}

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
-import { Trophy, TrendingUp, Zap, Award } from "lucide-react"
+import { Trophy, TrendingUp, Zap, Award, Star } from "lucide-react"
 
 export const revalidate = 300
 
@@ -49,6 +49,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
         <div>
           <h1 className="text-3xl font-bold">{team.name}</h1>
           <p className="text-[var(--muted-foreground)]">{team.players.length} Players &middot; {allMatches.length} Matches &middot; {won} Wins</p>
+          {team.captainName && <p className="text-xs text-amber-600 dark:text-amber-400">Captain: {team.captainName}</p>}
         </div>
       </div>
 
@@ -113,7 +114,10 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                   <img src="/placeholder-player.svg" alt={player.name} className="h-10 w-10 rounded-full bg-[var(--muted)] p-2" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium truncate">{player.name}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-medium truncate">{player.name}</p>
+                    {(player as any).isCaptain && <Star className="h-3 w-3 shrink-0 fill-amber-500 text-amber-500" />}
+                  </div>
                   <p className="text-xs text-[var(--muted-foreground)]">{player.role}</p>
                 </div>
                 <div className="text-right text-xs text-[var(--muted-foreground)] shrink-0">

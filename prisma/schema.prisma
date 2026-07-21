@@ -90,6 +90,7 @@ model Player {
   battingStyle  String  @default("Right-handed")
   bowlingStyle  String  @default("Right-arm fast")
   photo         String  @default("/placeholder-player.svg")
+  isCaptain     Boolean @default(false)
   teamId        String
   team          Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
