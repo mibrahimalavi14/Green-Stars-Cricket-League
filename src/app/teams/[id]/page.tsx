@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 import { Trophy, TrendingUp, Zap, Award, Star } from "lucide-react"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

@@ -13,7 +13,7 @@ import { AnimatedCounter } from "@/components/AnimatedCounter"
 import { FadeInView } from "@/components/FadeInView"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award, Timer } from "lucide-react"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function HomePage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })

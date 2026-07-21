@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { DownloadCSVButton } from "@/components/DownloadCSVButton"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function PlayerStatsPage() {
   const players = await prisma.player.findMany({

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { ShareButtons } from "@/components/ShareButtons"
 import { PlayerStatsClient } from "./PlayerStatsClient"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

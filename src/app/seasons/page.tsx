@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function SeasonsPage() {
   const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })

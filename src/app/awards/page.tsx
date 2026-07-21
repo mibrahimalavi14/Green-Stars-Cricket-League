@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { Trophy, Award, Star, Zap, Target } from "lucide-react"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function AwardsPage() {
   const seasons = await prisma.season.findMany({

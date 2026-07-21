@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { PlayersList } from "@/components/PlayersList"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function PlayersPage() {
   const [players, teams] = await Promise.all([

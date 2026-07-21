@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { Trophy, Users, Target, TrendingUp, Award, Zap } from "lucide-react"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function TeamStatsPage() {
   const teams = await prisma.team.findMany({

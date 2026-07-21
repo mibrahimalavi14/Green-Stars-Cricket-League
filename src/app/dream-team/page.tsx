@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { Trophy, Shield, Star, Zap } from "lucide-react"
 import Link from "next/link"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 const ROLES = ["Wicket-keeper", "Batsman", "Batsman", "Batsman", "Batsman", "All-rounder", "All-rounder", "Bowler", "Bowler", "Bowler", "Bowler"] as const
 

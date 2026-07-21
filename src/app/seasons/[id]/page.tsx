@@ -3,7 +3,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

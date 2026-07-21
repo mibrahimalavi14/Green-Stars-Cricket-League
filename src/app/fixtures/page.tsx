@@ -3,7 +3,7 @@ import { MatchCard } from "@/components/MatchCard"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { Breadcrumbs } from "@/components/Breadcrumbs"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function FixturesPage() {
   const matches = await prisma.match.findMany({

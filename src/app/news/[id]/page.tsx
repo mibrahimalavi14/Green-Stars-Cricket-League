@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { formatDate } from "@/lib/utils"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

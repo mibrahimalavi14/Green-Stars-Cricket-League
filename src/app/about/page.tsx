@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Users, Star, Heart, MapPin } from "lucide-react"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 function AboutPage() {
   return (

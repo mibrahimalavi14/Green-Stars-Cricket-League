@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function PointsTablePage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })

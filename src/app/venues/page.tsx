@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { MapPin, Calendar, Users } from "lucide-react"
 import Link from "next/link"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 async function VenuesPage() {
   const matches = await prisma.match.findMany({
