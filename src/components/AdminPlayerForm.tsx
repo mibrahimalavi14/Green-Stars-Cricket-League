@@ -19,6 +19,7 @@ export function AdminPlayerForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     })
+    setForm({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast", isCaptain: false })
     setLoading(false)
     router.refresh()
   }
