@@ -157,8 +157,8 @@ export default function LiveScoringPage() {
     if (!summary) return
     if (summary.match.tossWinner && !tossWinner) setTossWinner(summary.match.tossWinner)
     if (summary.match.tossDecision && !tossDecision) setTossDecision(summary.match.tossDecision)
-    if (summary.innings.length === 0) {
-      const m = summary.match
+    const m = summary.match
+    if (summary.innings.length <= 1) {
       if (m.tossWinner && m.tossDecision) {
         const t1BattingFirst = m.tossDecision === "bat"
           ? m.tossWinner === m.team1.id
@@ -170,20 +170,10 @@ export default function LiveScoringPage() {
         setBowlingTeamId(m.team2.id)
       }
       setInningsNum(1)
-    } else if (summary.innings.length === 1) {
-      const inn = summary.innings[0]
-      setBattingTeamId(inn.teamId)
-      const otherTeamId = inn.teamId === summary.match.team1.id
-        ? summary.match.team2.id
-        : summary.match.team1.id
-      setBowlingTeamId(otherTeamId)
-      setInningsNum(1)
     } else {
       const inn = summary.innings[summary.innings.length - 1]
       setBattingTeamId(inn.teamId)
-      const otherTeamId = inn.teamId === summary.match.team1.id
-        ? summary.match.team2.id
-        : summary.match.team1.id
+      const otherTeamId = inn.teamId === m.team1.id ? m.team2.id : m.team1.id
       setBowlingTeamId(otherTeamId)
       setInningsNum(summary.innings.length)
     }
