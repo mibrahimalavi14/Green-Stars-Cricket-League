@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2 } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -21,30 +21,58 @@ export function Header() {
   }, [])
 
   if (isAdmin) {
+    const adminLinks = {
+      main: [
+        { href: "/admin/matches", label: "Matches", icon: Calendar },
+        { href: "/admin/players", label: "Players", icon: Users },
+        { href: "/admin/teams", label: "Teams", icon: Shield },
+        { href: "/admin/performances", label: "Performances", icon: TrendingUp },
+      ],
+      content: [
+        { href: "/admin/news", label: "News", icon: Newspaper },
+        { href: "/admin/quiz", label: "Quiz", icon: Brain },
+        { href: "/admin/moments", label: "Moments", icon: Sparkles },
+        { href: "/admin/gallery", label: "Gallery", icon: Image },
+        { href: "/admin/sponsors", label: "Sponsors", icon: Award },
+      ],
+      manage: [
+        { href: "/admin/seasons", label: "Seasons", icon: Calendar },
+        { href: "/admin/squad", label: "Squad", icon: Users },
+        { href: "/admin/potm", label: "POTM", icon: Star },
+        { href: "/admin/predictions", label: "Predictions", icon: Trophy },
+        { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
+      ],
+      system: [
+        { href: "/admin/notifications", label: "Notifications", icon: Bell },
+        { href: "/admin/contact", label: "Messages", icon: MessageSquare },
+      ],
+    }
     return (
       <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link href="/admin" className="flex items-center gap-2">
             <img src="/images/optimized/gscl-logo.webp" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
-            <span className="text-sm font-semibold">Admin Panel</span>
+            <span className="text-sm font-semibold">Admin</span>
           </Link>
           <nav className="hidden items-center gap-5 md:flex">
-            <Link href="/admin/matches" className="text-sm transition-colors hover:text-[var(--accent)]">Matches</Link>
-            <Link href="/admin/players" className="text-sm transition-colors hover:text-[var(--accent)]">Players</Link>
-            <Link href="/admin/teams" className="text-sm transition-colors hover:text-[var(--accent)]">Teams</Link>
-            <Link href="/admin/performances" className="text-sm transition-colors hover:text-[var(--accent)]">Performances</Link>
-            <Link href="/admin/seasons" className="text-sm transition-colors hover:text-[var(--accent)]">Seasons</Link>
-            <Link href="/admin/news" className="text-sm transition-colors hover:text-[var(--accent)]">News</Link>
-            <Link href="/admin/quiz" className="text-sm transition-colors hover:text-[var(--accent)]">Quiz</Link>
-            <Link href="/admin/potm" className="flex items-center gap-1 text-sm transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM</Link>
-            <Link href="/admin/predictions" className="text-sm transition-colors hover:text-[var(--accent)]">Predictions</Link>
-            <Link href="/admin/reviews" className="text-sm transition-colors hover:text-[var(--accent)]">Reviews</Link>
-            <Link href="/admin/contact" className="text-sm transition-colors hover:text-[var(--accent)]">Contact</Link>
-            <Link href="/admin/gallery" className="text-sm transition-colors hover:text-[var(--accent)]">Gallery</Link>
-            <Link href="/admin/sponsors" className="text-sm transition-colors hover:text-[var(--accent)]">Sponsors</Link>
-            <Link href="/admin/squad" className="text-sm transition-colors hover:text-[var(--accent)]">Squad</Link>
-            <Link href="/admin/notifications" className="flex items-center gap-1 text-sm transition-colors hover:text-[var(--accent)]"><Bell className="h-3 w-3" /> Notifications</Link>
-            <Link href="/" className="text-sm transition-colors hover:text-[var(--accent)]">View Site</Link>
+            {adminLinks.main.map(l => <Link key={l.href} href={l.href} className="text-sm transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+            <div className="group relative">
+              <button className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">
+                More <ChevronDown className="h-3 w-3" />
+              </button>
+              <div className="invisible absolute right-0 top-full z-50 mt-1 w-56 origin-top-right scale-95 rounded-xl border border-[var(--border)] bg-[var(--background)] p-2 opacity-0 shadow-2xl transition-all group-hover:visible group-hover:scale-100 group-hover:opacity-100">
+                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Content</p>
+                {adminLinks.content.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
+                <div className="my-1 border-t border-[var(--border)]" />
+                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Manage</p>
+                {adminLinks.manage.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
+                <div className="my-1 border-t border-[var(--border)]" />
+                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">System</p>
+                {adminLinks.system.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
+                <div className="my-1 border-t border-[var(--border)]" />
+                <Link href="/" className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[var(--accent)] transition-colors hover:bg-[var(--muted)]">View Site</Link>
+              </div>
+            </div>
           </nav>
           <div className="flex items-center gap-2">
             <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -56,23 +84,19 @@ export function Header() {
         {open && (
           <nav className="border-t border-[var(--border)] px-4 py-3 md:hidden">
             <div className="flex flex-col gap-3 text-sm font-medium">
-              <Link href="/admin/matches" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Matches</Link>
-              <Link href="/admin/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
-              <Link href="/admin/teams" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Teams</Link>
-              <Link href="/admin/performances" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Performances</Link>
-              <Link href="/admin/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
-              <Link href="/admin/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
-              <Link href="/admin/quiz" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Quiz</Link>
-              <Link href="/admin/potm" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Star className="h-3 w-3" /> POTM</Link>
-              <Link href="/admin/predictions" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
-              <Link href="/admin/reviews" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Reviews</Link>
-              <Link href="/admin/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>
-              <Link href="/admin/gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Gallery</Link>
-              <Link href="/admin/sponsors" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Sponsors</Link>
-              <Link href="/admin/squad" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Squad</Link>
-              <Link href="/admin/notifications" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Bell className="h-3 w-3" /> Notifications</Link>
-              <Link href="/admin/moments" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Moments</Link>
-              <Link href="/" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">View Site</Link>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Main</p>
+              {adminLinks.main.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+              <div className="border-t border-[var(--border)]" />
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Content</p>
+              {adminLinks.content.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+              <div className="border-t border-[var(--border)]" />
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Manage</p>
+              {adminLinks.manage.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+              <div className="border-t border-[var(--border)]" />
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">System</p>
+              {adminLinks.system.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+              <div className="border-t border-[var(--border)]" />
+              <Link href="/" onClick={() => setOpen(false)} className="text-[var(--accent)] transition-colors hover:text-[var(--accent)]">View Site</Link>
             </div>
           </nav>
         )}
