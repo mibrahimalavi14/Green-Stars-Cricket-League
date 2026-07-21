@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -142,6 +142,7 @@ export function Header() {
                   <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
                   <Link href="/compare" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
                   <Link href="/head-to-head" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>
+                  <Link href="/field-analysis" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Map className="h-3.5 w-3.5" /> Field Analysis</Link>
                   <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Gamepad2 className="h-3.5 w-3.5" /> Toss Analysis</Link>
                   <Link href="/teams/stats" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><TrendingUp className="h-3.5 w-3.5" /> Team Stats</Link>
                   <Link href="/performers" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Top Performers</Link>
@@ -195,6 +196,7 @@ export function Header() {
             <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
             <Link href="/compare" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Crosshair className="h-3 w-3" /> Player Comparison</Link>
             <Link href="/head-to-head" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Sword className="h-3 w-3" /> Head to Head</Link>
+            <Link href="/field-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Field Analysis</Link>
             <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
             <Link href="/teams/stats" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Team Stats</Link>
             <Link href="/performers" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Top Performers</Link>

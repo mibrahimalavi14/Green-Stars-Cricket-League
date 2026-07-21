@@ -82,20 +82,21 @@ function formatOvers(balls: number): string {
   return `${Math.floor(balls / 6)}.${balls % 6}`
 }
 
-function ballDisplay(ball: BallEvent): { text: string; color: string } {
-  if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white" }
-  if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white" }
-  if (ball.isNoBall) return { text: "Nb", color: "bg-gray-500 text-white" }
-  if (ball.byes > 0) return { text: `${ball.byes}B`, color: "bg-gray-500 text-white" }
-  if (ball.legByes > 0) return { text: `${ball.legByes}LB`, color: "bg-gray-500 text-white" }
+function ballDisplay(ball: BallEvent): { text: string; color: string; region: string } {
+  const region = ball.region ? ball.region : ""
+  if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white", region }
+  if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white", region }
+  if (ball.isNoBall) return { text: "Nb", color: "bg-gray-500 text-white", region }
+  if (ball.byes > 0) return { text: `${ball.byes}B`, color: "bg-gray-500 text-white", region }
+  if (ball.legByes > 0) return { text: `${ball.legByes}LB`, color: "bg-gray-500 text-white", region }
   const r = ball.runs
-  if (r === 0) return { text: "0", color: "bg-[var(--muted)]" }
-  if (r === 1) return { text: "1", color: "bg-blue-500 text-white" }
-  if (r === 2) return { text: "2", color: "bg-yellow-500 text-white" }
-  if (r === 3) return { text: "3", color: "bg-orange-500 text-white" }
-  if (r === 4) return { text: "4", color: "bg-pink-500 text-white" }
-  if (r === 6) return { text: "6", color: "bg-red-500 text-white" }
-  return { text: String(r), color: "bg-[var(--muted)]" }
+  if (r === 0) return { text: "0", color: "bg-[var(--muted)]", region }
+  if (r === 1) return { text: "1", color: "bg-blue-500 text-white", region }
+  if (r === 2) return { text: "2", color: "bg-yellow-500 text-white", region }
+  if (r === 3) return { text: "3", color: "bg-orange-500 text-white", region }
+  if (r === 4) return { text: "4", color: "bg-pink-500 text-white", region }
+  if (r === 6) return { text: "6", color: "bg-red-500 text-white", region }
+  return { text: String(r), color: "bg-[var(--muted)]", region }
 }
 
 export default function LiveScoringPage() {
@@ -711,71 +712,74 @@ export default function LiveScoringPage() {
                 </div>
               </div>
 
-              <div className="mb-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/30 p-3">
+              <div className="mb-3 rounded-xl border-2 border-yellow-500/30 bg-yellow-500/5 p-4">
                 <div className="flex items-center justify-between">
-                  <p className="flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
-                    <Trophy className="h-3 w-3 text-yellow-500" /> TOSS
+                  <p className="flex items-center gap-1.5 text-sm font-bold text-yellow-600">
+                    <Trophy className="h-4 w-4" /> TOSS
                   </p>
-                  {tossWinner && (
-                    <span className="rounded-full bg-yellow-500/20 px-2 py-0.5 text-[10px] font-bold text-yellow-600">
+                  {tossWinner ? (
+                    <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-bold text-yellow-600">
                       {tossWinner === match.team1.id ? match.team1.shortName : match.team2.shortName} elected to {tossDecision} first
                     </span>
+                  ) : (
+                    <span className="text-xs text-red-400">Not set yet</span>
                   )}
                 </div>
-                {(!tossWinner || !tossDecision) && activeInnings && activeInnings.ballsData.length === 0 && (
-                  <div className="mt-2 grid grid-cols-2 gap-2">
+                {(!tossWinner || !tossDecision) && (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
                     <div>
-                      <label className="mb-1 block text-[10px] text-[var(--muted-foreground)]">Toss Winner</label>
+                      <label className="mb-1 block text-xs font-semibold text-[var(--muted-foreground)]">Toss Winner</label>
                       <select
                         value={tossWinner}
                         onChange={(e) => setTossWinner(e.target.value)}
-                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
                       >
-                        <option value="">Select winner</option>
+                        <option value="">— Select —</option>
                         <option value={match.team1.id}>{match.team1.name}</option>
                         <option value={match.team2.id}>{match.team2.name}</option>
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-[10px] text-[var(--muted-foreground)]">Decision</label>
-                      <div className="flex gap-1">
+                      <label className="mb-1 block text-xs font-semibold text-[var(--muted-foreground)]">Decision</label>
+                      <div className="flex gap-2">
                         <select
                           value={tossDecision}
                           onChange={(e) => setTossDecision(e.target.value)}
                           disabled={!tossWinner}
-                          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs disabled:opacity-40"
+                          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm disabled:opacity-40"
                         >
-                          <option value="">Select</option>
-                          <option value="bat">Bat</option>
-                          <option value="bowl">Bowl</option>
+                          <option value="">— Select —</option>
+                          <option value="bat">Bat First</option>
+                          <option value="bowl">Bowl First</option>
                         </select>
-                        {tossWinner && tossDecision && (
-                          <button
-                            onClick={async () => {
-                              const t1BattingFirst = tossDecision === "bat"
-                                ? tossWinner === match.team1.id
-                                : tossWinner === match.team2.id
-                              setBattingTeamId(t1BattingFirst ? match.team1.id : match.team2.id)
-                              setBowlingTeamId(t1BattingFirst ? match.team2.id : match.team1.id)
-                              await fetch("/api/matches", {
-                                method: "PATCH",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ id: matchId, tossWinner, tossDecision }),
-                              })
-                            }}
-                            className="rounded-lg bg-yellow-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-yellow-600"
-                          >
-                            Set
-                          </button>
-                        )}
+                        <button
+                          onClick={async () => {
+                            if (!tossWinner || !tossDecision) return
+                            const t1BattingFirst = tossDecision === "bat"
+                              ? tossWinner === match.team1.id
+                              : tossWinner === match.team2.id
+                            setBattingTeamId(t1BattingFirst ? match.team1.id : match.team2.id)
+                            setBowlingTeamId(t1BattingFirst ? match.team2.id : match.team1.id)
+                            await fetch("/api/matches", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ id: matchId, tossWinner, tossDecision }),
+                            })
+                          }}
+                          disabled={!tossWinner || !tossDecision}
+                          className="flex items-center gap-1 rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-white hover:bg-yellow-600 disabled:opacity-40"
+                        >
+                          Set
+                        </button>
                       </div>
                     </div>
                   </div>
                 )}
-                {tossWinner && tossDecision && activeInnings && activeInnings.ballsData.length > 0 && (
-                  <p className="mt-1 text-[10px] text-[var(--muted-foreground)]">
-                    Toss set — {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won & elected to {tossDecision} first
-                  </p>
+                {tossWinner && tossDecision && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+                    {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won the toss & elected to {tossDecision} first
+                  </div>
                 )}
               </div>
 
@@ -1084,9 +1088,15 @@ export default function LiveScoringPage() {
                     return (
                       <span
                         key={i}
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${display.color}`}
+                        title={display.region || "No region"}
+                        className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${display.color}`}
                       >
                         {display.text}
+                        {display.region && (
+                          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[7px] font-medium text-[var(--muted-foreground)] opacity-60">
+                            {display.region.slice(0, 4)}
+                          </span>
+                        )}
                       </span>
                     )
                   })}
@@ -1260,15 +1270,21 @@ export default function LiveScoringPage() {
                       !ball.isNoBall &&
                       prevOvers % 6 === 5
                     return (
-                      <span key={i} className="inline-flex items-center gap-0.5">
+                      <span key={i} className="group relative inline-flex items-center gap-0.5">
                         {isOverBoundary && (
                           <span className="ml-1 text-[10px] text-[var(--muted-foreground)]">|</span>
                         )}
                         <span
+                          title={display.region || ""}
                           className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold ${display.color}`}
                         >
                           {display.text}
                         </span>
+                        {display.region && (
+                          <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--background)] px-1 text-[7px] text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100">
+                            {display.region}
+                          </span>
+                        )}
                       </span>
                     )
                   })}
