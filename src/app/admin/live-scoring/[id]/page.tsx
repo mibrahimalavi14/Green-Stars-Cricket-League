@@ -676,43 +676,7 @@ export default function LiveScoringPage() {
         <div className="grid gap-4 lg:grid-cols-5">
           <div className="space-y-4 lg:col-span-3">
             <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-              <div className="mb-3 grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
-                    <Shield className="h-3 w-3" /> Batting Team
-                  </label>
-                  <select
-                    value={battingTeamId}
-                    onChange={(e) => {
-                      setBattingTeamId(e.target.value)
-                      setBowlingTeamId(
-                        e.target.value === match.team1.id
-                          ? match.team2.id
-                          : match.team1.id
-                      )
-                    }}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
-                  >
-                    <option value={match.team1.id}>{match.team1.name}</option>
-                    <option value={match.team2.id}>{match.team2.name}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
-                    <Target className="h-3 w-3" /> Bowling Team
-                  </label>
-                  <select
-                    value={bowlingTeamId}
-                    onChange={(e) => setBowlingTeamId(e.target.value)}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
-                  >
-                    <option value={match.team1.id}>{match.team1.name}</option>
-                    <option value={match.team2.id}>{match.team2.name}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-3 rounded-xl border-2 border-yellow-500/30 bg-yellow-500/5 p-4">
+              <div className="mb-3 rounded-xl border-2 border-yellow-500/40 bg-yellow-500/5 p-4">
                 <div className="flex items-center justify-between">
                   <p className="flex items-center gap-1.5 text-sm font-bold text-yellow-600">
                     <Trophy className="h-4 w-4" /> TOSS
@@ -725,7 +689,7 @@ export default function LiveScoringPage() {
                     <span className="text-xs text-red-400">Not set yet</span>
                   )}
                 </div>
-                {(!tossWinner || !tossDecision) && (
+                {!tossWinner || !tossDecision ? (
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1 block text-xs font-semibold text-[var(--muted-foreground)]">Toss Winner</label>
@@ -769,16 +733,33 @@ export default function LiveScoringPage() {
                           disabled={!tossWinner || !tossDecision}
                           className="flex items-center gap-1 rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-white hover:bg-yellow-600 disabled:opacity-40"
                         >
-                          Set
+                          Set Toss
                         </button>
                       </div>
                     </div>
                   </div>
-                )}
-                {tossWinner && tossDecision && (
-                  <div className="mt-2 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
-                    {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won the toss & elected to {tossDecision} first
+                ) : (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
+                        <Shield className="h-3 w-3" /> Batting Team
+                      </label>
+                      <div className="rounded-lg border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-2 text-sm font-medium">
+                        {battingTeamId === match.team1.id ? match.team1.name : match.team2.name}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
+                        <Target className="h-3 w-3" /> Bowling Team
+                      </label>
+                      <div className="rounded-lg border border-[var(--border)] bg-[var(--muted)]/50 px-3 py-2 text-sm font-medium">
+                        {bowlingTeamId === match.team1.id ? match.team1.name : match.team2.name}
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+                      {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won the toss & elected to {tossDecision} first
+                    </div>
                   </div>
                 )}
               </div>
