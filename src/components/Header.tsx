@@ -26,7 +26,7 @@ export function Header() {
         { href: "/admin/matches", label: "Matches", icon: Calendar },
         { href: "/admin/players", label: "Players", icon: Users },
         { href: "/admin/teams", label: "Teams", icon: Shield },
-        { href: "/admin/performances", label: "Performances", icon: TrendingUp },
+        { href: "/admin/performances", label: "Scorecards", icon: Trophy },
       ],
       content: [
         { href: "/admin/news", label: "News", icon: Newspaper },

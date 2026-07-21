@@ -13,6 +13,8 @@ interface LiveMatch {
   status: string
   result: string
   venue: string
+  tossWinner: string
+  tossDecision: string
   innings: { id: string; teamId: string; runs: number; wickets: number; balls: number; extras: number; ballsData: string }[]
 }
 
@@ -239,6 +241,11 @@ export function LiveScoreClient({
 
         {match.result && (
           <p className="mt-4 text-center text-sm font-medium">{match.result}</p>
+        )}
+        {(match as any).tossWinner && (
+          <p className="mt-2 text-center text-xs text-[var(--muted-foreground)]">
+            Toss: {(match as any).tossWinner === match.team1.id ? match.team1.name : match.team2.name} won & elected to {(match as any).tossDecision} first
+          </p>
         )}
       </div>
 

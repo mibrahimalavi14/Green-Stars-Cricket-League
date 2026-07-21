@@ -479,9 +479,16 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 </Link>
               )}
               {!scoring && (
-                <button onClick={() => openScoring(m.id, m)} className="rounded bg-green-500 px-2 py-1 text-xs text-white whitespace-nowrap">
-                  {m.status === "completed" ? (m.team1Score ? "Edit Result" : "Add Result") : m.status === "live" ? "Add Score" : "Set Result"}
-                </button>
+                <>
+                  {(m.status === "completed" || m.status === "live") && (
+                    <Link href="/admin/performances" className="rounded bg-[var(--accent)] px-2 py-1 text-xs text-white whitespace-nowrap hover:opacity-90">
+                      Scorecard
+                    </Link>
+                  )}
+                  <button onClick={() => openScoring(m.id, m)} className="rounded bg-green-500 px-2 py-1 text-xs text-white whitespace-nowrap">
+                    {m.status === "completed" ? (m.team1Score ? "Edit" : "Add") : m.status === "live" ? "Add" : "Set"}
+                  </button>
+                </>
               )}
               <button onClick={() => deleteMatch(m.id)} disabled={deleting === m.id}
                 className="rounded bg-red-600 px-2 py-1 text-xs text-white disabled:opacity-50 whitespace-nowrap">Delete</button>
