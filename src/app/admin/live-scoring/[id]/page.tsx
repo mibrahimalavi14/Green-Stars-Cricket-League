@@ -908,16 +908,25 @@ export default function LiveScoringPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => {
-                      setWicketType(null)
-                      setWicketBatsman("")
-                      setWicketFielder("")
-                    }}
-                    className="mt-2 text-xs text-[var(--muted-foreground)] hover:text-red-500"
-                  >
-                    Cancel wicket
-                  </button>
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      onClick={() => handleRun(0)}
+                      disabled={submitting}
+                      className="flex items-center gap-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-700 disabled:opacity-50"
+                    >
+                      <Send className="h-3.5 w-3.5" /> Confirm OUT
+                    </button>
+                    <button
+                      onClick={() => {
+                        setWicketType(null)
+                        setWicketBatsman("")
+                        setWicketFielder("")
+                      }}
+                      className="text-xs text-[var(--muted-foreground)] hover:text-red-500"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               )}
 
