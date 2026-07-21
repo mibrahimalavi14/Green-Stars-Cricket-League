@@ -158,11 +158,38 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     if (playersData.length > 0) {
       let bestScore = -Infinity
       for (const p of playersData) {
-        const player = allPlayers.find(x => x.id === p.playerId)
-        const battingImpact = p.battingRuns + p.fours * 2 + p.sixes * 4 - (p.wicketsLost || 0) * 5
-        const bowlingImpact = p.bowlingWickets * 25 - p.bowlingRuns
-        const fieldingImpact = p.catches * 10 + p.stumpings * 15 + p.runOuts * 15
-        const total = battingImpact + bowlingImpact + fieldingImpact
+        const sr = p.ballsFaced > 0 ? (p.battingRuns / p.ballsFaced) * 100 : 0
+        const econ = p.ballsBowled > 0 ? p.bowlingRuns / (p.ballsBowled / 6) : 0
+        const battingImpact = (
+          p.battingRuns
+          + (p.ballsFaced >= 5
+            ? sr >= 200 ? p.battingRuns * 0.3
+            : sr >= 150 ? p.battingRuns * 0.2
+            : sr >= 100 ? p.battingRuns * 0.1
+            : 0
+            : 0)
+          + p.fours * 2
+          + p.sixes * 5
+          + (p.isOut ? 0 : 15)
+          + (p.battingRuns === 0 && p.isOut ? -15 : 0)
+          - (p.wicketsLost || 0) * 5
+        )
+        const bowlingImpact = (
+          p.bowlingWickets * 25
+          + p.maidens * 12
+          + (p.ballsBowled >= 6
+            ? econ <= 4 ? 20 : econ <= 6 ? 12 : econ <= 8 ? 6 : econ <= 10 ? 0 : -10
+            : 0)
+          - p.bowlingRuns * 0.5
+          - (p.wides + p.noBalls) * 2
+        )
+        const fieldingImpact = p.catches * 12 + p.stumpings * 18 + p.runOuts * 20
+
+        let total = battingImpact + bowlingImpact + fieldingImpact
+        if (p.battingRuns >= 30 && p.bowlingWickets >= 2) total += 25
+        if (p.battingRuns >= 50 && p.bowlingWickets >= 1) total += 35
+        if (p.bowlingWickets >= 4) total += 20
+        if (p.bowlingWickets >= 5) total += 40
         if (total > bestScore) { bestScore = total; mom = p.playerId }
       }
     }
