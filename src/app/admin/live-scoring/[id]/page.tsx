@@ -15,6 +15,7 @@ import {
   Flag,
   Loader2,
 } from "lucide-react"
+import { FieldDiagram } from "@/components/FieldDiagram"
 
 interface Player {
   id: string
@@ -971,7 +972,8 @@ export default function LiveScoringPage() {
                     </span>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-1">
+                <FieldDiagram selected={ballRegion} onSelect={setBallRegion} />
+                <div className="mt-1.5 flex flex-wrap gap-1">
                   {["", "Off", "Cover", "Mid Off", "Mid On", "Leg", "Fine Leg", "Square Leg", "Mid Wkt", "Long On", "Long Off", "Third", "Point", "Gully", "Slip", "Straight"].map((r) => (
                     <button
                       key={r}

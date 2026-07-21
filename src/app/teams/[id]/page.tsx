@@ -2,7 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
-import { Trophy, TrendingUp, Zap, Award, Star } from "lucide-react"
+import { Trophy, TrendingUp, Zap, Award, Star, Crown } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -116,7 +116,7 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1">
                     <p className="font-medium truncate">{player.name}</p>
-                    {(player as any).isCaptain && <Star className="h-3 w-3 shrink-0 fill-amber-500 text-amber-500" />}
+                    {(player as any).isCaptain && <Crown className="h-3 w-3 shrink-0 text-amber-500" />}
                   </div>
                   <p className="text-xs text-[var(--muted-foreground)]">{player.role}</p>
                 </div>

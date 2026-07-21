@@ -40,6 +40,7 @@ interface BallEvent {
   isNoBall?: boolean
   byes?: number
   legByes?: number
+  region?: string
 }
 
 function parseBallsData(raw: string): (string | BallEvent)[] {
@@ -53,27 +54,28 @@ function parseBallsData(raw: string): (string | BallEvent)[] {
   }
 }
 
-function getBallDisplay(ball: string | BallEvent): { text: string; color: string } {
+function getBallDisplay(ball: string | BallEvent): { text: string; color: string; region: string } {
   if (typeof ball === "string") {
-    if (ball === "W") return { text: "W", color: "bg-purple-600 text-white" }
-    if (ball === "4") return { text: "4", color: "bg-pink-500 text-white" }
-    if (ball === "6") return { text: "6", color: "bg-red-500 text-white" }
-    if (ball === "0") return { text: "0", color: "bg-[var(--muted)]" }
-    return { text: ball, color: "bg-[var(--muted)]" }
+    if (ball === "W") return { text: "W", color: "bg-purple-600 text-white", region: "" }
+    if (ball === "4") return { text: "4", color: "bg-pink-500 text-white", region: "" }
+    if (ball === "6") return { text: "6", color: "bg-red-500 text-white", region: "" }
+    if (ball === "0") return { text: "0", color: "bg-[var(--muted)]", region: "" }
+    return { text: ball, color: "bg-[var(--muted)]", region: "" }
   }
-  if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white" }
-  if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white" }
-  if (ball.isNoBall) return { text: "Nb", color: "bg-gray-500 text-white" }
-  if (ball.byes && ball.byes > 0) return { text: `${ball.byes}B`, color: "bg-gray-500 text-white" }
-  if (ball.legByes && ball.legByes > 0) return { text: `${ball.legByes}LB`, color: "bg-gray-500 text-white" }
+  const region = ball.region || ""
+  if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white", region }
+  if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white", region }
+  if (ball.isNoBall) return { text: "Nb", color: "bg-gray-500 text-white", region }
+  if (ball.byes && ball.byes > 0) return { text: `${ball.byes}B`, color: "bg-gray-500 text-white", region }
+  if (ball.legByes && ball.legByes > 0) return { text: `${ball.legByes}LB`, color: "bg-gray-500 text-white", region }
   const r = ball.runs || 0
-  if (r === 0) return { text: "0", color: "bg-[var(--muted)]" }
-  if (r === 1) return { text: "1", color: "bg-blue-500 text-white" }
-  if (r === 2) return { text: "2", color: "bg-yellow-500 text-white" }
-  if (r === 3) return { text: "3", color: "bg-orange-500 text-white" }
-  if (r === 4) return { text: "4", color: "bg-pink-500 text-white" }
-  if (r === 6) return { text: "6", color: "bg-red-500 text-white" }
-  return { text: String(r), color: "bg-[var(--muted)]" }
+  if (r === 0) return { text: "0", color: "bg-[var(--muted)]", region }
+  if (r === 1) return { text: "1", color: "bg-blue-500 text-white", region }
+  if (r === 2) return { text: "2", color: "bg-yellow-500 text-white", region }
+  if (r === 3) return { text: "3", color: "bg-orange-500 text-white", region }
+  if (r === 4) return { text: "4", color: "bg-pink-500 text-white", region }
+  if (r === 6) return { text: "6", color: "bg-red-500 text-white", region }
+  return { text: String(r), color: "bg-[var(--muted)]", region }
 }
 
 function getBallLabel(ball: string | BallEvent): string {
@@ -294,13 +296,15 @@ export function LiveScoreClient({
                         const display = getBallDisplay(ball)
                         const label = getBallLabel(ball)
                         return (
-                          <span
-                            key={idx}
-                            title={label}
-                            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold ${display.color}`}
-                          >
-                            {display.text}
-                          </span>
+                          <div key={idx} className="flex flex-col items-center">
+                            <span
+                              title={label + (display.region ? ` → ${display.region}` : "")}
+                              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold ${display.color}`}
+                            >
+                              {display.text}
+                            </span>
+                            {display.region && <span className="mt-0.5 text-[7px] font-medium text-green-600 leading-none">{display.region}</span>}
+                          </div>
                         )
                       })}
                     </div>

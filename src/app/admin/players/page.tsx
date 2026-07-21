@@ -4,7 +4,7 @@ import { AdminPlayerEdit } from "@/components/AdminPlayerEdit"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 import { AdminResetStats } from "@/components/AdminResetStats"
 import { TeamCollapsible } from "@/components/TeamCollapsible"
-import { Trophy } from "lucide-react"
+import { Crown } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -73,7 +73,7 @@ async function AdminPlayersPage() {
                             <div>
                               <div className="flex items-center gap-1 font-medium">
                                 {p.name}
-                                {p.isCaptain && <Trophy className="h-3.5 w-3.5 text-amber-500" aria-label="Captain" />}
+                                {p.isCaptain && <Crown className="h-3.5 w-3.5 text-amber-500" aria-label="Captain" />}
                               </div>
                               <p className="text-[10px] text-[var(--muted-foreground)]">{p.battingStyle} &middot; {p.bowlingStyle}</p>
                             </div>

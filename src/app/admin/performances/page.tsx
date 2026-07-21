@@ -326,7 +326,12 @@ function Scorecard({ match, players, performances, onGenerate }: { match: MatchR
                             <div className="flex flex-wrap gap-1">
                               {g.balls.map((b, i) => {
                                 const d = ballDisplay(b)
-                                return <span key={i} title={d.region || ""} className={`flex h-7 w-7 items-center justify-center rounded text-[10px] font-bold ${d.color}`}>{d.text}</span>
+                                return (
+                                  <div key={i} className="flex flex-col items-center">
+                                    <span title={d.region || ""} className={`flex h-7 w-7 items-center justify-center rounded text-[10px] font-bold ${d.color}`}>{d.text}</span>
+                                    {d.region && <span className="mt-0.5 text-[7px] text-green-600 font-medium leading-none">{d.region}</span>}
+                                  </div>
+                                )
                               })}
                             </div>
                           </div>
