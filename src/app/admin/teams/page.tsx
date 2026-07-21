@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { AdminTeamForm } from "@/components/AdminTeamForm"
+import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 
 export const dynamic = "force-dynamic"
 
@@ -27,6 +28,7 @@ async function AdminTeamsPage() {
                   <p className="text-xs text-[var(--muted-foreground)]">{t._count.players} players</p>
                 </div>
               </div>
+              <AdminDeleteButton api="/api/teams" id={t.id} label="team" />
             </div>
             <div className="mt-2 flex flex-wrap gap-4 text-xs text-[var(--muted-foreground)]">
               {t.season && <span>Season: {t.season.name}</span>}

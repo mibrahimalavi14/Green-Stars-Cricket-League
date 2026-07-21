@@ -11,3 +11,9 @@ export async function POST(req: Request) {
   const team = await prisma.team.create({ data: body })
   return NextResponse.json(team)
 }
+
+export async function DELETE(req: Request) {
+  const { id } = await req.json()
+  await prisma.team.delete({ where: { id } })
+  return NextResponse.json({ success: true })
+}

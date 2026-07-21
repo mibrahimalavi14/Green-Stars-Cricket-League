@@ -34,3 +34,13 @@ export async function PATCH(req: Request) {
   }
   return NextResponse.json(player)
 }
+
+export async function DELETE(req: Request) {
+  const { id } = await req.json()
+  const player = await prisma.player.findUnique({ where: { id }, select: { teamId: true, name: true, isCaptain: true } })
+  if (player?.isCaptain) {
+    await prisma.team.update({ where: { id: player.teamId }, data: { captainName: "" } })
+  }
+  await prisma.player.delete({ where: { id } })
+  return NextResponse.json({ success: true })
+}

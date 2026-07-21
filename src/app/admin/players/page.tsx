@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { AdminPlayerForm } from "@/components/AdminPlayerForm"
 import { AdminPlayerEdit } from "@/components/AdminPlayerEdit"
+import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 import { Trophy } from "lucide-react"
 
 export const dynamic = "force-dynamic"
@@ -105,7 +106,10 @@ async function AdminPlayersPage() {
                           </div>
                         </td>
                         <td className="p-3 text-right">
-                          <AdminPlayerEdit player={p as any} teams={teams} />
+                          <div className="flex items-center justify-end gap-1.5">
+                            <AdminPlayerEdit player={p as any} teams={teams} />
+                            <AdminDeleteButton api="/api/players" id={p.id} label="player" />
+                          </div>
                         </td>
                       </tr>
                     )
