@@ -3,6 +3,7 @@ import { AdminPlayerForm } from "@/components/AdminPlayerForm"
 import { AdminPlayerEdit } from "@/components/AdminPlayerEdit"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 import { AdminResetStats } from "@/components/AdminResetStats"
+import { TeamCollapsible } from "@/components/TeamCollapsible"
 import { Trophy } from "lucide-react"
 
 export const dynamic = "force-dynamic"
@@ -20,10 +21,9 @@ function perfScore(player: { runs: number; ballsFaced: number; matchesPlayed: nu
 async function AdminPlayersPage() {
   const [allPlayers, teams] = await Promise.all([
     prisma.player.findMany({ include: { team: true }, orderBy: [{ teamId: "asc" }, { runs: "desc" }] }),
-    prisma.team.findMany({ select: { id: true, name: true, shortName: true, captainName: true, logo: true } }),
+    prisma.team.findMany({ select: { id: true, name: true, shortName: true, captainName: true, logo: true, color: true } }),
   ])
 
-  const teamMap = new Map(teams.map(t => [t.id, t]))
   const grouped = new Map<string, typeof allPlayers>()
   for (const p of allPlayers) {
     const g = grouped.get(p.teamId) || []
@@ -43,17 +43,7 @@ async function AdminPlayersPage() {
         const players = grouped.get(team.id) || []
         if (players.length === 0) return null
         return (
-          <div key={team.id} className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--muted)] px-5 py-3">
-              <div className="flex items-center gap-3">
-                {team.logo && <img src={team.logo} alt="" className="h-7 w-7 rounded-full object-cover" />}
-                <div>
-                  <h2 className="font-semibold">{team.name} ({team.shortName})</h2>
-                  <p className="text-xs text-[var(--muted-foreground)]">{players.length} players</p>
-                </div>
-              </div>
-              <AdminResetStats teamId={team.id} />
-            </div>
+          <TeamCollapsible key={team.id} title={`${team.name} (${team.shortName})`} subtitle={`${players.length} players`} logo={team.logo}>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -122,7 +112,10 @@ async function AdminPlayersPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+            <div className="flex justify-end border-t border-[var(--border)] bg-[var(--muted)] px-5 py-2">
+              <AdminResetStats teamId={team.id} />
+            </div>
+          </TeamCollapsible>
         )
       })}
       {allPlayers.length === 0 && <p className="text-center py-8 text-[var(--muted-foreground)]">No players yet.</p>}

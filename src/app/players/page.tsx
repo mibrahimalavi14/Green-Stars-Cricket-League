@@ -11,7 +11,7 @@ async function PlayersPage() {
       include: { team: true },
       orderBy: { runs: "desc" },
     }),
-    prisma.team.findMany({ select: { id: true, shortName: true, name: true } }),
+    prisma.team.findMany({ select: { id: true, shortName: true, name: true, logo: true } }),
   ])
 
   return (

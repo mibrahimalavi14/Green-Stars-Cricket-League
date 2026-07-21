@@ -2,6 +2,7 @@
 import Link from "next/link"
 import { useState, useMemo } from "react"
 import { Search, X } from "lucide-react"
+import { TeamCollapsible } from "@/components/TeamCollapsible"
 
 interface PlayerItem {
   id: string
@@ -18,12 +19,12 @@ interface TeamItem {
   id: string
   shortName: string
   name: string
+  logo?: string | null
 }
 
 export function PlayersList({ players, teams }: { players: PlayerItem[]; teams: TeamItem[] }) {
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState("")
-  const [teamFilter, setTeamFilter] = useState("")
 
   const roles = useMemo(() => [...new Set(players.map((p) => p.role))].sort(), [players])
 
@@ -31,12 +32,22 @@ export function PlayersList({ players, teams }: { players: PlayerItem[]; teams: 
     return players.filter((p) => {
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       if (roleFilter && p.role !== roleFilter) return false
-      if (teamFilter && p.team?.shortName !== teamFilter) return false
       return true
     })
-  }, [players, search, roleFilter, teamFilter])
+  }, [players, search, roleFilter])
 
-  const hasFilters = search || roleFilter || teamFilter
+  const grouped = useMemo(() => {
+    const map = new Map<string, PlayerItem[]>()
+    for (const p of filtered) {
+      const key = p.team?.shortName || "Ungrouped"
+      const g = map.get(key) || []
+      g.push(p)
+      map.set(key, g)
+    }
+    return map
+  }, [filtered])
+
+  const hasFilters = search || roleFilter
 
   return (
     <>
@@ -64,16 +75,8 @@ export function PlayersList({ players, teams }: { players: PlayerItem[]; teams: 
           <option value="">All Roles</option>
           {roles.map((r) => <option key={r} value={r}>{r}</option>)}
         </select>
-        <select
-          value={teamFilter}
-          onChange={(e) => setTeamFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--accent)]"
-        >
-          <option value="">All Teams</option>
-          {teams.map((t) => <option key={t.id} value={t.shortName}>{t.shortName}</option>)}
-        </select>
         {hasFilters && (
-          <button onClick={() => { setSearch(""); setRoleFilter(""); setTeamFilter("") }} className="text-xs text-[var(--accent)] hover:underline">
+          <button onClick={() => { setSearch(""); setRoleFilter("") }} className="text-xs text-[var(--accent)] hover:underline">
             Clear filters
           </button>
         )}
@@ -82,44 +85,47 @@ export function PlayersList({ players, teams }: { players: PlayerItem[]; teams: 
       {filtered.length === 0 ? (
         <p className="py-12 text-center text-[var(--muted-foreground)]">No players match your filters.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((player) => (
-            <Link
-              key={player.id}
-              href={`/players/${player.id}`}
-              className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg"
-            >
-              <div className="mb-3 flex items-center gap-3">
-                {player.photo && player.photo !== "/placeholder-player.svg" ? (
-                  <img src={player.photo} alt={player.name} className="h-12 w-12 rounded-full object-cover" />
-                ) : (
-                  <img src="/placeholder-player.svg" alt={player.name} className="h-12 w-12 rounded-full bg-[var(--muted)] p-2" />
-                )}
-                <div>
-                  <p className="font-semibold">{player.name}</p>
-                  <p className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
-                    {player.team?.logo && <img src={player.team.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
-                    {player.role} &middot; {player.team?.shortName}
-                  </p>
-                </div>
+        teams.map(team => {
+          const teamPlayers = grouped.get(team.shortName)
+          if (!teamPlayers) return null
+          return (
+            <TeamCollapsible key={team.id} title={team.name} subtitle={`${teamPlayers.length} players`} logo={team.logo}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+                      <th className="p-3 text-left">Player</th>
+                      <th className="p-3 text-center">Role</th>
+                      <th className="p-3 text-center">Runs</th>
+                      <th className="p-3 text-center">Wkts</th>
+                      <th className="p-3 text-center">Mat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teamPlayers.map(p => (
+                      <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
+                        <td className="p-3">
+                          <Link href={`/players/${p.id}`} className="flex items-center gap-2">
+                            {p.photo && p.photo !== "/placeholder-player.svg" ? (
+                              <img src={p.photo} alt={p.name} className="h-8 w-8 rounded-full object-cover" />
+                            ) : (
+                              <img src="/placeholder-player.svg" alt={p.name} className="h-8 w-8 rounded-full bg-[var(--muted)] p-1" />
+                            )}
+                            <span className="font-medium">{p.name}</span>
+                          </Link>
+                        </td>
+                        <td className="p-3 text-center">{p.role}</td>
+                        <td className="p-3 text-center font-medium">{p.runs}</td>
+                        <td className="p-3 text-center font-medium">{p.wickets}</td>
+                        <td className="p-3 text-center">{p.matchesPlayed}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                <div>
-                  <p className="font-bold">{player.runs}</p>
-                  <p className="text-[10px] text-[var(--muted-foreground)]">Runs</p>
-                </div>
-                <div>
-                  <p className="font-bold">{player.wickets}</p>
-                  <p className="text-[10px] text-[var(--muted-foreground)]">Wkts</p>
-                </div>
-                <div>
-                  <p className="font-bold">{player.matchesPlayed}</p>
-                  <p className="text-[10px] text-[var(--muted-foreground)]">Matches</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+            </TeamCollapsible>
+          )
+        })
       )}
     </>
   )
