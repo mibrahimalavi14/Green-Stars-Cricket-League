@@ -127,6 +127,10 @@ export default function LiveScoringPage() {
   const [endingMatch, setEndingMatch] = useState(false)
   const [tossWinner, setTossWinner] = useState("")
   const [tossDecision, setTossDecision] = useState("")
+  const [superOverT1Runs, setSuperOverT1Runs] = useState("")
+  const [superOverT1Wkts, setSuperOverT1Wkts] = useState("")
+  const [superOverT2Runs, setSuperOverT2Runs] = useState("")
+  const [superOverT2Wkts, setSuperOverT2Wkts] = useState("")
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -418,7 +422,17 @@ export default function LiveScoringPage() {
         const wktsLeft = 10 - t2Wkts
         result = `${match.team2.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
       } else {
-        result = "Match Tied"
+        const so1Runs = parseInt(superOverT1Runs) || 0
+        const so2Runs = parseInt(superOverT2Runs) || 0
+        const so1Wkts = parseInt(superOverT1Wkts) || 0
+        const so2Wkts = parseInt(superOverT2Wkts) || 0
+        if (so1Runs || so2Runs) {
+          if (so1Runs > so2Runs) result = `${match.team1.name} won the Super Over (${so1Runs}/${so1Wkts} - ${so2Runs}/${so2Wkts})`
+          else if (so2Runs > so1Runs) result = `${match.team2.name} won the Super Over (${so2Runs}/${so2Wkts} - ${so1Runs}/${so1Wkts})`
+          else result = "Match Tied (Super Over tied again)"
+        } else {
+          result = "Match Tied"
+        }
       }
 
       const playerStats: Record<string, any> = {}
@@ -523,6 +537,45 @@ export default function LiveScoringPage() {
 
       const playersData = Object.values(playerStats)
 
+      let mom = ""
+      if (playersData.length > 0) {
+        let bestScore = -Infinity
+        for (const p of playersData) {
+          const sr = p.ballsFaced > 0 ? (p.battingRuns / p.ballsFaced) * 100 : 0
+          const econ = p.ballsBowled > 0 ? p.bowlingRuns / (p.ballsBowled / 6) : 0
+          const battingImpact = (
+            p.battingRuns
+            + (p.ballsFaced >= 5
+              ? sr >= 200 ? p.battingRuns * 0.3
+              : sr >= 150 ? p.battingRuns * 0.2
+              : sr >= 100 ? p.battingRuns * 0.1
+              : 0
+              : 0)
+            + p.fours * 2
+            + p.sixes * 5
+            + (p.isOut ? 0 : 15)
+            + (p.battingRuns === 0 && p.isOut ? -15 : 0)
+            - (p.wicketsLost || 0) * 5
+          )
+          const bowlingImpact = (
+            p.bowlingWickets * 25
+            + p.maidens * 12
+            + (p.ballsBowled >= 6
+              ? econ <= 4 ? 20 : econ <= 6 ? 12 : econ <= 8 ? 6 : econ <= 10 ? 0 : -10
+              : 0)
+            - p.bowlingRuns * 0.5
+            - (p.wides + p.noBalls) * 2
+          )
+          const fieldingImpact = p.catches * 12 + p.stumpings * 18 + p.runOuts * 20
+          let total = battingImpact + bowlingImpact + fieldingImpact
+          if (p.battingRuns >= 30 && p.bowlingWickets >= 2) total += 25
+          if (p.battingRuns >= 50 && p.bowlingWickets >= 1) total += 35
+          if (p.bowlingWickets >= 4) total += 20
+          if (p.bowlingWickets >= 5) total += 40
+          if (total > bestScore) { bestScore = total; mom = p.playerId }
+        }
+      }
+
       if (playersData.length > 0) {
         await fetch("/api/performances", {
           method: "POST",
@@ -562,10 +615,15 @@ export default function LiveScoringPage() {
           id: matchId,
           status: "completed",
           result,
+          manOfMatch: mom,
           tossWinner: summary.match.tossWinner || tossWinner,
           tossDecision: summary.match.tossDecision || tossDecision,
           team1Score: `${t1Total}/${t1Wkts}${t1Balls ? ` (${formatOvers(t1Balls)} ov)` : ""}`,
           team2Score: `${t2Total}/${t2Wkts}${t2Balls ? ` (${formatOvers(t2Balls)} ov)` : ""}`,
+          superOverT1Runs: parseInt(superOverT1Runs) || 0,
+          superOverT1Wkts: parseInt(superOverT1Wkts) || 0,
+          superOverT2Runs: parseInt(superOverT2Runs) || 0,
+          superOverT2Wkts: parseInt(superOverT2Wkts) || 0,
         }),
       })
 
@@ -729,6 +787,7 @@ export default function LiveScoringPage() {
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ id: matchId, tossWinner, tossDecision }),
                             })
+                            await fetchSummary()
                           }}
                           disabled={!tossWinner || !tossDecision}
                           className="flex items-center gap-1 rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-white hover:bg-yellow-600 disabled:opacity-40"
@@ -1028,7 +1087,13 @@ export default function LiveScoringPage() {
                 </button>
               </div>
 
-              {endMatchConfirm && (
+              {endMatchConfirm && (() => {
+                const inn1 = summary?.innings.find(i => i.teamId === summary?.match.team1.id)
+                const inn2 = summary?.innings.find(i => i.teamId === summary?.match.team2.id)
+                const total1 = inn1 ? inn1.runs + inn1.extras : 0
+                const total2 = inn2 ? inn2.runs + inn2.extras : 0
+                const isTied = total1 > 0 && total2 > 0 && total1 === total2
+                return (
                 <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
                   <p className="mb-2 text-sm font-semibold text-red-500">
                     End match and save all stats?
@@ -1036,6 +1101,33 @@ export default function LiveScoringPage() {
                   <p className="mb-3 text-xs text-[var(--muted-foreground)]">
                     This will calculate player performances, save innings totals, and mark the match as completed.
                   </p>
+                  {isTied && (
+                    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-700/40 dark:bg-amber-900/10">
+                      <p className="mb-2 text-xs font-semibold text-amber-700 dark:text-amber-400">Match Tied — Enter Super Over Scores</p>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <div>
+                          <label className="mb-1 block text-xs">{summary?.match.team1.name} Runs</label>
+                          <input type="number" min="0" value={superOverT1Runs} onChange={e => setSuperOverT1Runs(e.target.value)}
+                            className="w-full rounded border border-amber-300 bg-white px-2 py-1 text-sm dark:bg-[var(--card)]" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs">Wickets</label>
+                          <input type="number" min="0" max="2" value={superOverT1Wkts} onChange={e => setSuperOverT1Wkts(e.target.value)}
+                            className="w-full rounded border border-amber-300 bg-white px-2 py-1 text-sm dark:bg-[var(--card)]" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs">{summary?.match.team2.name} Runs</label>
+                          <input type="number" min="0" value={superOverT2Runs} onChange={e => setSuperOverT2Runs(e.target.value)}
+                            className="w-full rounded border border-amber-300 bg-white px-2 py-1 text-sm dark:bg-[var(--card)]" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs">Wickets</label>
+                          <input type="number" min="0" max="2" value={superOverT2Wkts} onChange={e => setSuperOverT2Wkts(e.target.value)}
+                            className="w-full rounded border border-amber-300 bg-white px-2 py-1 text-sm dark:bg-[var(--card)]" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <button
                       onClick={handleEndMatch}
@@ -1053,7 +1145,8 @@ export default function LiveScoringPage() {
                     </button>
                   </div>
                 </div>
-              )}
+                )
+              })()}
             </div>
           </div>
 

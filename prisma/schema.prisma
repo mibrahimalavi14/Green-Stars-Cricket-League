@@ -156,6 +156,10 @@ model Match {
   tossDecision  String   @default("")
   manOfMatch    String   @default("")
   youtubeUrl    String   @default("")
+  superOverT1Runs Int    @default(0)
+  superOverT1Wkts Int    @default(0)
+  superOverT2Runs Int    @default(0)
+  superOverT2Wkts Int    @default(0)
   createdAt     DateTime @default(now())
   predictions   Prediction[]
   innings       Inning[]
