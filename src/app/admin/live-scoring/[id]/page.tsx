@@ -200,16 +200,19 @@ export default function LiveScoringPage() {
     setNonStrikerId("")
   }, [bowlingTeamId, battingTeamId])
 
+  const ROLE_ORDER_BATTING: Record<string, number> = { "Batsman": 0, "Wicket-keeper": 1, "All-rounder": 2, "Bowler": 3 }
+  const ROLE_ORDER_BOWLING: Record<string, number> = { "Bowler": 0, "All-rounder": 1, "Wicket-keeper": 2, "Batsman": 3 }
+
   const battingPlayers = summary
     ? (battingTeamId === summary.match.team1.id
-        ? summary.team1Players
-        : summary.team2Players)
+        ? [...summary.team1Players].sort((a, b) => (ROLE_ORDER_BATTING[a.role] ?? 9) - (ROLE_ORDER_BATTING[b.role] ?? 9))
+        : [...summary.team2Players].sort((a, b) => (ROLE_ORDER_BATTING[a.role] ?? 9) - (ROLE_ORDER_BATTING[b.role] ?? 9)))
     : []
 
   const bowlingPlayers = summary
     ? (bowlingTeamId === summary.match.team1.id
-        ? summary.team1Players
-        : summary.team2Players)
+        ? [...summary.team1Players].sort((a, b) => (ROLE_ORDER_BOWLING[a.role] ?? 9) - (ROLE_ORDER_BOWLING[b.role] ?? 9))
+        : [...summary.team2Players].sort((a, b) => (ROLE_ORDER_BOWLING[a.role] ?? 9) - (ROLE_ORDER_BOWLING[b.role] ?? 9)))
     : []
 
   function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
@@ -1048,11 +1051,14 @@ export default function LiveScoringPage() {
               </div>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {[
-                  { type: "bowled", label: "Bowled", icon: "🎳" },
-                  { type: "caught", label: "Caught", icon: "🤲" },
-                  { type: "lbw", label: "LBW", icon: "🦵" },
-                  { type: "stumped", label: "Stumped", icon: "🧤" },
-                  { type: "runout", label: "Run Out", icon: "🏃" },
+                  { type: "bowled", label: "Bowled" },
+                  { type: "caught", label: "Caught" },
+                  { type: "lbw", label: "LBW" },
+                  { type: "stumped", label: "Stumped" },
+                  { type: "runout", label: "Run Out" },
+                  { type: "hit wicket", label: "Hit Wicket" },
+                  { type: "retired", label: "Retired" },
+                  { type: "obstructing", label: "Obstruct" },
                 ].map(({ type, label }) => (
                   <button
                     key={type}

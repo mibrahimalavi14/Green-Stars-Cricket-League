@@ -192,5 +192,13 @@ export async function POST(req: Request) {
     })
   }
 
+  // Update career 4w/5w stats for bowlers in this match
+  const bowlerIds = [...new Set(Object.keys(playerStats).filter(pid => playerStats[pid].bowlingWickets > 0))]
+  for (const bowlerId of bowlerIds) {
+    const fourPlus = await prisma.playerMatch.count({ where: { playerId: bowlerId, bowlingWickets: { gte: 4 } } })
+    const fivePlus = await prisma.playerMatch.count({ where: { playerId: bowlerId, bowlingWickets: { gte: 5 } } })
+    await prisma.player.update({ where: { id: bowlerId }, data: { fourWickets: fourPlus, fiveWickets: fivePlus } })
+  }
+
   return NextResponse.json({ success: true, playersUpdated: Object.keys(playerStats).length })
 }
