@@ -735,15 +735,15 @@ export default function LiveScoringPage() {
                   <p className="flex items-center gap-1.5 text-sm font-bold text-yellow-600">
                     <Trophy className="h-4 w-4" /> TOSS
                   </p>
-                  {tossWinner ? (
+                  {(tossWinner || summary.match.tossWinner) ? (
                     <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-bold text-yellow-600">
-                      {tossWinner === match.team1.id ? match.team1.shortName : match.team2.shortName} elected to {tossDecision} first
+                      {(tossWinner || summary.match.tossWinner) === match.team1.id ? match.team1.shortName : match.team2.shortName} elected to {tossDecision || summary.match.tossDecision} first
                     </span>
                   ) : (
                     <span className="text-xs text-red-400">Not set yet</span>
                   )}
                 </div>
-                {!tossWinner || !tossDecision ? (
+                {!(summary.match.tossWinner && summary.match.tossDecision) ? (
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1 block text-xs font-semibold text-[var(--muted-foreground)]">Toss Winner</label>
