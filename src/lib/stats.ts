@@ -159,7 +159,7 @@ export async function recalcPlayerStats() {
     const timesCaught = individualMatches.filter(m => m.dismissalType === "caught" || m.secondDismissalType === "caught").length
     const timesLbw = individualMatches.filter(m => m.dismissalType === "lbw" || m.secondDismissalType === "lbw").length
     const timesStumped = individualMatches.filter(m => m.dismissalType === "stumped" || m.secondDismissalType === "stumped").length
-    const timesRunOut = individualMatches.filter(m => m.dismissalType === "run out" || m.secondDismissalType === "run out").length
+    const timesRunOut = individualMatches.filter(m => m.dismissalType === "runout" || m.secondDismissalType === "runout").length
     const threes = individualMatches.reduce((a, m) => a + (m.threes || 0), 0)
     const dotBalls = individualMatches.reduce((a, m) => a + (m.dotBalls || 0), 0)
     const hattricks = individualMatches.reduce((a, m) => a + (m.hattricks || 0), 0)

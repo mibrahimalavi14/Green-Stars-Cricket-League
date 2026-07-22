@@ -40,7 +40,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
   const timesCaught = selPerfs.filter(x => x.dismissalType === "caught" || x.secondDismissalType === "caught").length
   const timesLbw = selPerfs.filter(x => x.dismissalType === "lbw" || x.secondDismissalType === "lbw").length
   const timesStumped = selPerfs.filter(x => x.dismissalType === "stumped" || x.secondDismissalType === "stumped").length
-  const timesRunOut = selPerfs.filter(x => x.dismissalType === "run out" || x.secondDismissalType === "run out").length
+  const timesRunOut = selPerfs.filter(x => x.dismissalType === "runout" || x.secondDismissalType === "runout").length
 
   const battingAvg = dismissals > 0 ? (runs / dismissals).toFixed(2) : "-" 
   const sr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
