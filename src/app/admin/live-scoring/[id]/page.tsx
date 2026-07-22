@@ -249,7 +249,7 @@ export default function LiveScoringPage() {
 
   function calcCurrentRunRate(): number {
     if (!activeInnings || activeInnings.balls === 0) return 0
-    return Number(((activeInnings.runs / activeInnings.balls) * 6).toFixed(2))
+    return Number((((activeInnings.runs + activeInnings.extras) / activeInnings.balls) * 6).toFixed(2))
   }
 
   async function addBall(ball: BallEvent) {
