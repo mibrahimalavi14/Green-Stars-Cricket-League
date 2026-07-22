@@ -426,23 +426,23 @@ export function LiveScoreClient({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="text-center">
+          <div className="min-w-0 text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
-              {match.team1.logo && <img src={match.team1.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
-               <p className="font-bold">{match.team1.name}</p>
+              {match.team1.logo && <img src={match.team1.logo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />}
+               <p className="truncate font-bold">{match.team1.name}</p>
             </div>
-            <p className="text-3xl font-bold tabular-nums">{inn1 ? `${t1Total}/${inn1.wickets}` : match.team1Score || "-"}</p>
+            <p className="text-2xl font-bold tabular-nums sm:text-3xl">{inn1 ? `${t1Total}/${inn1.wickets}` : match.team1Score || "-"}</p>
             <p className="text-sm text-[var(--muted-foreground)]">
               {inn1 ? `(${overs1} ov)` : "Yet to bat"}
             </p>
           </div>
 
-          <div className="text-center">
+          <div className="min-w-0 text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
-               <p className="font-bold">{match.team2.name}</p>
-              {match.team2.logo && <img src={match.team2.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
+               <p className="truncate font-bold">{match.team2.name}</p>
+              {match.team2.logo && <img src={match.team2.logo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />}
             </div>
-            <p className="text-3xl font-bold tabular-nums">{inn2 ? `${t2Total}/${inn2.wickets}` : match.team2Score || "-"}</p>
+            <p className="text-2xl font-bold tabular-nums sm:text-3xl">{inn2 ? `${t2Total}/${inn2.wickets}` : match.team2Score || "-"}</p>
             <p className="text-sm text-[var(--muted-foreground)]">
               {inn2 ? `(${overs2} ov)` : match.innings.length > 0 ? "Yet to bat" : "Yet to bat"}
             </p>
@@ -484,9 +484,9 @@ export function LiveScoreClient({
           </p>
           <div className="grid grid-cols-3 gap-3 text-center text-xs">
             {currentStriker && (
-              <div className="rounded-lg bg-[var(--muted)] p-2">
+              <div className="min-w-0 overflow-hidden rounded-lg bg-[var(--muted)] p-2">
                 <p className="text-[10px] text-[var(--muted-foreground)]">Striker</p>
-                <p className="mt-0.5 font-bold text-green-500">{currentStriker.name}</p>
+                <p className="mt-0.5 truncate font-bold text-green-500">{currentStriker.name}</p>
                 {activeBatStats[currentStriker.id] && (
                   <p className="text-[10px] text-[var(--muted-foreground)]">
                     {activeBatStats[currentStriker.id].runs} ({activeBatStats[currentStriker.id].balls})
@@ -495,9 +495,9 @@ export function LiveScoreClient({
               </div>
             )}
             {currentNonStriker && (
-              <div className="rounded-lg bg-[var(--muted)] p-2">
+              <div className="min-w-0 overflow-hidden rounded-lg bg-[var(--muted)] p-2">
                 <p className="text-[10px] text-[var(--muted-foreground)]">Non-Striker</p>
-                <p className="mt-0.5 font-bold">{currentNonStriker.name}</p>
+                <p className="mt-0.5 truncate font-bold">{currentNonStriker.name}</p>
                 {activeBatStats[currentNonStriker.id] && (
                   <p className="text-[10px] text-[var(--muted-foreground)]">
                     {activeBatStats[currentNonStriker.id].runs} ({activeBatStats[currentNonStriker.id].balls})
@@ -506,9 +506,9 @@ export function LiveScoreClient({
               </div>
             )}
             {currentBowler && (
-              <div className="rounded-lg bg-[var(--muted)] p-2">
+              <div className="min-w-0 overflow-hidden rounded-lg bg-[var(--muted)] p-2">
                 <p className="text-[10px] text-[var(--muted-foreground)]">Bowler</p>
-                <p className="mt-0.5 font-bold text-purple-500">{currentBowler.name}</p>
+                <p className="mt-0.5 truncate font-bold text-purple-500">{currentBowler.name}</p>
                 {activeBowlStats[currentBowler.id] && (
                   <p className="text-[10px] text-[var(--muted-foreground)]">
                     {activeBowlStats[currentBowler.id].wickets}-{activeBowlStats[currentBowler.id].runs}

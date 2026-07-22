@@ -77,7 +77,7 @@ async function HomePage() {
           <p className="mx-auto mb-8 max-w-2xl text-lg text-white/80">
             {season?.name || "Welcome to the most exciting cricket league"} — Where champions rise and legends are made.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <Link href="/fixtures" className="animate-float rounded-lg bg-gscl-gold px-6 py-3 font-semibold text-gscl-dark transition-all hover:scale-105 hover:opacity-90">
               View Fixtures
             </Link>
@@ -171,11 +171,11 @@ async function HomePage() {
         <FadeInView>
         <section className="border-t border-[var(--border)] py-10">
           <div className="mx-auto max-w-7xl px-4">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Tournament Leaders</h2>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-xl font-bold sm:text-2xl">Tournament Leaders</h2>
               <div className="flex items-center gap-3">
-                <Link href="/dream-team" className="text-sm text-[var(--accent)] hover:underline">Dream Team</Link>
-                <Link href="/players/stats" className="text-sm text-[var(--accent)] hover:underline">Full Stats</Link>
+                <Link href="/dream-team" className="text-xs text-[var(--accent)] hover:underline sm:text-sm">Dream Team</Link>
+                <Link href="/players/stats" className="text-xs text-[var(--accent)] hover:underline sm:text-sm">Full Stats</Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">

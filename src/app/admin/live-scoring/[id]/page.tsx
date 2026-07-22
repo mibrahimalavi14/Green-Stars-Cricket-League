@@ -1304,8 +1304,8 @@ export default function LiveScoringPage() {
                 </div>
 
                 <p className="mb-1 text-xs font-semibold text-[var(--muted-foreground)]">Batting</p>
-                <div className="mb-3 max-h-40 overflow-y-auto">
-                  <table className="w-full text-xs">
+                <div className="mb-3 max-h-40 overflow-x-auto overflow-y-auto">
+                  <table className="w-full min-w-[500px] text-xs">
                     <thead>
                       <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
                         <th className="py-1 text-left font-medium">Batsman</th>
@@ -1363,8 +1363,8 @@ export default function LiveScoringPage() {
                 </div>
 
                 <p className="mb-1 text-xs font-semibold text-[var(--muted-foreground)]">Bowling</p>
-                <div className="max-h-40 overflow-y-auto">
-                  <table className="w-full text-xs">
+                <div className="max-h-40 overflow-x-auto overflow-y-auto">
+                  <table className="w-full min-w-[450px] text-xs">
                     <thead>
                       <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
                         <th className="py-1 text-left font-medium">Bowler</th>
