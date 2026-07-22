@@ -369,7 +369,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
         <>
           {m.tossWinner && (
             <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-              Toss: {m.tossWinner} elected to {m.tossDecision} first
+              Toss: {m.tossWinner === m.team1Id ? m.team1.name : m.team2.name} won & elected to {m.tossDecision} first
             </p>
           )}
 

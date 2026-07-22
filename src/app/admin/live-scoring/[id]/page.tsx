@@ -771,16 +771,12 @@ export default function LiveScoringPage() {
                         <button
                           onClick={async () => {
                             if (!tossWinner || !tossDecision) return
-                            const t1BattingFirst = tossDecision === "bat"
-                              ? tossWinner === match.team1.id
-                              : tossWinner === match.team2.id
-                            setBattingTeamId(t1BattingFirst ? match.team1.id : match.team2.id)
-                            setBowlingTeamId(t1BattingFirst ? match.team2.id : match.team1.id)
-                            await fetch("/api/matches", {
+                            const res = await fetch("/api/matches", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ id: matchId, tossWinner, tossDecision }),
                             })
+                            if (!res.ok) { alert("Failed to save toss"); return }
                             await fetchSummary()
                           }}
                           disabled={!tossWinner || !tossDecision}

@@ -28,7 +28,7 @@ async function TossAnalysisPage() {
     for (const team of [m.team1, m.team2]) {
       const s = getTeamStats(team.id, team.name, team.logo)
       s.total++
-      const wonToss = m.tossWinner === team.name
+      const wonToss = m.tossWinner === team.id
       if (wonToss) {
         s.tossWon++
         if (m.tossDecision === "bat") s.bat++
@@ -45,11 +45,11 @@ async function TossAnalysisPage() {
 
     if (m.tossDecision === "bat") {
       batFirstTotal++
-      const battingTeam = m.tossWinner === m.team1.name ? m.team1 : m.team2
+      const battingTeam = m.tossWinner === m.team1.id ? m.team1 : m.team2
       if (winnerName === battingTeam.name) batFirstWins++
     } else {
       chaseTotal++
-      const fieldingTeam = m.tossWinner === m.team1.name ? m.team1 : m.team2
+      const fieldingTeam = m.tossWinner === m.team1.id ? m.team1 : m.team2
       if (winnerName === fieldingTeam.name) chaseWins++
     }
   }
