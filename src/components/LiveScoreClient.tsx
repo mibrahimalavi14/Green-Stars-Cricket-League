@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, User } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
 
 interface LiveMatch {
@@ -16,6 +16,8 @@ interface LiveMatch {
   tossWinner: string
   tossDecision: string
   innings: { id: string; teamId: string; runs: number; wickets: number; balls: number; extras: number; ballsData: string }[]
+  team1Players: { id: string; name: string }[]
+  team2Players: { id: string; name: string }[]
 }
 
 interface UpcomingMatch {
@@ -43,25 +45,17 @@ interface BallEvent {
   region?: string
 }
 
-function parseBallsData(raw: string): (string | BallEvent)[] {
+function parseBallsData(raw: string): BallEvent[] {
   try {
     const parsed = JSON.parse(raw || "[]")
     if (parsed.length === 0) return []
-    if (typeof parsed[0] === "string") return parsed
     return parsed
   } catch {
     return []
   }
 }
 
-function getBallDisplay(ball: string | BallEvent): { text: string; color: string; region: string } {
-  if (typeof ball === "string") {
-    if (ball === "W") return { text: "W", color: "bg-purple-600 text-white", region: "" }
-    if (ball === "4") return { text: "4", color: "bg-pink-500 text-white", region: "" }
-    if (ball === "6") return { text: "6", color: "bg-red-500 text-white", region: "" }
-    if (ball === "0") return { text: "0", color: "bg-[var(--muted)]", region: "" }
-    return { text: ball, color: "bg-[var(--muted)]", region: "" }
-  }
+function getBallDisplay(ball: BallEvent): { text: string; color: string; region: string } {
   const region = ball.region || ""
   if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white", region }
   if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white", region }
@@ -78,12 +72,7 @@ function getBallDisplay(ball: string | BallEvent): { text: string; color: string
   return { text: String(r), color: "bg-[var(--muted)]", region }
 }
 
-function getBallLabel(ball: string | BallEvent): string {
-  if (typeof ball === "string") {
-    if (ball === "W") return "Wicket!"
-    if (ball === "0") return "Dot ball"
-    return `${ball} run${ball === "1" ? "" : "s"}`
-  }
+function getBallLabel(ball: BallEvent): string {
   if (ball.wicket) return `Wicket! (${ball.wicket})`
   if (ball.isWide) return "Wide"
   if (ball.isNoBall) return "No ball"
@@ -94,6 +83,55 @@ function getBallLabel(ball: string | BallEvent): string {
   if (r === 4) return "FOUR!"
   if (r === 6) return "SIX!"
   return `${r} run${r === 1 ? "" : "s"}`
+}
+
+function formatOvers(balls: number): string {
+  return `${Math.floor(balls / 6)}.${balls % 6}`
+}
+
+function computeInningsStats(
+  balls: BallEvent[],
+  battingPlayers: { id: string; name: string }[],
+  bowlingPlayers: { id: string; name: string }[]
+) {
+  const batting: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }> = {}
+  const bowling: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }> = {}
+
+  for (const p of battingPlayers) {
+    batting[p.id] = { runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissal: "" }
+  }
+
+  for (const ball of balls) {
+    const sid = ball.striker || ""
+    if (sid && batting[sid]) {
+      const bs = batting[sid]
+      bs.runs += ball.runs || 0
+      if (!ball.isWide && !ball.isNoBall) bs.balls++
+      if (ball.runs === 4) bs.fours++
+      if (ball.runs === 6) bs.sixes++
+    }
+
+    const bid = ball.bowler || ""
+    if (bid) {
+      if (!bowling[bid]) bowling[bid] = { runs: 0, balls: 0, wickets: 0, wides: 0, noBalls: 0 }
+      const bws = bowling[bid]
+      bws.runs += (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0)
+      if (!ball.isWide && !ball.isNoBall) bws.balls++
+      if (ball.isWide) bws.wides++
+      if (ball.isNoBall) bws.noBalls++
+      if (ball.wicket) bws.wickets++
+    }
+
+    if (ball.wicket) {
+      const dismissed = ball.wicketBatsman || ball.striker || ""
+      if (dismissed && batting[dismissed]) {
+        batting[dismissed].isOut = true
+        batting[dismissed].dismissal = ball.wicket
+      }
+    }
+  }
+
+  return { batting, bowling }
 }
 
 export function LiveScoreClient({
@@ -163,30 +201,77 @@ export function LiveScoreClient({
 
   const inn1 = match.innings.find((i) => i.teamId === match.team1.id)
   const inn2 = match.innings.find((i) => i.teamId === match.team2.id)
-  const overs1 = inn1 ? `${Math.floor(inn1.balls / 6)}.${inn1.balls % 6}` : "0.0"
-  const overs2 = inn2 ? `${Math.floor(inn2.balls / 6)}.${inn2.balls % 6}` : "0.0"
+  const overs1 = inn1 ? formatOvers(inn1.balls) : "0.0"
+  const overs2 = inn2 ? formatOvers(inn2.balls) : "0.0"
   const t1Total = inn1 ? inn1.runs + inn1.extras : 0
   const t2Total = inn2 ? inn2.runs + inn2.extras : 0
 
   const currentInn = match.innings.length > 0 ? match.innings[match.innings.length - 1] : null
   const allBalls = currentInn ? parseBallsData(currentInn.ballsData) : []
 
-  function getCurrentOverBalls(balls: (string | BallEvent)[]): (string | BallEvent)[] {
+  const currentBowlingTeam = currentInn
+    ? currentInn.teamId === match.team1.id
+      ? match.team1
+      : match.team2
+    : null
+  const currentBattingTeam = currentInn
+    ? currentInn.teamId === match.team1.id
+      ? match.team1
+      : match.team2
+    : null
+
+  const battingPlayers = currentInn
+    ? currentInn.teamId === match.team1.id
+      ? match.team1Players
+      : match.team2Players
+    : []
+  const bowlingPlayers = currentInn
+    ? currentInn.teamId === match.team1.id
+      ? match.team2Players
+      : match.team1Players
+    : []
+
+  const lastBall = allBalls.length > 0 ? allBalls[allBalls.length - 1] : null
+  const currentStriker = lastBall?.striker
+    ? battingPlayers.find((p) => p.id === lastBall.striker)
+    : null
+  const currentNonStriker = lastBall?.nonStriker
+    ? battingPlayers.find((p) => p.id === lastBall.nonStriker)
+    : null
+  const currentBowler = lastBall?.bowler
+    ? bowlingPlayers.find((p) => p.id === lastBall.bowler)
+    : null
+
+  const { batting: inn1BatStats, bowling: inn1BowlStats } = inn1
+    ? computeInningsStats(parseBallsData(inn1.ballsData), inn1.teamId === match.team1.id ? match.team1Players : match.team2Players, inn1.teamId === match.team1.id ? match.team2Players : match.team1Players)
+    : { batting: {}, bowling: {} }
+  const { batting: inn2BatStats, bowling: inn2BowlStats } = inn2
+    ? computeInningsStats(parseBallsData(inn2.ballsData), inn2.teamId === match.team1.id ? match.team1Players : match.team2Players, inn2.teamId === match.team1.id ? match.team2Players : match.team1Players)
+    : { batting: {}, bowling: {} }
+
+  const activeBatStats = currentInn
+    ? currentInn.teamId === match.team1.id
+      ? inn1BatStats
+      : inn2BatStats
+    : {}
+  const activeBowlStats = currentInn
+    ? currentInn.teamId === match.team1.id
+      ? inn1BowlStats
+      : inn2BowlStats
+    : {}
+
+  function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
     if (balls.length === 0) return []
     let legalCount = 0
     for (const b of balls) {
-      if (typeof b === "string") {
-        if (b !== "W" || true) legalCount++
-      } else {
-        if (!b.isWide && !b.isNoBall) legalCount++
-      }
+      if (!b.isWide && !b.isNoBall) legalCount++
     }
     const inLastOver = legalCount % 6 || 6
     let count = 0
     let startIdx = balls.length
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i]
-      const isLegal = typeof b === "string" ? true : (!b.isWide && !b.isNoBall)
+      const isLegal = !b.isWide && !b.isNoBall
       if (isLegal) count++
       if (count === inLastOver) {
         startIdx = i
@@ -197,6 +282,111 @@ export function LiveScoreClient({
   }
 
   const currentOverBalls = getCurrentOverBalls(allBalls)
+
+  function BattingScorecard({
+    stats,
+    players,
+    battingTeam,
+  }: {
+    stats: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }>
+    players: { id: string; name: string }[]
+    battingTeam: { name: string; shortName: string; logo: string }
+  }) {
+    const activePlayers = players.filter((p) => stats[p.id])
+    if (activePlayers.length === 0) return null
+    return (
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+        <div className="mb-3 flex items-center gap-2">
+          {battingTeam.logo && <img src={battingTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+          <h4 className="text-sm font-semibold">{battingTeam.shortName} Batting</h4>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+                <th className="pb-1.5 text-left font-medium">Batsman</th>
+                <th className="pb-1.5 text-center font-medium">R</th>
+                <th className="pb-1.5 text-center font-medium">B</th>
+                <th className="pb-1.5 text-center font-medium">4s</th>
+                <th className="pb-1.5 text-center font-medium">6s</th>
+                <th className="pb-1.5 text-center font-medium">SR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activePlayers.map((p) => {
+                const s = stats[p.id]
+                if (!s) return null
+                const sr = s.balls > 0 ? ((s.runs / s.balls) * 100).toFixed(1) : "0.0"
+                return (
+                  <tr key={p.id} className="border-b border-[var(--border)]/50">
+                    <td className="py-1.5 font-medium">
+                      {p.name}
+                      {s.isOut ? "" : " *"}
+                    </td>
+                    <td className="py-1.5 text-center font-bold">{s.runs}</td>
+                    <td className="py-1.5 text-center">{s.balls}</td>
+                    <td className="py-1.5 text-center text-pink-500">{s.fours}</td>
+                    <td className="py-1.5 text-center text-red-500">{s.sixes}</td>
+                    <td className="py-1.5 text-center text-[var(--muted-foreground)]">{sr}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  function BowlingScorecard({
+    stats,
+    players,
+    bowlingTeam,
+  }: {
+    stats: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }>
+    players: { id: string; name: string }[]
+    bowlingTeam: { name: string; shortName: string; logo: string }
+  }) {
+    const activeBowlers = players.filter((p) => stats[p.id])
+    if (activeBowlers.length === 0) return null
+    return (
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+        <div className="mb-3 flex items-center gap-2">
+          {bowlingTeam.logo && <img src={bowlingTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+          <h4 className="text-sm font-semibold">{bowlingTeam.shortName} Bowling</h4>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+                <th className="pb-1.5 text-left font-medium">Bowler</th>
+                <th className="pb-1.5 text-center font-medium">O</th>
+                <th className="pb-1.5 text-center font-medium">R</th>
+                <th className="pb-1.5 text-center font-medium">W</th>
+                <th className="pb-1.5 text-center font-medium">Econ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeBowlers.map((p) => {
+                const s = stats[p.id]
+                if (!s) return null
+                const econ = s.balls > 0 ? ((s.runs / s.balls) * 6).toFixed(1) : "0.0"
+                return (
+                  <tr key={p.id} className="border-b border-[var(--border)]/50">
+                    <td className="py-1.5 font-medium">{p.name}</td>
+                    <td className="py-1.5 text-center">{formatOvers(s.balls)}</td>
+                    <td className="py-1.5 text-center">{s.runs}</td>
+                    <td className="py-1.5 text-center font-bold text-purple-500">{s.wickets}</td>
+                    <td className="py-1.5 text-center text-[var(--muted-foreground)]">{econ}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -251,8 +441,51 @@ export function LiveScoreClient({
         )}
       </div>
 
+      {currentInn && (
+        <div className="mt-4 rounded-xl border border-[var(--accent)]/30 bg-[var(--card)] p-4">
+          <p className="mb-2 text-xs font-semibold text-[var(--accent)]">
+            {currentBattingTeam?.shortName} Batting &middot; {currentBowlingTeam?.shortName} Bowling
+          </p>
+          <div className="grid grid-cols-3 gap-3 text-center text-xs">
+            {currentStriker && (
+              <div className="rounded-lg bg-[var(--muted)] p-2">
+                <p className="text-[10px] text-[var(--muted-foreground)]">Striker</p>
+                <p className="mt-0.5 font-bold text-green-500">{currentStriker.name}</p>
+                {activeBatStats[currentStriker.id] && (
+                  <p className="text-[10px] text-[var(--muted-foreground)]">
+                    {activeBatStats[currentStriker.id].runs} ({activeBatStats[currentStriker.id].balls})
+                  </p>
+                )}
+              </div>
+            )}
+            {currentNonStriker && (
+              <div className="rounded-lg bg-[var(--muted)] p-2">
+                <p className="text-[10px] text-[var(--muted-foreground)]">Non-Striker</p>
+                <p className="mt-0.5 font-bold">{currentNonStriker.name}</p>
+                {activeBatStats[currentNonStriker.id] && (
+                  <p className="text-[10px] text-[var(--muted-foreground)]">
+                    {activeBatStats[currentNonStriker.id].runs} ({activeBatStats[currentNonStriker.id].balls})
+                  </p>
+                )}
+              </div>
+            )}
+            {currentBowler && (
+              <div className="rounded-lg bg-[var(--muted)] p-2">
+                <p className="text-[10px] text-[var(--muted-foreground)]">Bowler</p>
+                <p className="mt-0.5 font-bold text-purple-500">{currentBowler.name}</p>
+                {activeBowlStats[currentBowler.id] && (
+                  <p className="text-[10px] text-[var(--muted-foreground)]">
+                    {activeBowlStats[currentBowler.id].wickets}-{activeBowlStats[currentBowler.id].runs}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {currentOverBalls.length > 0 && (
-        <div className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
           <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Current Over</h3>
           <div className="flex flex-wrap gap-2">
             {currentOverBalls.map((ball, i) => {
@@ -270,6 +503,40 @@ export function LiveScoreClient({
         </div>
       )}
 
+      {inn1 && (
+        <div className="mt-4">
+          <BattingScorecard
+            stats={inn1BatStats}
+            players={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
+            battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
+          />
+          <div className="mt-3">
+            <BowlingScorecard
+              stats={inn1BowlStats}
+              players={inn1.teamId === match.team1.id ? match.team2Players : match.team1Players}
+              bowlingTeam={inn1.teamId === match.team1.id ? match.team2 : match.team1}
+            />
+          </div>
+        </div>
+      )}
+
+      {inn2 && (
+        <div className="mt-4">
+          <BattingScorecard
+            stats={inn2BatStats}
+            players={inn2.teamId === match.team1.id ? match.team1Players : match.team2Players}
+            battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
+          />
+          <div className="mt-3">
+            <BowlingScorecard
+              stats={inn2BowlStats}
+              players={inn2.teamId === match.team1.id ? match.team2Players : match.team1Players}
+              bowlingTeam={inn2.teamId === match.team1.id ? match.team2 : match.team1}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mt-6">
         <h3 className="mb-3 text-lg font-semibold">Ball-by-Ball Timeline</h3>
         {allBalls.length > 0 ? (
@@ -281,7 +548,7 @@ export function LiveScoreClient({
               let legalCount = 0
               let currentOver = 0
               const elements: React.ReactElement[] = []
-              let overBalls: { ball: string | BallEvent; idx: number }[] = []
+              let overBalls: { ball: BallEvent; idx: number }[] = []
 
               function flushOver() {
                 if (overBalls.length === 0) return
@@ -295,10 +562,11 @@ export function LiveScoreClient({
                       {overBalls.map(({ ball, idx }) => {
                         const display = getBallDisplay(ball)
                         const label = getBallLabel(ball)
+                        const bowlerName = ball.bowler ? bowlingPlayers.find((p) => p.id === ball.bowler)?.name : ""
                         return (
                           <div key={idx} className="flex flex-col items-center">
                             <span
-                              title={label + (display.region ? ` → ${display.region}` : "")}
+                              title={`${label}${bowlerName ? ` - ${bowlerName}` : ""}${display.region ? ` → ${display.region}` : ""}`}
                               className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold ${display.color}`}
                             >
                               {display.text}
@@ -314,7 +582,7 @@ export function LiveScoreClient({
               }
 
               allBalls.forEach((ball, i) => {
-                const isLegal = typeof ball === "string" ? true : (!ball.isWide && !ball.isNoBall)
+                const isLegal = !ball.isWide && !ball.isNoBall
                 if (isLegal) {
                   if (legalCount > 0 && legalCount % 6 === 0) {
                     flushOver()

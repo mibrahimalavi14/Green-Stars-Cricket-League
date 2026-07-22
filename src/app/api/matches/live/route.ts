@@ -12,5 +12,18 @@ export async function GET() {
     where: { status: "live" },
     include: { team1: true, team2: true, innings: true },
   })
-  return NextResponse.json(match)
+
+  if (!match) return NextResponse.json(null)
+
+  const team1Players = await prisma.player.findMany({
+    where: { teamId: match.team1Id },
+    select: { id: true, name: true },
+  })
+
+  const team2Players = await prisma.player.findMany({
+    where: { teamId: match.team2Id },
+    select: { id: true, name: true },
+  })
+
+  return NextResponse.json({ ...match, team1Players, team2Players })
 }
