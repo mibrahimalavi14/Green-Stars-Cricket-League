@@ -219,7 +219,7 @@ function PartnershipCard({ battingPerformances, allPerformances, inning }: { bat
             <span className="font-mono">SR {totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(1) : "-"}</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
-            <span>RR {inning && inning.balls > 0 ? (inning.runs / (inning.balls / 6)).toFixed(2) : "-"}</span>
+            <span>RR {inning && inning.balls > 0 ? ((inning.runs + inning.extras) / (inning.balls / 6)).toFixed(2) : "-"}</span>
             {inning && (
               <>
                 <span>|</span>
@@ -423,6 +423,25 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
               )}
             </div>
           </div>
+
+          {(() => {
+            if (m.status !== "live" || !team1Inning || !team2Inning) return null
+            const battingFirst = team1BatFirst ? team1Inning : team2Inning
+            const chasingTeam = team1BatFirst ? m.team2 : m.team1
+            const chasingInning = team1BatFirst ? team2Inning : team1Inning
+            const target = battingFirst.runs + battingFirst.extras + 1
+            const needed = target - (chasingInning.runs + chasingInning.extras)
+            const ballsLeft = 60 - chasingInning.balls
+            return (
+              <div className="mb-6 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-center">
+                <p className="text-xs font-semibold text-amber-600">TARGET</p>
+                <p className="text-2xl font-black text-amber-600">{target}</p>
+                <p className="text-[10px] text-amber-600/70">
+                  {chasingTeam.name} need {Math.max(0, needed)} runs from {Math.max(0, ballsLeft)} balls
+                </p>
+              </div>
+            )
+          })()}
 
           {m.result && (
             <p className="mb-6 text-sm font-medium text-green-600 dark:text-green-400">{m.result}</p>

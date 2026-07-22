@@ -65,13 +65,11 @@ export async function POST(req: Request) {
 
     let bowlerBallsInOver = 0
     let lastBowlerId = ""
-    let lastBowlerWickets = 0
     let overRuns = 0
 
     for (const ball of balls) {
       if (ball.bowler !== lastBowlerId) {
         lastBowlerId = ball.bowler
-        lastBowlerWickets = 0
       }
 
       ensurePlayer(ball.striker, inn.teamId)
@@ -95,15 +93,13 @@ export async function POST(req: Request) {
         bps.ballsBowled++
         bowlerBallsInOver++
       }
-      const runsForBowler = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + ball.byes + ball.legByes
-      bps.bowlingRuns += runsForBowler
-      overRuns += runsForBowler
+      bps.bowlingRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+      overRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
       if (ball.isWide) bps.wides++
       if (ball.isNoBall) bps.noBalls++
 
       if (ball.wicket) {
         bps.bowlingWickets++
-        lastBowlerWickets++
         const dismissed = ball.wicketBatsman || ball.striker
         ensurePlayer(dismissed, inn.teamId)
         const dps = playerStats[dismissed]
@@ -123,12 +119,11 @@ export async function POST(req: Request) {
       }
 
       if (ball.bowler !== lastBowlerId || bowlerBallsInOver === 6) {
-        if (bowlerBallsInOver === 6 && overRuns === 0 && lastBowlerWickets === 0) {
+        if (bowlerBallsInOver === 6 && overRuns === 0) {
           playerStats[lastBowlerId].maidens++
         }
         bowlerBallsInOver = 0
         overRuns = 0
-        lastBowlerWickets = 0
         lastBowlerId = ball.bowler
       }
     }

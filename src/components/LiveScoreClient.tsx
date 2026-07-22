@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { RefreshCw, User } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
+import { PartnershipCard } from "./PartnershipCard"
 
 interface LiveMatch {
   id: string
@@ -89,6 +90,21 @@ function formatOvers(balls: number): string {
   return `${Math.floor(balls / 6)}.${balls % 6}`
 }
 
+function getDismissalText(ball: BallEvent, bowlingPlayers: { id: string; name: string }[]): string {
+  const bowlerName = bowlingPlayers.find(p => p.id === ball.bowler)?.name || ""
+  const fielderName = bowlingPlayers.find(p => p.id === ball.wicketFielder)?.name || ""
+  const type = ball.wicket || ""
+  if (type === "caught") return `c ${fielderName} b ${bowlerName}`
+  if (type === "bowled") return `b ${bowlerName}`
+  if (type === "lbw") return `lbw b ${bowlerName}`
+  if (type === "stumped") return `st ${fielderName} b ${bowlerName}`
+  if (type === "runout") return `run out (${fielderName})`
+  if (type === "hit wicket") return `hit wicket b ${bowlerName}`
+  if (type === "retired") return `retired`
+  if (type === "obstructing") return `obstructing the field`
+  return type
+}
+
 function computeInningsStats(
   balls: BallEvent[],
   battingPlayers: { id: string; name: string }[],
@@ -115,7 +131,7 @@ function computeInningsStats(
     if (bid) {
       if (!bowling[bid]) bowling[bid] = { runs: 0, balls: 0, wickets: 0, wides: 0, noBalls: 0 }
       const bws = bowling[bid]
-      bws.runs += (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0)
+      bws.runs += (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
       if (!ball.isWide && !ball.isNoBall) bws.balls++
       if (ball.isWide) bws.wides++
       if (ball.isNoBall) bws.noBalls++
@@ -126,7 +142,7 @@ function computeInningsStats(
       const dismissed = ball.wicketBatsman || ball.striker || ""
       if (dismissed && batting[dismissed]) {
         batting[dismissed].isOut = true
-        batting[dismissed].dismissal = ball.wicket
+        batting[dismissed].dismissal = getDismissalText(ball, bowlingPlayers)
       }
     }
   }
@@ -310,6 +326,7 @@ export function LiveScoreClient({
                 <th className="pb-1.5 text-center font-medium">4s</th>
                 <th className="pb-1.5 text-center font-medium">6s</th>
                 <th className="pb-1.5 text-center font-medium">SR</th>
+                <th className="pb-1.5 text-right font-medium">How Out</th>
               </tr>
             </thead>
             <tbody>
@@ -328,6 +345,7 @@ export function LiveScoreClient({
                     <td className="py-1.5 text-center text-pink-500">{s.fours}</td>
                     <td className="py-1.5 text-center text-red-500">{s.sixes}</td>
                     <td className="py-1.5 text-center text-[var(--muted-foreground)]">{sr}</td>
+                    <td className="py-1.5 text-right text-[10px] text-[var(--muted-foreground)] italic">{s.dismissal || ""}</td>
                   </tr>
                 )
               })}
@@ -439,6 +457,24 @@ export function LiveScoreClient({
             Toss: {match.tossWinner === match.team1.id ? match.team1.name : match.team2.name} won & elected to {match.tossDecision} first
           </p>
         )}
+        {(() => {
+          if (!inn1 || !inn2 || !currentInn || !currentBattingTeam) return null
+          const firstInnings = match.innings[0]
+          if (!firstInnings) return null
+          const target = firstInnings.runs + firstInnings.extras + 1
+          const chasingTotal = currentInn.teamId === match.team1.id ? t1Total : t2Total
+          const needed = target - chasingTotal
+          const ballsLeft = 60 - currentInn.balls
+          return (
+            <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-center">
+              <p className="text-xs font-semibold text-amber-600">TARGET</p>
+              <p className="text-2xl font-black text-amber-600">{target}</p>
+              <p className="text-[10px] text-amber-600/70">
+                {currentBattingTeam.shortName} need {Math.max(0, needed)} runs from {Math.max(0, ballsLeft)} balls
+              </p>
+            </div>
+          )
+        })()}
       </div>
 
       {currentInn && (
@@ -517,6 +553,12 @@ export function LiveScoreClient({
               bowlingTeam={inn1.teamId === match.team1.id ? match.team2 : match.team1}
             />
           </div>
+          <PartnershipCard
+            ballsData={parseBallsData(inn1.ballsData)}
+            battingPlayers={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
+            battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
+            inning={inn1}
+          />
         </div>
       )}
 
@@ -534,6 +576,12 @@ export function LiveScoreClient({
               bowlingTeam={inn2.teamId === match.team1.id ? match.team2 : match.team1}
             />
           </div>
+          <PartnershipCard
+            ballsData={parseBallsData(inn2.ballsData)}
+            battingPlayers={inn2.teamId === match.team1.id ? match.team1Players : match.team2Players}
+            battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
+            inning={inn2}
+          />
         </div>
       )}
 
@@ -563,6 +611,7 @@ export function LiveScoreClient({
                         const display = getBallDisplay(ball)
                         const label = getBallLabel(ball)
                         const bowlerName = ball.bowler ? bowlingPlayers.find((p) => p.id === ball.bowler)?.name : ""
+                        const dismissalText = ball.wicket ? getDismissalText(ball, bowlingPlayers) : ""
                         return (
                           <div key={idx} className="flex flex-col items-center">
                             <span
@@ -572,6 +621,7 @@ export function LiveScoreClient({
                               {display.text}
                             </span>
                             {display.region && <span className="mt-0.5 text-[7px] font-medium text-green-600 leading-none">{display.region}</span>}
+                            {dismissalText && <span className="mt-0.5 text-[7px] font-medium text-purple-500 leading-none text-center max-w-[80px]">{dismissalText}</span>}
                           </div>
                         )
                       })}

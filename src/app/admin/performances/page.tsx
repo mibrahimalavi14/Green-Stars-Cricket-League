@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Trophy, Shield, Target, Activity, RotateCcw, Loader2, CheckCircle, Map, ChevronDown, ChevronUp, Eye } from "lucide-react"
+import { PartnershipCard } from "@/components/PartnershipCard"
 
 interface BallEvent {
   runs: number
@@ -205,7 +206,7 @@ function Scorecard({ match, players, performances, onGenerate }: { match: MatchR
 
           if (!bowlingStats[ball.bowler]) bowlingStats[ball.bowler] = { runs: 0, balls: 0, wickets: 0, wides: 0, noBalls: 0, fours: 0, sixes: 0 }
           const bws = bowlingStats[ball.bowler]
-          bws.runs += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + ball.byes + ball.legByes
+          bws.runs += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
           if (!ball.isWide && !ball.isNoBall) bws.balls++
           if (ball.isWide) bws.wides++
           if (ball.isNoBall) bws.noBalls++
@@ -339,6 +340,15 @@ function Scorecard({ match, players, performances, onGenerate }: { match: MatchR
                       })()}
                     </div>
                   </div>
+                )}
+
+                {balls.length > 0 && (
+                  <PartnershipCard
+                    ballsData={balls}
+                    battingPlayers={battingPlayersList}
+                    battingTeam={battingTeam}
+                    inning={inn}
+                  />
                 )}
               </div>
             )}

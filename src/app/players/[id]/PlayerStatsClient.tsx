@@ -16,7 +16,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
   const selStat = view === "all" ? null : view === "latest" ? seasonStats.find(s => s.seasonId === p.team?.seasonId) || seasonStats[0] : seasonStats.find(s => s.seasonId === view)
 
   const inns = selPerfs.length
-  const dismissals = selPerfs.filter(x => x.isOut).length || inns
+  const dismissals = selPerfs.filter(x => x.isOut).length
   const runs = selPerfs.reduce((a, x) => a + x.battingRuns, 0)
   const ballsFaced = selPerfs.reduce((a, x) => a + x.ballsFaced, 0)
   const wickets = selPerfs.reduce((a, x) => a + x.bowlingWickets, 0)
@@ -42,7 +42,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
   const timesStumped = selPerfs.filter(x => x.dismissalType === "stumped" || x.secondDismissalType === "stumped").length
   const timesRunOut = selPerfs.filter(x => x.dismissalType === "run out" || x.secondDismissalType === "run out").length
 
-  const battingAvg = dismissals > 0 ? (runs / dismissals).toFixed(2) : "-"
+  const battingAvg = dismissals > 0 ? (runs / dismissals).toFixed(2) : "-" 
   const sr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
   const econ = ballsBowled > 0 ? (runsConceded / (ballsBowled / 6)).toFixed(2) : "-"
   const bowlingAvg = wickets > 0 ? (runsConceded / wickets).toFixed(2) : "-"

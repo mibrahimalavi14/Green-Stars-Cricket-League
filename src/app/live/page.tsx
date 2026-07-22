@@ -13,6 +13,20 @@ async function LivePage() {
     },
   })
 
+  let team1Players: { id: string; name: string }[] = []
+  let team2Players: { id: string; name: string }[] = []
+
+  if (liveMatch) {
+    team1Players = await prisma.player.findMany({
+      where: { teamId: liveMatch.team1Id },
+      select: { id: true, name: true },
+    })
+    team2Players = await prisma.player.findMany({
+      where: { teamId: liveMatch.team2Id },
+      select: { id: true, name: true },
+    })
+  }
+
   const upcomingMatches = await prisma.match.findMany({
     where: { status: "upcoming" },
     include: { team1: true, team2: true },
@@ -26,7 +40,7 @@ async function LivePage() {
       <p className="mb-8 text-[var(--muted-foreground)]">Real-time ball-by-ball updates</p>
 
       <LiveScoreClient
-        liveMatch={liveMatch as any}
+        liveMatch={liveMatch ? { ...liveMatch, team1Players, team2Players } as any : null}
         upcomingMatches={upcomingMatches as any[]}
       />
     </div>

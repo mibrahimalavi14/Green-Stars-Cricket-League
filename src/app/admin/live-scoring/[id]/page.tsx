@@ -109,11 +109,26 @@ export default function LiveScoringPage() {
   const [submitting, setSubmitting] = useState(false)
   const [summary, setSummary] = useState<SummaryData | null>(null)
 
-  const [battingTeamId, setBattingTeamId] = useState("")
-  const [bowlingTeamId, setBowlingTeamId] = useState("")
-  const [bowlerId, setBowlerId] = useState("")
-  const [strikerId, setStrikerId] = useState("")
-  const [nonStrikerId, setNonStrikerId] = useState("")
+  const [battingTeamId, setBattingTeamId] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(`ls-${matchId}-bat`) || ""
+    return ""
+  })
+  const [bowlingTeamId, setBowlingTeamId] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(`ls-${matchId}-bowl`) || ""
+    return ""
+  })
+  const [bowlerId, setBowlerId] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(`ls-${matchId}-bowler`) || ""
+    return ""
+  })
+  const [strikerId, setStrikerId] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(`ls-${matchId}-striker`) || ""
+    return ""
+  })
+  const [nonStrikerId, setNonStrikerId] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(`ls-${matchId}-nonStriker`) || ""
+    return ""
+  })
 
   const [wicketType, setWicketType] = useState<string | null>(null)
   const [wicketBatsman, setWicketBatsman] = useState("")
@@ -188,9 +203,29 @@ export default function LiveScoringPage() {
   }, [summary, battingTeamId])
 
   useEffect(() => {
+    if (battingTeamId) localStorage.setItem(`ls-${matchId}-bat`, battingTeamId)
+    if (bowlingTeamId) localStorage.setItem(`ls-${matchId}-bowl`, bowlingTeamId)
+  }, [matchId, battingTeamId, bowlingTeamId])
+
+  useEffect(() => {
+    if (bowlerId) localStorage.setItem(`ls-${matchId}-bowler`, bowlerId)
+  }, [matchId, bowlerId])
+
+  useEffect(() => {
+    if (strikerId) localStorage.setItem(`ls-${matchId}-striker`, strikerId)
+  }, [matchId, strikerId])
+
+  useEffect(() => {
+    if (nonStrikerId) localStorage.setItem(`ls-${matchId}-nonStriker`, nonStrikerId)
+  }, [matchId, nonStrikerId])
+
+  useEffect(() => {
     setBowlerId("")
     setStrikerId("")
     setNonStrikerId("")
+    localStorage.removeItem(`ls-${matchId}-bowler`)
+    localStorage.removeItem(`ls-${matchId}-striker`)
+    localStorage.removeItem(`ls-${matchId}-nonStriker`)
   }, [bowlingTeamId, battingTeamId])
 
   const ROLE_ORDER_BATTING: Record<string, number> = { "Batsman": 0, "Wicket-keeper": 1, "All-rounder": 2, "Bowler": 3 }
@@ -207,6 +242,16 @@ export default function LiveScoringPage() {
         ? [...summary.team1Players].sort((a, b) => (ROLE_ORDER_BOWLING[a.role] ?? 9) - (ROLE_ORDER_BOWLING[b.role] ?? 9))
         : [...summary.team2Players].sort((a, b) => (ROLE_ORDER_BOWLING[a.role] ?? 9) - (ROLE_ORDER_BOWLING[b.role] ?? 9)))
     : []
+
+  const outBatsmen = new Set<string>(
+    activeInnings
+      ? activeInnings.ballsData
+          .filter((b) => b.wicket)
+          .map((b) => b.wicketBatsman || b.striker)
+      : []
+  )
+
+  const availableBattingPlayers = battingPlayers.filter((p) => !outBatsmen.has(p.id) || p.id === strikerId || p.id === nonStrikerId)
 
   function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
     if (balls.length === 0) return []
@@ -232,6 +277,26 @@ export default function LiveScoringPage() {
     ? getCurrentOverBalls(activeInnings.ballsData)
     : []
 
+  const bowlerLegalBalls: Record<string, number> = {}
+  for (const b of activeInnings?.ballsData || []) {
+    if (!b.isWide && !b.isNoBall) {
+      bowlerLegalBalls[b.bowler] = (bowlerLegalBalls[b.bowler] || 0) + 1
+    }
+  }
+  const lastOverBowlerId: string | null = (() => {
+    if (!activeInnings || activeInnings.ballsData.length === 0) return null
+    const legalBalls = activeInnings.ballsData.filter((b) => !b.isWide && !b.isNoBall)
+    const currentOverNum = Math.floor(legalBalls.length / 6)
+    if (currentOverNum <= 0) return null
+    const prevOverStart = (currentOverNum - 1) * 6
+    const prevOverEnd = currentOverNum * 6
+    if (legalBalls.length % 6 === 0) {
+      return legalBalls[legalBalls.length - 1]?.bowler || null
+    }
+    return legalBalls[prevOverStart]?.bowler || null
+  })()
+  const MAX_BOWLER_OVERS = 2
+
   const innings1 = summary?.innings.find(
     (i) => i.teamId === (summary?.match.team1.id)
   )
@@ -240,8 +305,9 @@ export default function LiveScoringPage() {
   )
 
   function calcRequiredRunRate(): number | null {
-    if (!innings1 || battingTeamId !== summary?.match.team2.id) return null
-    const target = innings1.runs + innings1.extras + 1
+    if (!summary || summary.innings.length <= 1) return null
+    const firstInnings = summary.innings[0]
+    const target = firstInnings.runs + firstInnings.extras + 1
     const remaining = 60 - (activeInnings?.balls || 0)
     if (remaining <= 0) return 0
     return Number((((target - (activeInnings?.runs || 0) - (activeInnings?.extras || 0)) / remaining) * 6).toFixed(2))
@@ -279,10 +345,18 @@ export default function LiveScoringPage() {
         await fetchSummary()
         if (ball.wicket) {
           setStrikerId("")
-        } else if (ball.runs % 2 === 1) {
-          const tmp = strikerId
-          setStrikerId(nonStrikerId)
-          setNonStrikerId(tmp)
+        } else {
+          const completedRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+          if (completedRuns % 2 === 1) {
+            const tmp = strikerId
+            setStrikerId(nonStrikerId)
+            setNonStrikerId(tmp)
+          }
+        }
+        const legalBallsSoFar = (activeInnings?.balls || 0) + ((!ball.isWide && !ball.isNoBall) ? 1 : 0)
+        if (legalBallsSoFar > 0 && legalBallsSoFar % 6 === 0) {
+          setBowlerId("")
+          localStorage.removeItem(`ls-${matchId}-bowler`)
         }
       }
     } catch {}
@@ -485,7 +559,7 @@ export default function LiveScoringPage() {
           if (!ball.isWide && !ball.isNoBall) {
             bps.ballsBowled++
           }
-          bps.bowlingRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + ball.byes + ball.legByes
+          bps.bowlingRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
           if (ball.isWide) bps.wides++
           if (ball.isNoBall) bps.noBalls++
 
@@ -512,21 +586,6 @@ export default function LiveScoringPage() {
               if (ball.wicket === "stumped") fps.stumpings++
               if (ball.wicket === "runout") fps.runOuts++
             }
-          }
-        }
-
-        const bowlingTeamPlayers = Object.keys(playerStats).filter(
-          (pid) => playerStats[pid].teamId === bowlingTeamId && playerStats[pid].ballsBowled > 0
-        )
-        let overStart = true
-        let legalInOver = 0
-        for (const ball of balls) {
-          if (!ball.isWide && !ball.isNoBall) {
-            legalInOver++
-            if (legalInOver % 6 === 1) overStart = true
-          }
-          if (overStart && !ball.isWide && !ball.isNoBall) {
-            overStart = false
           }
         }
       }
@@ -831,9 +890,19 @@ export default function LiveScoringPage() {
                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
                   >
                     <option value="">Select</option>
-                    {bowlingPlayers.map((p) => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
+                    {bowlingPlayers.map((p) => {
+                      const overs = Math.floor((bowlerLegalBalls[p.id] || 0) / 6)
+                      const balls = (bowlerLegalBalls[p.id] || 0) % 6
+                      const overLabel = overs > 0 ? ` (${overs}.${balls} ov)` : ""
+                      const isLastOver = p.id === lastOverBowlerId
+                      const isMaxed = (bowlerLegalBalls[p.id] || 0) >= MAX_BOWLER_OVERS * 6
+                      const disabled = isLastOver || isMaxed
+                      return (
+                        <option key={p.id} value={disabled ? "" : p.id} disabled={disabled}>
+                          {p.name}{overLabel}{isLastOver ? " ← prev" : ""}{isMaxed ? " (max)" : ""}
+                        </option>
+                      )
+                    })}
                   </select>
                 </div>
                 <div>
@@ -846,7 +915,7 @@ export default function LiveScoringPage() {
                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
                   >
                     <option value="">Select</option>
-                    {battingPlayers.map((p) => (
+                    {availableBattingPlayers.map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
@@ -861,7 +930,7 @@ export default function LiveScoringPage() {
                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
                   >
                     <option value="">Select</option>
-                    {battingPlayers.map((p) => (
+                    {availableBattingPlayers.map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
@@ -882,7 +951,7 @@ export default function LiveScoringPage() {
                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm"
                       >
                         <option value="">Current Striker</option>
-                        {battingPlayers.map((p) => (
+                        {availableBattingPlayers.map((p) => (
                           <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
                       </select>
@@ -1190,6 +1259,17 @@ export default function LiveScoringPage() {
 
             {activeInnings && (
               <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+                {summary && summary.innings.length >= 2 && (() => {
+                  const firstInnings = summary.innings[0]
+                  const target = firstInnings.runs + firstInnings.extras + 1
+                  return (
+                    <div className="mb-3 rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-center">
+                      <p className="text-xs font-semibold text-amber-600">TARGET</p>
+                      <p className="text-2xl font-black text-amber-600">{target}</p>
+                      <p className="text-[10px] text-amber-600/70">Need {Math.max(0, target - (activeInnings.runs + activeInnings.extras))} runs from {Math.max(0, 60 - activeInnings.balls)} balls</p>
+                    </div>
+                  )
+                })()}
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="rounded-lg bg-[var(--muted)] p-3">
                     <p className="text-xs text-[var(--muted-foreground)]">CRR</p>
@@ -1307,7 +1387,7 @@ export default function LiveScoringPage() {
                             (b) => !b.isWide && !b.isNoBall
                           ).length
                           const runsConceded = balls.reduce(
-                            (s, b) => s + b.runs + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0) + b.byes + b.legByes,
+                            (s, b) => s + b.runs + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0),
                             0
                           )
                           const wickets = balls.filter((b) => b.wicket).length
