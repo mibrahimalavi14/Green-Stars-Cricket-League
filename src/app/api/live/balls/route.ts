@@ -22,8 +22,6 @@ function isLegalDelivery(ball: BallEvent): boolean {
 
 function totalRuns(ball: BallEvent): number {
   let total = ball.runs
-  if (ball.isWide) total += 1
-  if (ball.isNoBall) total += 1
   total += ball.byes
   total += ball.legByes
   return total
