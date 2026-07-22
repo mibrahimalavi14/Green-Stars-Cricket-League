@@ -158,11 +158,13 @@ export default function LiveScoringPage() {
     if (summary.match.tossWinner && !tossWinner) setTossWinner(summary.match.tossWinner)
     if (summary.match.tossDecision && !tossDecision) setTossDecision(summary.match.tossDecision)
     const m = summary.match
+    const tw = tossWinner || m.tossWinner
+    const td = tossDecision || m.tossDecision
     if (summary.innings.length <= 1) {
-      if (m.tossWinner && m.tossDecision) {
-        const t1BattingFirst = m.tossDecision === "bat"
-          ? m.tossWinner === m.team1.id
-          : m.tossWinner === m.team2.id
+      if (tw && td) {
+        const t1BattingFirst = td === "bat"
+          ? tw === m.team1.id
+          : tw === m.team2.id
         setBattingTeamId(t1BattingFirst ? m.team1.id : m.team2.id)
         setBowlingTeamId(t1BattingFirst ? m.team2.id : m.team1.id)
       } else {
@@ -177,7 +179,7 @@ export default function LiveScoringPage() {
       setBowlingTeamId(otherTeamId)
       setInningsNum(summary.innings.length)
     }
-  }, [summary])
+  }, [summary, tossWinner, tossDecision])
 
   useEffect(() => {
     if (!summary) return
@@ -771,6 +773,11 @@ export default function LiveScoringPage() {
                         <button
                           onClick={async () => {
                             if (!tossWinner || !tossDecision) return
+                            const t1BattingFirst = tossDecision === "bat"
+                              ? tossWinner === match.team1.id
+                              : tossWinner === match.team2.id
+                            setBattingTeamId(t1BattingFirst ? match.team1.id : match.team2.id)
+                            setBowlingTeamId(t1BattingFirst ? match.team2.id : match.team1.id)
                             const res = await fetch("/api/matches", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
