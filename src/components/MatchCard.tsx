@@ -38,27 +38,27 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
           )}
         </div>
       )}
-      <div className="flex items-center justify-between gap-4">
-        <div className={`flex min-w-0 flex-1 items-center gap-3 rounded-lg p-2 ${team1Won ? "bg-green-500/10" : ""}`}>
+      <div className="flex items-center justify-between gap-2 sm:gap-4">
+        <div className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg p-1.5 sm:gap-3 sm:p-2 ${team1Won ? "bg-green-500/10" : ""}`}>
           {match.team1.logo ? (
-            <img src={match.team1.logo} alt={match.team1.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+            <img src={match.team1.logo} alt={match.team1.name} className="h-8 w-8 shrink-0 rounded-full object-cover sm:h-10 sm:w-10" />
           ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: match.team1.color, color: "#fff" }}>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-10 sm:w-10" style={{ backgroundColor: match.team1.color, color: "#fff" }}>
               {match.team1.shortName}
             </div>
           )}
           <div className="min-w-0 text-right">
-            <p className="flex items-center justify-end gap-1.5 truncate text-sm font-medium">
+            <p className="flex items-center justify-end gap-1 truncate text-xs font-medium sm:text-sm">
               {match.team1.name}
-              {team1Won && <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
+              {team1Won && <Trophy className="h-3.5 w-3.5 shrink-0 text-yellow-500" />}
             </p>
-            {match.team1Score && <p className="text-lg font-bold">{match.team1Score}</p>}
+            {match.team1Score && <p className="text-base font-bold sm:text-lg">{match.team1Score}</p>}
           </div>
         </div>
         <div className="shrink-0 text-center">
           <span className="text-xs font-semibold text-[var(--accent)]">VS</span>
           {match.status === "upcoming" && (
-            <div className="mt-1 text-xs">
+            <div className="mt-1 text-[10px] sm:text-xs">
               {rel.label ? (
                 <span className={rel.className}>{rel.label}</span>
               ) : (
@@ -67,18 +67,18 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
             </div>
           )}
         </div>
-        <div className={`flex min-w-0 flex-1 items-center justify-end gap-3 rounded-lg p-2 ${team2Won ? "bg-green-500/10" : ""}`}>
+        <div className={`flex min-w-0 flex-1 items-center justify-end gap-2 rounded-lg p-1.5 sm:gap-3 sm:p-2 ${team2Won ? "bg-green-500/10" : ""}`}>
           <div className="min-w-0 text-left">
-            <p className="flex items-center gap-1.5 truncate text-sm font-medium">
+            <p className="flex items-center gap-1 truncate text-xs font-medium sm:text-sm">
               {match.team2.name}
-              {team2Won && <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
+              {team2Won && <Trophy className="h-3.5 w-3.5 shrink-0 text-yellow-500" />}
             </p>
-            {match.team2Score && <p className="text-lg font-bold">{match.team2Score}</p>}
+            {match.team2Score && <p className="text-base font-bold sm:text-lg">{match.team2Score}</p>}
           </div>
           {match.team2.logo ? (
-            <img src={match.team2.logo} alt={match.team2.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+            <img src={match.team2.logo} alt={match.team2.name} className="h-8 w-8 shrink-0 rounded-full object-cover sm:h-10 sm:w-10" />
           ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: match.team2.color, color: "#fff" }}>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:h-10 sm:w-10" style={{ backgroundColor: match.team2.color, color: "#fff" }}>
               {match.team2.shortName}
             </div>
           )}
