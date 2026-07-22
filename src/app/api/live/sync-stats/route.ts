@@ -129,70 +129,36 @@ export async function POST(req: Request) {
     }
   }
 
-  for (const pid of Object.keys(playerStats)) {
-    const p = playerStats[pid]
-    await prisma.playerMatch.upsert({
-      where: { playerId_matchId: { playerId: pid, matchId } },
-      update: {
-        battingRuns: p.battingRuns,
-        ballsFaced: p.ballsFaced,
-        fours: p.fours,
-        sixes: p.sixes,
-        ones: p.ones,
-        twos: p.twos,
-        threes: p.threes,
-        dotBalls: p.dotBalls,
-        isOut: p.isOut,
-        dismissalType: p.dismissalType,
-        dismissedByBowlerId: p.dismissedByBowlerId,
-        dismissedByFielderId: p.dismissedByFielderId,
-        bowlingWickets: p.bowlingWickets,
-        bowlingRuns: p.bowlingRuns,
-        ballsBowled: p.ballsBowled,
-        maidens: p.maidens,
-        wides: p.wides,
-        noBalls: p.noBalls,
-        hattricks: p.hattricks,
-        catches: p.catches,
-        stumpings: p.stumpings,
-        runOuts: p.runOuts,
-      },
-      create: {
-        playerId: pid,
-        matchId,
-        teamId: p.teamId,
-        battingRuns: p.battingRuns,
-        ballsFaced: p.ballsFaced,
-        fours: p.fours,
-        sixes: p.sixes,
-        ones: p.ones,
-        twos: p.twos,
-        threes: p.threes,
-        dotBalls: p.dotBalls,
-        isOut: p.isOut,
-        dismissalType: p.dismissalType,
-        dismissedByBowlerId: p.dismissedByBowlerId,
-        dismissedByFielderId: p.dismissedByFielderId,
-        bowlingWickets: p.bowlingWickets,
-        bowlingRuns: p.bowlingRuns,
-        ballsBowled: p.ballsBowled,
-        maidens: p.maidens,
-        wides: p.wides,
-        noBalls: p.noBalls,
-        hattricks: p.hattricks,
-        catches: p.catches,
-        stumpings: p.stumpings,
-        runOuts: p.runOuts,
-      },
+  await prisma.$transaction(
+    Object.keys(playerStats).map(pid => {
+      const p = playerStats[pid]
+      const data = {
+        battingRuns: p.battingRuns, ballsFaced: p.ballsFaced, fours: p.fours, sixes: p.sixes,
+        ones: p.ones, twos: p.twos, threes: p.threes, dotBalls: p.dotBalls,
+        isOut: p.isOut, dismissalType: p.dismissalType, dismissedByBowlerId: p.dismissedByBowlerId, dismissedByFielderId: p.dismissedByFielderId,
+        bowlingWickets: p.bowlingWickets, bowlingRuns: p.bowlingRuns, ballsBowled: p.ballsBowled,
+        maidens: p.maidens, wides: p.wides, noBalls: p.noBalls, hattricks: p.hattricks,
+        catches: p.catches, stumpings: p.stumpings, runOuts: p.runOuts,
+      }
+      return prisma.playerMatch.upsert({
+        where: { playerId_matchId: { playerId: pid, matchId } },
+        update: data,
+        create: { playerId: pid, matchId, teamId: p.teamId, ...data },
+      })
     })
-  }
+  )
 
-  // Update career 4w/5w stats for bowlers in this match
   const bowlerIds = [...new Set(Object.keys(playerStats).filter(pid => playerStats[pid].bowlingWickets > 0))]
-  for (const bowlerId of bowlerIds) {
-    const fourPlus = await prisma.playerMatch.count({ where: { playerId: bowlerId, bowlingWickets: { gte: 4 } } })
-    const fivePlus = await prisma.playerMatch.count({ where: { playerId: bowlerId, bowlingWickets: { gte: 5 } } })
-    await prisma.player.update({ where: { id: bowlerId }, data: { fourWickets: fourPlus, fiveWickets: fivePlus } })
+  if (bowlerIds.length > 0) {
+    const [fourPlusCounts, fivePlusCounts] = await Promise.all([
+      prisma.playerMatch.groupBy({ by: ["playerId"], where: { playerId: { in: bowlerIds }, bowlingWickets: { gte: 4 } }, _count: { id: true } }),
+      prisma.playerMatch.groupBy({ by: ["playerId"], where: { playerId: { in: bowlerIds }, bowlingWickets: { gte: 5 } }, _count: { id: true } }),
+    ])
+    const fourMap = new Map(fourPlusCounts.map(r => [r.playerId, r._count.id]))
+    const fiveMap = new Map(fivePlusCounts.map(r => [r.playerId, r._count.id]))
+    await prisma.$transaction(
+      bowlerIds.map(bid => prisma.player.update({ where: { id: bid }, data: { fourWickets: fourMap.get(bid) || 0, fiveWickets: fiveMap.get(bid) || 0 } }))
+    )
   }
 
   return NextResponse.json({ success: true, playersUpdated: Object.keys(playerStats).length })

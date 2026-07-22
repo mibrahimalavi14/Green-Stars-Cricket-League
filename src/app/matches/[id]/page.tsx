@@ -273,22 +273,23 @@ function FallOfWickets({ battingPerformances, allPerformances, inning }: { batti
 
 async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const match = await prisma.match.findUnique({
-    where: { id },
-    include: {
-      team1: true,
-      team2: true,
-      season: true,
-      innings: true,
-      performances: { include: { player: true } },
-    },
-  })
+  const [match, squad] = await Promise.all([
+    prisma.match.findUnique({
+      where: { id },
+      include: {
+        team1: true,
+        team2: true,
+        season: true,
+        innings: true,
+        performances: { include: { player: true } },
+      },
+    }),
+    prisma.squadMember.findMany({
+      where: { matchId: id },
+      include: { player: { select: { name: true, role: true, photo: true } } },
+    }),
+  ])
   if (!match) notFound()
-
-  const squad = await prisma.squadMember.findMany({
-    where: { matchId: id },
-    include: { player: { select: { name: true, role: true, photo: true } } },
-  })
 
   const m: MatchWithRelations = match
   const allPerfs = m.performances

@@ -13,15 +13,16 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
   })
   if (!player) notFound()
 
-  const performances = await prisma.playerMatch.findMany({
-    where: { playerId: player.id },
-    include: {
-      match: { include: { team1: true, team2: true, season: true } },
-    },
-    orderBy: { match: { date: "desc" } },
-  })
-
-  const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
+  const [performances, seasons] = await Promise.all([
+    prisma.playerMatch.findMany({
+      where: { playerId: player.id },
+      include: {
+        match: { include: { team1: true, team2: true, season: true } },
+      },
+      orderBy: { match: { date: "desc" } },
+    }),
+    prisma.season.findMany({ orderBy: { year: "desc" } }),
+  ])
 
   const seasonStats = seasons.map(s => {
     const p = performances.filter(x => x.match.seasonId === s.id)

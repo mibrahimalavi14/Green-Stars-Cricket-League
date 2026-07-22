@@ -93,34 +93,38 @@ export async function recalcPointsTable(seasonId: string) {
 }
 
 export async function recalcPlayerStats() {
-  const players = await prisma.player.findMany()
-  const performances = await prisma.playerMatch.groupBy({
-    by: ["playerId"],
-    _sum: {
-      battingRuns: true,
-      ballsFaced: true,
-      fours: true,
-      sixes: true,
-      ones: true,
-      twos: true,
-      bowlingWickets: true,
-      bowlingRuns: true,
-      ballsBowled: true,
-      maidens: true,
-      wides: true,
-      noBalls: true,
-      threes: true,
-      dotBalls: true,
-      hattricks: true,
-      catches: true,
-      stumpings: true,
-      runOuts: true,
-    },
-    _count: { id: true },
-  })
+  const [players, allMatches, performances] = await Promise.all([
+    prisma.player.findMany(),
+    prisma.playerMatch.findMany({
+      select: {
+        playerId: true,
+        battingRuns: true, ballsFaced: true, isOut: true,
+        bowlingWickets: true, bowlingRuns: true,
+        dismissalType: true, secondDismissalType: true,
+        threes: true, dotBalls: true, maidens: true, wides: true, noBalls: true, hattricks: true,
+      },
+    }),
+    prisma.playerMatch.groupBy({
+      by: ["playerId"],
+      _sum: {
+        battingRuns: true, ballsFaced: true, fours: true, sixes: true,
+        ones: true, twos: true, bowlingWickets: true, bowlingRuns: true,
+        ballsBowled: true, maidens: true, wides: true, noBalls: true,
+        threes: true, dotBalls: true, hattricks: true,
+        catches: true, stumpings: true, runOuts: true,
+      },
+      _count: { id: true },
+    }),
+  ])
 
   const perfMap = new Map(performances.map(p => [p.playerId, p]))
+  const matchesByPlayer = new Map<string, typeof allMatches>()
+  for (const m of allMatches) {
+    if (!matchesByPlayer.has(m.playerId)) matchesByPlayer.set(m.playerId, [])
+    matchesByPlayer.get(m.playerId)!.push(m)
+  }
 
+  const updates: Promise<any>[] = []
   for (const player of players) {
     const p = perfMap.get(player.id)
     if (!p) continue
@@ -139,36 +143,28 @@ export async function recalcPlayerStats() {
     const stumpings = p._sum.stumpings || 0
     const runOuts = p._sum.runOuts || 0
 
-    const individualMatches = await prisma.playerMatch.findMany({
-      where: { playerId: player.id },
-      select: {
-        battingRuns: true, ballsFaced: true, isOut: true,
-        bowlingWickets: true, bowlingRuns: true,
-        dismissalType: true, secondDismissalType: true,
-        threes: true, dotBalls: true, maidens: true, wides: true, noBalls: true, hattricks: true,
-      },
-    })
-    const fifties = individualMatches.filter(m => m.battingRuns >= 50 && m.battingRuns < 100).length
-    const hundreds = individualMatches.filter(m => m.battingRuns >= 100).length
-    const notOuts = individualMatches.filter(m => m.ballsFaced > 0 && !m.isOut).length
-    const ducks = individualMatches.filter(m => m.battingRuns === 0 && m.isOut).length
-    const highestScore = Math.max(...individualMatches.map(m => m.battingRuns), 0)
-    const fiveWickets = individualMatches.filter(m => m.bowlingWickets >= 5).length
-    const fourWickets = individualMatches.filter(m => m.bowlingWickets >= 4).length
-    const timesBowled = individualMatches.filter(m => m.dismissalType === "bowled" || m.secondDismissalType === "bowled").length
-    const timesCaught = individualMatches.filter(m => m.dismissalType === "caught" || m.secondDismissalType === "caught").length
-    const timesLbw = individualMatches.filter(m => m.dismissalType === "lbw" || m.secondDismissalType === "lbw").length
-    const timesStumped = individualMatches.filter(m => m.dismissalType === "stumped" || m.secondDismissalType === "stumped").length
-    const timesRunOut = individualMatches.filter(m => m.dismissalType === "runout" || m.secondDismissalType === "runout").length
-    const threes = individualMatches.reduce((a, m) => a + (m.threes || 0), 0)
-    const dotBalls = individualMatches.reduce((a, m) => a + (m.dotBalls || 0), 0)
-    const hattricks = individualMatches.reduce((a, m) => a + (m.hattricks || 0), 0)
-    const maidens = individualMatches.reduce((a, m) => a + (m.maidens || 0), 0)
-    const wides = individualMatches.reduce((a, m) => a + (m.wides || 0), 0)
-    const noBalls = individualMatches.reduce((a, m) => a + (m.noBalls || 0), 0)
+    const im = matchesByPlayer.get(player.id) || []
+    const fifties = im.filter(m => m.battingRuns >= 50 && m.battingRuns < 100).length
+    const hundreds = im.filter(m => m.battingRuns >= 100).length
+    const notOuts = im.filter(m => m.ballsFaced > 0 && !m.isOut).length
+    const ducks = im.filter(m => m.battingRuns === 0 && m.isOut).length
+    const highestScore = im.length > 0 ? Math.max(...im.map(m => m.battingRuns)) : 0
+    const fiveWickets = im.filter(m => m.bowlingWickets >= 5).length
+    const fourWickets = im.filter(m => m.bowlingWickets >= 4).length
+    const timesBowled = im.filter(m => m.dismissalType === "bowled" || m.secondDismissalType === "bowled").length
+    const timesCaught = im.filter(m => m.dismissalType === "caught" || m.secondDismissalType === "caught").length
+    const timesLbw = im.filter(m => m.dismissalType === "lbw" || m.secondDismissalType === "lbw").length
+    const timesStumped = im.filter(m => m.dismissalType === "stumped" || m.secondDismissalType === "stumped").length
+    const timesRunOut = im.filter(m => m.dismissalType === "runout" || m.secondDismissalType === "runout").length
+    const threes = im.reduce((a, m) => a + (m.threes || 0), 0)
+    const dotBalls = im.reduce((a, m) => a + (m.dotBalls || 0), 0)
+    const hattricks = im.reduce((a, m) => a + (m.hattricks || 0), 0)
+    const maidens = im.reduce((a, m) => a + (m.maidens || 0), 0)
+    const wides = im.reduce((a, m) => a + (m.wides || 0), 0)
+    const noBalls = im.reduce((a, m) => a + (m.noBalls || 0), 0)
 
     let bestWkts = 0, bestRuns = Infinity
-    for (const m of individualMatches) {
+    for (const m of im) {
       if (m.bowlingWickets > bestWkts || (m.bowlingWickets === bestWkts && m.bowlingRuns < bestRuns)) {
         bestWkts = m.bowlingWickets
         bestRuns = m.bowlingRuns
@@ -177,7 +173,7 @@ export async function recalcPlayerStats() {
     const bestBowlingWickets = bestWkts
     const bestBowlingRuns = bestRuns === Infinity ? 0 : bestRuns
 
-    await prisma.player.update({
+    updates.push(prisma.player.update({
       where: { id: player.id },
       data: {
         runs, ballsFaced, fours, sixes, ones, twos,
@@ -189,6 +185,8 @@ export async function recalcPlayerStats() {
         catches, stumpings, runOuts,
         timesBowled, timesCaught, timesLbw, timesStumped, timesRunOut,
       },
-    })
+    }))
   }
+
+  await prisma.$transaction(updates as any)
 }

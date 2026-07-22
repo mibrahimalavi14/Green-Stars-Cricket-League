@@ -22,7 +22,6 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
     where: {
       seasonId: team.seasonId,
       OR: [{ team1Id: team.id }, { team2Id: team.id }],
-      date: { lt: new Date("2026-08-16T00:00:00.000Z") },
     },
     include: { team1: true, team2: true },
     orderBy: { date: "asc" },

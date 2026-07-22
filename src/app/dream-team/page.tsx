@@ -7,22 +7,42 @@ export const dynamic = "force-dynamic"
 const ROLES = ["Wicket-keeper", "Batsman", "Batsman", "Batsman", "Batsman", "All-rounder", "All-rounder", "Bowler", "Bowler", "Bowler", "Bowler"] as const
 
 async function DreamTeamPage() {
-  const players = await prisma.player.findMany({ include: { team: true } })
-  const performances = await prisma.playerMatch.findMany({
-    include: { player: { include: { team: true } } },
-  })
+  const [players, perfsByPlayer, outCounts] = await Promise.all([
+    prisma.player.findMany({
+      select: { id: true, name: true, role: true, team: { select: { shortName: true, logo: true } } },
+    }),
+    prisma.playerMatch.groupBy({
+      by: ["playerId"],
+      _sum: { battingRuns: true, ballsFaced: true, bowlingWickets: true, bowlingRuns: true, ballsBowled: true, catches: true, stumpings: true },
+      _count: { id: true },
+    }),
+    prisma.playerMatch.groupBy({
+      by: ["playerId"],
+      where: { isOut: true },
+      _count: { id: true },
+    }),
+  ])
 
-  const stats = players.map(p => {
-    const pPerfs = performances.filter(x => x.playerId === p.id)
-    const runs = pPerfs.reduce((s, x) => s + x.battingRuns, 0)
-    const ballsFaced = pPerfs.reduce((s, x) => s + x.ballsFaced, 0)
-    const wickets = pPerfs.reduce((s, x) => s + x.bowlingWickets, 0)
-    const dismissals = pPerfs.filter(x => x.isOut).length
-    const catches = pPerfs.reduce((s, x) => s + x.catches, 0)
-    const stumpings = pPerfs.reduce((s, x) => s + x.stumpings, 0)
-    const ballsBowled = pPerfs.reduce((s, x) => s + x.ballsBowled, 0)
-    const runsConceded = pPerfs.reduce((s, x) => s + x.bowlingRuns, 0)
-    return { ...p, runs, ballsFaced, wickets, dismissals, catches, stumpings, ballsBowled, runsConceded, matchCount: pPerfs.length }
+  const outMap = new Map(outCounts.map(o => [o.playerId, o._count.id]))
+  const perfMap = new Map(perfsByPlayer.map(p => [p.playerId, p]))
+  const stats = players.map(pl => {
+    const s = perfMap.get(pl.id)
+    const runs = s?._sum?.battingRuns || 0
+    const ballsFaced = s?._sum?.ballsFaced || 0
+    const wickets = s?._sum?.bowlingWickets || 0
+    const dismissals = outMap.get(pl.id) || 0
+    return {
+      ...pl,
+      runs,
+      ballsFaced,
+      wickets,
+      dismissals,
+      catches: s?._sum?.catches || 0,
+      stumpings: s?._sum?.stumpings || 0,
+      ballsBowled: s?._sum?.ballsBowled || 0,
+      runsConceded: s?._sum?.bowlingRuns || 0,
+      matchCount: s?._count?.id || 0,
+    }
   })
 
   const wicketkeepers = stats.filter(p => p.role === "Wicket-keeper" && p.matchCount > 0).sort((a, b) => (b.runs + b.catches * 10 + b.stumpings * 15) - (a.runs + a.catches * 10 + a.stumpings * 15))

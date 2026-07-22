@@ -5,17 +5,19 @@ import { Trophy, Users, Target, TrendingUp, Award, Zap } from "lucide-react"
 export const dynamic = "force-dynamic"
 
 async function TeamStatsPage() {
-  const teams = await prisma.team.findMany({
-    include: {
-      players: true,
-      _count: { select: { players: true } },
-    },
-  })
-
-  const matches = await prisma.match.findMany({
-    where: { status: "completed" },
-    include: { team1: true, team2: true },
-  })
+  const [teams, matches] = await Promise.all([
+    prisma.team.findMany({
+      select: {
+        id: true, name: true, shortName: true, logo: true, color: true,
+        players: { select: { runs: true, wickets: true, runsConceded: true, matchesPlayed: true, name: true } },
+        _count: { select: { players: true } },
+      },
+    }),
+    prisma.match.findMany({
+      where: { status: "completed" },
+      select: { id: true, team1Id: true, team2Id: true, result: true },
+    }),
+  ])
 
   const teamStats = teams.map((team) => {
     const teamMatches = matches.filter((m) => m.team1Id === team.id || m.team2Id === team.id)
@@ -60,7 +62,7 @@ async function TeamStatsPage() {
               </div>
               <div>
                 <h2 className="text-lg font-bold group-hover:text-[var(--accent)]">{s.team.name}</h2>
-                <p className="text-xs text-[var(--muted-foreground)]">{s.team.shortName} &middot; {s.team.location || "Haripur"}</p>
+                <p className="text-xs text-[var(--muted-foreground)]">{s.team.shortName}</p>
               </div>
             </div>
 
