@@ -154,7 +154,7 @@ function Scorecard({ match, players, performances, onGenerate }: { match: MatchR
             </button>
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-3 items-center gap-4 text-center">
+        <div className="mt-3 grid grid-cols-1 items-center gap-4 text-center sm:grid-cols-3">
           <div>
             <div className="flex items-center justify-center gap-2">
               {match.team1.logo && <img src={match.team1.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}

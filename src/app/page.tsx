@@ -71,7 +71,7 @@ async function HomePage() {
           <div className="absolute right-[40%] bottom-[20%] h-1.5 w-1.5 animate-ping rounded-full bg-gscl-gold/20" style={{ animationDuration: "2.5s", animationDelay: "1.2s" }} />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 text-center">
-          <h1 className="mb-4 text-5xl font-bold text-white md:text-7xl">
+          <h1 className="mb-4 text-3xl font-bold text-white sm:text-5xl md:text-7xl">
             Green Stars <span className="animate-gradient bg-gradient-to-r from-gscl-gold via-yellow-300 to-gscl-gold bg-clip-text text-transparent">Cricket League</span>
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-white/80">

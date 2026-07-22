@@ -44,7 +44,7 @@ export default function PerformersPage() {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[700px] text-sm">
           <thead>
             <tr className="bg-[var(--muted)] text-left">
               <th className="px-4 py-3 font-medium">#</th>

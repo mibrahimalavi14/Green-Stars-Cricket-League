@@ -736,7 +736,7 @@ export default function LiveScoringPage() {
         </div>
 
         <div className="mb-4 rounded-xl border-2 border-[var(--accent)]/30 bg-[var(--card)] p-4">
-          <div className="grid grid-cols-3 items-center gap-4 text-center">
+          <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-3">
             <div>
               <div className="mb-1 flex items-center justify-center gap-2">
                 {match.team1.logo && (
@@ -879,7 +879,7 @@ export default function LiveScoringPage() {
                 )}
               </div>
 
-              <div className="mb-3 grid grid-cols-3 gap-3">
+              <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-[var(--muted-foreground)]">
                     Bowler

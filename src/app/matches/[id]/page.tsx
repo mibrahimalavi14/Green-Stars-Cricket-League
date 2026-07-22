@@ -207,7 +207,7 @@ function PartnershipCard({ battingPerformances, allPerformances, inning }: { bat
           )
         })}
         <div className="mt-3 border-t border-[var(--border)] pt-3">
-          <div className="flex items-center justify-center gap-2 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
             <span className="text-lg font-bold">{totalRuns}</span>
             <span className="text-[var(--muted-foreground)]">runs</span>
             <span className="text-[var(--muted-foreground)]">|</span>
@@ -218,7 +218,7 @@ function PartnershipCard({ battingPerformances, allPerformances, inning }: { bat
             <span className="text-[var(--muted-foreground)]">|</span>
             <span className="font-mono">SR {totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(1) : "-"}</span>
           </div>
-          <div className="flex items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
             <span>RR {inning && inning.balls > 0 ? ((inning.runs + inning.extras) / (inning.balls / 6)).toFixed(2) : "-"}</span>
             {inning && (
               <>

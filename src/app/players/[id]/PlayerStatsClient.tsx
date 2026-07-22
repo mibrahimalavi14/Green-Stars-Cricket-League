@@ -68,7 +68,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-8">
         <div className="mb-4 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
           {p.photo && p.photo !== "/placeholder-player.svg" ? (
             <img src={p.photo} alt={p.name} className="h-24 w-24 rounded-full object-cover" />
