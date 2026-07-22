@@ -21,10 +21,7 @@ function isLegalDelivery(ball: BallEvent): boolean {
 }
 
 function totalRuns(ball: BallEvent): number {
-  let total = ball.runs
-  total += ball.byes
-  total += ball.legByes
-  return total
+  return ball.runs
 }
 
 export async function POST(req: Request) {
