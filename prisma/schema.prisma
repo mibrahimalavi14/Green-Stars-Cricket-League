@@ -106,7 +106,6 @@ model Player {
   hundreds        Int     @default(0)
   highestScore    Int     @default(0)
   notOuts         Int     @default(0)
-  dismissals      Int     @default(0)
   ducks           Int     @default(0)
   matchesPlayed   Int     @default(0)
   wickets         Int     @default(0)
