@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   return NextResponse.json(player)
 }
 
-const STAT_FIELDS = ["runs","ballsFaced","fours","sixes","threes","dotBalls","ones","twos","fifties","hundreds","highestScore","notOuts","ducks","matchesPlayed","wickets","ballsBowled","runsConceded","maidens","wides","noBalls","fiveWickets","fourWickets","hattricks","bestBowlingWickets","bestBowlingRuns","catches","stumpings","runOuts","timesBowled","timesCaught","timesLbw","timesStumped","timesRunOut"]
+const STAT_FIELDS = ["runs","ballsFaced","fours","sixes","threes","dotBalls","ones","twos","fifties","hundreds","highestScore","highestScoreNotOut","notOuts","ducks","matchesPlayed","wickets","ballsBowled","runsConceded","maidens","wides","noBalls","fiveWickets","fourWickets","hattricks","bestBowlingWickets","bestBowlingRuns","bestBowlingBalls","catches","stumpings","runOuts","timesBowled","timesCaught","timesLbw","timesStumped","timesRunOut"]
 
 export async function PATCH(req: Request) {
   const body = await req.json()

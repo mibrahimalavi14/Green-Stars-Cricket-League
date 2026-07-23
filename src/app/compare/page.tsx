@@ -7,10 +7,10 @@ type TeamInfo = { id: string; name: string; shortName: string; color: string; lo
 type Player = {
   id: string; name: string; role: string; battingStyle: string; bowlingStyle: string; photo: string; teamId: string; team: TeamInfo
   runs: number; ballsFaced: number; fours: number; sixes: number; ones: number; twos: number
-  threes: number; dotBalls: number; highestScore: number
+  threes: number; dotBalls: number; highestScore: number; highestScoreNotOut: boolean
   fifties: number; hundreds: number; wickets: number; ballsBowled: number; runsConceded: number
   maidens: number; wides: number; noBalls: number; fiveWickets: number; fourWickets: number; hattricks: number
-  matchesPlayed: number; bestBowlingWickets: number; bestBowlingRuns: number
+  matchesPlayed: number; bestBowlingWickets: number; bestBowlingRuns: number; bestBowlingBalls: number
   catches: number; stumpings: number; runOuts: number; notOuts: number; ducks: number
   timesBowled: number; timesCaught: number; timesLbw: number; timesStumped: number; timesRunOut: number
 }
@@ -257,7 +257,7 @@ const BATTING_STATS: StatDef[] = [
   { label: "Sixes", key: "sixes" },
   { label: "Threes", key: "threes" },
   { label: "Dot Balls", key: "dotBalls" },
-  { label: "Highest Score", key: "highestScore" },
+  { label: "Highest Score", key: "highestScore", format: (_v: number, p?: Player) => p && p.highestScoreNotOut ? `${p.highestScore}*` : String(p?.highestScore ?? 0) },
   { label: "50s", key: "fifties" },
   { label: "100s", key: "hundreds" },
   { label: "Not Outs", key: "notOuts" },
@@ -272,7 +272,7 @@ const BATTING_STATS: StatDef[] = [
   },
   {
     label: "Boundary%", key: "_bdry",
-    format: (_v: number, p?: Player) => p && p.runs > 0 ? (((p.fours * 4 + p.sixes * 6) / p.runs) * 100).toFixed(2) : "-",
+    format: (_v: number, p?: Player) => p && p.runs > 0 ? (((p.fours * 4 + p.sixes * 6) / p.runs) * 100).toFixed(1) : "0",
   },
 ]
 const BOWLING_STATS: StatDef[] = [

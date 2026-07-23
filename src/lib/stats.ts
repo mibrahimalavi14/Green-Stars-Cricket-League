@@ -99,7 +99,7 @@ export async function recalcPlayerStats() {
       select: {
         playerId: true,
         battingRuns: true, ballsFaced: true, isOut: true,
-        bowlingWickets: true, bowlingRuns: true,
+        bowlingWickets: true, bowlingRuns: true, ballsBowled: true,
         dismissalType: true, secondDismissalType: true,
         threes: true, dotBalls: true, maidens: true, wides: true, noBalls: true, hattricks: true,
       },
@@ -149,7 +149,14 @@ export async function recalcPlayerStats() {
     const notOuts = im.filter(m => m.ballsFaced > 0 && !m.isOut).length
     const ducks = im.filter(m => m.battingRuns === 0 && m.isOut).length
     const dismissals = im.filter(m => m.isOut).length
-    const highestScore = im.length > 0 ? Math.max(...im.map(m => m.battingRuns)) : 0
+    let highestScore = 0
+    let highestScoreNotOut = false
+    for (const m of im) {
+      if (m.battingRuns > highestScore || (m.battingRuns === highestScore && !m.isOut && !highestScoreNotOut)) {
+        highestScore = m.battingRuns
+        highestScoreNotOut = m.ballsFaced > 0 && !m.isOut
+      }
+    }
     const fiveWickets = im.filter(m => m.bowlingWickets >= 5).length
     const fourWickets = im.filter(m => m.bowlingWickets >= 4).length
     const timesBowled = im.filter(m => m.dismissalType === "bowled" || m.secondDismissalType === "bowled").length
@@ -164,25 +171,29 @@ export async function recalcPlayerStats() {
     const wides = im.reduce((a, m) => a + (m.wides || 0), 0)
     const noBalls = im.reduce((a, m) => a + (m.noBalls || 0), 0)
 
-    let bestWkts = 0, bestRuns = Infinity
+    let bestWkts = 0, bestRuns = Infinity, bestBalls = Infinity
     for (const m of im) {
-      if (m.bowlingWickets > bestWkts || (m.bowlingWickets === bestWkts && m.bowlingRuns < bestRuns)) {
+      if (m.bowlingWickets > bestWkts ||
+          (m.bowlingWickets === bestWkts && m.bowlingRuns < bestRuns) ||
+          (m.bowlingWickets === bestWkts && m.bowlingRuns === bestRuns && (m.ballsBowled || 0) < bestBalls)) {
         bestWkts = m.bowlingWickets
         bestRuns = m.bowlingRuns
+        bestBalls = m.ballsBowled || 0
       }
     }
     const bestBowlingWickets = bestWkts
     const bestBowlingRuns = bestRuns === Infinity ? 0 : bestRuns
+    const bestBowlingBalls = bestBalls === Infinity ? 0 : bestBalls
 
     updates.push(prisma.player.update({
       where: { id: player.id },
       data: {
           runs, ballsFaced, fours, sixes, ones, twos,
-          threes, dotBalls, highestScore,
+          threes, dotBalls, highestScore, highestScoreNotOut,
           fifties, hundreds, notOuts, dismissals, ducks,
         wickets, runsConceded, ballsBowled, maidens, wides, noBalls,
         fiveWickets, fourWickets, hattricks,
-        matchesPlayed, bestBowlingWickets, bestBowlingRuns,
+        matchesPlayed, bestBowlingWickets, bestBowlingRuns, bestBowlingBalls,
         catches, stumpings, runOuts,
         timesBowled, timesCaught, timesLbw, timesStumped, timesRunOut,
       },

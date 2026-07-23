@@ -48,14 +48,19 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
   const bowlingAvg = wickets > 0 ? (runsConceded / wickets).toFixed(2) : "-"
   const battingSr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
   const overs = Math.floor(ballsBowled / 6) + "." + (ballsBowled % 6)
-  const hs = Math.max(...selPerfs.map(x => x.battingRuns), 0)
+  const hsPerf = selPerfs.reduce((best, x) => x.battingRuns > (best?.battingRuns ?? -1) ? x : best, null as PerfMin | null)
+  const hs = hsPerf ? hsPerf.battingRuns : 0
+  const hsDisplay = hsPerf && !hsPerf.isOut && hsPerf.ballsFaced > 0 ? `${hs}*` : String(hs)
   const ballsPerBoundary = (fours + sixes) > 0 ? (ballsFaced / (fours + sixes)).toFixed(1) : "-"
   const bowlingSr = wickets > 0 ? (ballsBowled / wickets).toFixed(2) : "-"
   const wktsPerMatch = selPerfs.length > 0 ? (wickets / selPerfs.length).toFixed(2) : "-"
-  const boundaryPct = runs > 0 ? (((fours * 4 + sixes * 6) / runs) * 100).toFixed(2) : "-"
-  const dotBallPct = ballsFaced > 0 ? ((dotBalls / ballsFaced) * 100).toFixed(2) : "-"
+  const boundaryPct = runs === 0 ? "0" : (((fours * 4 + sixes * 6) / runs) * 100).toFixed(1)
+  const dotBallPct = ballsFaced === 0 ? "0" : ((dotBalls / ballsFaced) * 100).toFixed(1)
   const bestBbiWkts = Math.max(...selPerfs.map(x => x.bowlingWickets), 0)
-  const bestBbiRuns = selPerfs.filter(x => x.bowlingWickets === bestBbiWkts).sort((a, b) => a.bowlingRuns - b.bowlingRuns)[0]?.bowlingRuns || 0
+  const bestBbiCandidates = selPerfs.filter(x => x.bowlingWickets === bestBbiWkts)
+  const bestBbiRuns = bestBbiCandidates.sort((a, b) => a.bowlingRuns - b.bowlingRuns)[0]?.bowlingRuns || 0
+  const bestBbiBalls = bestBbiCandidates.sort((a, b) => (a.ballsBowled || 0) - (b.ballsBowled || 0))[0]?.ballsBowled || 0
+  const bestBbiOvers = bestBbiBalls > 0 ? ` (${Math.floor(bestBbiBalls / 6)}.${bestBbiBalls % 6})` : ""
 
   const tabs = [
     { id: "all", label: "All Time" },
@@ -107,7 +112,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="Matches" value={selPerfs.length} />
             <StatCard label="Innings" value={inns} />
             <StatCard label="Runs" value={runs} />
-            <StatCard label="HS" value={hs} />
+            <StatCard label="HS" value={hsDisplay} />
             <StatCard label="Avg" value={battingAvg} />
             <StatCard label="SR" value={sr} />
             <StatCard label="4s" value={fours} />
@@ -135,7 +140,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="Runs" value={runsConceded} />
             <StatCard label="Wides" value={wides} />
             <StatCard label="No Balls" value={noBalls} />
-            <StatCard label="BBI" value={`${bestBbiWkts}/${bestBbiRuns}`} />
+            <StatCard label="BBI" value={`${bestBbiWkts}/${bestBbiRuns}`} title={`${bestBbiWkts}/${bestBbiRuns}${bestBbiOvers}`} />
             <StatCard label="SR" value={bowlingSr} />
             <StatCard label="Avg" value={bowlingAvg} />
             <StatCard label="Econ" value={econ} />
