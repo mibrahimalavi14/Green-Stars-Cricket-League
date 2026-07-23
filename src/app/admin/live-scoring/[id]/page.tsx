@@ -939,7 +939,7 @@ export default function LiveScoringPage() {
                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
                   >
                     <option value="">Select</option>
-                    {availableBattingPlayers.map((p) => (
+                    {availableBattingPlayers.filter(p => p.id !== nonStrikerId).map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
@@ -954,7 +954,7 @@ export default function LiveScoringPage() {
                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
                   >
                     <option value="">Select</option>
-                    {availableBattingPlayers.map((p) => (
+                    {availableBattingPlayers.filter(p => p.id !== strikerId).map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
@@ -1345,7 +1345,7 @@ export default function LiveScoringPage() {
                     <tbody>
                       {battingPlayers
                         .filter((p) => {
-                          return activeInnings.ballsData.some(
+                          return p.id === strikerId || p.id === nonStrikerId || activeInnings.ballsData.some(
                             (b) => b.striker === p.id || b.nonStriker === p.id
                           )
                         })
@@ -1401,7 +1401,7 @@ export default function LiveScoringPage() {
                     <tbody>
                       {bowlingPlayers
                         .filter((p) =>
-                          activeInnings.ballsData.some((b) => b.bowler === p.id)
+                          p.id === bowlerId || activeInnings.ballsData.some((b) => b.bowler === p.id)
                         )
                         .map((p) => {
                           const balls = activeInnings.ballsData.filter(
