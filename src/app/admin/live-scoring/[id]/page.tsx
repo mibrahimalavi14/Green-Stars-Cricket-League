@@ -1381,7 +1381,7 @@ export default function LiveScoringPage() {
                           return (
                             <tr key={p.id} className={`border-b border-[var(--border)] ${isOnStrike ? "bg-[var(--accent)]/10 font-bold" : ""}`}>
                               <td className="py-1 text-left">
-                                {p.name} {isOnStrike ? "*" : isOut ? "+" : ""}
+                                {p.name} {isOnStrike ? "*" : isOut ? "†" : ""}
                               </td>
                               <td className="py-1 text-center">{runs}</td>
                               <td className="py-1 text-center">{legalBalls}</td>

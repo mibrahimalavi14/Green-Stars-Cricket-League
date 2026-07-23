@@ -364,7 +364,7 @@ export function LiveScoreClient({
                   <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isBatting ? "bg-[var(--accent)]/10" : ""}`}>
                     <td className="py-1.5 font-medium">
                       {p.name}
-                      {isBatting ? " *" : s.isOut ? " +" : ""}
+                      {isBatting ? " *" : s.isOut ? " †" : ""}
                     </td>
                     <td className="py-1.5 text-center font-bold">{s.runs}</td>
                     <td className="py-1.5 text-center">{s.balls}</td>
