@@ -161,5 +161,8 @@ export async function POST(req: Request) {
     )
   }
 
+  const { recalcPlayerStats } = await import("@/lib/stats")
+  await recalcPlayerStats()
+
   return NextResponse.json({ success: true, playersUpdated: Object.keys(playerStats).length })
 }
