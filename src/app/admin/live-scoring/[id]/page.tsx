@@ -1349,6 +1349,17 @@ export default function LiveScoringPage() {
                             (b) => b.striker === p.id || b.nonStriker === p.id
                           )
                         })
+                        .sort((a, b) => {
+                          const aBatting = a.id === strikerId || a.id === nonStrikerId
+                          const bBatting = b.id === strikerId || b.id === nonStrikerId
+                          if (aBatting && !bBatting) return -1
+                          if (!aBatting && bBatting) return 1
+                          const aOut = outBatsmen.has(a.id)
+                          const bOut = outBatsmen.has(b.id)
+                          if (!aOut && bOut) return -1
+                          if (aOut && !bOut) return 1
+                          return 0
+                        })
                         .map((p) => {
                           const balls = activeInnings.ballsData.filter(
                             (b) => b.striker === p.id
@@ -1370,7 +1381,7 @@ export default function LiveScoringPage() {
                           return (
                             <tr key={p.id} className={`border-b border-[var(--border)] ${isOnStrike ? "bg-[var(--accent)]/10 font-bold" : ""}`}>
                               <td className="py-1 text-left">
-                                {p.name} {isOnStrike ? "*" : ""} {isOut ? "†" : ""}
+                                {p.name} {isOnStrike ? "*" : isOut ? "+" : ""}
                               </td>
                               <td className="py-1 text-center">{runs}</td>
                               <td className="py-1 text-center">{legalBalls}</td>

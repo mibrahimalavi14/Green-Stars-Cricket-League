@@ -266,6 +266,11 @@ export function LiveScoreClient({
     ? computeInningsStats(parseBallsData(inn2.ballsData), inn2.teamId === match.team1.id ? match.team1Players : match.team2Players, inn2.teamId === match.team1.id ? match.team2Players : match.team1Players)
     : { batting: {}, bowling: {} }
 
+  const inn1Balls = inn1 ? parseBallsData(inn1.ballsData) : []
+  const inn1Last = inn1Balls.length > 0 ? inn1Balls[inn1Balls.length - 1] : null
+  const inn2Balls = inn2 ? parseBallsData(inn2.ballsData) : []
+  const inn2Last = inn2Balls.length > 0 ? inn2Balls[inn2Balls.length - 1] : null
+
   const activeBatStats = currentInn
     ? currentInn.teamId === match.team1.id
       ? inn1BatStats
@@ -304,13 +309,32 @@ export function LiveScoreClient({
     stats,
     players,
     battingTeam,
+    currentStrikerId,
+    currentNonStrikerId,
   }: {
     stats: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }>
     players: { id: string; name: string }[]
     battingTeam: { name: string; shortName: string; logo: string }
+    currentStrikerId?: string
+    currentNonStrikerId?: string
   }) {
     const activePlayers = players.filter((p) => stats[p.id])
     if (activePlayers.length === 0) return null
+
+    const currentIds = new Set([currentStrikerId, currentNonStrikerId].filter(Boolean))
+    const sorted = [...activePlayers].sort((a, b) => {
+      const sa = stats[a.id], sb = stats[b.id]
+      const aBatting = currentIds.has(a.id) && !sa.isOut
+      const bBatting = currentIds.has(b.id) && !sb.isOut
+      if (aBatting && !bBatting) return -1
+      if (!aBatting && bBatting) return 1
+      if (!sa.isOut && sa.balls === 0 && (sb.isOut || sb.balls > 0)) return -1
+      if ((sa.isOut || sa.balls > 0) && !sb.isOut && sb.balls === 0) return 1
+      if (sa.isOut && !sb.isOut) return 1
+      if (!sa.isOut && sb.isOut) return -1
+      return 0
+    })
+
     return (
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
         <div className="mb-3 flex items-center gap-2">
@@ -331,15 +355,16 @@ export function LiveScoreClient({
               </tr>
             </thead>
             <tbody>
-              {activePlayers.map((p) => {
+              {sorted.map((p) => {
                 const s = stats[p.id]
                 if (!s) return null
                 const sr = s.balls > 0 ? ((s.runs / s.balls) * 100).toFixed(1) : "0.0"
+                const isBatting = currentIds.has(p.id) && !s.isOut
                 return (
-                  <tr key={p.id} className="border-b border-[var(--border)]/50">
+                  <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isBatting ? "bg-[var(--accent)]/10" : ""}`}>
                     <td className="py-1.5 font-medium">
                       {p.name}
-                      {s.isOut ? "" : " *"}
+                      {isBatting ? " *" : s.isOut ? " +" : ""}
                     </td>
                     <td className="py-1.5 text-center font-bold">{s.runs}</td>
                     <td className="py-1.5 text-center">{s.balls}</td>
@@ -361,13 +386,25 @@ export function LiveScoreClient({
     stats,
     players,
     bowlingTeam,
+    currentBowlerId,
   }: {
     stats: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }>
     players: { id: string; name: string }[]
     bowlingTeam: { name: string; shortName: string; logo: string }
+    currentBowlerId?: string
   }) {
     const activeBowlers = players.filter((p) => stats[p.id])
     if (activeBowlers.length === 0) return null
+
+    const sorted = [...activeBowlers].sort((a, b) => {
+      const sa = stats[a.id], sb = stats[b.id]
+      const aCur = a.id === currentBowlerId
+      const bCur = b.id === currentBowlerId
+      if (aCur && !bCur) return -1
+      if (!aCur && bCur) return 1
+      return sb.wickets - sa.wickets || sa.balls - sb.balls
+    })
+
     return (
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
         <div className="mb-3 flex items-center gap-2">
@@ -386,13 +423,14 @@ export function LiveScoreClient({
               </tr>
             </thead>
             <tbody>
-              {activeBowlers.map((p) => {
+              {sorted.map((p) => {
                 const s = stats[p.id]
                 if (!s) return null
                 const econ = s.balls > 0 ? ((s.runs / s.balls) * 6).toFixed(1) : "0.0"
+                const isCurrent = p.id === currentBowlerId
                 return (
-                  <tr key={p.id} className="border-b border-[var(--border)]/50">
-                    <td className="py-1.5 font-medium">{p.name}</td>
+                  <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isCurrent ? "bg-[var(--accent)]/10" : ""}`}>
+                    <td className="py-1.5 font-medium">{p.name} {isCurrent ? " *" : ""}</td>
                     <td className="py-1.5 text-center">{formatOvers(s.balls)}</td>
                     <td className="py-1.5 text-center">{s.runs}</td>
                     <td className="py-1.5 text-center font-bold text-purple-500">{s.wickets}</td>
@@ -555,12 +593,15 @@ export function LiveScoreClient({
             stats={inn1BatStats}
             players={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
             battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
+            currentStrikerId={inn1Last?.striker}
+            currentNonStrikerId={inn1Last?.nonStriker}
           />
           <div className="mt-3">
             <BowlingScorecard
               stats={inn1BowlStats}
               players={inn1.teamId === match.team1.id ? match.team2Players : match.team1Players}
               bowlingTeam={inn1.teamId === match.team1.id ? match.team2 : match.team1}
+              currentBowlerId={inn1Last?.bowler}
             />
           </div>
           <PartnershipCard
@@ -578,12 +619,15 @@ export function LiveScoreClient({
             stats={inn2BatStats}
             players={inn2.teamId === match.team1.id ? match.team1Players : match.team2Players}
             battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
+            currentStrikerId={inn2Last?.striker}
+            currentNonStrikerId={inn2Last?.nonStriker}
           />
           <div className="mt-3">
             <BowlingScorecard
               stats={inn2BowlStats}
               players={inn2.teamId === match.team1.id ? match.team2Players : match.team1Players}
               bowlingTeam={inn2.teamId === match.team1.id ? match.team2 : match.team1}
+              currentBowlerId={inn2Last?.bowler}
             />
           </div>
           <PartnershipCard
