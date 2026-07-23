@@ -26,7 +26,7 @@ export async function GET() {
       highestScore: p.highestScore,
       ducks: p.ducks,
       strikeRate: p.ballsFaced > 0 ? Math.round((p.runs / p.ballsFaced) * 100) : 0,
-      average: p.matchesPlayed > 0 ? (p.runs / p.matchesPlayed).toFixed(1) : "-",
+      average: p.dismissals > 0 ? (p.runs / p.dismissals).toFixed(1) : "-",
       dotBallPct: p.ballsFaced > 0 ? ((p.dotBalls / p.ballsFaced) * 100).toFixed(1) : "-",
       boundaryPct: p.runs > 0 ? (((p.fours * 4 + p.sixes * 6) / p.runs) * 100).toFixed(1) : "-",
     }))
