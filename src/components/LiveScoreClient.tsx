@@ -16,6 +16,7 @@ interface LiveMatch {
   venue: string
   tossWinner: string
   tossDecision: string
+  inningsBreak: boolean
   innings: { id: string; teamId: string; runs: number; wickets: number; balls: number; extras: number; ballsData: string }[]
   team1Players: { id: string; name: string }[]
   team2Players: { id: string; name: string }[]
@@ -421,8 +422,17 @@ export function LiveScoreClient({
 
       <div className="rounded-xl border-2 border-red-500/50 bg-[var(--card)] p-6">
         <div className="mb-4 flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-          <span className="font-semibold text-red-500">LIVE</span>
+          {match.inningsBreak ? (
+            <>
+              <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+              <span className="font-semibold text-amber-500">INNINGS BREAK</span>
+            </>
+          ) : (
+            <>
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+              <span className="font-semibold text-red-500">LIVE</span>
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">

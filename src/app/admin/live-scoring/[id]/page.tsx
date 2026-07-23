@@ -70,6 +70,7 @@ interface MatchData {
   venue: string
   tossWinner: string
   tossDecision: string
+  inningsBreak: boolean
 }
 
 interface SummaryData {
@@ -785,6 +786,29 @@ export default function LiveScoringPage() {
             </p>
           )}
         </div>
+
+        {summary.match.status === "live" && innings1 && (
+          <div className="mb-4">
+            <button
+              onClick={async () => {
+                const newVal = !summary.match.inningsBreak
+                await fetch("/api/live/innings-break", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ matchId, inningsBreak: newVal }),
+                })
+                await fetchSummary()
+              }}
+              className={`w-full rounded-xl border-2 px-4 py-3 text-sm font-bold transition-all ${
+                summary.match.inningsBreak
+                  ? "border-amber-500/60 bg-amber-500/20 text-amber-600 animate-pulse"
+                  : "border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)] hover:border-amber-400 hover:text-amber-600"
+              }`}
+            >
+              {summary.match.inningsBreak ? "⏸ INNINGS BREAK — Tap to Resume" : "▶ Start Innings Break"}
+            </button>
+          </div>
+        )}
 
         <div className="grid gap-4 lg:grid-cols-5">
           <div className="space-y-4 lg:col-span-3">

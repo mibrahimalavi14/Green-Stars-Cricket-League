@@ -160,6 +160,7 @@ model Match {
   superOverT1Wkts Int    @default(0)
   superOverT2Runs Int    @default(0)
   superOverT2Wkts Int    @default(0)
+  inningsBreak    Boolean @default(false)
   createdAt     DateTime @default(now())
   predictions   Prediction[]
   innings       Inning[]

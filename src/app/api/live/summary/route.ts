@@ -41,6 +41,7 @@ export async function GET(req: Request) {
       date: match.date,
       tossWinner: match.tossWinner,
       tossDecision: match.tossDecision,
+      inningsBreak: match.inningsBreak,
     },
     innings,
     team1Players,
