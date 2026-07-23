@@ -1,31 +1,23 @@
 "use client"
 
-import { useState, useRef } from "react"
-import ReCAPTCHA from "react-google-recaptcha"
-import { BotCheck } from "@/components/BotCheck"
+import { useState } from "react"
 
 function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError("")
 
-    let captchaToken = ""
-    if (recaptchaRef.current) {
-      captchaToken = recaptchaRef.current.getValue() || ""
-    }
-
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, captchaToken }),
+        body: JSON.stringify(form),
       })
       const data = await res.json()
       if (res.ok) setSent(true)
@@ -35,10 +27,9 @@ function ContactPage() {
   }
 
   return (
-    <BotCheck>
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="mb-2 text-3xl font-bold">Contact Us</h1>
-        <p className="mb-8 text-[var(--muted-foreground)]">Get in touch with the GSCL team</p>
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <h1 className="mb-2 text-3xl font-bold">Contact Us</h1>
+      <p className="mb-8 text-[var(--muted-foreground)]">Get in touch with the GSCL team</p>
 
       {sent ? (
         <div className="rounded-xl border border-green-500/50 bg-green-500/10 p-8 text-center">
@@ -76,10 +67,6 @@ function ContactPage() {
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
           </div>
 
-          {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-            <div className="overflow-x-auto pb-1"><ReCAPTCHA sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY} ref={recaptchaRef} /></div>
-          )}
-
           {error && <p className="text-sm text-red-500">{error}</p>}
           <button type="submit" disabled={loading}
             className="w-full rounded-lg bg-[var(--accent)] px-6 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50">
@@ -88,7 +75,6 @@ function ContactPage() {
         </form>
       )}
     </div>
-    </BotCheck>
   )
 }
 

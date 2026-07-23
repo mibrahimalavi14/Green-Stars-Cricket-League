@@ -300,7 +300,7 @@ async function HomePage() {
       </FadeInView>
 
       <SponsorsSection />
-      <ReviewsSection hideCaptcha />
+      <ReviewsSection />
     </>
   )
 }

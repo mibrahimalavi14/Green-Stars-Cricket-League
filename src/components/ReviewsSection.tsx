@@ -1,12 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import ReCAPTCHA from "react-google-recaptcha"
-
 
 type Review = { id: string; name: string; city: string; rating: number; comment: string; createdAt: string }
 
-export function ReviewsSection({ hideCaptcha = false }: { hideCaptcha?: boolean }) {
+export function ReviewsSection() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [average, setAverage] = useState(0)
   const [total, setTotal] = useState(0)
@@ -19,7 +17,6 @@ export function ReviewsSection({ hideCaptcha = false }: { hideCaptcha?: boolean 
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState("")
-  const [recaptchaRef, setRecaptchaRef] = useState<ReCAPTCHA | null>(null)
 
   useEffect(() => {
     fetch("/api/reviews").then(r => r.json()).then(d => {
@@ -35,13 +32,10 @@ export function ReviewsSection({ hideCaptcha = false }: { hideCaptcha?: boolean 
     setSending(true)
     setError("")
 
-    let captchaToken = ""
-    if (recaptchaRef) captchaToken = recaptchaRef.getValue() || ""
-
     const res = await fetch("/api/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, city, rating, comment, captchaToken }),
+      body: JSON.stringify({ name, email, city, rating, comment }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || "Failed to submit"); setSending(false); return }
@@ -55,7 +49,7 @@ export function ReviewsSection({ hideCaptcha = false }: { hideCaptcha?: boolean 
         {[1, 2, 3, 4, 5].map(s => (
           <button
             key={s}
-            type={interactive ? "button" : "button"}
+            type="button"
             disabled={!interactive}
             onClick={() => { if (interactive) setRating(s) }}
             onMouseEnter={() => { if (interactive) setHover(s) }}
@@ -137,13 +131,6 @@ export function ReviewsSection({ hideCaptcha = false }: { hideCaptcha?: boolean 
               <textarea required rows={3} value={comment} onChange={e => setComment(e.target.value)} maxLength={1000}
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
             </div>
-
-            {!hideCaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-              <ReCAPTCHA
-                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                ref={(ref) => setRecaptchaRef(ref)}
-              />
-            )}
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
