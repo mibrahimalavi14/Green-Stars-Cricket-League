@@ -66,7 +66,7 @@ export default function AdminGalleryPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {images.map(img => (
             <div key={img.id} className="group relative overflow-hidden rounded-xl border border-[var(--border)]">
-              <img src={img.imageUrl} alt={img.caption || "Gallery"} className="aspect-[4/3] w-full object-cover" />
+              <img src={img.imageUrl} alt={img.caption || "Gallery"} loading="lazy" className="aspect-[4/3] w-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 transition-all group-hover:bg-black/40">
                 <button onClick={() => deleteImage(img.id)} className="rounded-full bg-red-500 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button>
               </div>

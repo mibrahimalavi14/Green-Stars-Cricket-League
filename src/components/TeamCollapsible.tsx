@@ -9,7 +9,7 @@ export function TeamCollapsible({ title, subtitle, logo, defaultOpen, children }
   defaultOpen?: boolean
   children: React.ReactNode
 }) {
-  const [open, setOpen] = useState(defaultOpen ?? true)
+  const [open, setOpen] = useState(defaultOpen ?? false)
   return (
     <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
       <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between border-b border-[var(--border)] bg-[var(--muted)] px-5 py-3 text-left transition-colors hover:bg-[var(--muted)]/80">

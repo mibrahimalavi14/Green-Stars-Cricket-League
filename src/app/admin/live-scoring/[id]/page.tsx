@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   Plus,
@@ -163,9 +163,18 @@ export default function LiveScoringPage() {
 
   useEffect(() => {
     fetchSummary().then(() => setLoading(false))
-    pollRef.current = setInterval(fetchSummary, 3000)
+    function startPoll() {
+      pollRef.current = setInterval(() => { if (!document.hidden) fetchSummary() }, 3000)
+    }
+    startPoll()
+    const onVis = () => {
+      if (document.hidden) { if (pollRef.current) clearInterval(pollRef.current) }
+      else { if (pollRef.current) clearInterval(pollRef.current); startPoll() }
+    }
+    document.addEventListener("visibilitychange", onVis)
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
+      document.removeEventListener("visibilitychange", onVis)
     }
   }, [fetchSummary])
 
@@ -206,19 +215,10 @@ export default function LiveScoringPage() {
   useEffect(() => {
     if (battingTeamId) localStorage.setItem(`ls-${matchId}-bat`, battingTeamId)
     if (bowlingTeamId) localStorage.setItem(`ls-${matchId}-bowl`, bowlingTeamId)
-  }, [matchId, battingTeamId, bowlingTeamId])
-
-  useEffect(() => {
     if (bowlerId) localStorage.setItem(`ls-${matchId}-bowler`, bowlerId)
-  }, [matchId, bowlerId])
-
-  useEffect(() => {
     if (strikerId) localStorage.setItem(`ls-${matchId}-striker`, strikerId)
-  }, [matchId, strikerId])
-
-  useEffect(() => {
     if (nonStrikerId) localStorage.setItem(`ls-${matchId}-nonStriker`, nonStrikerId)
-  }, [matchId, nonStrikerId])
+  }, [matchId, battingTeamId, bowlingTeamId, bowlerId, strikerId, nonStrikerId])
 
   useEffect(() => {
     setBowlerId("")
@@ -232,29 +232,29 @@ export default function LiveScoringPage() {
   const ROLE_ORDER_BATTING: Record<string, number> = { "Batsman": 0, "Wicket-keeper": 1, "All-rounder": 2, "Bowler": 3 }
   const ROLE_ORDER_BOWLING: Record<string, number> = { "Bowler": 0, "All-rounder": 1, "Wicket-keeper": 2, "Batsman": 3 }
 
-  const battingPlayers = summary
+  const battingPlayers = useMemo(() => summary
     ? (battingTeamId === summary.match.team1.id
         ? [...summary.team1Players].sort((a, b) => (ROLE_ORDER_BATTING[a.role] ?? 9) - (ROLE_ORDER_BATTING[b.role] ?? 9))
         : [...summary.team2Players].sort((a, b) => (ROLE_ORDER_BATTING[a.role] ?? 9) - (ROLE_ORDER_BATTING[b.role] ?? 9)))
-    : []
+    : [], [summary, battingTeamId])
 
-  const bowlingPlayers = summary
+  const bowlingPlayers = useMemo(() => summary
     ? (bowlingTeamId === summary.match.team1.id
         ? [...summary.team1Players].sort((a, b) => (ROLE_ORDER_BOWLING[a.role] ?? 9) - (ROLE_ORDER_BOWLING[b.role] ?? 9))
         : [...summary.team2Players].sort((a, b) => (ROLE_ORDER_BOWLING[a.role] ?? 9) - (ROLE_ORDER_BOWLING[b.role] ?? 9)))
-    : []
+    : [], [summary, bowlingTeamId])
 
-  const outBatsmen = new Set<string>(
+  const outBatsmen = useMemo(() => new Set<string>(
     activeInnings
       ? activeInnings.ballsData
           .filter((b) => b.wicket)
           .map((b) => b.wicketBatsman || b.striker)
       : []
-  )
+  ), [activeInnings?.ballsData])
 
-  const availableBattingPlayers = battingPlayers.filter((p) => !outBatsmen.has(p.id) || p.id === strikerId || p.id === nonStrikerId)
+  const availableBattingPlayers = useMemo(() => battingPlayers.filter((p) => !outBatsmen.has(p.id) || p.id === strikerId || p.id === nonStrikerId), [battingPlayers, outBatsmen, strikerId, nonStrikerId])
 
-  function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
+  const getCurrentOverBalls = useCallback((balls: BallEvent[]): BallEvent[] => {
     if (balls.length === 0) return []
     const legalCount = balls.filter(
       (b) => !b.isWide && !b.isNoBall
@@ -272,52 +272,56 @@ export default function LiveScoringPage() {
       }
     }
     return balls.slice(startIdx)
-  }
+  }, [])
 
-  const currentOverBalls = activeInnings
+  const currentOverBalls = useMemo(() => activeInnings
     ? getCurrentOverBalls(activeInnings.ballsData)
-    : []
+    : [], [activeInnings?.ballsData, getCurrentOverBalls])
 
-  const bowlerLegalBalls: Record<string, number> = {}
-  for (const b of activeInnings?.ballsData || []) {
-    if (!b.isWide && !b.isNoBall) {
-      bowlerLegalBalls[b.bowler] = (bowlerLegalBalls[b.bowler] || 0) + 1
+  const bowlerLegalBalls = useMemo(() => {
+    const map: Record<string, number> = {}
+    for (const b of activeInnings?.ballsData || []) {
+      if (!b.isWide && !b.isNoBall) {
+        map[b.bowler] = (map[b.bowler] || 0) + 1
+      }
     }
-  }
-  const lastOverBowlerId: string | null = (() => {
+    return map
+  }, [activeInnings?.ballsData])
+
+  const lastOverBowlerId: string | null = useMemo(() => {
     if (!activeInnings || activeInnings.ballsData.length === 0) return null
     const legalBalls = activeInnings.ballsData.filter((b) => !b.isWide && !b.isNoBall)
     const currentOverNum = Math.floor(legalBalls.length / 6)
     if (currentOverNum <= 0) return null
     const prevOverStart = (currentOverNum - 1) * 6
-    const prevOverEnd = currentOverNum * 6
     if (legalBalls.length % 6 === 0) {
       return legalBalls[legalBalls.length - 1]?.bowler || null
     }
     return legalBalls[prevOverStart]?.bowler || null
-  })()
+  }, [activeInnings?.ballsData])
   const MAX_BOWLER_OVERS = 2
 
-  const innings1 = summary?.innings.find(
+  const innings1 = useMemo(() => summary?.innings.find(
     (i) => i.teamId === (summary?.match.team1.id)
-  )
-  const innings2 = summary?.innings.find(
-    (i) => i.teamId === (summary?.match.team2.id)
-  )
+  ), [summary])
 
-  function calcRequiredRunRate(): number | null {
+  const innings2 = useMemo(() => summary?.innings.find(
+    (i) => i.teamId === (summary?.match.team2.id)
+  ), [summary])
+
+  const requiredRunRate = useMemo(() => {
     if (!summary || summary.innings.length <= 1) return null
     const firstInnings = summary.innings[0]
     const target = firstInnings.runs + firstInnings.extras + 1
     const remaining = 60 - (activeInnings?.balls || 0)
     if (remaining <= 0) return 0
     return Number((((target - (activeInnings?.runs || 0) - (activeInnings?.extras || 0)) / remaining) * 6).toFixed(2))
-  }
+  }, [summary, activeInnings?.runs, activeInnings?.extras, activeInnings?.balls])
 
-  function calcCurrentRunRate(): number {
+  const currentRunRate = useMemo(() => {
     if (!activeInnings || activeInnings.balls === 0) return 0
     return Number((((activeInnings.runs + activeInnings.extras) / activeInnings.balls) * 6).toFixed(2))
-  }
+  }, [activeInnings?.runs, activeInnings?.extras, activeInnings?.balls])
 
   async function addBall(ball: BallEvent) {
     if (!battingTeamId || !strikerId || !bowlerId) {
@@ -719,8 +723,8 @@ export default function LiveScoringPage() {
   const overs2 = innings2 ? formatOvers(innings2.balls) : "0.0"
   const t1Total = innings1 ? innings1.runs + innings1.extras : 0
   const t2Total = innings2 ? innings2.runs + innings2.extras : 0
-  const rrr = calcRequiredRunRate()
-  const crr = calcCurrentRunRate()
+  const rrr = requiredRunRate
+  const crr = currentRunRate
 
   const battingTeamName = battingTeamId === match.team1.id ? match.team1.name : match.team2.name
   const battingShort = battingTeamId === match.team1.id ? match.team1.shortName : match.team2.shortName

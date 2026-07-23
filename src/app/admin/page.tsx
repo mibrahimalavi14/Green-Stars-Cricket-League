@@ -6,13 +6,14 @@ export const dynamic = "force-dynamic"
 
 async function AdminPage() {
 
-  const counts = {
-    teams: await prisma.team.count(),
-    players: await prisma.player.count(),
-    matches: await prisma.match.count(),
-    news: await prisma.news.count(),
-    contacts: await prisma.contact.count(),
-  }
+  const [teams, players, matches, news, contacts] = await Promise.all([
+    prisma.team.count(),
+    prisma.player.count(),
+    prisma.match.count(),
+    prisma.news.count(),
+    prisma.contact.count(),
+  ])
+  const counts = { teams, players, matches, news, contacts }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">

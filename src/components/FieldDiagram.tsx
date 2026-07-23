@@ -1,5 +1,7 @@
 "use client"
 
+import { memo } from "react"
+
 interface FieldDiagramProps {
   selected: string
   onSelect: (region: string) => void
@@ -23,7 +25,7 @@ const positions: { label: string; x: number; y: number; short?: string }[] = [
   { label: "Leg", x: 45, y: 48 },
 ]
 
-export function FieldDiagram({ selected, onSelect }: FieldDiagramProps) {
+export const FieldDiagram = memo(function FieldDiagram({ selected, onSelect }: FieldDiagramProps) {
   return (
     <div className="relative mx-auto w-full max-w-[340px]">
       <svg viewBox="0 0 100 100" className="w-full" style={{ aspectRatio: "1" }}>
@@ -85,4 +87,4 @@ export function FieldDiagram({ selected, onSelect }: FieldDiagramProps) {
       </svg>
     </div>
   )
-}
+})

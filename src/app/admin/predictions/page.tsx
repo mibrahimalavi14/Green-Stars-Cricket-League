@@ -3,31 +3,6 @@ import { Trophy, Users, Mail, Calendar } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
-async function PredictionBreakdown({ predictions }: { predictions: any[] }) {
-  const counts: Record<string, { count: number; teamName: string }> = {}
-  for (const p of predictions) {
-    const team = await prisma.team.findUnique({ where: { id: p.predictedTeamId }, select: { name: true, shortName: true, logo: true } })
-    if (team) {
-      counts[p.predictedTeamId] = counts[p.predictedTeamId] || { count: 0, teamName: team.name }
-      counts[p.predictedTeamId].count++
-    }
-  }
-
-  return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {Object.entries(counts).sort((a, b) => b[1].count - a[1].count).map(([teamId, data]) => (
-        <div key={teamId} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">{data.teamName}</span>
-            <span className="text-2xl font-bold text-[var(--accent)]">{data.count}</span>
-          </div>
-          <p className="text-xs text-[var(--muted-foreground)]">predictions</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export default async function AdminPredictionsPage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })
   if (!season) return <div className="p-8 text-center text-[var(--muted-foreground)]">No active season</div>
@@ -37,11 +12,25 @@ export default async function AdminPredictionsPage() {
     orderBy: { createdAt: "desc" },
   })
 
+  const teamIds = [...new Set(predictions.map(p => p.predictedTeamId))]
+  const teams = await prisma.team.findMany({
+    where: { id: { in: teamIds } },
+    select: { id: true, name: true, shortName: true, logo: true },
+  })
+  const teamMap = new Map(teams.map(t => [t.id, t]))
+
   const teamNames: Record<string, string> = {}
   for (const p of predictions) {
-    if (!teamNames[p.predictedTeamId]) {
-      const team = await prisma.team.findUnique({ where: { id: p.predictedTeamId }, select: { name: true, shortName: true, logo: true } })
-      teamNames[p.predictedTeamId] = team ? `${team.name} (${team.shortName})` : "Unknown"
+    const team = teamMap.get(p.predictedTeamId)
+    teamNames[p.predictedTeamId] = team ? `${team.name} (${team.shortName})` : "Unknown"
+  }
+
+  const counts: Record<string, { count: number; teamName: string }> = {}
+  for (const p of predictions) {
+    const team = teamMap.get(p.predictedTeamId)
+    if (team) {
+      counts[p.predictedTeamId] = counts[p.predictedTeamId] || { count: 0, teamName: team.name }
+      counts[p.predictedTeamId].count++
     }
   }
 
@@ -53,7 +42,17 @@ export default async function AdminPredictionsPage() {
       </div>
 
       <h2 className="mb-4 text-lg font-semibold">Breakdown by Team</h2>
-      <PredictionBreakdown predictions={predictions} />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {Object.entries(counts).sort((a, b) => b[1].count - a[1].count).map(([teamId, data]) => (
+          <div key={teamId} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{data.teamName}</span>
+              <span className="text-2xl font-bold text-[var(--accent)]">{data.count}</span>
+            </div>
+            <p className="text-xs text-[var(--muted-foreground)]">predictions</p>
+          </div>
+        ))}
+      </div>
 
       <h2 className="mb-4 mt-10 text-lg font-semibold">All Predictions</h2>
       {predictions.length === 0 ? (
