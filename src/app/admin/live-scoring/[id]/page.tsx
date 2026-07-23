@@ -344,18 +344,26 @@ export default function LiveScoringPage() {
           body: JSON.stringify({ matchId }),
         })
         await fetchSummary()
+        const isLegal = !ball.isWide && !ball.isNoBall
+        const legalBallsAfter = (activeInnings?.balls || 0) + (isLegal ? 1 : 0)
+        const overComplete = isLegal && legalBallsAfter % 6 === 0
         if (ball.wicket) {
-          setStrikerId("")
+          if (overComplete) {
+            setStrikerId(nonStrikerId)
+            setNonStrikerId("")
+          } else {
+            setStrikerId("")
+          }
         } else {
           const completedRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
-          if (completedRuns % 2 === 1) {
+          const oddRuns = completedRuns % 2 === 1
+          if (oddRuns !== overComplete) {
             const tmp = strikerId
             setStrikerId(nonStrikerId)
             setNonStrikerId(tmp)
           }
         }
-        const legalBallsSoFar = (activeInnings?.balls || 0) + ((!ball.isWide && !ball.isNoBall) ? 1 : 0)
-        if (legalBallsSoFar > 0 && legalBallsSoFar % 6 === 0) {
+        if (overComplete) {
           setBowlerId("")
           localStorage.removeItem(`ls-${matchId}-bowler`)
         }
@@ -1378,10 +1386,11 @@ export default function LiveScoringPage() {
                           )
                           const sr = legalBalls > 0 ? ((runs / legalBalls) * 100).toFixed(1) : "0.0"
                           const isOnStrike = p.id === strikerId
+                          const isNonStrike = p.id === nonStrikerId && !isOut
                           return (
-                            <tr key={p.id} className={`border-b border-[var(--border)] ${isOnStrike ? "bg-[var(--accent)]/10 font-bold" : ""}`}>
+                            <tr key={p.id} className={`border-b border-[var(--border)] ${isOnStrike ? "bg-[var(--accent)]/10 font-bold" : isNonStrike ? "bg-green-500/5" : ""}`}>
                               <td className="py-1 text-left">
-                                {p.name} {isOnStrike ? "*" : isOut ? "†" : ""}
+                                {p.name} {isOnStrike ? "*" : isNonStrike ? "•" : isOut ? "†" : ""}
                               </td>
                               <td className="py-1 text-center">{runs}</td>
                               <td className="py-1 text-center">{legalBalls}</td>

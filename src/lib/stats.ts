@@ -148,6 +148,7 @@ export async function recalcPlayerStats() {
     const hundreds = im.filter(m => m.battingRuns >= 100).length
     const notOuts = im.filter(m => m.ballsFaced > 0 && !m.isOut).length
     const ducks = im.filter(m => m.battingRuns === 0 && m.isOut).length
+    const dismissals = im.filter(m => m.isOut).length
     const highestScore = im.length > 0 ? Math.max(...im.map(m => m.battingRuns)) : 0
     const fiveWickets = im.filter(m => m.bowlingWickets >= 5).length
     const fourWickets = im.filter(m => m.bowlingWickets >= 4).length
@@ -176,9 +177,9 @@ export async function recalcPlayerStats() {
     updates.push(prisma.player.update({
       where: { id: player.id },
       data: {
-        runs, ballsFaced, fours, sixes, ones, twos,
-        threes, dotBalls, highestScore,
-        fifties, hundreds, notOuts, ducks,
+          runs, ballsFaced, fours, sixes, ones, twos,
+          threes, dotBalls, highestScore,
+          fifties, hundreds, notOuts, dismissals, ducks,
         wickets, runsConceded, ballsBowled, maidens, wides, noBalls,
         fiveWickets, fourWickets, hattricks,
         matchesPlayed, bestBowlingWickets, bestBowlingRuns,

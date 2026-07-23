@@ -359,12 +359,14 @@ export function LiveScoreClient({
                 const s = stats[p.id]
                 if (!s) return null
                 const sr = s.balls > 0 ? ((s.runs / s.balls) * 100).toFixed(1) : "0.0"
-                const isBatting = currentIds.has(p.id) && !s.isOut
+                const isStriker = p.id === currentStrikerId && !s.isOut
+                const isNonStriker = p.id === currentNonStrikerId && !s.isOut
+                const isBatting = isStriker || isNonStriker
                 return (
-                  <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isBatting ? "bg-[var(--accent)]/10" : ""}`}>
+                  <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isStriker ? "bg-[var(--accent)]/10 font-bold" : isNonStriker ? "bg-green-500/5" : ""}`}>
                     <td className="py-1.5 font-medium">
                       {p.name}
-                      {isBatting ? " *" : s.isOut ? " †" : ""}
+                      {isStriker ? " *" : isNonStriker ? " •" : s.isOut ? " †" : ""}
                     </td>
                     <td className="py-1.5 text-center font-bold">{s.runs}</td>
                     <td className="py-1.5 text-center">{s.balls}</td>

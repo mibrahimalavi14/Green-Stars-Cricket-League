@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       if (ball.isWide) bps.wides++
       if (ball.isNoBall) bps.noBalls++
 
-      if (ball.wicket) {
+      if (ball.wicket && ball.wicket !== "runout") {
         bps.bowlingWickets++
         const dismissed = ball.wicketBatsman || ball.striker
         ensurePlayer(dismissed, inn.teamId)
