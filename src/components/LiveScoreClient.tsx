@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { RefreshCw, User } from "lucide-react"
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"
+import { RefreshCw } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { PartnershipCard } from "./PartnershipCard"
 
@@ -49,9 +49,7 @@ interface BallEvent {
 
 function parseBallsData(raw: string): BallEvent[] {
   try {
-    const parsed = JSON.parse(raw || "[]")
-    if (parsed.length === 0) return []
-    return parsed
+    return JSON.parse(raw || "[]") || []
   } catch {
     return []
   }
@@ -101,8 +99,8 @@ function getDismissalText(ball: BallEvent, bowlingPlayers: { id: string; name: s
   if (type === "stumped") return `st ${fielderName} b ${bowlerName}`
   if (type === "runout") return `run out (${fielderName})`
   if (type === "hit wicket") return `hit wicket b ${bowlerName}`
-  if (type === "retired") return `retired`
-  if (type === "obstructing") return `obstructing the field`
+  if (type === "retired") return "retired"
+  if (type === "obstructing") return "obstructing the field"
   return type
 }
 
@@ -151,6 +149,168 @@ function computeInningsStats(
   return { batting, bowling }
 }
 
+function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
+  if (balls.length === 0) return []
+  let legalCount = 0
+  for (const b of balls) {
+    if (!b.isWide && !b.isNoBall) legalCount++
+  }
+  const inLastOver = legalCount % 6 || 6
+  let count = 0
+  let startIdx = balls.length
+  for (let i = balls.length - 1; i >= 0; i--) {
+    const b = balls[i]
+    const isLegal = !b.isWide && !b.isNoBall
+    if (isLegal) count++
+    if (count === inLastOver) {
+      startIdx = i
+      break
+    }
+  }
+  return balls.slice(startIdx)
+}
+
+function BattingScorecard({
+  stats,
+  players,
+  battingTeam,
+  currentStrikerId,
+  currentNonStrikerId,
+}: {
+  stats: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }>
+  players: { id: string; name: string }[]
+  battingTeam: { name: string; shortName: string; logo: string }
+  currentStrikerId?: string
+  currentNonStrikerId?: string
+}) {
+  const activePlayers = players.filter((p) => stats[p.id])
+  if (activePlayers.length === 0) return null
+
+  const currentIds = new Set([currentStrikerId, currentNonStrikerId].filter(Boolean))
+  const sorted = [...activePlayers].sort((a, b) => {
+    const sa = stats[a.id], sb = stats[b.id]
+    const aBatting = currentIds.has(a.id) && !sa.isOut
+    const bBatting = currentIds.has(b.id) && !sb.isOut
+    if (aBatting && !bBatting) return -1
+    if (!aBatting && bBatting) return 1
+    if (!sa.isOut && sa.balls === 0 && (sb.isOut || sb.balls > 0)) return -1
+    if ((sa.isOut || sa.balls > 0) && !sb.isOut && sb.balls === 0) return 1
+    if (sa.isOut && !sb.isOut) return 1
+    if (!sa.isOut && sb.isOut) return -1
+    return 0
+  })
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+      <div className="mb-3 flex items-center gap-2">
+        {battingTeam.logo && <img src={battingTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+        <h4 className="text-sm font-semibold">{battingTeam.shortName} Batting</h4>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+              <th className="pb-1.5 text-left font-medium">Batsman</th>
+              <th className="pb-1.5 text-center font-medium">R</th>
+              <th className="pb-1.5 text-center font-medium">B</th>
+              <th className="pb-1.5 text-center font-medium">4s</th>
+              <th className="pb-1.5 text-center font-medium">6s</th>
+              <th className="pb-1.5 text-center font-medium">SR</th>
+              <th className="pb-1.5 text-right font-medium">How Out</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((p) => {
+              const s = stats[p.id]
+              if (!s) return null
+              const sr = s.balls > 0 ? ((s.runs / s.balls) * 100).toFixed(1) : "0.0"
+              const isStriker = p.id === currentStrikerId && !s.isOut
+              const isNonStriker = p.id === currentNonStrikerId && !s.isOut
+              return (
+                <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isStriker ? "bg-[var(--accent)]/10 font-bold" : isNonStriker ? "bg-green-500/5" : ""}`}>
+                  <td className="py-1.5 font-medium">
+                    {p.name}
+                    {isStriker ? " *" : isNonStriker ? " •" : s.isOut ? " †" : ""}
+                  </td>
+                  <td className="py-1.5 text-center font-bold">{s.runs}</td>
+                  <td className="py-1.5 text-center">{s.balls}</td>
+                  <td className="py-1.5 text-center text-pink-500">{s.fours}</td>
+                  <td className="py-1.5 text-center text-red-500">{s.sixes}</td>
+                  <td className="py-1.5 text-center text-[var(--muted-foreground)]">{sr}</td>
+                  <td className="py-1.5 text-right text-[10px] text-[var(--muted-foreground)] italic">{s.dismissal || ""}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function BowlingScorecard({
+  stats,
+  players,
+  bowlingTeam,
+  currentBowlerId,
+}: {
+  stats: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }>
+  players: { id: string; name: string }[]
+  bowlingTeam: { name: string; shortName: string; logo: string }
+  currentBowlerId?: string
+}) {
+  const activeBowlers = players.filter((p) => stats[p.id])
+  if (activeBowlers.length === 0) return null
+
+  const sorted = [...activeBowlers].sort((a, b) => {
+    const sa = stats[a.id], sb = stats[b.id]
+    const aCur = a.id === currentBowlerId
+    const bCur = b.id === currentBowlerId
+    if (aCur && !bCur) return -1
+    if (!aCur && bCur) return 1
+    return sb.wickets - sa.wickets || sa.balls - sb.balls
+  })
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+      <div className="mb-3 flex items-center gap-2">
+        {bowlingTeam.logo && <img src={bowlingTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+        <h4 className="text-sm font-semibold">{bowlingTeam.shortName} Bowling</h4>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+              <th className="pb-1.5 text-left font-medium">Bowler</th>
+              <th className="pb-1.5 text-center font-medium">O</th>
+              <th className="pb-1.5 text-center font-medium">R</th>
+              <th className="pb-1.5 text-center font-medium">W</th>
+              <th className="pb-1.5 text-center font-medium">Econ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((p) => {
+              const s = stats[p.id]
+              if (!s) return null
+              const econ = s.balls > 0 ? ((s.runs / s.balls) * 6).toFixed(1) : "0.0"
+              const isCurrent = p.id === currentBowlerId
+              return (
+                <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isCurrent ? "bg-[var(--accent)]/10" : ""}`}>
+                  <td className="py-1.5 font-medium">{p.name} {isCurrent ? " *" : ""}</td>
+                  <td className="py-1.5 text-center">{formatOvers(s.balls)}</td>
+                  <td className="py-1.5 text-center">{s.runs}</td>
+                  <td className="py-1.5 text-center font-bold text-purple-500">{s.wickets}</td>
+                  <td className="py-1.5 text-center text-[var(--muted-foreground)]">{econ}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function LiveScoreClient({
   liveMatch,
   upcomingMatches,
@@ -161,28 +321,149 @@ export function LiveScoreClient({
   const [match, setMatch] = useState<LiveMatch | null>(liveMatch)
   const [refreshing, setRefreshing] = useState(false)
   const timelineRef = useRef<HTMLDivElement>(null)
+  const userScrolledUp = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
 
-  async function refreshScore() {
+  const refreshScore = useCallback(async () => {
+    abortRef.current?.abort()
+    const ctrl = new AbortController()
+    abortRef.current = ctrl
     try {
-      const res = await fetch("/api/matches/live")
+      const res = await fetch("/api/matches/live", { signal: ctrl.signal })
       if (res.ok) {
         const data = await res.json()
         setMatch(data)
       }
     } catch {}
     setRefreshing(false)
-  }
-
-  useEffect(() => {
-    const interval = setInterval(refreshScore, 5000)
-    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
-    if (timelineRef.current) {
-      timelineRef.current.scrollTop = timelineRef.current.scrollHeight
+    const id = setInterval(refreshScore, 5000)
+    const onVisChange = () => {
+      if (document.hidden) {
+        clearInterval(id)
+      }
+    }
+    document.addEventListener("visibilitychange", onVisChange)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener("visibilitychange", onVisChange)
+      abortRef.current?.abort()
+    }
+  }, [refreshScore])
+
+  useEffect(() => {
+    const el = timelineRef.current
+    if (!el) return
+    if (!userScrolledUp.current) {
+      el.scrollTop = el.scrollHeight
     }
   }, [match])
+
+  const handleTimelineScroll = useCallback(() => {
+    const el = timelineRef.current
+    if (!el) return
+    userScrolledUp.current = el.scrollTop + el.clientHeight < el.scrollHeight - 50
+  }, [])
+
+  const inn1 = match?.innings.find((i) => i.teamId === match.team1.id) || null
+  const inn2 = match?.innings.find((i) => i.teamId === match.team2.id) || null
+
+  const inn1BallsParsed = useMemo(() => inn1 ? parseBallsData(inn1.ballsData) : [], [inn1?.ballsData])
+  const inn2BallsParsed = useMemo(() => inn2 ? parseBallsData(inn2.ballsData) : [], [inn2?.ballsData])
+
+  const inn1Stats = useMemo(() => inn1
+    ? computeInningsStats(inn1BallsParsed, inn1.teamId === match!.team1.id ? match!.team1Players : match!.team2Players, inn1.teamId === match!.team1.id ? match!.team2Players : match!.team1Players)
+    : { batting: {}, bowling: {} }, [inn1BallsParsed, inn1?.teamId, match])
+
+  const inn2Stats = useMemo(() => inn2
+    ? computeInningsStats(inn2BallsParsed, inn2.teamId === match!.team1.id ? match!.team1Players : match!.team2Players, inn2.teamId === match!.team1.id ? match!.team2Players : match!.team1Players)
+    : { batting: {}, bowling: {} }, [inn2BallsParsed, inn2?.teamId, match])
+
+  const currentInn = match?.innings.length ? match.innings[match.innings.length - 1] : null
+  const allBallsParsed = useMemo(() => currentInn ? parseBallsData(currentInn.ballsData) : [], [currentInn?.ballsData])
+
+  const overs1 = inn1 ? formatOvers(inn1.balls) : "0.0"
+  const overs2 = inn2 ? formatOvers(inn2.balls) : "0.0"
+  const t1Total = inn1 ? inn1.runs + inn1.extras : 0
+  const t2Total = inn2 ? inn2.runs + inn2.extras : 0
+
+  const currentBowlingTeam = currentInn ? (currentInn.teamId === match!.team1.id ? match!.team1 : match!.team2) : null
+  const currentBattingTeam = currentInn ? (currentInn.teamId === match!.team1.id ? match!.team1 : match!.team2) : null
+  const battingPlayers = currentInn ? (currentInn.teamId === match!.team1.id ? match!.team1Players : match!.team2Players) : []
+  const bowlingPlayers = currentInn ? (currentInn.teamId === match!.team1.id ? match!.team2Players : match!.team1Players) : []
+
+  const inn1Last = inn1BallsParsed.length > 0 ? inn1BallsParsed[inn1BallsParsed.length - 1] : null
+  const inn2Last = inn2BallsParsed.length > 0 ? inn2BallsParsed[inn2BallsParsed.length - 1] : null
+
+  const activeBatStats = currentInn ? (currentInn.teamId === match!.team1.id ? inn1Stats.batting : inn2Stats.batting) : {}
+  const activeBowlStats = currentInn ? (currentInn.teamId === match!.team1.id ? inn1Stats.bowling : inn2Stats.bowling) : {}
+
+  const lastBall = allBallsParsed.length > 0 ? allBallsParsed[allBallsParsed.length - 1] : null
+  const currentStriker = lastBall?.striker ? battingPlayers.find((p) => p.id === lastBall.striker) : null
+  const currentNonStriker = lastBall?.nonStriker ? battingPlayers.find((p) => p.id === lastBall.nonStriker) : null
+  const currentBowler = lastBall?.bowler ? bowlingPlayers.find((p) => p.id === lastBall.bowler) : null
+
+  const currentOverBalls = useMemo(() => getCurrentOverBalls(allBallsParsed), [allBallsParsed])
+
+  const recentOverElements = useMemo(() => {
+    if (allBallsParsed.length === 0) return null
+    const elements: React.ReactElement[] = []
+    let legalCount = 0
+    let currentOver = 0
+    let overBalls: { ball: BallEvent; idx: number }[] = []
+
+    function flushOver() {
+      if (overBalls.length === 0) return
+      const overNum = currentOver
+      elements.push(
+        <div key={`over-${overNum}`} className="mb-2">
+          <p className="mb-1 text-[10px] font-semibold text-[var(--muted-foreground)]">Over {overNum + 1}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {overBalls.map(({ ball, idx }) => {
+              const display = getBallDisplay(ball)
+              const label = getBallLabel(ball)
+              const bowlerName = ball.bowler ? bowlingPlayers.find((p) => p.id === ball.bowler)?.name : ""
+              const dismissalText = ball.wicket ? getDismissalText(ball, bowlingPlayers) : ""
+              return (
+                <div key={idx} className="flex flex-col items-center">
+                  <span
+                    title={`${label}${bowlerName ? ` - ${bowlerName}` : ""}${display.region ? ` → ${display.region}` : ""}`}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold ${display.color}`}
+                  >
+                    {display.text}
+                  </span>
+                  {display.region && <span className="mt-0.5 text-[7px] font-medium text-green-600 leading-none">{display.region}</span>}
+                  {dismissalText && <span className="mt-0.5 text-[7px] font-medium text-purple-500 leading-none text-center max-w-[80px]">{dismissalText}</span>}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )
+      overBalls = []
+    }
+
+    allBallsParsed.forEach((ball, i) => {
+      const isLegal = !ball.isWide && !ball.isNoBall
+      if (isLegal) {
+        if (legalCount > 0 && legalCount % 6 === 0) {
+          flushOver()
+          currentOver++
+        }
+        legalCount++
+      }
+      overBalls.push({ ball, idx: i })
+    })
+    flushOver()
+    return elements
+  }, [allBallsParsed, bowlingPlayers])
+
+  const recentOvers = useMemo(() => {
+    if (!recentOverElements) return []
+    return recentOverElements.slice(-5)
+  }, [recentOverElements])
 
   if (!match) {
     return (
@@ -192,257 +473,26 @@ export function LiveScoreClient({
           <div className="mt-8">
             <h2 className="mb-4 text-xl font-semibold">Upcoming Matches</h2>
             <div className="space-y-3 max-w-md mx-auto">
-              {upcomingMatches.map((match) => (
-                <div key={match.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
-                  {(match as any).matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {(match as any).matchNo}</div>}
+              {upcomingMatches.map((m) => (
+                <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+                  {(m as any).matchNo > 0 && <div className="mb-1 text-[10px] font-semibold text-[var(--accent)]">Match {(m as any).matchNo}</div>}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {match.team1.logo && <img src={match.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
-                       <span className="font-medium">{match.team1.name}</span>
+                      {m.team1.logo && <img src={m.team1.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                      <span className="font-medium">{m.team1.name}</span>
                     </div>
                     <span className="text-xs text-[var(--accent)]">VS</span>
                     <div className="flex items-center gap-2">
-                       <span className="font-medium">{match.team2.name}</span>
-                      {match.team2.logo && <img src={match.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                      <span className="font-medium">{m.team2.name}</span>
+                      {m.team2.logo && <img src={m.team2.logo} alt="" className="h-6 w-6 rounded-full object-cover" />}
                     </div>
                   </div>
-                  <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(match.date).toLocaleDateString()} &middot; {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</p>
+                  <p className="mt-1 text-center text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString()} &middot; {(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(m.venue)}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
-      </div>
-    )
-  }
-
-  const inn1 = match.innings.find((i) => i.teamId === match.team1.id)
-  const inn2 = match.innings.find((i) => i.teamId === match.team2.id)
-  const overs1 = inn1 ? formatOvers(inn1.balls) : "0.0"
-  const overs2 = inn2 ? formatOvers(inn2.balls) : "0.0"
-  const t1Total = inn1 ? inn1.runs + inn1.extras : 0
-  const t2Total = inn2 ? inn2.runs + inn2.extras : 0
-
-  const currentInn = match.innings.length > 0 ? match.innings[match.innings.length - 1] : null
-  const allBalls = currentInn ? parseBallsData(currentInn.ballsData) : []
-
-  const currentBowlingTeam = currentInn
-    ? currentInn.teamId === match.team1.id
-      ? match.team1
-      : match.team2
-    : null
-  const currentBattingTeam = currentInn
-    ? currentInn.teamId === match.team1.id
-      ? match.team1
-      : match.team2
-    : null
-
-  const battingPlayers = currentInn
-    ? currentInn.teamId === match.team1.id
-      ? match.team1Players
-      : match.team2Players
-    : []
-  const bowlingPlayers = currentInn
-    ? currentInn.teamId === match.team1.id
-      ? match.team2Players
-      : match.team1Players
-    : []
-
-  const lastBall = allBalls.length > 0 ? allBalls[allBalls.length - 1] : null
-  const currentStriker = lastBall?.striker
-    ? battingPlayers.find((p) => p.id === lastBall.striker)
-    : null
-  const currentNonStriker = lastBall?.nonStriker
-    ? battingPlayers.find((p) => p.id === lastBall.nonStriker)
-    : null
-  const currentBowler = lastBall?.bowler
-    ? bowlingPlayers.find((p) => p.id === lastBall.bowler)
-    : null
-
-  const { batting: inn1BatStats, bowling: inn1BowlStats } = inn1
-    ? computeInningsStats(parseBallsData(inn1.ballsData), inn1.teamId === match.team1.id ? match.team1Players : match.team2Players, inn1.teamId === match.team1.id ? match.team2Players : match.team1Players)
-    : { batting: {}, bowling: {} }
-  const { batting: inn2BatStats, bowling: inn2BowlStats } = inn2
-    ? computeInningsStats(parseBallsData(inn2.ballsData), inn2.teamId === match.team1.id ? match.team1Players : match.team2Players, inn2.teamId === match.team1.id ? match.team2Players : match.team1Players)
-    : { batting: {}, bowling: {} }
-
-  const inn1Balls = inn1 ? parseBallsData(inn1.ballsData) : []
-  const inn1Last = inn1Balls.length > 0 ? inn1Balls[inn1Balls.length - 1] : null
-  const inn2Balls = inn2 ? parseBallsData(inn2.ballsData) : []
-  const inn2Last = inn2Balls.length > 0 ? inn2Balls[inn2Balls.length - 1] : null
-
-  const activeBatStats = currentInn
-    ? currentInn.teamId === match.team1.id
-      ? inn1BatStats
-      : inn2BatStats
-    : {}
-  const activeBowlStats = currentInn
-    ? currentInn.teamId === match.team1.id
-      ? inn1BowlStats
-      : inn2BowlStats
-    : {}
-
-  function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
-    if (balls.length === 0) return []
-    let legalCount = 0
-    for (const b of balls) {
-      if (!b.isWide && !b.isNoBall) legalCount++
-    }
-    const inLastOver = legalCount % 6 || 6
-    let count = 0
-    let startIdx = balls.length
-    for (let i = balls.length - 1; i >= 0; i--) {
-      const b = balls[i]
-      const isLegal = !b.isWide && !b.isNoBall
-      if (isLegal) count++
-      if (count === inLastOver) {
-        startIdx = i
-        break
-      }
-    }
-    return balls.slice(startIdx)
-  }
-
-  const currentOverBalls = getCurrentOverBalls(allBalls)
-
-  function BattingScorecard({
-    stats,
-    players,
-    battingTeam,
-    currentStrikerId,
-    currentNonStrikerId,
-  }: {
-    stats: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }>
-    players: { id: string; name: string }[]
-    battingTeam: { name: string; shortName: string; logo: string }
-    currentStrikerId?: string
-    currentNonStrikerId?: string
-  }) {
-    const activePlayers = players.filter((p) => stats[p.id])
-    if (activePlayers.length === 0) return null
-
-    const currentIds = new Set([currentStrikerId, currentNonStrikerId].filter(Boolean))
-    const sorted = [...activePlayers].sort((a, b) => {
-      const sa = stats[a.id], sb = stats[b.id]
-      const aBatting = currentIds.has(a.id) && !sa.isOut
-      const bBatting = currentIds.has(b.id) && !sb.isOut
-      if (aBatting && !bBatting) return -1
-      if (!aBatting && bBatting) return 1
-      if (!sa.isOut && sa.balls === 0 && (sb.isOut || sb.balls > 0)) return -1
-      if ((sa.isOut || sa.balls > 0) && !sb.isOut && sb.balls === 0) return 1
-      if (sa.isOut && !sb.isOut) return 1
-      if (!sa.isOut && sb.isOut) return -1
-      return 0
-    })
-
-    return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-        <div className="mb-3 flex items-center gap-2">
-          {battingTeam.logo && <img src={battingTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-          <h4 className="text-sm font-semibold">{battingTeam.shortName} Batting</h4>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
-                <th className="pb-1.5 text-left font-medium">Batsman</th>
-                <th className="pb-1.5 text-center font-medium">R</th>
-                <th className="pb-1.5 text-center font-medium">B</th>
-                <th className="pb-1.5 text-center font-medium">4s</th>
-                <th className="pb-1.5 text-center font-medium">6s</th>
-                <th className="pb-1.5 text-center font-medium">SR</th>
-                <th className="pb-1.5 text-right font-medium">How Out</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((p) => {
-                const s = stats[p.id]
-                if (!s) return null
-                const sr = s.balls > 0 ? ((s.runs / s.balls) * 100).toFixed(1) : "0.0"
-                const isStriker = p.id === currentStrikerId && !s.isOut
-                const isNonStriker = p.id === currentNonStrikerId && !s.isOut
-                const isBatting = isStriker || isNonStriker
-                return (
-                  <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isStriker ? "bg-[var(--accent)]/10 font-bold" : isNonStriker ? "bg-green-500/5" : ""}`}>
-                    <td className="py-1.5 font-medium">
-                      {p.name}
-                      {isStriker ? " *" : isNonStriker ? " •" : s.isOut ? " †" : ""}
-                    </td>
-                    <td className="py-1.5 text-center font-bold">{s.runs}</td>
-                    <td className="py-1.5 text-center">{s.balls}</td>
-                    <td className="py-1.5 text-center text-pink-500">{s.fours}</td>
-                    <td className="py-1.5 text-center text-red-500">{s.sixes}</td>
-                    <td className="py-1.5 text-center text-[var(--muted-foreground)]">{sr}</td>
-                    <td className="py-1.5 text-right text-[10px] text-[var(--muted-foreground)] italic">{s.dismissal || ""}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    )
-  }
-
-  function BowlingScorecard({
-    stats,
-    players,
-    bowlingTeam,
-    currentBowlerId,
-  }: {
-    stats: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }>
-    players: { id: string; name: string }[]
-    bowlingTeam: { name: string; shortName: string; logo: string }
-    currentBowlerId?: string
-  }) {
-    const activeBowlers = players.filter((p) => stats[p.id])
-    if (activeBowlers.length === 0) return null
-
-    const sorted = [...activeBowlers].sort((a, b) => {
-      const sa = stats[a.id], sb = stats[b.id]
-      const aCur = a.id === currentBowlerId
-      const bCur = b.id === currentBowlerId
-      if (aCur && !bCur) return -1
-      if (!aCur && bCur) return 1
-      return sb.wickets - sa.wickets || sa.balls - sb.balls
-    })
-
-    return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-        <div className="mb-3 flex items-center gap-2">
-          {bowlingTeam.logo && <img src={bowlingTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-          <h4 className="text-sm font-semibold">{bowlingTeam.shortName} Bowling</h4>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
-                <th className="pb-1.5 text-left font-medium">Bowler</th>
-                <th className="pb-1.5 text-center font-medium">O</th>
-                <th className="pb-1.5 text-center font-medium">R</th>
-                <th className="pb-1.5 text-center font-medium">W</th>
-                <th className="pb-1.5 text-center font-medium">Econ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((p) => {
-                const s = stats[p.id]
-                if (!s) return null
-                const econ = s.balls > 0 ? ((s.runs / s.balls) * 6).toFixed(1) : "0.0"
-                const isCurrent = p.id === currentBowlerId
-                return (
-                  <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isCurrent ? "bg-[var(--accent)]/10" : ""}`}>
-                    <td className="py-1.5 font-medium">{p.name} {isCurrent ? " *" : ""}</td>
-                    <td className="py-1.5 text-center">{formatOvers(s.balls)}</td>
-                    <td className="py-1.5 text-center">{s.runs}</td>
-                    <td className="py-1.5 text-center font-bold text-purple-500">{s.wickets}</td>
-                    <td className="py-1.5 text-center text-[var(--muted-foreground)]">{econ}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
       </div>
     )
   }
@@ -479,29 +529,22 @@ export function LiveScoreClient({
           <div className="min-w-0 text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
               {match.team1.logo && <img src={match.team1.logo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />}
-               <p className="truncate font-bold">{match.team1.name}</p>
+              <p className="truncate font-bold">{match.team1.name}</p>
             </div>
             <p className="text-2xl font-bold tabular-nums sm:text-3xl">{inn1 ? `${t1Total}/${inn1.wickets}` : match.team1Score || "-"}</p>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              {inn1 ? `(${overs1} ov)` : "Yet to bat"}
-            </p>
+            <p className="text-sm text-[var(--muted-foreground)]">{inn1 ? `(${overs1} ov)` : "Yet to bat"}</p>
           </div>
-
           <div className="min-w-0 text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
-               <p className="truncate font-bold">{match.team2.name}</p>
+              <p className="truncate font-bold">{match.team2.name}</p>
               {match.team2.logo && <img src={match.team2.logo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />}
             </div>
             <p className="text-2xl font-bold tabular-nums sm:text-3xl">{inn2 ? `${t2Total}/${inn2.wickets}` : match.team2Score || "-"}</p>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              {inn2 ? `(${overs2} ov)` : match.innings.length > 0 ? "Yet to bat" : "Yet to bat"}
-            </p>
+            <p className="text-sm text-[var(--muted-foreground)]">{inn2 ? `(${overs2} ov)` : "Yet to bat"}</p>
           </div>
         </div>
 
-        {match.result && (
-          <p className="mt-4 text-center text-sm font-medium">{match.result}</p>
-        )}
+        {match.result && <p className="mt-4 text-center text-sm font-medium">{match.result}</p>}
         {match.tossWinner && (
           <p className="mt-2 text-center text-xs text-[var(--muted-foreground)]">
             Toss: {match.tossWinner === match.team1.id ? match.team1.name : match.team2.name} won & elected to {match.tossDecision} first
@@ -509,9 +552,7 @@ export function LiveScoreClient({
         )}
         {(() => {
           if (!inn1 || !inn2 || !currentInn || !currentBattingTeam) return null
-          const firstInnings = match.innings[0]
-          if (!firstInnings) return null
-          const target = firstInnings.runs + firstInnings.extras + 1
+          const target = inn1.runs + inn1.extras + 1
           const chasingTotal = currentInn.teamId === match.team1.id ? t1Total : t2Total
           const needed = target - chasingTotal
           const ballsLeft = 60 - currentInn.balls
@@ -578,7 +619,7 @@ export function LiveScoreClient({
               const display = getBallDisplay(ball)
               return (
                 <span
-                  key={allBalls.indexOf(ball)}
+                  key={i}
                   className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${display.color}`}
                 >
                   {display.text}
@@ -592,7 +633,7 @@ export function LiveScoreClient({
       {inn1 && (
         <div className="mt-4">
           <BattingScorecard
-            stats={inn1BatStats}
+            stats={inn1Stats.batting}
             players={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
             battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
             currentStrikerId={inn1Last?.striker}
@@ -600,14 +641,14 @@ export function LiveScoreClient({
           />
           <div className="mt-3">
             <BowlingScorecard
-              stats={inn1BowlStats}
+              stats={inn1Stats.bowling}
               players={inn1.teamId === match.team1.id ? match.team2Players : match.team1Players}
               bowlingTeam={inn1.teamId === match.team1.id ? match.team2 : match.team1}
               currentBowlerId={inn1Last?.bowler}
             />
           </div>
           <PartnershipCard
-            ballsData={parseBallsData(inn1.ballsData)}
+            ballsData={inn1BallsParsed}
             battingPlayers={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
             battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
             inning={inn1}
@@ -618,7 +659,7 @@ export function LiveScoreClient({
       {inn2 && (
         <div className="mt-4">
           <BattingScorecard
-            stats={inn2BatStats}
+            stats={inn2Stats.batting}
             players={inn2.teamId === match.team1.id ? match.team1Players : match.team2Players}
             battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
             currentStrikerId={inn2Last?.striker}
@@ -626,14 +667,14 @@ export function LiveScoreClient({
           />
           <div className="mt-3">
             <BowlingScorecard
-              stats={inn2BowlStats}
+              stats={inn2Stats.bowling}
               players={inn2.teamId === match.team1.id ? match.team2Players : match.team1Players}
               bowlingTeam={inn2.teamId === match.team1.id ? match.team2 : match.team1}
               currentBowlerId={inn2Last?.bowler}
             />
           </div>
           <PartnershipCard
-            ballsData={parseBallsData(inn2.ballsData)}
+            ballsData={inn2BallsParsed}
             battingPlayers={inn2.teamId === match.team1.id ? match.team1Players : match.team2Players}
             battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
             inning={inn2}
@@ -643,64 +684,13 @@ export function LiveScoreClient({
 
       <div className="mt-6">
         <h3 className="mb-3 text-lg font-semibold">Ball-by-Ball Timeline</h3>
-        {allBalls.length > 0 ? (
+        {recentOvers.length > 0 ? (
           <div
             ref={timelineRef}
+            onScroll={handleTimelineScroll}
             className="max-h-96 space-y-1 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--card)] p-3"
           >
-            {(() => {
-              let legalCount = 0
-              let currentOver = 0
-              const elements: React.ReactElement[] = []
-              let overBalls: { ball: BallEvent; idx: number }[] = []
-
-              function flushOver() {
-                if (overBalls.length === 0) return
-                const overNum = currentOver
-                elements.push(
-                  <div key={`over-${overNum}`} className="mb-2">
-                    <p className="mb-1 text-[10px] font-semibold text-[var(--muted-foreground)]">
-                      Over {overNum + 1}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {overBalls.map(({ ball, idx }) => {
-                        const display = getBallDisplay(ball)
-                        const label = getBallLabel(ball)
-                        const bowlerName = ball.bowler ? bowlingPlayers.find((p) => p.id === ball.bowler)?.name : ""
-                        const dismissalText = ball.wicket ? getDismissalText(ball, bowlingPlayers) : ""
-                        return (
-                          <div key={idx} className="flex flex-col items-center">
-                            <span
-                              title={`${label}${bowlerName ? ` - ${bowlerName}` : ""}${display.region ? ` → ${display.region}` : ""}`}
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold ${display.color}`}
-                            >
-                              {display.text}
-                            </span>
-                            {display.region && <span className="mt-0.5 text-[7px] font-medium text-green-600 leading-none">{display.region}</span>}
-                            {dismissalText && <span className="mt-0.5 text-[7px] font-medium text-purple-500 leading-none text-center max-w-[80px]">{dismissalText}</span>}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-                overBalls = []
-              }
-
-              allBalls.forEach((ball, i) => {
-                const isLegal = !ball.isWide && !ball.isNoBall
-                if (isLegal) {
-                  if (legalCount > 0 && legalCount % 6 === 0) {
-                    flushOver()
-                    currentOver++
-                  }
-                  legalCount++
-                }
-                overBalls.push({ ball, idx: i })
-              })
-              flushOver()
-              return elements
-            })()}
+            {recentOvers}
           </div>
         ) : (
           <p className="text-sm text-[var(--muted-foreground)]">No ball data yet.</p>
