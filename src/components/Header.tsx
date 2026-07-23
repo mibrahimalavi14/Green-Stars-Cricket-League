@@ -125,42 +125,42 @@ export function Header() {
           )}
           <Link href="/predictions" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Predictions</Link>
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">News</Link>
-          <div className="relative">
-            <button onClick={() => setMoreOpen(!moreOpen)} className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-[var(--accent)]">
-              More <ChevronDown className={`h-3 w-3 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
+          <div className="group/more relative">
+            <button className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-[var(--accent)]">
+              More <ChevronDown className="h-3 w-3 transition-transform group-hover/more:rotate-180" />
             </button>
-            {moreOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
-                <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-xl border border-[var(--border)] bg-[var(--background)] py-2 shadow-xl">
-                  <p className="px-4 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Games & Features</p>
-                  {hasPotm && <Link href="/matches/potm" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Star className="h-3.5 w-3.5" /> POTM Voting</Link>}
-                  <Link href="/quiz" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Brain className="h-3.5 w-3.5" /> Quiz</Link>
-                  <Link href="/dream-team" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Users className="h-3.5 w-3.5" /> Dream Team</Link>
-                  <Link href="/potm-gallery" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Award className="h-3.5 w-3.5" /> POTM Gallery</Link>
+            <div
+              className="invisible fixed left-0 right-0 top-[52px] z-50 mx-auto max-h-[80vh] w-full overflow-y-auto rounded-b-xl border border-[var(--border)] border-t-0 bg-[var(--background)] py-2 opacity-0 shadow-2xl transition-all group-hover/more:visible group-hover/more:opacity-100 lg:absolute lg:left-auto lg:right-0 lg:top-full lg:mt-2 lg:w-56 lg:rounded-xl lg:border lg:border-t lg:rounded-b-xl lg:max-h-[70vh]"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <div className="mx-auto max-w-7xl px-4 lg:px-0">
+                <p className="px-4 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Games & Features</p>
+                {hasPotm && <Link href="/matches/potm" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Star className="h-3.5 w-3.5" /> POTM Voting</Link>}
+                <Link href="/quiz" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Brain className="h-3.5 w-3.5" /> Quiz</Link>
+                <Link href="/dream-team" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Users className="h-3.5 w-3.5" /> Dream Team</Link>
+                <Link href="/potm-gallery" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Award className="h-3.5 w-3.5" /> POTM Gallery</Link>
 
-                  <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
-                  <Link href="/compare" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
-                  <Link href="/head-to-head" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>
-                  <Link href="/field-analysis" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Map className="h-3.5 w-3.5" /> Field Analysis</Link>
-                  <Link href="/toss-analysis" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Gamepad2 className="h-3.5 w-3.5" /> Toss Analysis</Link>
-                  <Link href="/teams/stats" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><TrendingUp className="h-3.5 w-3.5" /> Team Stats</Link>
-                  <Link href="/performers" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Top Performers</Link>
+                <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
+                <Link href="/compare" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
+                <Link href="/head-to-head" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Sword className="h-3.5 w-3.5" /> Head to Head</Link>
+                <Link href="/field-analysis" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Map className="h-3.5 w-3.5" /> Field Analysis</Link>
+                <Link href="/toss-analysis" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Gamepad2 className="h-3.5 w-3.5" /> Toss Analysis</Link>
+                <Link href="/teams/stats" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><TrendingUp className="h-3.5 w-3.5" /> Team Stats</Link>
+                <Link href="/performers" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Top Performers</Link>
 
-                  <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Explore</p>
-                  <Link href="/seasons" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><History className="h-3.5 w-3.5" /> Seasons</Link>
-                  <Link href="/awards" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Award className="h-3.5 w-3.5" /> Awards</Link>
-                  <Link href="/venues" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><MapPin className="h-3.5 w-3.5" /> Venues</Link>
-                  <Link href="/gallery" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Image className="h-3.5 w-3.5" /> Gallery</Link>
-                  <Link href="/hall-of-fame" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Hall of Fame</Link>
+                <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Explore</p>
+                <Link href="/seasons" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><History className="h-3.5 w-3.5" /> Seasons</Link>
+                <Link href="/awards" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Award className="h-3.5 w-3.5" /> Awards</Link>
+                <Link href="/venues" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><MapPin className="h-3.5 w-3.5" /> Venues</Link>
+                <Link href="/gallery" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Image className="h-3.5 w-3.5" /> Gallery</Link>
+                <Link href="/hall-of-fame" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Hall of Fame</Link>
 
-                  <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Info</p>
-                  <Link href="/about" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Info className="h-3.5 w-3.5" /> About</Link>
-                  <Link href="/contact" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Mail className="h-3.5 w-3.5" /> Contact</Link>
-                  <Link href="/faq" onClick={() => setMoreOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><HelpCircle className="h-3.5 w-3.5" /> FAQ</Link>
-                </div>
-              </>
-            )}
+                <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Info</p>
+                <Link href="/about" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Info className="h-3.5 w-3.5" /> About</Link>
+                <Link href="/contact" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Mail className="h-3.5 w-3.5" /> Contact</Link>
+                <Link href="/faq" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><HelpCircle className="h-3.5 w-3.5" /> FAQ</Link>
+              </div>
+            </div>
           </div>
         </nav>
 

@@ -11,7 +11,6 @@ import { SponsorsSection } from "@/components/SponsorsSection"
 import { CountdownTimer } from "@/components/CountdownTimer"
 import { AnimatedCounter } from "@/components/AnimatedCounter"
 import { FadeInView } from "@/components/FadeInView"
-import { BotCheck } from "@/components/BotCheck"
 import { Youtube, Trophy, Users, Calendar, MapPin, Award, Timer } from "lucide-react"
 
 export const dynamic = "force-dynamic"
@@ -57,7 +56,6 @@ async function HomePage() {
   if (todayMoment) moment = todayMoment
 
   return (
-    <BotCheck>
     <>
       <NewsNotification news={latestNews ? { id: latestNews.id, title: latestNews.title, excerpt: latestNews.excerpt || "", createdAt: latestNews.createdAt.toISOString(), type: latestNews.type } : null} />
       <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
@@ -302,9 +300,8 @@ async function HomePage() {
       </FadeInView>
 
       <SponsorsSection />
-      <ReviewsSection />
+      <ReviewsSection hideCaptcha />
     </>
-    </BotCheck>
   )
 }
 

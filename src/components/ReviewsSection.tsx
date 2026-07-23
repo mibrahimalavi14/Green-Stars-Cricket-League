@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
-import { BotCheck } from "@/components/BotCheck"
+
 
 type Review = { id: string; name: string; city: string; rating: number; comment: string; createdAt: string }
 
-export function ReviewsSection() {
+export function ReviewsSection({ hideCaptcha = false }: { hideCaptcha?: boolean }) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [average, setAverage] = useState(0)
   const [total, setTotal] = useState(0)
@@ -106,8 +106,7 @@ export function ReviewsSection() {
             <p className="text-sm text-[var(--muted-foreground)]">It will appear after approval.</p>
           </div>
         ) : (
-          <BotCheck storageKey="review_verified">
-            <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
             <h3 className="text-center font-semibold">Leave a Review</h3>
 
             <div>
@@ -139,7 +138,7 @@ export function ReviewsSection() {
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
             </div>
 
-            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+            {!hideCaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
               <ReCAPTCHA
                 sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
                 ref={(ref) => setRecaptchaRef(ref)}
@@ -153,7 +152,6 @@ export function ReviewsSection() {
               {sending ? "Submitting..." : "Submit Review"}
             </button>
           </form>
-          </BotCheck>
         )}
       </div>
     </section>
