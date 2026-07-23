@@ -1461,41 +1461,43 @@ export default function LiveScoringPage() {
                 <Activity className="h-3 w-3" /> ALL BALLS
               </p>
               {activeInnings && activeInnings.ballsData.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {activeInnings.ballsData.map((ball, i) => {
-                    const display = ballDisplay(ball)
-                    const overNum = Math.floor(
-                      activeInnings.ballsData
-                        .slice(0, i + 1)
-                        .filter((b) => !b.isWide && !b.isNoBall).length / 6
-                    )
-                    const prevOvers = activeInnings.ballsData
-                      .slice(0, i)
-                      .filter((b) => !b.isWide && !b.isNoBall).length
-                    const isOverBoundary =
-                      i > 0 &&
-                      !ball.isWide &&
-                      !ball.isNoBall &&
-                      prevOvers % 6 === 5
-                    return (
-                      <span key={i} className="group relative inline-flex items-center gap-0.5">
-                        {isOverBoundary && (
-                          <span className="ml-1 text-[10px] text-[var(--muted-foreground)]">|</span>
-                        )}
-                        <span
-                          title={display.region || ""}
-                          className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold ${display.color}`}
-                        >
-                          {display.text}
+                <div className="space-y-1.5">
+                  {(() => {
+                    const groups: { over: number; balls: typeof activeInnings.ballsData }[] = []
+                    let legalCount = 0
+                    let currentGroup: typeof activeInnings.ballsData = []
+                    for (const ball of activeInnings.ballsData) {
+                      const isLegal = !ball.isWide && !ball.isNoBall
+                      if (isLegal && legalCount > 0 && legalCount % 6 === 0) {
+                        groups.push({ over: groups.length, balls: currentGroup })
+                        currentGroup = []
+                      }
+                      currentGroup.push(ball)
+                      if (isLegal) legalCount++
+                    }
+                    if (currentGroup.length > 0) groups.push({ over: groups.length, balls: currentGroup })
+                    return groups.map((g) => (
+                      <div key={g.over} className="flex items-center gap-2">
+                        <span className="w-10 shrink-0 text-right text-[10px] font-semibold text-[var(--muted-foreground)]">
+                          {g.over + 1}
                         </span>
-                        {display.region && (
-                          <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--background)] px-1 text-[7px] text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100">
-                            {display.region}
-                          </span>
-                        )}
-                      </span>
-                    )
-                  })}
+                        <div className="flex flex-wrap gap-1.5">
+                          {g.balls.map((ball, i) => {
+                            const display = ballDisplay(ball)
+                            return (
+                              <span
+                                key={i}
+                                title={display.region || ""}
+                                className={`relative flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold ${display.color}`}
+                              >
+                                {display.text}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))
+                  })()}
                 </div>
               ) : (
                 <p className="text-xs text-[var(--muted-foreground)]">No balls recorded yet</p>
