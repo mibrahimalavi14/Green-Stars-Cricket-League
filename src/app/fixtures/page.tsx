@@ -107,7 +107,7 @@ async function FixturesPage() {
                       </div>
                       <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
                         <span>{new Date(match.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</span>
-                        <span>{(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</span>
+                        <span className="truncate">{(venue => { const url = getVenueMapsUrl(venue); return url ? <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] underline underline-offset-2">{venue}</a> : <>{venue}</> })(match.venue)}</span>
                       </div>
                     </div>
                   ))}

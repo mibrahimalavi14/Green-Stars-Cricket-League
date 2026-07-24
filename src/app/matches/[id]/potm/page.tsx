@@ -263,29 +263,29 @@ export default function PotmVotePage() {
         </div>
 
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                {match.team1.logo && <img src={match.team1.logo} alt="" className="mx-auto mb-1 h-10 w-10 rounded-full object-cover" />}
-                <p className="text-sm font-semibold">{match.team1.shortName}</p>
-                <p className="text-xs text-[var(--muted-foreground)]">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <div className="text-center shrink-0">
+                {match.team1.logo && <img src={match.team1.logo} alt="" className="mx-auto mb-1 h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover" />}
+                <p className="text-xs sm:text-sm font-semibold">{match.team1.shortName}</p>
+                <p className="text-[10px] sm:text-xs text-[var(--muted-foreground)]">
                   {match.team1Score || ""}
                 </p>
               </div>
-              <span className="text-lg font-bold text-[var(--muted-foreground)]">vs</span>
-              <div className="text-center">
-                {match.team2.logo && <img src={match.team2.logo} alt="" className="mx-auto mb-1 h-10 w-10 rounded-full object-cover" />}
-                <p className="text-sm font-semibold">{match.team2.shortName}</p>
-                <p className="text-xs text-[var(--muted-foreground)]">
+              <span className="text-sm sm:text-lg font-bold text-[var(--muted-foreground)]">vs</span>
+              <div className="text-center shrink-0">
+                {match.team2.logo && <img src={match.team2.logo} alt="" className="mx-auto mb-1 h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover" />}
+                <p className="text-xs sm:text-sm font-semibold">{match.team2.shortName}</p>
+                <p className="text-[10px] sm:text-xs text-[var(--muted-foreground)]">
                   {match.team2Score || ""}
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-[var(--muted-foreground)]">
+            <div className="text-right shrink-0">
+              <p className="text-[10px] sm:text-xs text-[var(--muted-foreground)]">
                 {new Date(match.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </p>
-              <p className="mt-1 text-xs text-green-500 font-medium">{match.result}</p>
+              <p className="mt-1 text-[10px] sm:text-xs text-green-500 font-medium truncate max-w-[120px]">{match.result}</p>
             </div>
           </div>
         </div>

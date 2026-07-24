@@ -91,7 +91,7 @@ async function PlayerStatsPage() {
       <div className="mb-12">
         <h2 className="mb-4 text-xl font-semibold">Most Wickets (Bowling)</h2>
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-          <table className="w-full text-sm">
+          <table className="min-w-[600px] w-full text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                 <th className="p-3 text-left">#</th>
@@ -144,7 +144,7 @@ async function PlayerStatsPage() {
         <div>
           <h2 className="mb-4 text-xl font-semibold">All-Rounders</h2>
           <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-            <table className="w-full text-sm">
+          <table className="min-w-[700px] w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                   <th className="p-3 text-left">#</th>

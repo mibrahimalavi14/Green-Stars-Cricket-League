@@ -204,7 +204,7 @@ function BattingScorecard({
         <h4 className="text-sm font-semibold">{battingTeam.shortName} Batting</h4>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="min-w-[420px] w-full text-xs">
           <thead>
             <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
               <th className="pb-1.5 text-left font-medium">Batsman</th>
@@ -275,7 +275,7 @@ function BowlingScorecard({
         <h4 className="text-sm font-semibold">{bowlingTeam.shortName} Bowling</h4>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="min-w-[350px] w-full text-xs">
           <thead>
             <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
               <th className="pb-1.5 text-left font-medium">Bowler</th>

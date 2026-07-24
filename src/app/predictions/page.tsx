@@ -297,9 +297,9 @@ function PredictionsList({ predictions }: { predictions: any[] }) {
       </h2>
       <div className="space-y-2">
         {predictions.slice(0, 20).map((p, i) => (
-          <div key={i} className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm">
-            <span><strong>{p.name}</strong> predicted <span className="font-medium text-[var(--accent)]">{p.teamName}</span></span>
-            <span className="text-xs text-[var(--muted-foreground)]">{timeAgo(p.createdAt)}</span>
+          <div key={i} className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm min-w-0">
+            <span className="truncate min-w-0"><strong>{p.name}</strong> predicted <span className="font-medium text-[var(--accent)]">{p.teamName}</span></span>
+            <span className="text-xs text-[var(--muted-foreground)] shrink-0">{timeAgo(p.createdAt)}</span>
           </div>
         ))}
       </div>

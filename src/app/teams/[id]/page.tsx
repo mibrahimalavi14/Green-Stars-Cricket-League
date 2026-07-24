@@ -37,17 +37,17 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <div className="mb-8 flex items-center gap-6">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--muted)] overflow-hidden" style={{ backgroundColor: team.color }}>
+      <div className="mb-8 flex items-center gap-6 min-w-0">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] overflow-hidden" style={{ backgroundColor: team.color }}>
           {team.logo && !team.logo.includes("placeholder") ? (
             <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
           ) : (
             <span className="text-2xl font-bold text-white">{team.shortName}</span>
           )}
         </div>
-        <div>
-          <h1 className="text-3xl font-bold">{team.name}</h1>
-          <p className="text-[var(--muted-foreground)]">{team.players.length} Players &middot; {allMatches.length} Matches &middot; {won} Wins</p>
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold truncate">{team.name}</h1>
+          <p className="text-[var(--muted-foreground)] truncate">{team.players.length} Players &middot; {allMatches.length} Matches &middot; {won} Wins</p>
           {team.captainName && <p className="text-xs text-amber-600 dark:text-amber-400">Captain: {team.captainName}</p>}
         </div>
       </div>

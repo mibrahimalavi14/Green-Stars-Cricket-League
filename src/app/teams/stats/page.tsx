@@ -95,15 +95,15 @@ async function TeamStatsPage() {
                 <span className="font-semibold text-[var(--foreground)]">{s.totalWickets}</span>
               </div>
               {s.topBatter && (
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1"><Award className="h-3 w-3 text-amber-500" /> Top Batter</span>
-                  <span className="font-semibold text-[var(--foreground)]">{s.topBatter.name} ({s.topBatter.runs})</span>
+                <div className="flex items-center justify-between min-w-0">
+                  <span className="flex items-center gap-1 shrink-0"><Award className="h-3 w-3 text-amber-500" /> Top Batter</span>
+                  <span className="font-semibold text-[var(--foreground)] truncate ml-2">{s.topBatter.name} ({s.topBatter.runs})</span>
                 </div>
               )}
               {s.topBowler && (
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1"><Award className="h-3 w-3 text-violet-500" /> Top Bowler</span>
-                  <span className="font-semibold text-[var(--foreground)]">{s.topBowler.name} ({s.topBowler.wickets} wkts)</span>
+                <div className="flex items-center justify-between min-w-0">
+                  <span className="flex items-center gap-1 shrink-0"><Award className="h-3 w-3 text-violet-500" /> Top Bowler</span>
+                  <span className="font-semibold text-[var(--foreground)] truncate ml-2">{s.topBowler.name} ({s.topBowler.wickets} wkts)</span>
                 </div>
               )}
             </div>

@@ -19,7 +19,7 @@ function AboutPage() {
         />
       </div>
 
-      <div className="mb-12 grid gap-8 md:grid-cols-2">
+      <div className="mb-12 grid gap-8">
         <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
           <div className="relative bg-gradient-to-br from-gscl-gold/20 via-gscl-dark to-gscl-gold/10 p-6">
             <div className="absolute inset-0 opacity-10" style={{backgroundImage: "radial-gradient(circle at 30% 50%, rgba(255,215,0,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.3) 0%, transparent 50%)"}} />

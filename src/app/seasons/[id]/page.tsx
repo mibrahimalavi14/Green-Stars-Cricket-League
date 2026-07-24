@@ -473,7 +473,13 @@ function LeaderCard({ label, stat, value, name, color, sub }: { label: string; s
     violet: "bg-violet-100 text-violet-700 dark:text-violet-400 dark:bg-violet-900/60",
     amber: "bg-amber-100 text-amber-600 dark:text-amber-400 dark:bg-amber-900/30",
   }
-  const labelColor = color === 'violet' ? 'text-violet-700 dark:text-violet-400' : `text-${color}-600 dark:text-${color}-400`
+  const labelColorMap: Record<string, string> = {
+    orange: "text-orange-600 dark:text-orange-400",
+    cyan: "text-cyan-600 dark:text-cyan-400",
+    violet: "text-violet-700 dark:text-violet-400",
+    amber: "text-amber-600 dark:text-amber-400",
+  }
+  const labelColor = labelColorMap[color] || "text-green-600 dark:text-green-400"
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
       <div className={`mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${colorMap[color] || colorMap.orange}`}>

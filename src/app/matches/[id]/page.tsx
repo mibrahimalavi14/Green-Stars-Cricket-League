@@ -187,11 +187,11 @@ function PartnershipCard({ battingPerformances, allPerformances, inning }: { bat
           const pct = (p.battingRuns / totalRuns) * 100
           return (
             <div key={p.id} className="mb-2">
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <Link href={`/players/${p.playerId}`} className="font-medium hover:text-[var(--accent)] underline underline-offset-2">
+              <div className="mb-1 flex items-center justify-between gap-2 text-sm min-w-0">
+                <Link href={`/players/${p.playerId}`} className="font-medium hover:text-[var(--accent)] underline underline-offset-2 shrink-0">
                   {p.player.name}
                 </Link>
-                <span className="text-[var(--muted-foreground)]">
+                <span className="text-[var(--muted-foreground)] truncate text-right">
                   {p.battingRuns} ({p.ballsFaced}){p.isOut ? ` ${getDismissalText(p, allPerformances)}` : " *"}
                 </span>
               </div>
@@ -243,7 +243,7 @@ function FallOfWickets({ battingPerformances, allPerformances, inning }: { batti
     <div className="mb-6">
       <h3 className="mb-2 font-semibold">Fall of Wickets</h3>
       <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-        <table className="w-full text-sm">
+        <table className="min-w-[400px] w-full text-sm">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
               <th className="p-2 text-center">Wkt</th>
@@ -380,12 +380,12 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
               <h3 className="mb-3 text-sm font-semibold">Playing XI</h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
                 {squad.map(s => (
-                  <div key={s.id} className="flex items-center gap-2">
+                  <div key={s.id} className="flex items-center gap-2 min-w-0 overflow-hidden">
                     {s.player.photo && s.player.photo !== "/placeholder-player.svg"
-                      ? <img src={s.player.photo} alt="" className="h-6 w-6 rounded-full object-cover" />
-                      : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold">{s.player.name.charAt(0)}</div>}
-                    <span>{s.player.name}</span>
-                    <span className="text-[10px] text-[var(--muted-foreground)]">{s.player.role}</span>
+                      ? <img src={s.player.photo} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                      : <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold">{s.player.name.charAt(0)}</div>}
+                    <span className="truncate">{s.player.name}</span>
+                    <span className="text-[10px] text-[var(--muted-foreground)] shrink-0">{s.player.role}</span>
                   </div>
                 ))}
               </div>

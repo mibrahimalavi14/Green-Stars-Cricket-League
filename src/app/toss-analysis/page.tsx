@@ -92,7 +92,7 @@ async function TossAnalysisPage() {
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-            <table className="w-full text-sm">
+            <table className="min-w-[700px] w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                   <th className="p-3 text-left">Team</th>

@@ -26,7 +26,7 @@ async function PointsTablePage() {
         <p className="py-12 text-center text-[var(--muted-foreground)]">No data yet.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-          <table className="w-full text-sm">
+          <table className="min-w-[550px] w-full text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
                 <th className="p-4 text-left">#</th>

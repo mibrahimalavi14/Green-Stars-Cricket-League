@@ -28,24 +28,24 @@ async function PotmVoteIndexPage() {
             <Link
               key={m.id}
               href={`/matches/${m.id}/potm`}
-              className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg"
+              className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4 transition-all hover:border-[var(--accent)] hover:shadow-lg"
             >
-              <div className="flex items-center gap-4">
-                {m.team1.logo && <img src={m.team1.logo} alt="" className="h-10 w-10 rounded-full object-cover" />}
-                <div className="text-center">
-                  <p className="font-semibold">{m.team1.shortName}</p>
-                  <p className="text-sm text-[var(--muted-foreground)]">{m.team1Score || ""}</p>
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                {m.team1.logo && <img src={m.team1.logo} alt="" className="h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-full object-cover" />}
+                <div className="text-center shrink-0">
+                  <p className="font-semibold text-xs sm:text-sm">{m.team1.shortName}</p>
+                  <p className="text-[10px] sm:text-sm text-[var(--muted-foreground)]">{m.team1Score || ""}</p>
                 </div>
                 <span className="text-xs text-[var(--muted-foreground)]">vs</span>
-                <div className="text-center">
-                  <p className="font-semibold">{m.team2.shortName}</p>
-                  <p className="text-sm text-[var(--muted-foreground)]">{m.team2Score || ""}</p>
+                <div className="text-center shrink-0">
+                  <p className="font-semibold text-xs sm:text-sm">{m.team2.shortName}</p>
+                  <p className="text-[10px] sm:text-sm text-[var(--muted-foreground)]">{m.team2Score || ""}</p>
                 </div>
-                {m.team2.logo && <img src={m.team2.logo} alt="" className="h-10 w-10 rounded-full object-cover" />}
+                {m.team2.logo && <img src={m.team2.logo} alt="" className="h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-full object-cover" />}
               </div>
-              <div className="flex items-center gap-3">
-                <p className="text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString("en-PK")}</p>
-                <span className="rounded-lg bg-[var(--accent)]/10 px-3 py-1.5 text-sm font-semibold text-[var(--accent)]">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <p className="text-[10px] sm:text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString("en-PK")}</p>
+                <span className="rounded-lg bg-[var(--accent)]/10 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-[var(--accent)]">
                   Vote <Star className="ml-1 inline h-3 w-3" />
                 </span>
               </div>
