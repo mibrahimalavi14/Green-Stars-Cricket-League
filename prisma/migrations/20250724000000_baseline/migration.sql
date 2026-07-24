@@ -1,0 +1,3 @@
+-- Baseline migration: no-op
+-- All tables and columns already applied via `prisma db push`
+-- This marks migration history as current so `prisma migrate deploy` works.
