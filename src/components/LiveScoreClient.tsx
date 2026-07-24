@@ -48,6 +48,20 @@ interface BallEvent {
   region?: string
 }
 
+interface TeamFormResult {
+  matchId: string
+  opponent: string
+  opponentShort: string
+  opponentLogo: string
+  opponentColor: string
+  won: boolean
+  tie: boolean
+  score: string
+  opponentScore: string
+  date: string
+  venue: string
+}
+
 function parseBallsData(raw: string): BallEvent[] {
   try {
     return JSON.parse(raw || "[]") || []
@@ -165,6 +179,177 @@ function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
     }
   }
   return balls.slice(startIdx)
+}
+
+function getLastLegalBalls(balls: BallEvent[], count: number): BallEvent[] {
+  const legal = balls.filter(b => !b.isWide && !b.isNoBall)
+  return legal.slice(-count)
+}
+
+function computeOverScores(balls: BallEvent[]): number[] {
+  const overs: number[] = []
+  let runsThisOver = 0
+  let legalCount = 0
+  for (const b of balls) {
+    const isLegal = !b.isWide && !b.isNoBall
+    if (isLegal) {
+      if (legalCount > 0 && legalCount % 6 === 0) {
+        overs.push(runsThisOver)
+        runsThisOver = 0
+      }
+      legalCount++
+    }
+    runsThisOver += b.runs || 0
+    if (b.isWide) runsThisOver++
+    if (b.isNoBall) runsThisOver++
+  }
+  if (legalCount > 0 && (legalCount - 1) % 6 !== 0 || overs.length === 0) {
+    overs.push(runsThisOver)
+  }
+  return overs
+}
+
+function computeCumulativeScores(balls: BallEvent[]): number[] {
+  const cumulative: number[] = []
+  let total = 0
+  let legalCount = 0
+  for (const b of balls) {
+    const isLegal = !b.isWide && !b.isNoBall
+    if (isLegal) {
+      if (legalCount > 0 && legalCount % 6 === 0) {
+        cumulative.push(total)
+      }
+      legalCount++
+    }
+    total += b.runs || 0
+    if (b.isWide) total++
+    if (b.isNoBall) total++
+  }
+  if (cumulative.length === 0 || cumulative[cumulative.length - 1] !== total) {
+    cumulative.push(total)
+  }
+  return cumulative
+}
+
+function computeMatchHighlights(
+  inn1Balls: BallEvent[],
+  inn2Balls: BallEvent[],
+  batting1Players: { id: string; name: string }[],
+  batting2Players: { id: string; name: string }[],
+  bowling1Players: { id: string; name: string }[],
+  bowling2Players: { id: string; name: string }[]
+) {
+  const highlights: { icon: string; text: string; sub: string }[] = []
+  const allBalls = [...inn1Balls, ...inn2Balls]
+
+  function bestBatting(balls: BallEvent[], players: { id: string; name: string }[]) {
+    const stats: Record<string, { runs: number; balls: number }> = {}
+    for (const b of balls) {
+      const sid = b.striker || ""
+      if (sid) {
+        if (!stats[sid]) stats[sid] = { runs: 0, balls: 0 }
+        stats[sid].runs += b.runs || 0
+        if (!b.isWide && !b.isNoBall) stats[sid].balls++
+      }
+    }
+    let best = { id: "", runs: 0, balls: 0 }
+    for (const [id, s] of Object.entries(stats)) {
+      if (s.runs > best.runs) best = { id, ...s }
+    }
+    if (best.runs > 0) {
+      const name = players.find(p => p.id === best.id)?.name || "Unknown"
+      return { name, runs: best.runs, balls: best.balls }
+    }
+    return null
+  }
+
+  function bestBowling(balls: BallEvent[], players: { id: string; name: string }[]) {
+    const stats: Record<string, { runs: number; balls: number; wickets: number }> = {}
+    for (const b of balls) {
+      const bid = b.bowler || ""
+      if (bid) {
+        if (!stats[bid]) stats[bid] = { runs: 0, balls: 0, wickets: 0 }
+        stats[bid].runs += (b.runs || 0) + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0)
+        if (!b.isWide && !b.isNoBall) stats[bid].balls++
+        if (b.wicket) stats[bid].wickets++
+      }
+    }
+    let best = { id: "", runs: 999, balls: 0, wickets: 0 }
+    for (const [id, s] of Object.entries(stats)) {
+      if (s.wickets > best.wickets || (s.wickets === best.wickets && s.runs < best.runs)) {
+        best = { id, ...s }
+      }
+    }
+    if (best.wickets > 0) {
+      const name = players.find(p => p.id === best.id)?.name || "Unknown"
+      return { name, wickets: best.wickets, runs: best.runs, balls: best.balls }
+    }
+    return null
+  }
+
+  function biggestSix(balls: BallEvent[], players: { id: string; name: string }[]) {
+    for (const b of balls) {
+      if (b.runs === 6 && b.region) {
+        const name = players.find(p => p.id === b.striker)?.name
+        if (name) return { name, region: b.region }
+      }
+    }
+    return null
+  }
+
+  function mostProductiveOver(balls: BallEvent[]) {
+    let bestOver = -1
+    let bestRuns = 0
+    let legalCount = 0
+    let curRuns = 0
+    let curLegal = 0
+    let overStart = 0
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i]
+      const isLegal = !b.isWide && !b.isNoBall
+      if (isLegal) curLegal++
+      curRuns += b.runs || 0
+      if (b.isWide) curRuns++
+      if (b.isNoBall) curRuns++
+      if (isLegal && curLegal === 6) {
+        if (curRuns > bestRuns) {
+          bestRuns = curRuns
+          bestOver = Math.floor(legalCount / 6)
+        }
+        legalCount += curLegal
+        curRuns = 0
+        curLegal = 0
+      }
+    }
+    if (curRuns > bestRuns) bestRuns = curRuns
+    return bestRuns > 0 ? { runs: bestRuns } : null
+  }
+
+  const bb1 = bestBatting(inn1Balls, batting1Players)
+  const bb2 = bestBatting(inn2Balls, batting2Players)
+  const bestBat = bb1 && bb2 ? (bb1.runs >= bb2.runs ? bb1 : bb2) : bb1 || bb2
+  if (bestBat) highlights.push({ icon: "🏏", text: `${bestBat.name} — ${bestBat.runs}(${bestBat.balls})`, sub: "Top Scorer" })
+
+  const bw1 = bestBowling(inn1Balls, bowling1Players)
+  const bw2 = bestBowling(inn2Balls, bowling2Players)
+  const bestBowl = bw1 && bw2 ? (bw1.wickets > bw2.wickets || (bw1.wickets === bw2.wickets && bw1.runs < bw2.runs) ? bw1 : bw2) : bw1 || bw2
+  if (bestBowl) highlights.push({ icon: "🎯", text: `${bestBowl.name} — ${bestBowl.wickets}/${bestBowl.runs}`, sub: "Best Bowling" })
+
+  const s1 = biggestSix(inn1Balls, batting1Players)
+  const s2 = biggestSix(inn2Balls, batting2Players)
+  const topSix = s1 || s2
+  if (topSix) highlights.push({ icon: "💥", text: `${topSix.name} — ${topSix.region}`, sub: "Biggest Six" })
+
+  const mp1 = mostProductiveOver(inn1Balls)
+  const mp2 = mostProductiveOver(inn2Balls)
+  const mp = mp1 && mp2 ? (mp1.runs > mp2.runs ? mp1 : mp2) : mp1 || mp2
+  if (mp) highlights.push({ icon: "🔥", text: `${mp.runs} runs`, sub: "Best Over" })
+
+  const totalFours = allBalls.filter(b => b.runs === 4).length
+  const totalSixes = allBalls.filter(b => b.runs === 6).length
+  if (totalFours + totalSixes > 0) highlights.push({ icon: "⚡", text: `${totalFours} fours, ${totalSixes} sixes`, sub: "Boundaries" })
+
+  return highlights
 }
 
 function BattingScorecard({
@@ -317,6 +502,7 @@ export function LiveScoreClient({
 }) {
   const [match, setMatch] = useState<LiveMatch | null>(liveMatch)
   const [refreshing, setRefreshing] = useState(false)
+  const [teamForm, setTeamForm] = useState<Record<string, TeamFormResult[]>>({})
   const timelineRef = useRef<HTMLDivElement>(null)
   const userScrolledUp = useRef(false)
   const abortRef = useRef<AbortController | null>(null)
@@ -349,6 +535,49 @@ export function LiveScoreClient({
       abortRef.current?.abort()
     }
   }, [refreshScore])
+
+  useEffect(() => {
+    if (!match) return
+    const teamIds = [match.team1.id, match.team2.id]
+    const cached = teamIds.filter(id => teamForm[id])
+    if (cached.length === teamIds.length) return
+    for (const teamId of teamIds) {
+      if (teamForm[teamId]) continue
+      fetch(`/api/matches`)
+        .then(r => r.json())
+        .then((data: any[]) => {
+          const completed = data
+            .filter((m: any) => m.status === "completed" && m.result && (m.team1Id === teamId || m.team2Id === teamId) && m.id !== match.id)
+            .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 5)
+          const results: TeamFormResult[] = completed.map((m: any) => {
+            const isTeam1 = m.team1Id === teamId
+            const opponent = isTeam1 ? m.team2 : m.team1
+            const teamInn = m.innings?.find((i: any) => i.teamId === teamId)
+            const oppInn = m.innings?.find((i: any) => i.teamId !== teamId)
+            const teamTotal = teamInn ? teamInn.runs + teamInn.extras : 0
+            const oppTotal = oppInn ? oppInn.runs + oppInn.extras : 0
+            const won = m.winnerTeamId === teamId
+            const tie = !m.winnerTeamId
+            return {
+              matchId: m.id,
+              opponent: opponent.name,
+              opponentShort: opponent.shortName,
+              opponentLogo: opponent.logo || "",
+              opponentColor: opponent.color || "#888",
+              won,
+              tie,
+              score: teamTotal > 0 ? `${teamTotal}/${teamInn?.wickets ?? 0}` : "-",
+              opponentScore: oppTotal > 0 ? `${oppTotal}/${oppInn?.wickets ?? 0}` : "-",
+              date: m.date,
+              venue: m.venue,
+            }
+          })
+          setTeamForm(prev => ({ ...prev, [teamId]: results }))
+        })
+        .catch(() => {})
+    }
+  }, [match])
 
   useEffect(() => {
     const el = timelineRef.current
@@ -403,6 +632,83 @@ export function LiveScoreClient({
   const currentBowler = lastBall?.bowler ? bowlingPlayers.find((p) => p.id === lastBall.bowler) : null
 
   const currentOverBalls = useMemo(() => getCurrentOverBalls(allBallsParsed), [allBallsParsed])
+
+  const last6Balls = useMemo(() => getLastLegalBalls(allBallsParsed, 6), [allBallsParsed])
+
+  const totalFours = useMemo(() => {
+    const innBalls = currentInn ? allBallsParsed : []
+    return innBalls.filter(b => b.runs === 4).length
+  }, [allBallsParsed, currentInn])
+
+  const totalSixes = useMemo(() => {
+    const innBalls = currentInn ? allBallsParsed : []
+    return innBalls.filter(b => b.runs === 6).length
+  }, [allBallsParsed, currentInn])
+
+  const winProbability = useMemo(() => {
+    if (!currentInn || !inn1 || !inn2 || !match) return null
+    const isSecondInn = match.innings.length === 2 && currentInn.teamId !== match.innings[0]?.teamId
+    if (!isSecondInn) {
+      const ballsFaced = currentInn.balls
+      const projected = ballsFaced > 0 ? Math.round((t2Total / ballsFaced) * MATCH_CONFIG.totalBalls) : 0
+      const strength = Math.min(100, Math.max(0, 50 + (projected - 30) * 1.5))
+      return { team1: Math.round(strength), team2: Math.round(100 - strength) }
+    }
+    const target = inn1.runs + inn1.extras + 1
+    const chasingTotal = currentInn.teamId === match.team1.id ? t1Total : t2Total
+    const needed = target - chasingTotal
+    const ballsLeft = MATCH_CONFIG.totalBalls - currentInn.balls
+    const wktsLeft = MATCH_CONFIG.wicketsPerInnings - currentInn.wickets
+    if (ballsLeft <= 0 || wktsLeft <= 0) return null
+    const reqRate = needed / ballsLeft
+    const strength = Math.min(100, Math.max(0, 50 + (4 - reqRate) * 12 + (wktsLeft - 1) * 2))
+    const battingIsTeam1 = currentInn.teamId === match.team1.id
+    return battingIsTeam1
+      ? { team1: Math.round(strength), team2: Math.round(100 - strength) }
+      : { team1: Math.round(100 - strength), team2: Math.round(strength) }
+  }, [currentInn, inn1, inn2, match, t1Total, t2Total])
+
+  const requiredPerBall = useMemo(() => {
+    if (!currentInn || !inn1 || !inn2 || !match) return null
+    const isSecondInn = match.innings.length === 2 && currentInn.teamId !== match.innings[0]?.teamId
+    if (!isSecondInn) return null
+    const target = inn1.runs + inn1.extras + 1
+    const chasingTotal = currentInn.teamId === match.team1.id ? t1Total : t2Total
+    const needed = target - chasingTotal
+    const ballsLeft = MATCH_CONFIG.totalBalls - currentInn.balls
+    if (ballsLeft <= 0) return null
+    return { needed, ballsLeft, rpb: (needed / ballsLeft).toFixed(2) }
+  }, [currentInn, inn1, inn2, match, t1Total, t2Total])
+
+  const fieldingSummary = useMemo(() => {
+    const innBalls = currentInn ? allBallsParsed : []
+    const catches = innBalls.filter(b => b.wicket === "caught").length
+    const runouts = innBalls.filter(b => b.wicket === "runout").length
+    const stumpings = innBalls.filter(b => b.wicket === "stumped").length
+    return { catches, runouts, stumpings }
+  }, [allBallsParsed, currentInn])
+
+  const overScores = useMemo(() => computeOverScores(allBallsParsed), [allBallsParsed])
+
+  const wormData = useMemo(() => {
+    if (!inn1 || !inn2) return null
+    const inn1Cum = computeCumulativeScores(inn1BallsParsed)
+    const inn2Cum = computeCumulativeScores(inn2BallsParsed)
+    const maxOvers = Math.max(inn1Cum.length, inn2Cum.length)
+    const maxRuns = Math.max(...inn1Cum, ...inn2Cum, 1)
+    return { inn1Cum, inn2Cum, maxOvers, maxRuns }
+  }, [inn1BallsParsed, inn2BallsParsed, inn1, inn2])
+
+  const matchHighlights = useMemo(() => {
+    return computeMatchHighlights(
+      inn1BallsParsed,
+      inn2BallsParsed,
+      inn1?.teamId === match?.team1.id ? match!.team1Players : match!.team2Players,
+      inn1?.teamId === match?.team1.id ? match!.team2Players : match!.team1Players,
+      inn1?.teamId === match?.team1.id ? match!.team2Players : match!.team1Players,
+      inn1?.teamId === match?.team1.id ? match!.team1Players : match!.team2Players
+    )
+  }, [inn1BallsParsed, inn2BallsParsed, match])
 
   const recentOverElements = useMemo(() => {
     if (allBallsParsed.length === 0) return null
@@ -563,6 +869,38 @@ export function LiveScoreClient({
             </div>
           )
         })()}
+
+        {currentInn && (
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-lg bg-[var(--muted)] p-2">
+              <p className="text-[10px] text-[var(--muted-foreground)]">Powerplay</p>
+              <p className="text-sm font-bold text-[var(--accent)]">{formatOvers(currentInn.balls)} / {MATCH_CONFIG.oversPerInnings}.0</p>
+              <p className="text-[10px] text-green-600">Active</p>
+            </div>
+            {requiredPerBall && (
+              <div className="rounded-lg bg-amber-500/10 p-2">
+                <p className="text-[10px] text-amber-600">Need</p>
+                <p className="text-sm font-bold text-amber-600">{requiredPerBall.needed} off {requiredPerBall.ballsLeft}</p>
+                <p className="text-[10px] text-amber-600/70">{requiredPerBall.rpb} per ball</p>
+              </div>
+            )}
+            {winProbability && (
+              <div className="rounded-lg bg-[var(--muted)] p-2">
+                <p className="text-[10px] text-[var(--muted-foreground)]">Win %</p>
+                <div className="mt-1 space-y-0.5">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="truncate">{match.team1.shortName}</span>
+                    <span className="font-bold" style={{ color: match.team1.color }}>{winProbability.team1}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="truncate">{match.team2.shortName}</span>
+                    <span className="font-bold" style={{ color: match.team2.color }}>{winProbability.team2}%</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {currentInn && (
@@ -627,6 +965,72 @@ export function LiveScoreClient({
         </div>
       )}
 
+      {last6Balls.length > 0 && (
+        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+          <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Last 6 Balls</h3>
+          <div className="flex gap-2">
+            {last6Balls.map((ball, i) => {
+              const display = getBallDisplay(ball)
+              return (
+                <span
+                  key={i}
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${display.color}`}
+                >
+                  {display.text}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {currentInn && (
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
+            <p className="text-[10px] text-[var(--muted-foreground)]">4s</p>
+            <p className="text-lg font-bold text-pink-500">{totalFours}</p>
+          </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
+            <p className="text-[10px] text-[var(--muted-foreground)]">6s</p>
+            <p className="text-lg font-bold text-red-500">{totalSixes}</p>
+          </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
+            <p className="text-[10px] text-[var(--muted-foreground)]">Fielding</p>
+            <div className="flex items-center justify-center gap-1.5 text-[10px]">
+              {fieldingSummary.catches > 0 && <span>🙌 {fieldingSummary.catches}</span>}
+              {fieldingSummary.runouts > 0 && <span>🎯 {fieldingSummary.runouts}</span>}
+              {fieldingSummary.stumpings > 0 && <span>🧤 {fieldingSummary.stumpings}</span>}
+              {fieldingSummary.catches === 0 && fieldingSummary.runouts === 0 && fieldingSummary.stumpings === 0 && (
+                <span className="text-[var(--muted-foreground)]">-</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {currentInn && overScores.length > 1 && (
+        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+          <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Over-by-Over</h3>
+          <div className="flex gap-1.5">
+            {overScores.map((runs, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <div className="flex h-24 items-end">
+                  <div
+                    className="w-8 rounded-t-md transition-all"
+                    style={{
+                      height: `${Math.max(8, (runs / Math.max(...overScores, 1)) * 96)}px`,
+                      backgroundColor: runs >= 10 ? "var(--accent)" : runs >= 6 ? "hsl(var(--chart-2))" : "hsl(var(--chart-4))",
+                    }}
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-[var(--muted-foreground)]">{runs}</span>
+                <span className="text-[9px] text-[var(--muted-foreground)]/60">O{i + 1}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {inn1 && (
         <div className="mt-4">
           <BattingScorecard
@@ -676,6 +1080,69 @@ export function LiveScoreClient({
             battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
             inning={inn2}
           />
+        </div>
+      )}
+
+      {matchHighlights.length > 0 && (
+        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+          <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Match Highlights</h3>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {matchHighlights.map((h, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg bg-[var(--muted)] p-2.5">
+                <span className="text-lg">{h.icon}</span>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold">{h.text}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]">{h.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {wormData && (
+        <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+          <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Worm</h3>
+          <div className="flex items-end gap-0.5" style={{ height: "80px" }}>
+            {Array.from({ length: wormData.maxOvers }).map((_, overIdx) => {
+              const t1Run = wormData.inn1Cum[overIdx] ?? wormData.inn1Cum[wormData.inn1Cum.length - 1] ?? 0
+              const t2Run = wormData.inn2Cum[overIdx] ?? wormData.inn2Cum[wormData.inn2Cum.length - 1] ?? 0
+              const maxH = 72
+              const t1H = wormData.maxRuns > 0 ? (t1Run / wormData.maxRuns) * maxH : 0
+              const t2H = wormData.maxRuns > 0 ? (t2Run / wormData.maxRuns) * maxH : 0
+              return (
+                <div key={overIdx} className="flex flex-1 items-end gap-px" title={`Over ${overIdx + 1}: ${match?.team1.shortName} ${t1Run} | ${match?.team2.shortName} ${t2Run}`}>
+                  <div className="w-1/2 rounded-t-sm" style={{ height: `${Math.max(1, t1H)}px`, backgroundColor: match?.team1.color || "var(--accent)" }} />
+                  <div className="w-1/2 rounded-t-sm" style={{ height: `${Math.max(1, t2H)}px`, backgroundColor: match?.team2.color || "hsl(var(--chart-2))" }} />
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-2 flex justify-center gap-4 text-[10px]">
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm" style={{ backgroundColor: match?.team1.color || "var(--accent)" }} />{match?.team1.shortName}</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm" style={{ backgroundColor: match?.team2.color || "hsl(var(--chart-2))" }} />{match?.team2.shortName}</span>
+          </div>
+        </div>
+      )}
+
+      {match && (
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {[match.team1, match.team2].map(team => {
+            const form = teamForm[team.id]
+            if (!form || form.length === 0) return null
+            return (
+              <div key={team.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3">
+                <p className="mb-2 text-[10px] font-semibold text-[var(--muted-foreground)]">Last {form.length} — {team.shortName}</p>
+                <div className="flex gap-1.5">
+                  {form.map(r => (
+                    <div key={r.matchId} className={`flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white ${r.won ? "bg-green-500" : r.tie ? "bg-amber-500" : "bg-red-500"}`} title={`${r.won ? "W" : r.tie ? "T" : "L"} vs ${r.opponent} (${r.score} vs ${r.opponentScore})`}>
+                      {r.won ? "W" : r.tie ? "T" : "L"}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 
