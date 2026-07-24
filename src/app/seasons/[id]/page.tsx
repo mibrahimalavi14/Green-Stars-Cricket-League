@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
+import { MATCH_CONFIG } from "@/lib/config"
 
 export const dynamic = "force-dynamic"
 
@@ -56,7 +57,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
     return {
       id: team.id, name: team.name, shortName: team.shortName, logo: team.logo, color: team.color,
       played: s.played, won: s.won, lost: s.lost, tied: s.tied, nr: s.nr,
-      points: s.won * 2 + s.tied * 1 + s.nr * 1, nrr,
+      points: s.won * MATCH_CONFIG.pointsWin + s.tied * MATCH_CONFIG.pointsTie + s.nr * MATCH_CONFIG.pointsNoResult, nrr,
     }
   }).sort((a, b) => b.points - a.points || b.nrr - a.nrr)
 

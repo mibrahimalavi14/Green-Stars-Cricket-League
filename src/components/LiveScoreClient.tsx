@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { RefreshCw } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { PartnershipCard } from "./PartnershipCard"
-import { MATCH_CONFIG } from "@/lib/config"
+import { MATCH_CONFIG, formatOvers } from "@/lib/config"
 
 interface LiveMatch {
   id: string
@@ -84,10 +84,6 @@ function getBallLabel(ball: BallEvent): string {
   if (r === 4) return "FOUR!"
   if (r === 6) return "SIX!"
   return `${r} run${r === 1 ? "" : "s"}`
-}
-
-function formatOvers(balls: number): string {
-  return `${Math.floor(balls / 6)}.${balls % 6}`
 }
 
 function getDismissalText(ball: BallEvent, bowlingPlayers: { id: string; name: string }[]): string {

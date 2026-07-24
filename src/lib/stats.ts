@@ -83,7 +83,7 @@ export async function recalcPointsTable(seasonId: string) {
       lost: s.lost,
       tied: s.tied,
       nr: s.nr,
-      points: s.won * 2 + s.tied * 1 + s.nr * 1,
+      points: s.won * MATCH_CONFIG.pointsWin + s.tied * MATCH_CONFIG.pointsTie + s.nr * MATCH_CONFIG.pointsNoResult,
       nrr,
       forRuns: s.forRuns,
       forBalls: s.forBalls,

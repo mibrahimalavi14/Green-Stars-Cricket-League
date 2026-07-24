@@ -1,10 +1,12 @@
+import { MATCH_CONFIG } from "./config"
+
 export function calculatePoints(teamStats: {
   won: number
   lost: number
   tied: number
   nr: number
 }) {
-  return teamStats.won * 2 + teamStats.tied * 1 + teamStats.nr * 1
+  return teamStats.won * MATCH_CONFIG.pointsWin + teamStats.tied * MATCH_CONFIG.pointsTie + teamStats.nr * MATCH_CONFIG.pointsNoResult
 }
 
 export function calculateNRR(

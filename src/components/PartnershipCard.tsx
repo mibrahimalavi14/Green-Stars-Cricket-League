@@ -1,5 +1,7 @@
 "use client"
 
+import { formatOvers } from "@/lib/config"
+
 interface BallEvent {
   runs?: number
   extras?: string | null
@@ -102,10 +104,6 @@ function computeBattingContributions(
   }
 
   return stats
-}
-
-function formatOvers(balls: number): string {
-  return `${Math.floor(balls / 6)}.${balls % 6}`
 }
 
 const WK_COLORS = [
