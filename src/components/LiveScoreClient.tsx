@@ -21,6 +21,7 @@ interface LiveMatch {
   innings: { id: string; teamId: string; runs: number; wickets: number; balls: number; extras: number; ballsData: string }[]
   team1Players: { id: string; name: string }[]
   team2Players: { id: string; name: string }[]
+  customHighlights: string
 }
 
 interface UpcomingMatch {
@@ -700,7 +701,7 @@ export function LiveScoreClient({
   }, [inn1BallsParsed, inn2BallsParsed, inn1, inn2])
 
   const matchHighlights = useMemo(() => {
-    return computeMatchHighlights(
+    const autoHighlights = computeMatchHighlights(
       inn1BallsParsed,
       inn2BallsParsed,
       inn1?.teamId === match?.team1.id ? match!.team1Players : match!.team2Players,
@@ -708,6 +709,11 @@ export function LiveScoreClient({
       inn1?.teamId === match?.team1.id ? match!.team2Players : match!.team1Players,
       inn1?.teamId === match?.team1.id ? match!.team1Players : match!.team2Players
     )
+    let manualHighlights: { icon: string; text: string; sub: string }[] = []
+    if (match?.customHighlights) {
+      try { manualHighlights = JSON.parse(match.customHighlights) } catch {}
+    }
+    return [...manualHighlights, ...autoHighlights]
   }, [inn1BallsParsed, inn2BallsParsed, match])
 
   const recentOverElements = useMemo(() => {
@@ -886,7 +892,7 @@ export function LiveScoreClient({
             )}
             {winProbability && (
               <div className="rounded-lg bg-[var(--muted)] p-2">
-                <p className="text-[10px] text-[var(--muted-foreground)]">Win %</p>
+                <p className="text-[10px] text-[var(--muted-foreground)]">Est. Win Prob.</p>
                 <div className="mt-1 space-y-0.5">
                   <div className="flex items-center justify-between text-[10px]">
                     <span className="truncate">{match.team1.shortName}</span>

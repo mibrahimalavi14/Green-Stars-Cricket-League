@@ -72,6 +72,7 @@ interface MatchData {
   tossWinner: string
   tossDecision: string
   inningsBreak: boolean
+  customHighlights: string
 }
 
 interface SummaryData {
@@ -149,6 +150,11 @@ export default function LiveScoringPage() {
   const [superOverT1Wkts, setSuperOverT1Wkts] = useState("")
   const [superOverT2Runs, setSuperOverT2Runs] = useState("")
   const [superOverT2Wkts, setSuperOverT2Wkts] = useState("")
+  const [customHighlights, setCustomHighlights] = useState<{ icon: string; text: string; sub: string }[]>([])
+  const [newHighlightIcon, setNewHighlightIcon] = useState("⭐")
+  const [newHighlightText, setNewHighlightText] = useState("")
+  const [newHighlightSub, setNewHighlightSub] = useState("")
+  const [savingHighlights, setSavingHighlights] = useState(false)
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -161,6 +167,33 @@ export default function LiveScoringPage() {
       }
     } catch {}
   }, [matchId])
+
+  const saveHighlights = useCallback(async (highlights: { icon: string; text: string; sub: string }[]) => {
+    setSavingHighlights(true)
+    try {
+      await fetch("/api/matches", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: matchId, customHighlights: JSON.stringify(highlights) }),
+      })
+    } catch {}
+    setSavingHighlights(false)
+  }, [matchId])
+
+  const addHighlight = useCallback(() => {
+    if (!newHighlightText.trim()) return
+    const updated = [...customHighlights, { icon: newHighlightIcon, text: newHighlightText.trim(), sub: newHighlightSub.trim() || "Manual" }]
+    setCustomHighlights(updated)
+    saveHighlights(updated)
+    setNewHighlightText("")
+    setNewHighlightSub("")
+  }, [customHighlights, newHighlightIcon, newHighlightText, newHighlightSub, saveHighlights])
+
+  const removeHighlight = useCallback((idx: number) => {
+    const updated = customHighlights.filter((_, i) => i !== idx)
+    setCustomHighlights(updated)
+    saveHighlights(updated)
+  }, [customHighlights, saveHighlights])
 
   useEffect(() => {
     fetchSummary().then(() => setLoading(false))
@@ -183,6 +216,9 @@ export default function LiveScoringPage() {
     if (!summary) return
     if (summary.match.tossWinner && !tossWinner) setTossWinner(summary.match.tossWinner)
     if (summary.match.tossDecision && !tossDecision) setTossDecision(summary.match.tossDecision)
+    if ((summary.match as any).customHighlights && customHighlights.length === 0) {
+      try { setCustomHighlights(JSON.parse((summary.match as any).customHighlights)) } catch {}
+    }
     const m = summary.match
     const tw = tossWinner || m.tossWinner
     const td = tossDecision || m.tossDecision
@@ -1479,6 +1515,38 @@ export default function LiveScoringPage() {
                 </div>
               </div>
             )}
+
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+              <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
+                ⭐ CUSTOM HIGHLIGHTS
+              </p>
+              {customHighlights.length > 0 && (
+                <div className="mb-3 space-y-1.5">
+                  {customHighlights.map((h, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-lg bg-[var(--muted)] px-3 py-1.5">
+                      <div className="flex items-center gap-2">
+                        <span>{h.icon}</span>
+                        <div>
+                          <p className="text-xs font-bold">{h.text}</p>
+                          <p className="text-[10px] text-[var(--muted-foreground)]">{h.sub}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => removeHighlight(i)} className="text-xs text-red-500 hover:text-red-700">✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-1.5">
+                <select value={newHighlightIcon} onChange={(e) => setNewHighlightIcon(e.target.value)} className="w-12 rounded-lg border border-[var(--border)] bg-[var(--background)] px-1 py-1.5 text-xs">
+                  <option>⭐</option><option>🏏</option><option>🎯</option><option>💥</option><option>🔥</option><option>⚡</option><option>🧤</option><option>🙌</option><option>👑</option><option>🏆</option>
+                </select>
+                <input value={newHighlightText} onChange={(e) => setNewHighlightText(e.target.value)} placeholder="Highlight text..." className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs" onKeyDown={(e) => e.key === "Enter" && addHighlight()} />
+                <input value={newHighlightSub} onChange={(e) => setNewHighlightSub(e.target.value)} placeholder="Label" className="w-20 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs" onKeyDown={(e) => e.key === "Enter" && addHighlight()} />
+                <button onClick={addHighlight} disabled={!newHighlightText.trim() || savingHighlights} className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+                  {savingHighlights ? "..." : "Add"}
+                </button>
+              </div>
+            </div>
 
             <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
               <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">

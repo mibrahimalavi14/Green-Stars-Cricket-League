@@ -42,6 +42,7 @@ export async function GET(req: Request) {
       tossWinner: match.tossWinner,
       tossDecision: match.tossDecision,
       inningsBreak: match.inningsBreak,
+      customHighlights: match.customHighlights || "",
     },
     innings,
     team1Players,

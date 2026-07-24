@@ -160,6 +160,7 @@ model Match {
   manOfMatch    String   @default("")
   winnerTeamId  String?
   youtubeUrl    String   @default("")
+  customHighlights String   @default("")
   superOverT1Runs Int    @default(0)
   superOverT1Wkts Int    @default(0)
   superOverT2Runs Int    @default(0)
