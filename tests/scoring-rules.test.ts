@@ -280,3 +280,42 @@ describe("Target Calculation", () => {
     expect(target).toBe(106)
   })
 })
+
+describe("MATCH_CONFIG Integrity", () => {
+  const MATCH_CONFIG = {
+    oversPerInnings: 4,
+    ballsPerOver: 6,
+    totalBalls: 24,
+    wicketsPerInnings: 10,
+    maxOversPerBowler: 1,
+    maxBallsPerBowler: 6,
+    pointsWin: 2,
+    pointsTie: 1,
+    pointsNoResult: 1,
+  }
+
+  it("totalBalls should equal oversPerInnings * ballsPerOver", () => {
+    expect(MATCH_CONFIG.totalBalls).toBe(MATCH_CONFIG.oversPerInnings * MATCH_CONFIG.ballsPerOver)
+  })
+
+  it("maxBallsPerBowler should equal maxOversPerBowler * ballsPerOver", () => {
+    expect(MATCH_CONFIG.maxBallsPerBowler).toBe(MATCH_CONFIG.maxOversPerBowler * MATCH_CONFIG.ballsPerOver)
+  })
+
+  it("maxBallsPerBowler should not exceed totalBalls", () => {
+    expect(MATCH_CONFIG.maxBallsPerBowler).toBeLessThanOrEqual(MATCH_CONFIG.totalBalls)
+  })
+
+  it("maxOversPerBowler should not exceed oversPerInnings", () => {
+    expect(MATCH_CONFIG.maxOversPerBowler).toBeLessThanOrEqual(MATCH_CONFIG.oversPerInnings)
+  })
+
+  it("pointsWin should be >= pointsTie", () => {
+    expect(MATCH_CONFIG.pointsWin).toBeGreaterThanOrEqual(MATCH_CONFIG.pointsTie)
+  })
+
+  it("all numeric values should be positive", () => {
+    const values = Object.values(MATCH_CONFIG).filter((v): v is number => typeof v === "number")
+    values.forEach(v => expect(v).toBeGreaterThan(0))
+  })
+})
