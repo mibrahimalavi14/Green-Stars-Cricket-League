@@ -45,19 +45,19 @@ export async function recalcPointsTable(seasonId: string) {
 
     if (team1Inning && stats[m.team1Id]) {
       stats[m.team1Id].forRuns += team1Inning.runs + team1Inning.extras
-      stats[m.team1Id].forBalls += team1Inning.balls
+      stats[m.team1Id].forBalls += team1Inning.wickets >= 10 ? 60 : team1Inning.balls
     }
     if (team2Inning && stats[m.team1Id]) {
       stats[m.team1Id].againstRuns += team2Inning.runs + team2Inning.extras
-      stats[m.team1Id].againstBalls += team2Inning.balls
+      stats[m.team1Id].againstBalls += team2Inning.wickets >= 10 ? 60 : team2Inning.balls
     }
     if (team2Inning && stats[m.team2Id]) {
       stats[m.team2Id].forRuns += team2Inning.runs + team2Inning.extras
-      stats[m.team2Id].forBalls += team2Inning.balls
+      stats[m.team2Id].forBalls += team2Inning.wickets >= 10 ? 60 : team2Inning.balls
     }
     if (team1Inning && stats[m.team2Id]) {
       stats[m.team2Id].againstRuns += team1Inning.runs + team1Inning.extras
-      stats[m.team2Id].againstBalls += team1Inning.balls
+      stats[m.team2Id].againstBalls += team1Inning.wickets >= 10 ? 60 : team1Inning.balls
     }
   }
 

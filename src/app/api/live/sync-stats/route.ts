@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
 
 interface BallEvent {
   runs: number
@@ -17,6 +18,7 @@ interface BallEvent {
 }
 
 export async function POST(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { matchId } = await req.json()
   if (!matchId) return NextResponse.json({ error: "matchId required" }, { status: 400 })
 
@@ -100,6 +102,8 @@ export async function POST(req: Request) {
 
       if (ball.wicket && ball.wicket !== "runout") {
         bps.bowlingWickets++
+      }
+      if (ball.wicket) {
         const dismissed = ball.wicketBatsman || ball.striker
         ensurePlayer(dismissed, inn.teamId)
         const dps = playerStats[dismissed]

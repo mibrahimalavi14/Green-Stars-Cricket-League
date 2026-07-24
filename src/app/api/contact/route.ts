@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(req: Request) {
   const cookie = req.headers.get("cookie") || ""
-  const isAdmin = cookie.includes("admin_token=true")
+  const isAdmin = cookie.includes("admin_auth=true")
   if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const contacts = await prisma.contact.findMany({ orderBy: { createdAt: "desc" } })
   return NextResponse.json(contacts)

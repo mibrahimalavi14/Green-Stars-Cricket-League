@@ -11,8 +11,8 @@ webpush.setVapidDetails(
 
 export async function POST(req: Request) {
   try {
-    const adminKey = req.headers.get("x-admin-key")
-    if (adminKey !== "gscl-admin-2024") {
+    const cookie = req.headers.get("cookie") || ""
+    if (!cookie.includes("admin_auth=true")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

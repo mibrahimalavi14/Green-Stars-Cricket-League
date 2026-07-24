@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
 
 export async function GET() {
   const players = await prisma.player.findMany({ include: { team: true } })
@@ -7,6 +8,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const body = await req.json()
   const player = await prisma.player.create({ data: body })
   if (body.isCaptain) {
@@ -19,6 +21,7 @@ export async function POST(req: Request) {
 const STAT_FIELDS = ["runs","ballsFaced","fours","sixes","threes","dotBalls","ones","twos","fifties","hundreds","highestScore","highestScoreNotOut","notOuts","ducks","matchesPlayed","wickets","ballsBowled","runsConceded","maidens","wides","noBalls","fiveWickets","fourWickets","hattricks","bestBowlingWickets","bestBowlingRuns","bestBowlingBalls","catches","stumpings","runOuts","timesBowled","timesCaught","timesLbw","timesStumped","timesRunOut"]
 
 export async function PATCH(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const body = await req.json()
   const { id, ...data } = body
 
@@ -51,6 +54,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await req.json()
   const player = await prisma.player.findUnique({ where: { id }, select: { teamId: true, name: true, isCaptain: true } })
   if (player?.isCaptain) {

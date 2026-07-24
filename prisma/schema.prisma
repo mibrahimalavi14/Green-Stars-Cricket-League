@@ -165,12 +165,18 @@ model Match {
   superOverT2Wkts Int    @default(0)
   inningsBreak    Boolean @default(false)
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
   predictions   Prediction[]
   innings       Inning[]
   performances  PlayerMatch[]
   quizzes       Quiz[]
   potmVotes     PotmVote[]
   ballEvents    BallEvent[]
+
+  @@index([status])
+  @@index([seasonId])
+  @@index([team1Id])
+  @@index([team2Id])
 }
 
 model Inning {
@@ -183,6 +189,7 @@ model Inning {
   balls    Int    @default(0)
   extras   Int    @default(0)
   ballsData String @default("[]")
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([matchId, teamId])
 }
@@ -228,6 +235,9 @@ model PlayerMatch {
   createdAt DateTime @default(now())
 
   @@unique([playerId, matchId])
+  @@index([matchId])
+  @@index([playerId])
+  @@index([teamId])
 }
 
 model Prediction {
@@ -438,4 +448,18 @@ model MomentOfTheDay {
   active      Boolean  @default(true)
   date        DateTime @unique
   createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String   @default("")
+  details   String   @default("")
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([createdAt])
 }

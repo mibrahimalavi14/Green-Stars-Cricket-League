@@ -9,23 +9,50 @@ async function AwardsPage() {
     include: { teams: true },
   })
 
-  const allPlayers = await prisma.player.findMany({ include: { team: true } })
   const completedMatches = await prisma.match.findMany({
     where: { status: "completed" },
     include: { team1: true, team2: true },
     orderBy: { date: "desc" },
   })
 
-  const seasonsAwards = seasons.map(season => {
-    const seasonPlayers = allPlayers.filter(p => season.teams.some(t => t.id === p.teamId))
-    const seasonMatches = completedMatches.filter(m => m.seasonId === season.id)
+  const seasonMatchIds = new Map<string, string[]>()
+  for (const m of completedMatches) {
+    if (!m.seasonId) continue
+    if (!seasonMatchIds.has(m.seasonId)) seasonMatchIds.set(m.seasonId, [])
+    seasonMatchIds.get(m.seasonId)!.push(m.id)
+  }
 
-    const topScorer = [...seasonPlayers].sort((a, b) => b.runs - a.runs)[0]
-    const topWicketTaker = [...seasonPlayers].sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)[0]
-    const mostSixes = [...seasonPlayers].sort((a, b) => b.sixes - a.sixes)[0]
-    const bestStrikeRate = [...seasonPlayers].filter(p => p.ballsFaced >= 10).sort((a, b) => (b.runs / b.ballsFaced) - (a.runs / a.ballsFaced))[0]
-    const bestAllRounder = [...seasonPlayers].filter(p => p.runs >= 20 && p.wickets >= 2).sort((a, b) => (b.runs + b.wickets * 20) - (a.runs + a.wickets * 20))[0]
-    const mostCatches = [...seasonPlayers].sort((a, b) => b.catches - a.catches)[0]
+  const allPlayerMatches = await prisma.playerMatch.findMany({
+    include: { player: { include: { team: true } } },
+  })
+
+  const seasonsAwards = seasons.map(season => {
+    const matchIds = new Set(seasonMatchIds.get(season.id) || [])
+    const spm = allPlayerMatches.filter(pm => matchIds.has(pm.matchId))
+
+    const agg: Record<string, { playerId: string; name: string; team?: any; runs: number; ballsFaced: number; sixes: number; wickets: number; runsConceded: number; catches: number; matchesPlayed: number }> = {}
+    for (const pm of spm) {
+      const pid = pm.playerId
+      if (!agg[pid]) agg[pid] = { playerId: pid, name: pm.player.name, team: pm.player.team, runs: 0, ballsFaced: 0, sixes: 0, wickets: 0, runsConceded: 0, catches: 0, matchesPlayed: 0 }
+      const a = agg[pid]
+      a.runs += pm.battingRuns
+      a.ballsFaced += pm.ballsFaced
+      a.sixes += pm.sixes
+      a.wickets += pm.bowlingWickets
+      a.runsConceded += pm.bowlingRuns
+      a.catches += pm.catches
+      a.matchesPlayed++
+    }
+
+    const players = Object.values(agg)
+
+    const topScorer = [...players].sort((a, b) => b.runs - a.runs)[0]
+    const topWicketTaker = [...players].sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)[0]
+    const mostSixes = [...players].sort((a, b) => b.sixes - a.sixes)[0]
+    const bestStrikeRate = [...players].filter(p => p.ballsFaced >= 10).sort((a, b) => (b.runs / b.ballsFaced) - (a.runs / a.ballsFaced))[0]
+    const bestAllRounder = [...players].filter(p => p.runs >= 20 && p.wickets >= 2).sort((a, b) => (b.runs + b.wickets * 20) - (a.runs + a.wickets * 20))[0]
+    const mostCatches = [...players].sort((a, b) => b.catches - a.catches)[0]
+    const seasonMatches = completedMatches.filter(m => m.seasonId === season.id)
     const potmList = seasonMatches.filter(m => m.manOfMatch).reduce((acc: { name: string; count: number }[], m) => {
       const existing = acc.find(x => x.name === m.manOfMatch)
       if (existing) existing.count++

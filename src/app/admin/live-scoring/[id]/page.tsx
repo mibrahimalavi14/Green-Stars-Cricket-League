@@ -378,6 +378,11 @@ export default function LiveScoringPage() {
 
   async function undoBall() {
     if (!activeInnings) return
+    const lastBall = activeInnings.ballsData[activeInnings.ballsData.length - 1]
+    if (!lastBall) return
+    const prevStriker = lastBall.striker
+    const prevNonStriker = lastBall.nonStriker
+    const prevBowler = lastBall.bowler
     setSubmitting(true)
     try {
       const res = await fetch("/api/live/balls/undo", {
@@ -386,6 +391,10 @@ export default function LiveScoringPage() {
         body: JSON.stringify({ inningsId: activeInnings.id }),
       })
       if (res.ok) {
+        setStrikerId(prevStriker)
+        setNonStrikerId(prevNonStriker)
+        setBowlerId(prevBowler)
+        localStorage.setItem(`ls-${matchId}-bowler`, prevBowler)
         fetch("/api/live/sync-stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -580,8 +589,10 @@ export default function LiveScoringPage() {
             ps.ballsFaced--
           }
 
-          if (ball.wicket) {
+          if (ball.wicket && ball.wicket !== "runout") {
             bps.bowlingWickets++
+          }
+          if (ball.wicket) {
             const dismissed = ball.wicketBatsman || ball.striker
             ensurePlayer(dismissed, inn.teamId)
             const dps = playerStats[dismissed]
