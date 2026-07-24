@@ -114,6 +114,7 @@ export function Header() {
 
         <nav className="hidden items-center gap-5 md:flex">
           <Link href="/" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Home</Link>
+          <Link href="/matches" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Matches</Link>
           <Link href="/teams" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Teams</Link>
           <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
@@ -147,6 +148,7 @@ export function Header() {
                 <Link href="/toss-analysis" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Gamepad2 className="h-3.5 w-3.5" /> Toss Analysis</Link>
                 <Link href="/teams/stats" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><TrendingUp className="h-3.5 w-3.5" /> Team Stats</Link>
                 <Link href="/performers" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Top Performers</Link>
+                <Link href="/records" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Records</Link>
 
                 <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Explore</p>
                 <Link href="/seasons" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><History className="h-3.5 w-3.5" /> Seasons</Link>

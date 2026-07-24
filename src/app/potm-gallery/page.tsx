@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Trophy, Medal, Star } from "lucide-react"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 async function PotmGalleryPage() {
   const all = await prisma.match.findMany({

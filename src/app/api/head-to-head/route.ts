@@ -48,10 +48,15 @@ export async function GET(req: Request) {
     if (myRuns > team1Highest) team1Highest = myRuns
     if (oppRuns > team2Highest) team2Highest = oppRuns
 
-    if (match.result.includes(team1.name)) {
-      team1Wins++
-    } else if (match.result.includes(team2.name)) {
-      team2Wins++
+    if (match.winnerTeamId) {
+      if (match.winnerTeamId === team1Id) team1Wins++
+      else if (match.winnerTeamId === team2Id) team2Wins++
+    } else if (match.result.toLowerCase().includes("tied")) {
+      // tie — no winner
+    } else {
+      // fallback: string match for legacy data
+      if (match.result.includes(team1.name) || match.result.includes(team1.shortName)) team1Wins++
+      else if (match.result.includes(team2.name) || match.result.includes(team2.shortName)) team2Wins++
     }
   }
 

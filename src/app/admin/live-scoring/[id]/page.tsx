@@ -508,21 +508,30 @@ export default function LiveScoringPage() {
       const t2Total = t2Runs + t2Extras
 
       let result = ""
+      let winnerTeamId = ""
       if (t1Total > t2Total) {
         const diff = t1Total - t2Total
         result = `${match.team1.name} won by ${diff} run${diff !== 1 ? "s" : ""}`
+        winnerTeamId = match.team1.id
       } else if (t2Total > t1Total) {
-        const wktsLeft = 10 - t2Wkts
+        const wktsLeft = MATCH_CONFIG.wicketsPerInnings - t2Wkts
         result = `${match.team2.name} won by ${wktsLeft} wicket${wktsLeft !== 1 ? "s" : ""}`
+        winnerTeamId = match.team2.id
       } else {
         const so1Runs = parseInt(superOverT1Runs) || 0
         const so2Runs = parseInt(superOverT2Runs) || 0
         const so1Wkts = parseInt(superOverT1Wkts) || 0
         const so2Wkts = parseInt(superOverT2Wkts) || 0
         if (so1Runs || so2Runs) {
-          if (so1Runs > so2Runs) result = `${match.team1.name} won the Super Over (${so1Runs}/${so1Wkts} - ${so2Runs}/${so2Wkts})`
-          else if (so2Runs > so1Runs) result = `${match.team2.name} won the Super Over (${so2Runs}/${so2Wkts} - ${so1Runs}/${so1Wkts})`
-          else result = "Match Tied (Super Over tied again)"
+          if (so1Runs > so2Runs) {
+            result = `${match.team1.name} won the Super Over (${so1Runs}/${so1Wkts} - ${so2Runs}/${so2Wkts})`
+            winnerTeamId = match.team1.id
+          } else if (so2Runs > so1Runs) {
+            result = `${match.team2.name} won the Super Over (${so2Runs}/${so2Wkts} - ${so1Runs}/${so1Wkts})`
+            winnerTeamId = match.team2.id
+          } else {
+            result = "Match Tied (Super Over tied again)"
+          }
         } else {
           result = "Match Tied"
         }
@@ -695,6 +704,7 @@ export default function LiveScoringPage() {
           id: matchId,
           status: "completed",
           result,
+          winnerTeamId,
           manOfMatch: mom,
           tossWinner: summary.match.tossWinner || tossWinner,
           tossDecision: summary.match.tossDecision || tossDecision,

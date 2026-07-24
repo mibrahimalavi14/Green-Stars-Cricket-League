@@ -158,6 +158,7 @@ model Match {
   tossWinner    String   @default("")
   tossDecision  String   @default("")
   manOfMatch    String   @default("")
+  winnerTeamId  String   @default("")
   youtubeUrl    String   @default("")
   superOverT1Runs Int    @default(0)
   superOverT1Wkts Int    @default(0)

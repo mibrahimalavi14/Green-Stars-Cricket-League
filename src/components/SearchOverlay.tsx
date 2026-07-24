@@ -65,15 +65,21 @@ export function SearchOverlay() {
             <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">No results found</p>
           )}
           {!loading && !query && (
-            <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">Type to search players and teams</p>
+            <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">Search players, teams, matches, news & seasons</p>
           )}
-          {results.map((r, i) => (
-            <Link key={i} href={r.href} onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--muted)]">
-              <span className="font-medium">{r.label}</span>
-              {r.sub && <span className="text-xs text-[var(--muted-foreground)]">{r.sub}</span>}
-            </Link>
-          ))}
+          {results.map((r, i) => {
+            const iconMap: Record<string, string> = { player: "👤", team: "🏏", match: "⚔️", news: "📰", season: "🏆" }
+            return (
+              <Link key={i} href={r.href} onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--muted)]">
+                <span className="text-base shrink-0">{(r as any).icon ? iconMap[(r as any).icon] || "🔗" : "🔗"}</span>
+                <div className="min-w-0">
+                  <span className="font-medium block truncate">{r.label}</span>
+                  {r.sub && <span className="text-xs text-[var(--muted-foreground)]">{r.sub}</span>}
+                </div>
+              </Link>
+            )
+          })}
         </div>
         <div className="border-t border-[var(--border)] px-5 py-2 text-[10px] text-[var(--muted-foreground)]">
           Press <kbd className="rounded border border-[var(--border)] px-1.5 py-0.5 font-mono">Esc</kbd> to close · <kbd className="rounded border border-[var(--border)] px-1.5 py-0.5 font-mono">Ctrl+K</kbd> to open
