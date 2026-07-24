@@ -8,8 +8,8 @@ export function MatchCard({ match, showMatchNo }: { match: MatchData; showMatchN
   const rel = relativeDateLabel(date)
   const navHref = match.status === "live" ? "/live" : "/fixtures"
 
-  const team1Won = match.status === "completed" && match.winnerTeamId === match.team1Id
-  const team2Won = match.status === "completed" && match.winnerTeamId === match.team2Id
+  const team1Won = match.status === "completed" && match.result?.startsWith(match.team1.name)
+  const team2Won = match.status === "completed" && match.result?.startsWith(match.team2.name)
 
   return (
     <div

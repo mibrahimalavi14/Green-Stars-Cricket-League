@@ -29,12 +29,7 @@ export async function recalcPointsTable(seasonId: string) {
     } else if (result === "no result" || result.includes("abandon")) {
       if (stats[m.team1Id]) stats[m.team1Id].nr++
       if (stats[m.team2Id]) stats[m.team2Id].nr++
-    } else if (m.winnerTeamId) {
-      if (stats[m.winnerTeamId]) stats[m.winnerTeamId].won++
-      const loserId = m.winnerTeamId === m.team1Id ? m.team2Id : m.team1Id
-      if (stats[loserId]) stats[loserId].lost++
     } else {
-      // fallback: string match for legacy data
       const t1Match = result.includes((m.team1?.name || "").toLowerCase()) || result.includes((m.team1?.shortName || "").toLowerCase())
       const t2Match = result.includes((m.team2?.name || "").toLowerCase()) || result.includes((m.team2?.shortName || "").toLowerCase())
       if (t1Match && !t2Match) {

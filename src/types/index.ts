@@ -55,7 +55,6 @@ export interface MatchData {
   tossWinner: string
   tossDecision: string
   manOfMatch: string
-  winnerTeamId: string | null
   youtubeUrl: string
   season?: SeasonData
   innings?: InningData[]
