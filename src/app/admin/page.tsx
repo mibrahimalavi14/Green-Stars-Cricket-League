@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3 } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -109,6 +109,12 @@ async function AdminPage() {
           <PlusCircle className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Quick Add</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Add new match</p>
+        </Link>
+
+        <Link href="/admin/analytics" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <BarChart3 className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Analytics</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Usage metrics & trends for v2.0 planning</p>
         </Link>
 
         <Link href="/admin/contact" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">

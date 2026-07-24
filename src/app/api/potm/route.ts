@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { trackEvent } from "@/lib/analytics"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -97,6 +98,8 @@ export async function POST(req: Request) {
         name: name || "Anonymous",
       },
     })
+
+    trackEvent("potm_vote", { matchId, playerId })
 
     return NextResponse.json({ success: true, vote })
   } catch (e: any) {

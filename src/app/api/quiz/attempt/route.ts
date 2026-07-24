@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { trackEvent } from "@/lib/analytics"
 
 export async function POST(req: Request) {
   const body = await req.json()
@@ -32,6 +33,8 @@ export async function POST(req: Request) {
       correct,
     },
   })
+
+  trackEvent("quiz_attempted", { quizId, correct: correct ? "yes" : "no" })
 
   return NextResponse.json({
     correct,

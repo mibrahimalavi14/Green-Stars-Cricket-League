@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { trackEvent } from "@/lib/analytics"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -77,6 +78,8 @@ export async function POST(req: Request) {
   const pred = await prisma.seasonPrediction.create({
     data: { email, name, seasonId: season.id, predictedTeamId },
   })
+
+  trackEvent("prediction_submitted", { teamId: predictedTeamId })
 
   return NextResponse.json(pred)
 }

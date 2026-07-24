@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
+import { trackEvent } from "@/lib/analytics"
 
 export async function GET() {
   await prisma.match.updateMany({
@@ -45,6 +46,7 @@ export async function PATCH(req: Request) {
 
   if (data.status === "completed") {
     logAudit({ action: "match_completed", entity: "match", entityId: id, details: JSON.stringify({ result: data.result, manOfMatch: data.manOfMatch }), ip })
+    trackEvent("match_completed", { matchId: id, result: data.result || "" }, ip)
     const fullMatch = await prisma.match.findUnique({
       where: { id },
       select: { seasonId: true },

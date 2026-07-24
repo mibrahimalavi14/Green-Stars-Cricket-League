@@ -466,3 +466,15 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
 }
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  event     String
+  metadata  String   @default("{}")
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([event])
+  @@index([createdAt])
+  @@index([event, createdAt])
+}

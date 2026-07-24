@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
+import { trackEvent } from "@/lib/analytics"
 
 interface BallEvent {
   runs: number
@@ -67,6 +68,8 @@ export async function POST(req: Request) {
   }, { maxWait: 5000, timeout: 10000 })
 
   logAudit({ action: "ball_undone", entity: "match", entityId: result.lastBall.bowler, details: JSON.stringify({ inningsId, undone: { runs: result.lastBall.runs, wicket: result.lastBall.wicket } }), ip })
+
+  trackEvent("undo_used", { inningsId, runsUndone: result.lastBall.runs || 0, wicketUndone: result.lastBall.wicket || "" }, ip)
 
   return NextResponse.json({
     success: true,

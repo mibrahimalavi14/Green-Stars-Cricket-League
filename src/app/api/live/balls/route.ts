@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { MATCH_CONFIG } from "@/lib/config"
+import { trackEvent } from "@/lib/analytics"
 
 interface BallEvent {
   runs: number
@@ -106,6 +107,8 @@ export async function POST(req: Request) {
   }, { maxWait: 5000, timeout: 10000 })
 
   logAudit({ action: "ball_added", entity: "match", entityId: matchId, details: JSON.stringify({ battingTeamId, ball: { runs: ball.runs, wicket: ball.wicket, isWide: ball.isWide, isNoBall: ball.isNoBall } }), ip })
+
+  trackEvent("match_scored", { matchId, runs: ball.runs || 0, wicket: ball.wicket || "" }, ip)
 
   return NextResponse.json({
     success: true,

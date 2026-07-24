@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { trackEvent } from "@/lib/analytics"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -44,6 +45,8 @@ export async function GET(req: Request) {
     ...news.map(n => ({ label: n.title, href: `/news/${n.id}`, sub: "News", icon: "news" })),
     ...seasons.map(s => ({ label: s.name, href: `/seasons/${s.id}`, sub: "Season", icon: "season" })),
   ]
+
+  trackEvent("search_query", { query: q, resultCount: results.length })
 
   return NextResponse.json({ results })
 }
