@@ -508,7 +508,7 @@ export default function LiveScoringPage() {
       const t2Total = t2Runs + t2Extras
 
       let result = ""
-      let winnerTeamId = ""
+      let winnerTeamId: string | null = null
       if (t1Total > t2Total) {
         const diff = t1Total - t2Total
         result = `${match.team1.name} won by ${diff} run${diff !== 1 ? "s" : ""}`

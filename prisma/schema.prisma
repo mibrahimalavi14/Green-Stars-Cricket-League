@@ -158,7 +158,7 @@ model Match {
   tossWinner    String   @default("")
   tossDecision  String   @default("")
   manOfMatch    String   @default("")
-  winnerTeamId  String   @default("")
+  winnerTeamId  String?
   youtubeUrl    String   @default("")
   superOverT1Runs Int    @default(0)
   superOverT1Wkts Int    @default(0)
@@ -178,6 +178,7 @@ model Match {
   @@index([seasonId])
   @@index([team1Id])
   @@index([team2Id])
+  @@index([seasonId, winnerTeamId])
 }
 
 model Inning {
