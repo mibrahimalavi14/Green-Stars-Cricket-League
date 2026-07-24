@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { RefreshCw } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { PartnershipCard } from "./PartnershipCard"
+import { MATCH_CONFIG } from "@/lib/config"
 
 interface LiveMatch {
   id: string
@@ -555,7 +556,7 @@ export function LiveScoreClient({
           const target = inn1.runs + inn1.extras + 1
           const chasingTotal = currentInn.teamId === match.team1.id ? t1Total : t2Total
           const needed = target - chasingTotal
-          const ballsLeft = 60 - currentInn.balls
+          const ballsLeft = MATCH_CONFIG.totalBalls - currentInn.balls
           return (
             <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-center">
               <p className="text-xs font-semibold text-amber-600">TARGET</p>

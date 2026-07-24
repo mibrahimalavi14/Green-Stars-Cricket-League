@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
+import { MATCH_CONFIG } from "@/lib/config"
 
 interface BallEvent {
   runs: number
@@ -73,11 +74,11 @@ export async function POST(req: Request) {
     if (dismissed.has(ball.striker)) throw new Error("Dismissed batsman cannot bat again")
 
     const legalBefore = ballsData.filter(b => !b.isWide && !b.isNoBall).length
-    const ballsInCurrentOver = legalBefore % 6
-    if (isLegalDelivery(ball) && ballsInCurrentOver >= 6) throw new Error("Over already complete (6 legal balls)")
+    const ballsInCurrentOver = legalBefore % MATCH_CONFIG.ballsPerOver
+    if (isLegalDelivery(ball) && ballsInCurrentOver >= MATCH_CONFIG.ballsPerOver) throw new Error(`Over already complete (${MATCH_CONFIG.ballsPerOver} legal balls)`)
 
     const bowlerLegalBalls = ballsData.filter(b => b.bowler === ball.bowler && !b.isWide && !b.isNoBall).length
-    if (isLegalDelivery(ball) && bowlerLegalBalls >= 12) throw new Error("Bowler cannot bowl more than 2 overs")
+    if (isLegalDelivery(ball) && bowlerLegalBalls >= MATCH_CONFIG.maxBallsPerBowler) throw new Error(`Bowler cannot bowl more than ${MATCH_CONFIG.maxOversPerBowler} over`)
 
     ballsData.push(ball)
     const newBallsData = JSON.stringify(ballsData)

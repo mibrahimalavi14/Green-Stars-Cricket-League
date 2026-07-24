@@ -16,6 +16,7 @@ import {
   Loader2,
 } from "lucide-react"
 import { FieldDiagram } from "@/components/FieldDiagram"
+import { MATCH_CONFIG } from "@/lib/config"
 
 interface Player {
   id: string
@@ -313,7 +314,7 @@ export default function LiveScoringPage() {
     if (!summary || summary.innings.length <= 1) return null
     const firstInnings = summary.innings[0]
     const target = firstInnings.runs + firstInnings.extras + 1
-    const remaining = 60 - (activeInnings?.balls || 0)
+    const remaining = MATCH_CONFIG.totalBalls - (activeInnings?.balls || 0)
     if (remaining <= 0) return 0
     return Number((((target - (activeInnings?.runs || 0) - (activeInnings?.extras || 0)) / remaining) * 6).toFixed(2))
   }, [summary, activeInnings?.runs, activeInnings?.extras, activeInnings?.balls])
@@ -1313,7 +1314,7 @@ export default function LiveScoringPage() {
                     <div className="mb-3 rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-center">
                       <p className="text-xs font-semibold text-amber-600">TARGET</p>
                       <p className="text-2xl font-black text-amber-600">{target}</p>
-                      <p className="text-[10px] text-amber-600/70">Need {Math.max(0, target - (activeInnings.runs + activeInnings.extras))} runs from {Math.max(0, 60 - activeInnings.balls)} balls</p>
+                      <p className="text-[10px] text-amber-600/70">Need {Math.max(0, target - (activeInnings.runs + activeInnings.extras))} runs from {Math.max(0, MATCH_CONFIG.totalBalls - activeInnings.balls)} balls</p>
                     </div>
                   )
                 })()}

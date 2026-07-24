@@ -1,18 +1,18 @@
 describe("NRR Calculation", () => {
-  it("should use full 60 balls for all-out innings (ICC standard)", () => {
-    // T10 format: team all out for 50 runs in 40 balls
+  it("should use full 24 balls for all-out innings (ICC standard)", () => {
+    // T4 format: team all out for 50 runs in 20 balls
     const runs = 50
-    const balls = 40
+    const balls = 20
     const wickets = 10
 
-    // ICC rule: all-out = use full quota (60 balls in T10)
-    const effectiveBalls = wickets >= 10 ? 60 : balls
+    // ICC rule: all-out = use full quota (24 balls in T4)
+    const effectiveBalls = wickets >= 10 ? 24 : balls
     const runRate = runs / (effectiveBalls / 6)
 
-    // Without fix: 50 / (40/6) = 7.50
-    // With fix: 50 / (60/6) = 5.00
-    expect(effectiveBalls).toBe(60)
-    expect(runRate).toBe(5.0)
+    // Without fix: 50 / (20/6) = 15.00
+    // With fix: 50 / (24/6) = 12.50
+    expect(effectiveBalls).toBe(24)
+    expect(runRate).toBe(12.5)
   })
 
   it("should use actual balls when NOT all out", () => {
@@ -20,7 +20,7 @@ describe("NRR Calculation", () => {
     const balls = 55
     const wickets = 4
 
-    const effectiveBalls = wickets >= 10 ? 60 : balls
+    const effectiveBalls = wickets >= 10 ? 24 : balls
     const runRate = runs / (effectiveBalls / 6)
 
     expect(effectiveBalls).toBe(55)
@@ -37,24 +37,24 @@ describe("NRR Calculation", () => {
 })
 
 describe("Bowling Validation Rules", () => {
-  it("should reject bowler exceeding 2 overs (12 legal balls)", () => {
-    const legalBallsBowled = 12
+  it("should reject bowler exceeding 1 over (6 legal balls)", () => {
+    const legalBallsBowled = 6
     const wouldBeLegal = true
-    const reject = wouldBeLegal && legalBallsBowled >= 12
+    const reject = wouldBeLegal && legalBallsBowled >= 6
     expect(reject).toBe(true)
   })
 
-  it("should allow bowler with 11 legal balls", () => {
-    const legalBallsBowled = 11
+  it("should allow bowler with 5 legal balls", () => {
+    const legalBallsBowled = 5
     const wouldBeLegal = true
-    const reject = wouldBeLegal && legalBallsBowled >= 12
+    const reject = wouldBeLegal && legalBallsBowled >= 6
     expect(reject).toBe(false)
   })
 
-  it("should allow wide on 12th ball (not legal)", () => {
-    const legalBallsBowled = 12
+  it("should allow wide on 6th ball (not legal)", () => {
+    const legalBallsBowled = 6
     const wouldBeLegal = false
-    const reject = wouldBeLegal && legalBallsBowled >= 12
+    const reject = wouldBeLegal && legalBallsBowled >= 6
     expect(reject).toBe(false)
   })
 })

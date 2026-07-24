@@ -5,6 +5,7 @@ import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 import { ShareButtons } from "@/components/ShareButtons"
 import { Star } from "lucide-react"
+import { MATCH_CONFIG } from "@/lib/config"
 
 function getYoutubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -432,7 +433,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
             const chasingInning = team1BatFirst ? team2Inning : team1Inning
             const target = battingFirst.runs + battingFirst.extras + 1
             const needed = target - (chasingInning.runs + chasingInning.extras)
-            const ballsLeft = 60 - chasingInning.balls
+            const ballsLeft = MATCH_CONFIG.totalBalls - chasingInning.balls
             return (
               <div className="mb-6 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-center">
                 <p className="text-xs font-semibold text-amber-600">TARGET</p>
