@@ -17,6 +17,7 @@ export async function GET() {
     status: database === "connected" ? "ok" : "degraded",
     database,
     version: "v1.0.1",
+    commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "03a5856",
     config: {
       oversPerInnings: MATCH_CONFIG.oversPerInnings,
       totalBalls: MATCH_CONFIG.totalBalls,
