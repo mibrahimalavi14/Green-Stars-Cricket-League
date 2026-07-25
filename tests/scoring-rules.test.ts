@@ -1,36 +1,34 @@
+import { MATCH_CONFIG } from "../src/lib/config"
+
 describe("NRR Calculation", () => {
-  it("should use full 24 balls for all-out innings (ICC standard)", () => {
-    // T4 format: team all out for 50 runs in 20 balls
+  it("should use full totalBalls for all-out innings (ICC standard)", () => {
     const runs = 50
     const balls = 20
-    const wickets = 10
+    const wickets = MATCH_CONFIG.wicketsPerInnings
 
-    // ICC rule: all-out = use full quota (24 balls in T4)
-    const effectiveBalls = wickets >= 10 ? 24 : balls
-    const runRate = runs / (effectiveBalls / 6)
+    const effectiveBalls = wickets >= MATCH_CONFIG.wicketsPerInnings ? MATCH_CONFIG.totalBalls : balls
+    const runRate = runs / (effectiveBalls / MATCH_CONFIG.ballsPerOver)
 
-    // Without fix: 50 / (20/6) = 15.00
-    // With fix: 50 / (24/6) = 12.50
-    expect(effectiveBalls).toBe(24)
-    expect(runRate).toBe(12.5)
+    expect(effectiveBalls).toBe(MATCH_CONFIG.totalBalls)
+    expect(runRate).toBe(runs / (MATCH_CONFIG.totalBalls / MATCH_CONFIG.ballsPerOver))
   })
 
   it("should use actual balls when NOT all out", () => {
-    const runs = 80
-    const balls = 55
+    const runs = 40
+    const balls = 20
     const wickets = 4
 
-    const effectiveBalls = wickets >= 10 ? 24 : balls
-    const runRate = runs / (effectiveBalls / 6)
+    const effectiveBalls = wickets >= MATCH_CONFIG.wicketsPerInnings ? MATCH_CONFIG.totalBalls : balls
+    const runRate = runs / (effectiveBalls / MATCH_CONFIG.ballsPerOver)
 
-    expect(effectiveBalls).toBe(55)
-    expect(runRate).toBeCloseTo(8.727, 2)
+    expect(effectiveBalls).toBe(balls)
+    expect(runRate).toBeCloseTo(12, 1)
   })
 
   it("should handle zero balls gracefully", () => {
     const runs = 0
     const balls = 0
-    const forOvers = balls / 6
+    const forOvers = balls / MATCH_CONFIG.ballsPerOver
     const nrr = forOvers > 0 ? runs / forOvers : 0
     expect(nrr).toBe(0)
   })
@@ -38,46 +36,37 @@ describe("NRR Calculation", () => {
 
 describe("Bowling Validation Rules", () => {
   it("should reject bowler exceeding 1 over (6 legal balls)", () => {
-    const legalBallsBowled = 6
+    const legalBallsBowled = MATCH_CONFIG.ballsPerOver
     const wouldBeLegal = true
-    const reject = wouldBeLegal && legalBallsBowled >= 6
+    const reject = wouldBeLegal && legalBallsBowled >= MATCH_CONFIG.ballsPerOver
     expect(reject).toBe(true)
   })
 
-  it("should allow bowler with 5 legal balls", () => {
-    const legalBallsBowled = 5
+  it("should allow bowler with less than max balls", () => {
+    const legalBallsBowled = MATCH_CONFIG.ballsPerOver - 1
     const wouldBeLegal = true
-    const reject = wouldBeLegal && legalBallsBowled >= 6
+    const reject = wouldBeLegal && legalBallsBowled >= MATCH_CONFIG.ballsPerOver
     expect(reject).toBe(false)
   })
 
-  it("should allow wide on 6th ball (not legal)", () => {
-    const legalBallsBowled = 6
+  it("should allow wide on last ball (not legal)", () => {
+    const legalBallsBowled = MATCH_CONFIG.ballsPerOver
     const wouldBeLegal = false
-    const reject = wouldBeLegal && legalBallsBowled >= 6
+    const reject = wouldBeLegal && legalBallsBowled >= MATCH_CONFIG.ballsPerOver
     expect(reject).toBe(false)
   })
 })
 
 describe("Over Completion Rules", () => {
-  it("should reject legal ball when over has 6 legal balls already in current over", () => {
-    // After 5 legal balls, 6th should be last. After 6 balls, over is complete.
-    // 5 balls done: 5 % 6 = 5 → allow. 6 balls done: 6 % 6 = 0 → new over starts.
-    // Actually the over-complete check in addBall is: legalBallsAfter % 6 === 0 AFTER adding.
-    // So when legalBefore=5 and this is legal, 5+1=6, 6%6=0 → over complete, OK to add.
-    // When legalBefore=6 (already 1 full over), 6%6=0 → this means a new over.
-    // The API validates BEFORE adding, so legalBefore % 6 === 6 is never true (modulo 6 gives 0-5).
-    // The check is: if (isLegalDelivery && ballsInCurrentOver >= 6) → but ballsInCurrentOver is always 0-5.
-    // So the over-complete scenario is handled by the client (don't allow), not the server.
-    // Server just validates bowler limits and batter limits.
-    expect(6 % 6).toBe(0) // Over resets after 6 balls
+  it("should complete over after ballsPerOver legal balls", () => {
+    expect(MATCH_CONFIG.ballsPerOver % MATCH_CONFIG.ballsPerOver).toBe(0)
   })
 
-  it("should allow wide on ball 7 of over", () => {
-    const legalBefore = 6
-    const ballsInCurrentOver = legalBefore % 6
+  it("should allow wide when over is complete (not legal)", () => {
+    const legalBefore = MATCH_CONFIG.ballsPerOver
+    const ballsInCurrentOver = legalBefore % MATCH_CONFIG.ballsPerOver
     const wouldBeLegal = false
-    const reject = wouldBeLegal && ballsInCurrentOver >= 6
+    const reject = wouldBeLegal && ballsInCurrentOver >= MATCH_CONFIG.ballsPerOver
     expect(reject).toBe(false)
   })
 })
@@ -191,17 +180,17 @@ describe("Dot Ball Calculation", () => {
 })
 
 describe("Maiden Over Calculation", () => {
-  it("should be maiden when 6 legal balls, 0 runs", () => {
-    const overBalls = 6
+  it("should be maiden when all legal balls, 0 runs", () => {
+    const overBalls = MATCH_CONFIG.ballsPerOver
     const overRuns = 0
-    const isMaiden = overBalls === 6 && overRuns === 0
+    const isMaiden = overBalls === MATCH_CONFIG.ballsPerOver && overRuns === 0
     expect(isMaiden).toBe(true)
   })
 
-  it("should NOT be maiden when 6 legal balls, 1 wide", () => {
-    const overBalls = 6
+  it("should NOT be maiden when all legal balls, 1 wide", () => {
+    const overBalls = MATCH_CONFIG.ballsPerOver
     const overRuns = 1
-    const isMaiden = overBalls === 6 && overRuns === 0
+    const isMaiden = overBalls === MATCH_CONFIG.ballsPerOver && overRuns === 0
     expect(isMaiden).toBe(false)
   })
 })
@@ -250,9 +239,9 @@ describe("Boundary Percentage", () => {
     const runs = 100
     const fours = 8
     const sixes = 3
-    const boundaryRuns = fours * 4 + sixes * 6  // 32 + 18 = 50
+    const boundaryRuns = fours * 4 + sixes * 6
     const pct = runs > 0 ? (boundaryRuns / runs) * 100 : 0
-    expect(pct).toBe(50)  // 50/100 = 50%
+    expect(pct).toBe(50)
   })
 
   it("should return 0 when no runs", () => {
@@ -267,8 +256,8 @@ describe("Points Table", () => {
     const won = 5
     const tied = 2
     const nr = 1
-    const points = won * 2 + tied * 1 + nr * 1
-    expect(points).toBe(13)
+    const points = won * MATCH_CONFIG.pointsWin + tied * MATCH_CONFIG.pointsTie + nr * MATCH_CONFIG.pointsNoResult
+    expect(points).toBe(5 * 2 + 2 * 1 + 1 * 1)
   })
 })
 
@@ -281,19 +270,22 @@ describe("Target Calculation", () => {
   })
 })
 
-describe("MATCH_CONFIG Integrity", () => {
-  const MATCH_CONFIG = {
-    oversPerInnings: 4,
-    ballsPerOver: 6,
-    totalBalls: 24,
-    wicketsPerInnings: 10,
-    maxOversPerBowler: 1,
-    maxBallsPerBowler: 6,
-    pointsWin: 2,
-    pointsTie: 1,
-    pointsNoResult: 1,
-  }
+describe("Result Formatting", () => {
+  it("should format won by wickets (batting first wins)", () => {
+    const wicketsLost = 3
+    const wicketsRemaining = MATCH_CONFIG.wicketsPerInnings - wicketsLost
+    expect(wicketsRemaining).toBe(7)
+  })
 
+  it("should format won by runs (batting second wins)", () => {
+    const chasingTotal = 60
+    const target = 76
+    const margin = target - 1 - chasingTotal
+    expect(margin).toBe(15)
+  })
+})
+
+describe("MATCH_CONFIG Integrity", () => {
   it("totalBalls should equal oversPerInnings * ballsPerOver", () => {
     expect(MATCH_CONFIG.totalBalls).toBe(MATCH_CONFIG.oversPerInnings * MATCH_CONFIG.ballsPerOver)
   })
@@ -317,5 +309,17 @@ describe("MATCH_CONFIG Integrity", () => {
   it("all numeric values should be positive", () => {
     const values = Object.values(MATCH_CONFIG).filter((v): v is number => typeof v === "number")
     values.forEach(v => expect(v).toBeGreaterThan(0))
+  })
+
+  it("wicketsPerInnings should be 10 (standard)", () => {
+    expect(MATCH_CONFIG.wicketsPerInnings).toBe(10)
+  })
+
+  it("oversPerInnings should be 4 (T4 format)", () => {
+    expect(MATCH_CONFIG.oversPerInnings).toBe(4)
+  })
+
+  it("ballsPerOver should be 6 (standard)", () => {
+    expect(MATCH_CONFIG.ballsPerOver).toBe(6)
   })
 })
