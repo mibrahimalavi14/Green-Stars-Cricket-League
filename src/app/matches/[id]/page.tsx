@@ -511,7 +511,6 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {innings.map((inn) => {
                         const team = inn.teamId === m.team1Id ? m.team1 : m.team2
-                        const legalBalls = inn.balls
                         return (
                           <div key={inn.id} className={`rounded-lg p-3 ${inn.isWinner ? "border-2 border-green-500/40 bg-green-500/10" : "border border-[var(--border)] bg-[var(--card)]"}`}>
                             <div className="flex items-center gap-2 mb-1">
@@ -536,6 +535,75 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
                         </p>
                       )
                     })()}
+                    {innings.some(i => {
+                      const balls = typeof i.ballsData === "string" ? JSON.parse(i.ballsData) : i.ballsData
+                      return Array.isArray(balls) && balls.length > 0
+                    }) && (
+                      <details className="mt-2 group">
+                        <summary className="cursor-pointer text-xs font-semibold text-[var(--accent)] hover:underline select-none">
+                          View Ball-by-Ball
+                        </summary>
+                        <div className="mt-2 space-y-2">
+                          {innings.map((inn) => {
+                            const team = inn.teamId === m.team1Id ? m.team1 : m.team2
+                            const balls = typeof inn.ballsData === "string" ? JSON.parse(inn.ballsData) : inn.ballsData
+                            if (!Array.isArray(balls) || balls.length === 0) return null
+                            const groups: { over: number; balls: typeof balls }[] = []
+                            let legalCount = 0
+                            let currentGroup: typeof balls = []
+                            for (const ball of balls) {
+                              const isLegal = !ball.isWide && !ball.isNoBall
+                              if (isLegal && legalCount > 0 && legalCount % 6 === 0) {
+                                groups.push({ over: groups.length, balls: currentGroup })
+                                currentGroup = []
+                              }
+                              currentGroup.push(ball)
+                              if (isLegal) legalCount++
+                            }
+                            if (currentGroup.length > 0) groups.push({ over: groups.length, balls: currentGroup })
+                            return (
+                              <div key={inn.id} className="rounded-lg bg-[var(--card)] border border-[var(--border)] p-3">
+                                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{team.shortName} — {inn.runs}/{inn.wickets}</p>
+                                <div className="space-y-1.5">
+                                  {groups.map((g) => (
+                                    <div key={g.over} className="flex items-center gap-2">
+                                      <span className="w-8 shrink-0 text-right text-[10px] font-semibold text-[var(--muted-foreground)]">
+                                        {g.over + 1}
+                                      </span>
+                                      <div className="flex flex-wrap gap-1">
+                                        {g.balls.map((ball: any, i: number) => {
+                                          let text = "0"
+                                          let color = "bg-[var(--muted)]"
+                                          if (ball.wicket) { text = "W"; color = "bg-purple-600 text-white" }
+                                          else if (ball.isWide) { text = "Wd"; color = "bg-gray-500 text-white" }
+                                          else if (ball.isNoBall) { text = "Nb"; color = "bg-gray-500 text-white" }
+                                          else if (ball.byes > 0) { text = `${ball.byes}B`; color = "bg-gray-500 text-white" }
+                                          else if (ball.legByes > 0) { text = `${ball.legByes}LB`; color = "bg-gray-500 text-white" }
+                                          else {
+                                            const r = ball.runs
+                                            if (r === 1) color = "bg-blue-500 text-white"
+                                            else if (r === 2) color = "bg-yellow-500 text-white"
+                                            else if (r === 3) color = "bg-orange-500 text-white"
+                                            else if (r === 4) color = "bg-pink-500 text-white"
+                                            else if (r === 6) color = "bg-red-500 text-white"
+                                            text = String(r)
+                                          }
+                                          return (
+                                            <span key={i} title={ball.region || ""} className={`flex h-7 min-w-[1.75rem] items-center justify-center rounded px-1 text-xs font-bold ${color}`}>
+                                              {text}
+                                            </span>
+                                          )
+                                        })}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </details>
+                    )}
                   </div>
                 ))}
               </div>
