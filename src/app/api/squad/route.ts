@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { squadMemberSchema } from "@/lib/validation"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -15,8 +17,27 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { matchId, playerId, teamId, role } = await req.json()
-  if (!matchId || !playerId) return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`squad:${ip}`, RATE_LIMITS.SQUAD)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 })
+  }
+
+  const body = await req.json()
+  const parsed = squadMemberSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const { matchId, playerId, teamId, role } = parsed.data
+
+  const match = await prisma.match.findUnique({ where: { id: matchId }, select: { isSquadLocked: true, status: true } })
+  if (match && match.isSquadLocked) {
+    return NextResponse.json({ error: "Squad is locked. Match is already live." }, { status: 403 })
+  }
+  if (match && match.status !== "upcoming") {
+    return NextResponse.json({ error: "Can only edit squad for upcoming matches." }, { status: 403 })
+  }
 
   const existing = await prisma.squadMember.findUnique({ where: { matchId_playerId: { matchId, playerId } } })
   if (existing) {
@@ -29,9 +50,27 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const ip = getClientIp(req)
+  const rl = rateLimit(`squad_del:${ip}`, RATE_LIMITS.SQUAD)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 })
+  }
+
   const { searchParams } = new URL(req.url)
   const id = searchParams.get("id")
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+
+  const member = await prisma.squadMember.findUnique({ where: { id }, select: { matchId: true } })
+  if (member) {
+    const match = await prisma.match.findUnique({ where: { id: member.matchId }, select: { isSquadLocked: true, status: true } })
+    if (match && match.isSquadLocked) {
+      return NextResponse.json({ error: "Squad is locked. Match is already live." }, { status: 403 })
+    }
+    if (match && match.status !== "upcoming") {
+      return NextResponse.json({ error: "Can only edit squad for upcoming matches." }, { status: 403 })
+    }
+  }
+
   await prisma.squadMember.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

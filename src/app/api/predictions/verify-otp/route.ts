@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { otpVerifySchema } from "@/lib/validation"
 
 export async function POST(req: Request) {
-  const { email, otp, name } = await req.json()
-  if (!email || !otp) {
-    return NextResponse.json({ error: "Email and OTP are required" }, { status: 400 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`otp_verify:${ip}`, RATE_LIMITS.OTP_VERIFY)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 })
   }
+
+  const body = await req.json()
+  const parsed = otpVerifySchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const { email, otp } = parsed.data
+  const { name } = body
 
   const record = await prisma.emailOtp.findFirst({
     where: { email, otp, used: false, expiresAt: { gte: new Date() } },

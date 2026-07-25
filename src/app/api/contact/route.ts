@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { contactSchema } from "@/lib/validation"
 
 export async function GET(req: Request) {
   const cookie = req.headers.get("cookie") || ""
@@ -10,17 +12,19 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const recentCount = await prisma.contact.count({
-    where: { createdAt: { gte: new Date(Date.now() - 86400000) } },
-  })
-  if (recentCount >= 100) return NextResponse.json({ error: "Too many submissions" }, { status: 429 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`contact:${ip}`, RATE_LIMITS.CONTACT)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many submissions. Try again later." }, { status: 429 })
+  }
 
-  const { name, email, subject, message } = await req.json()
+  const body = await req.json()
+  const parsed = contactSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
 
-  if (!name || !name.trim() || name.length > 200) return NextResponse.json({ error: "Invalid name" }, { status: 400 })
-  if (!email || !email.trim() || email.length > 200) return NextResponse.json({ error: "Invalid email" }, { status: 400 })
-  if (!message || !message.trim() || message.length > 5000) return NextResponse.json({ error: "Invalid message" }, { status: 400 })
-  if (subject && subject.length > 500) return NextResponse.json({ error: "Invalid subject" }, { status: 400 })
+  const { name, email, subject, message } = parsed.data
 
   const contact = await prisma.contact.create({
     data: { name: name.trim(), email: email.trim(), subject: subject?.trim() || "", message: message.trim() },

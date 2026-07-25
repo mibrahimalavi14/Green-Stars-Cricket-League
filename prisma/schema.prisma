@@ -64,6 +64,8 @@ model Season {
   createdAt         DateTime @default(now())
   teams             Team[]
   matches           Match[]
+
+  @@unique([name, year])
 }
 
 model Team {
@@ -137,6 +139,8 @@ model Player {
   potmVotes     PotmVote[]
 
   createdAt DateTime @default(now())
+
+  @@unique([teamId, name])
 }
 
 model Match {
@@ -166,6 +170,16 @@ model Match {
   superOverT2Runs Int    @default(0)
   superOverT2Wkts Int    @default(0)
   inningsBreak    Boolean @default(false)
+  umpire1        String   @default("")
+  umpire2        String   @default("")
+  thirdUmpire    String   @default("")
+  matchReferee   String   @default("")
+  officialScorer String   @default("")
+  tossTime       String   @default("")
+  matchStartTime String   @default("")
+  matchEndTime   String   @default("")
+  delayReason    String   @default("")
+  isSquadLocked  Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   predictions   Prediction[]

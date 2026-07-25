@@ -4,6 +4,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { MATCH_CONFIG } from "@/lib/config"
 import { trackEvent } from "@/lib/analytics"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 
 interface BallEvent {
   runs: number
@@ -27,7 +28,9 @@ function isLegalDelivery(ball: BallEvent): boolean {
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || ""
+  const ip = getClientIp(req)
+  const rl = rateLimit(`ball:${ip}`, RATE_LIMITS.BALL_SUBMIT)
+  if (!rl.allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 })
 
   const body = await req.json()
   const { matchId, battingTeamId, ball } = body as {

@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 import { prisma } from "@/lib/prisma"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { otpRequestSchema } from "@/lib/validation"
 
 export async function POST(req: Request) {
-  const { email, name } = await req.json()
-  if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`otp_send:${ip}`, RATE_LIMITS.OTP_SEND)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many requests. Try again later." }, { status: 429 })
+  }
+
+  const body = await req.json()
+  const parsed = otpRequestSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const { email } = parsed.data
+  const { name } = body
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
@@ -41,7 +55,7 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Email send error:", err)
     return NextResponse.json({ error: "Failed to send email. Check SMTP settings." }, { status: 500 })
   }

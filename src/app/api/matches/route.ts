@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { trackEvent } from "@/lib/analytics"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { createMatchSchema, updateMatchSchema } from "@/lib/validation"
 
 export async function GET() {
   await prisma.match.updateMany({
@@ -18,9 +20,20 @@ export async function GET() {
 
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const ip = getClientIp(req)
+  const rl = rateLimit(`match_write:${ip}`, RATE_LIMITS.GENERAL_WRITE)
+  if (!rl.allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 })
+
   const body = await req.json()
-  const seasonId = body.seasonId
-  let matchNo = body.matchNo
+  const parsed = createMatchSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const data = parsed.data
+  const seasonId = data.seasonId
+  let matchNo = data.matchNo
   if (seasonId && !matchNo) {
     const last = await prisma.match.findFirst({
       where: { seasonId },
@@ -29,18 +42,54 @@ export async function POST(req: Request) {
     })
     matchNo = (last?.matchNo ?? 0) + 1
   }
+
   const match = await prisma.match.create({
-    data: { ...body, matchNo, date: new Date(body.date) },
+    data: {
+      seasonId: data.seasonId,
+      team1Id: data.team1Id,
+      team2Id: data.team2Id,
+      matchNo: matchNo || 0,
+      stage: data.stage || "league",
+      date: new Date(data.date),
+      venue: data.venue,
+      tossWinner: data.tossWinner || "",
+      tossDecision: data.tossDecision || "",
+      youtubeUrl: data.youtubeUrl || "",
+      umpire1: data.umpire1 || "",
+      umpire2: data.umpire2 || "",
+      thirdUmpire: data.thirdUmpire || "",
+      matchReferee: data.matchReferee || "",
+      officialScorer: data.officialScorer || "",
+      tossTime: data.tossTime || "",
+      matchStartTime: data.matchStartTime || "",
+      delayReason: data.delayReason || "",
+    },
   })
+
+  logAudit({ action: "match_created", entity: "match", entityId: match.id, details: JSON.stringify({ matchNo, teams: [data.team1Id, data.team2Id] }), ip })
+
   return NextResponse.json(match)
 }
 
 export async function PATCH(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || ""
+  const ip = getClientIp(req)
+
+  const rl = rateLimit(`match_write:${ip}`, RATE_LIMITS.GENERAL_WRITE)
+  if (!rl.allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 })
+
   const body = await req.json()
-  const { id, ...data } = body
-  const match = await prisma.match.update({ where: { id }, data })
+  const parsed = updateMatchSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const { id, ...data } = parsed.data
+
+  const updateData: Record<string, unknown> = { ...data }
+  if (data.date) updateData.date = new Date(data.date)
+
+  const match = await prisma.match.update({ where: { id }, data: updateData })
 
   logAudit({ action: "match_updated", entity: "match", entityId: id, details: JSON.stringify(Object.keys(data)), ip })
 
@@ -58,12 +107,21 @@ export async function PATCH(req: Request) {
     }
   }
 
+  if (data.status === "live" || data.status === "super_over") {
+    await prisma.match.update({ where: { id }, data: { isSquadLocked: true } })
+    logAudit({ action: "squad_locked", entity: "match", entityId: id, details: JSON.stringify({ status: data.status }), ip })
+  }
+
   return NextResponse.json(match)
 }
 
 export async function DELETE(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || ""
+  const ip = getClientIp(req)
+
+  const rl = rateLimit(`match_write:${ip}`, RATE_LIMITS.GENERAL_WRITE)
+  if (!rl.allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 })
+
   const { id } = await req.json()
   const match = await prisma.match.findUnique({ where: { id }, select: { status: true, seasonId: true, team1Id: true, team2Id: true } })
   await prisma.playerMatch.deleteMany({ where: { matchId: id } })

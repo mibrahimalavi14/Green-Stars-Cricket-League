@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { createPlayerSchema } from "@/lib/validation"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 
 export async function GET() {
   const players = await prisma.player.findMany({ include: { team: true } })
@@ -9,8 +11,29 @@ export async function GET() {
 
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const ip = getClientIp(req)
+  const rl = rateLimit(`player_write:${ip}`, RATE_LIMITS.GENERAL_WRITE)
+  if (!rl.allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 })
+
   const body = await req.json()
-  const player = await prisma.player.create({ data: body })
+  const parsed = createPlayerSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const data = parsed.data
+  const player = await prisma.player.create({
+    data: {
+      name: data.name,
+      role: data.role,
+      battingStyle: data.battingStyle || "",
+      bowlingStyle: data.bowlingStyle || "",
+      teamId: data.teamId,
+      photo: data.image || "/placeholder-player.svg",
+    },
+  })
+
   if (body.isCaptain) {
     await prisma.player.updateMany({ where: { teamId: player.teamId, id: { not: player.id } }, data: { isCaptain: false } })
     await prisma.team.update({ where: { id: player.teamId }, data: { captainName: player.name } })
@@ -24,6 +47,7 @@ export async function PATCH(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const body = await req.json()
   const { id, ...data } = body
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
 
   if (data.resetStats) {
     const reset = Object.fromEntries(STAT_FIELDS.map(f => [f, 0]))
@@ -56,6 +80,7 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
   const player = await prisma.player.findUnique({ where: { id }, select: { teamId: true, name: true, isCaptain: true } })
   if (player?.isCaptain) {
     await prisma.team.update({ where: { id: player.teamId }, data: { captainName: "" } })

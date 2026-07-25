@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { predictionSchema } from "@/lib/validation"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -50,11 +52,20 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { email, name, predictedTeamId } = await req.json()
-
-  if (!email || !predictedTeamId) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`prediction:${ip}`, RATE_LIMITS.PREDICTION)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 })
   }
+
+  const body = await req.json()
+  const parsed = predictionSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const { email, predictedTeamId } = parsed.data
+  const { name } = body
 
   const season = await prisma.season.findFirst({ where: { isActive: true } })
   if (!season) return NextResponse.json({ error: "No active season" }, { status: 404 })

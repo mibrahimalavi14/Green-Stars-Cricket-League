@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { potmVoteSchema } from "@/lib/validation"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -71,12 +73,20 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    const { matchId, playerId, email, name } = body
-
-    if (!matchId || !playerId || !email) {
-      return NextResponse.json({ error: "matchId, playerId, and email are required" }, { status: 400 })
+    const ip = getClientIp(req)
+    const rl = rateLimit(`potm:${ip}`, RATE_LIMITS.POTM_VOTE)
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many votes. Try again later." }, { status: 429 })
     }
+
+    const body = await req.json()
+    const parsed = potmVoteSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+    }
+
+    const { matchId, playerId, email } = parsed.data
+    const { name } = body
 
     const match = await prisma.match.findUnique({ where: { id: matchId } })
     if (!match || match.status !== "completed") {
@@ -102,8 +112,8 @@ export async function POST(req: Request) {
     trackEvent("potm_vote", { matchId, playerId })
 
     return NextResponse.json({ success: true, vote })
-  } catch (e: any) {
-    if (e?.code === "P2002") {
+  } catch (e: unknown) {
+    if (typeof e === "object" && e !== null && "code" in e && (e as { code: string }).code === "P2002") {
       return NextResponse.json({ error: "You have already voted for this match" }, { status: 409 })
     }
     return NextResponse.json({ error: "Failed to submit vote" }, { status: 500 })

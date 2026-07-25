@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { reviewSchema } from "@/lib/validation"
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
@@ -39,17 +41,20 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const recentCount = await prisma.review.count({
-    where: { createdAt: { gte: new Date(Date.now() - 86400000) } },
-  })
-  if (recentCount >= 20) return NextResponse.json({ error: "Too many reviews. Try again later." }, { status: 429 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`review:${ip}`, RATE_LIMITS.REVIEW)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many reviews. Try again later." }, { status: 429 })
+  }
 
-  const { name, email, city, rating, comment } = await req.json()
+  const body = await req.json()
+  const parsed = reviewSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
 
-  if (!name || !name.trim() || name.length > 100) return NextResponse.json({ error: "Invalid name" }, { status: 400 })
-  if (!rating || rating < 1 || rating > 5) return NextResponse.json({ error: "Invalid rating" }, { status: 400 })
-  if (!comment || !comment.trim() || comment.length > 1000) return NextResponse.json({ error: "Invalid comment" }, { status: 400 })
-  if (email && email.length > 200) return NextResponse.json({ error: "Invalid email" }, { status: 400 })
+  const { name, rating, comment } = parsed.data
+  const { email, city } = body
 
   const review = await prisma.review.create({
     data: {

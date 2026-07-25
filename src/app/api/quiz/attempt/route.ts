@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { quizAttemptSchema } from "@/lib/validation"
 
 export async function POST(req: Request) {
-  const body = await req.json()
-  const { quizId, email, name, selectedAnswer } = body
-
-  if (!quizId || !email || !selectedAnswer) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+  const ip = getClientIp(req)
+  const rl = rateLimit(`quiz:${ip}`, RATE_LIMITS.QUIZ_ATTEMPT)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 })
   }
+
+  const body = await req.json()
+  const parsed = quizAttemptSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+  }
+
+  const { quizId, email, selectedAnswer } = parsed.data
+  const { name } = body
 
   const existing = await prisma.quizAttempt.findUnique({
     where: { quizId_email: { quizId, email } },
