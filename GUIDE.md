@@ -1,194 +1,224 @@
-# GREEN STARS CRICKET LEAGUE — Complete Guide
+# GSCL v1.0.1 — Complete Admin & Operations Guide
 
-## 📂 Website Structure
+## Admin Panel Access
 
-```
-D:\Green Stars Cricket League\
-├── prisma/               # Database schema + seed
-│   ├── schema.prisma     # Database tables definition
-│   ├── seed.ts           # Empty season seeder
-│   └── dev.db            # SQLite database (auto-created)
-├── src/
-│   ├── app/              # All pages
-│   │   ├── page.tsx          # Home page
-│   │   ├── teams/            # Teams list & detail
-│   │   ├── players/          # Players list & detail
-│   │   ├── fixtures/         # Fixtures & results
-│   │   ├── points-table/     # Automatic points table
-│   │   ├── predictions/      # Predictions (Google auth required)
-│   │   ├── news/             # News articles
-│   │   ├── contact/          # Contact form
-│   │   ├── live/             # Live scoring
-│   │   ├── admin/            # Admin panel
-│   │   └── api/              # API routes
-│   ├── components/       # Reusable components
-│   └── lib/              # Utilities (auth, prisma, utils)
-├── public/               # Static files
-├── .env                  # Environment variables
-├── next.config.ts
-├── package.json
-└── tsconfig.json
-```
+**Production URL**: https://green-stars-cricket-league.vercel.app/admin
+
+Login with admin password → full access to all management tools.
 
 ---
 
-## 🚀 How to Run Locally (Dev Mode)
+## Admin Panel — All Pages
 
-Open PowerShell/CMD in the project folder and run:
+| Page | URL | What It Does |
+|---|---|---|
+| Dashboard | `/admin` | Overview — all counts, quick links |
+| Teams | `/admin/teams` | Add/edit/delete teams |
+| Players | `/admin/players` | Add/edit/delete players per team |
+| Seasons | `/admin/seasons` | Create seasons, lock predictions |
+| **Matches** | `/admin/matches` | Create/schedule matches, set live/completed |
+| **Live Scoring** | `/admin/live-scoring/{MATCH_ID}` | Ball-by-ball scoring panel |
+| Performances | `/admin/performances` | Enter player performances after matches |
+| News | `/admin/news` | Publish/edit news articles |
+| Gallery | `/admin/gallery` | Upload/manage photos |
+| Sponsors | `/admin/sponsors` | Manage league sponsors |
+| Quiz | `/admin/quiz` | Create match quizzes |
+| Squad | `/admin/squad` | Set match squads |
+| POTM | `/admin/potm` | Manage Man of the Match voting |
+| Predictions | `/admin/predictions` | View/lock season predictions |
+| Moments | `/admin/moments` | Moment of the Day highlights |
+| Notifications | `/admin/notifications` | Send push notifications |
+| Reviews | `/admin/reviews` | Approve/reject user reviews |
+| Contact | `/admin/contact` | View contact form messages |
+| **Analytics** | `/admin/analytics` | Usage metrics & trends |
+
+---
+
+## Match Day Workflow
+
+### Before Match
+1. Go to `/admin/matches` → Create new match (set teams, venue, date)
+2. Go to `/admin/squad` → Set playing XI for both teams
+3. Open `/admin/live-scoring/{MATCH_ID}`
+4. Select toss winner + decision (bat/bowl)
+5. Select batting team, striker, non-striker, bowler
+6. Click **Start Match**
+
+### During Match (Live Scoring)
+The scoring panel has:
+
+**Batting Section:**
+- Runs: 0, 1, 2, 3, 4, 6 buttons
+- Extras: Wide, No Ball, Bye, Leg Bye
+- Wicket: Select type (bowled, caught, lbw, runout, stumped, hit wicket)
+- Region: Click field diagram to mark shot direction
+
+**Key Rules (T4 Format):**
+- 4 overs per innings (24 balls total)
+- Max 1 over (6 legal balls) per bowler
+- 10 wickets per innings
+- Strike rotates on odd runs, end of over
+
+**Undo Button:**
+- Reverses last ball (runs, wickets, extras)
+- Cannot undo after match is completed
+
+**Auto-calculations:**
+- Score updates live
+- Run rate, required run rate
+- Partnership tracker
+- Current over display
+
+### After Match
+1. Click **End Match** in scoring panel
+2. Select winner (or tie)
+3. Enter result text
+4. Select Man of the Match
+5. Match auto-saves as completed
+6. Points table auto-updates
+7. Player stats auto-recalculate
+
+---
+
+## Scoring Panel Features
+
+### Live Display (Admin View)
+- Score with run rate
+- Striker/Non-stiker/Bowler cards
+- Current over balls
+- Last 6 balls
+- Ball-by-ball timeline
+- Batting & bowling scorecards
+- Partnership tracker
+- Field diagram with shot regions
+
+### Public Live View (`/live`)
+- Auto-refreshes every 5 seconds
+- Score, overs, wickets
+- Target (2nd innings)
+- Powerplay indicator
+- Estimated win probability
+- Required per ball
+- Boundary count (4s/6s)
+- Fielding summary
+- Over-by-over bar chart
+- Worm graph (cumulative comparison)
+- Match highlights
+- Team form (last 5 results)
+- Full scorecards
+- Ball-by-ball timeline with regions
+
+### Custom Highlights
+Admin can add custom match highlights during scoring:
+1. Go to scoring panel → "Custom Highlights" section
+2. Select icon, enter text + label
+3. Saves instantly → appears on public view above auto-generated highlights
+
+---
+
+## Analytics Dashboard
+
+**URL**: `/admin/analytics` (admin only)
+
+**Tracked events:**
+- Match scored (each ball submission)
+- Match completed
+- Undo usage
+- Search queries
+- Predictions submitted
+- Quiz attempts
+- POTM votes
+
+**Dashboard shows:**
+- 8 all-time counters
+- 30-day period counters
+- Trend charts (matches, page views, undo, searches)
+- Top search terms
+- Most visited pages
+- Recent events feed
+
+---
+
+## API Endpoints
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/api/health` | GET | Public | DB status, version, commit SHA |
+| `/api/teams` | GET | Public | All teams |
+| `/api/players` | GET | Public | All players |
+| `/api/matches` | GET | Public | All matches |
+| `/api/matches/live` | GET | Public | Current live match |
+| `/api/search?q=` | GET | Public | Search players/teams/matches/news |
+| `/api/head-to-head` | GET | Public | H2H stats |
+| `/api/live/summary` | GET | Public | Live match full summary |
+| `/api/live/balls` | POST | Admin | Submit ball event |
+| `/api/live/balls/undo` | POST | Admin | Undo last ball |
+| `/api/admin/analytics` | GET | Admin | Analytics data |
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | Neon PostgreSQL connection string |
+| `NEXTAUTH_SECRET` | Yes | Auth encryption key |
+| `NEXTAUTH_URL` | Yes | Production URL |
+| `ADMIN_PASSWORD` | Yes | Admin panel login password |
+| `AUTH_GOOGLE_ID` | No | Google OAuth (for predictions) |
+| `AUTH_GOOGLE_SECRET` | No | Google OAuth (for predictions) |
+
+---
+
+## Database Management
 
 ```bash
-# First time only:
-npm install
+# Generate Prisma client
 npx prisma generate
+
+# Push schema changes to DB
 npx prisma db push
 
-# For local development (if Turbopack doesn't work):
-npm run dev:webpack
+# Deploy migrations (production)
+npx prisma migrate deploy
 
-# If Turbopack works (normal):
-npm run dev
+# Check migration status
+npx prisma migrate status
 ```
-
-Website will open at: **http://localhost:3000**
 
 ---
 
-## 🌐 Deploy on Vercel (FREE)
+## Deployment (Vercel)
 
-### Step 1: Push to GitHub
-1. Create an account on github.com
-2. Create a new repository (private or public)
-3. In the project folder:
 ```bash
-git init
+# Push code
 git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USER/YOUR_REPO.git
-git push -u origin main
+git commit -m "update"
+git push
+
+# Vercel auto-deploys from main branch
+# Manual deploy:
+npx vercel --prod
 ```
 
-### Step 2: Deploy to Vercel
-1. Go to vercel.com and sign in with GitHub
-2. Click "Add New" → "Project"
-3. Import your GitHub repository
-4. Settings:
-   - **Framework Preset**: Next.js (auto-detected)
-   - **Root Directory**: . (leave default)
-   - **Build Command**: `npm run build` (auto)
-   - **Output Directory**: .next (auto)
+---
 
-### Step 3: Environment Variables (VERCEL)
-In Vercel project settings → Environment Variables, add:
+## Health Check
 
-| Variable | Value | Notes |
-|---|---|---|
-| `DATABASE_URL` | Your database URL | Use Supabase (free) or Turso (free) |
-| `NEXTAUTH_SECRET` | Any random string | `openssl rand -base64 32` se banao |
-| `NEXTAUTH_URL` | `https://your-domain.vercel.app` | Your Vercel domain |
-| `AUTH_GOOGLE_ID` | From Google Cloud Console | ✅ Required for predictions |
-| `AUTH_GOOGLE_SECRET` | From Google Cloud Console | ✅ Required for predictions |
-
-### Step 4: Database Options
-Since Vercel doesn't support SQLite, you need a cloud database:
-
-**Option A: Supabase (Recommended - FREE)**
-1. Create account at supabase.com
-2. New project → Copy `Connection string`
-3. Add as `DATABASE_URL` in Vercel env vars
-4. Update `prisma/schema.prisma` → change `provider = "sqlite"` to `provider = "postgresql"`
-5. Run: `npx prisma generate` and `npx prisma db push`
-
-**Option B: Turso (FREE - SQLite compatible)**
-1. Create account at turso.tech
-2. Create database → Copy URL + auth token
-3. Add as `DATABASE_URL` in Vercel env vars
-
-### Step 5: Custom Domain
-1. In Vercel dashboard → Project → Settings → Domains
-2. Add your domain (e.g., `gscl.pk`)
-3. Update your domain's nameservers to Vercel's
-4. Wait for DNS propagation (5-30 mins)
-5. ✅ Done!
+```
+GET /api/health
+```
+Returns: `{ status, database, version, commit, config, timestamp }`
 
 ---
 
-## 📝 Google OAuth Setup (For Predictions)
+## Troubleshooting
 
-1. Go to https://console.cloud.google.com
-2. Create a new project (or select existing)
-3. Go to **APIs & Services** → **Credentials**
-4. Click **Create Credentials** → **OAuth 2.0 Client ID**
-5. Application type: **Web application**
-6. Name: `GSCL`
-7. Authorized redirect URIs:
-   - Local: `http://localhost:3000/api/auth/callback/google`
-   - Production: `https://your-domain.vercel.app/api/auth/callback/google`
-8. Copy **Client ID** and **Client Secret** to `.env` file
-
----
-
-## 🔧 Admin Panel Features
-
-After deployment, visit: `https://your-domain.com/admin`
-
-**Login required** (only logged-in users can access admin)
-
-### What you can do from admin:
-1. **Seasons** → Create seasons, **Lock/Unlock predictions**
-2. **Teams** → Add teams (name, short name, color)
-3. **Players** → Add players to teams
-4. **Matches** → Schedule matches, set Live/Completed
-5. **News** → Publish news articles
-
-### How it works:
-- **Points table** auto-calculates from match results
-- **Predictions lock**: Jab season ka schedule announce ho jaye, admin panel mein "Lock Predictions" press karo. Uske baad koi naya prediction nahi daal sakta, sirf dekh sakta hai.
-- **Live scoring**: Match ko "Live" karo, phir `/live` page par score dikhega
-
----
-
-## 📱 Website Pages
-
-| Page | URL | Description |
-|---|---|---|
-| 🏠 Home | `/` | Hero, upcoming matches, teams, points table, news |
-| 👥 Teams | `/teams` | All teams with players count |
-| 👤 Team Detail | `/teams/[id]` | Team players + match history |
-| 🏏 Players | `/players` | All players with stats |
-| 📊 Player Profile | `/players/[id]` | Full stats (runs, wickets, SR, economy) |
-| 📅 Fixtures | `/fixtures` | Upcoming + live + completed matches |
-| 📈 Points Table | `/points-table` | Auto-calculated standings (P, W, L, Pts, NRR) |
-| 🔮 Predictions | `/predictions` | Google sign-in required, auto-locks |
-| 📰 News | `/news` | Latest articles |
-| 📞 Contact | `/contact` | Contact form |
-| ⏱ Live | `/live` | Live scoring with ball-by-ball |
-| 🔐 Admin | `/admin` | Manage everything |
-
----
-
-## ✅ Features List
-
-- [x] Dark/Light mode toggle
-- [x] Teams & Players management
-- [x] Auto-calculated points table (NRR, rankings)
-- [x] Fixtures with upcoming/live/completed
-- [x] Live scoring with ball-by-ball
-- [x] Predictions with Google sign-in
-- [x] Auto-lock predictions when schedule announced
-- [x] YouTube live stream section
-- [x] News articles
-- [x] Contact form
-- [x] Social media links (Facebook, Twitter, Instagram, YouTube)
-- [x] SEO optimized (sitemap.xml, robots.txt)
-- [x] Google Search Console ready
-- [x] Custom domain support
-- [x] Mobile responsive
-- [x] Admin dashboard
-- [x] API routes for all CRUD operations
-
----
-
-## ❓ Need Help?
-
-If something doesn't work, just tell me! Main aapko step-by-step guide karunga.
+| Problem | Solution |
+|---|---|
+| Build fails | Run `npx prisma generate` first |
+| DB connection error | Check `DATABASE_URL` in `.env.local` |
+| Admin login fails | Check `ADMIN_PASSWORD` env var |
+| Scoring not saving | Check network, try refresh |
+| Stats wrong | Run `/api/live/sync-stats?matchId=X` |
+| Migration pending | Run `npx prisma migrate deploy` |
