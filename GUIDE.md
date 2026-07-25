@@ -1,10 +1,51 @@
-# GSCL v1.0.1 — Complete Admin & Operations Guide
+# GSCL v1.0.2 — Complete Admin & Operations Guide
 
 ## Admin Panel Access
 
 **Production URL**: https://green-stars-cricket-league.vercel.app/admin
 
 Login with admin password → full access to all management tools.
+
+---
+
+## Automatic Match Rules (PSL Style)
+
+**Scorer sirf ball enter kare. Baki sab system khud kare.**
+
+### Auto-Completion Triggers
+Match automatically ends when ANY of these occur:
+- 4 overs (24 legal balls) completed
+- 10 wickets lost (all out)
+- Target achieved (2nd innings score > 1st innings total)
+
+### Auto-Result Generation
+System generates result automatically:
+- **Batting second wins:** "Team A won by X runs"
+- **Batting first wins:** "Team A won by X wickets"
+- **Tie:** Super Over starts automatically
+
+### Auto-Super Over (PSL Style — ALL Matches)
+- League, Knockout, Qualifier, Final — Super Over everywhere
+- Each team gets 1 over (6 balls), max 2 wickets
+- Higher score wins
+- If Super Over is also tied → another Super Over until winner
+
+### Auto Man of the Match
+Impact Score formula (automatic):
+- **Runs × 0.4 + Wickets × 8 + Catches × 5 + Run Outs × 5 + Stumpings × 5**
+- Tie-breakers: more wickets → more runs → better SR → more catches
+- Admin override ONLY if all tie-breakers are equal
+
+### Auto Cascade After Match
+```
+Last Ball → Match Complete → Winner + Result → Super Over (if tied)
+→ Points Table → Player Stats → Team Stats → Awards → Records
+→ Hall of Fame → Dream Team → MOTM → Analytics → Audit → Notification
+```
+
+### Two Separate Awards
+1. **Official Man of the Match** — Fully automatic via Impact Score
+2. **Fan Favourite Player** — Public voting via POTM system
 
 ---
 

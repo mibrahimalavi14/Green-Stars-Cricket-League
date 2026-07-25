@@ -14,9 +14,10 @@ import {
   Send,
   Flag,
   Loader2,
+  CheckCircle,
 } from "lucide-react"
 import { FieldDiagram } from "@/components/FieldDiagram"
-import { MATCH_CONFIG } from "@/lib/config"
+import { MATCH_CONFIG, isMatchComplete, formatOvers } from "@/lib/config"
 
 interface Player {
   id: string
@@ -80,10 +81,6 @@ interface SummaryData {
   innings: Innings[]
   team1Players: Player[]
   team2Players: Player[]
-}
-
-function formatOvers(balls: number): string {
-  return `${Math.floor(balls / 6)}.${balls % 6}`
 }
 
 function ballDisplay(ball: BallEvent): { text: string; color: string; region: string } {
@@ -156,6 +153,13 @@ export default function LiveScoringPage() {
   const [newHighlightSub, setNewHighlightSub] = useState("")
   const [savingHighlights, setSavingHighlights] = useState(false)
 
+  const [autoCompletePending, setAutoCompletePending] = useState(false)
+  const [superOverRequired, setSuperOverRequired] = useState(false)
+  const [superOverTie, setSuperOverTie] = useState(false)
+  const [matchCompleted, setMatchCompleted] = useState(false)
+  const [completedResult, setCompletedResult] = useState("")
+  const [completedMotm, setCompletedMotm] = useState("")
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchSummary = useCallback(async () => {
@@ -167,6 +171,88 @@ export default function LiveScoringPage() {
       }
     } catch {}
   }, [matchId])
+
+  const checkAndAutoComplete = useCallback(async (summaryData: SummaryData) => {
+    if (summaryData.match.status === "completed" || matchCompleted || autoCompletePending) return
+    const allInnings = summaryData.innings
+    if (allInnings.length < 2) return
+
+    const inn1 = allInnings.find((i) => i.teamId === summaryData.match.team1.id)
+    const inn2 = allInnings.find((i) => i.teamId === summaryData.match.team2.id)
+    if (!inn1 || !inn2) return
+
+    const t1Total = inn1.runs + inn1.extras
+    const t2Total = inn2.runs + inn2.extras
+
+    const oversDone = inn2.balls >= MATCH_CONFIG.totalBalls
+    const allOut = inn2.wickets >= MATCH_CONFIG.wicketsPerInnings
+    const targetChased = t2Total > t1Total
+    const isTied = t1Total === t2Total && (oversDone || allOut)
+
+    if (!oversDone && !allOut && !targetChased) return
+
+    setAutoCompletePending(true)
+
+    try {
+      const res = await fetch("/api/live/complete-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId }),
+      })
+      const data = await res.json()
+
+      if (data.complete) {
+        setMatchCompleted(true)
+        setCompletedResult(data.result)
+        setCompletedMotm(data.manOfMatchName || "")
+        await fetchSummary()
+      } else if (data.superOverRequired) {
+        setSuperOverRequired(true)
+        setAutoCompletePending(false)
+      } else if (data.superOverTie) {
+        setSuperOverTie(true)
+        setAutoCompletePending(false)
+      } else {
+        setAutoCompletePending(false)
+      }
+    } catch {
+      setAutoCompletePending(false)
+    }
+  }, [matchId, matchCompleted, autoCompletePending, fetchSummary])
+
+  const submitSuperOver = useCallback(async () => {
+    setAutoCompletePending(true)
+    try {
+      const res = await fetch("/api/live/complete-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          matchId,
+          superOverT1Runs: parseInt(superOverT1Runs) || 0,
+          superOverT1Wkts: parseInt(superOverT1Wkts) || 0,
+          superOverT2Runs: parseInt(superOverT2Runs) || 0,
+          superOverT2Wkts: parseInt(superOverT2Wkts) || 0,
+        }),
+      })
+      const data = await res.json()
+      if (data.complete) {
+        setMatchCompleted(true)
+        setCompletedResult(data.result)
+        setCompletedMotm(data.manOfMatchName || "")
+        setSuperOverRequired(false)
+        setSuperOverTie(false)
+        await fetchSummary()
+      } else if (data.superOverTie) {
+        setSuperOverTie(true)
+        setAutoCompletePending(false)
+        alert("Super Over is tied! Enter new Super Over scores.")
+      } else {
+        setAutoCompletePending(false)
+      }
+    } catch {
+      setAutoCompletePending(false)
+    }
+  }, [matchId, superOverT1Runs, superOverT1Wkts, superOverT2Runs, superOverT2Wkts, fetchSummary])
 
   const saveHighlights = useCallback(async (highlights: { icon: string; text: string; sub: string }[]) => {
     setSavingHighlights(true)
@@ -385,6 +471,8 @@ export default function LiveScoringPage() {
           body: JSON.stringify({ matchId }),
         })
         await fetchSummary()
+        const updatedSummary = await fetch(`/api/live/summary?matchId=${matchId}`).then(r => r.json()).catch(() => null)
+        if (updatedSummary) checkAndAutoComplete(updatedSummary)
         const isLegal = !ball.isWide && !ball.isNoBall
         const legalBallsAfter = (activeInnings?.balls || 0) + (isLegal ? 1 : 0)
         const overComplete = isLegal && legalBallsAfter % 6 === 0
@@ -803,6 +891,133 @@ export default function LiveScoringPage() {
             </span>
           </div>
         </div>
+
+        {matchCompleted && (
+          <div className="mb-4 rounded-xl border-2 border-green-500/30 bg-green-500/5 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle className="h-6 w-6 text-green-500" />
+              <h3 className="text-lg font-bold text-green-600 dark:text-green-400">Match Completed!</h3>
+            </div>
+            <p className="text-sm text-[var(--foreground)] font-semibold mb-1">{completedResult}</p>
+            {completedMotm && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-[var(--muted-foreground)]">
+                <Trophy className="h-4 w-4 text-[var(--accent)]" />
+                Man of the Match: <span className="font-semibold text-[var(--accent)]">{completedMotm}</span>
+              </div>
+            )}
+            <button onClick={() => router.push("/admin/matches")}
+              className="mt-3 rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-white hover:bg-green-600 transition-colors">
+              Back to Matches
+            </button>
+          </div>
+        )}
+
+        {autoCompletePending && !matchCompleted && (
+          <div className="mb-4 rounded-xl border-2 border-amber-500/30 bg-amber-500/5 p-4 flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+            <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">Completing match automatically...</p>
+          </div>
+        )}
+
+        {superOverRequired && !matchCompleted && (
+          <div className="mb-4 rounded-xl border-2 border-amber-500/30 bg-amber-500/5 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="h-5 w-5 text-amber-500" />
+              <h3 className="font-bold text-amber-600 dark:text-amber-400">Match Tied — Super Over Required!</h3>
+            </div>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">Both teams scored the same. Enter Super Over scores:</p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="rounded-lg bg-[var(--muted)] p-3">
+                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team1.name}</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
+                    <input type="number" min={0} value={superOverT1Runs}
+                      onChange={e => setSuperOverT1Runs(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
+                    <input type="number" min={0} max={2} value={superOverT1Wkts}
+                      onChange={e => setSuperOverT1Wkts(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--muted)] p-3">
+                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team2.name}</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
+                    <input type="number" min={0} value={superOverT2Runs}
+                      onChange={e => setSuperOverT2Runs(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
+                    <input type="number" min={0} max={2} value={superOverT2Wkts}
+                      onChange={e => setSuperOverT2Wkts(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button onClick={submitSuperOver} disabled={autoCompletePending}
+              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 transition-colors">
+              {autoCompletePending ? "Submitting..." : "Submit Super Over & Complete Match"}
+            </button>
+          </div>
+        )}
+
+        {superOverTie && !matchCompleted && (
+          <div className="mb-4 rounded-xl border-2 border-red-500/30 bg-red-500/5 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="h-5 w-5 text-red-500" />
+              <h3 className="font-bold text-red-600 dark:text-red-400">Super Over is also Tied!</h3>
+            </div>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">Enter new Super Over scores for another Super Over:</p>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="rounded-lg bg-[var(--muted)] p-3">
+                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team1.name}</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
+                    <input type="number" min={0} value={superOverT1Runs}
+                      onChange={e => setSuperOverT1Runs(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
+                    <input type="number" min={0} max={2} value={superOverT1Wkts}
+                      onChange={e => setSuperOverT1Wkts(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg bg-[var(--muted)] p-3">
+                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team2.name}</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
+                    <input type="number" min={0} value={superOverT2Runs}
+                      onChange={e => setSuperOverT2Runs(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
+                    <input type="number" min={0} max={2} value={superOverT2Wkts}
+                      onChange={e => setSuperOverT2Wkts(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button onClick={submitSuperOver} disabled={autoCompletePending}
+              className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors">
+              {autoCompletePending ? "Submitting..." : "Submit New Super Over"}
+            </button>
+          </div>
+        )}
 
         <div className="mb-4 rounded-xl border-2 border-[var(--accent)]/30 bg-[var(--card)] p-4">
           <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-3">
