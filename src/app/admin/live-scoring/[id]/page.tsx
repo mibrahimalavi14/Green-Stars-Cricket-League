@@ -740,21 +740,8 @@ export default function LiveScoringPage() {
 
   function handleExtra(type: string) {
     if (type === "wide" || type === "noball") {
-      addBall({
-        runs: 0,
-        extras: type,
-        wicket: wicketType,
-        bowler: bowlerId,
-        striker: strikerId,
-        nonStriker: nonStrikerId,
-        wicketBatsman: wicketType ? (wicketBatsman || strikerId) : null,
-        wicketFielder: wicketType ? wicketFielder : null,
-        isWide: type === "wide",
-        isNoBall: type === "noball",
-        byes: 0,
-        legByes: 0,
-        region: ballRegion,
-      })
+      setPendingExtraType(type)
+      setPendingExtraRuns(null)
     } else {
       setPendingExtraType(type)
       setPendingExtraRuns(null)
@@ -763,21 +750,39 @@ export default function LiveScoringPage() {
 
   function handleExtraRuns(runs: number) {
     if (!pendingExtraType) return
-    addBall({
-      runs: 0,
-      extras: pendingExtraType,
-      wicket: wicketType,
-      bowler: bowlerId,
-      striker: strikerId,
-      nonStriker: nonStrikerId,
-      wicketBatsman: wicketType ? (wicketBatsman || strikerId) : null,
-      wicketFielder: wicketType ? wicketFielder : null,
-      isWide: false,
-      isNoBall: false,
-      byes: pendingExtraType === "bye" ? runs : 0,
-      legByes: pendingExtraType === "legbye" ? runs : 0,
-      region: ballRegion,
-    })
+    if (pendingExtraType === "wide" || pendingExtraType === "noball") {
+      addBall({
+        runs,
+        extras: pendingExtraType,
+        wicket: wicketType,
+        bowler: bowlerId,
+        striker: strikerId,
+        nonStriker: nonStrikerId,
+        wicketBatsman: wicketType ? (wicketBatsman || strikerId) : null,
+        wicketFielder: wicketType ? wicketFielder : null,
+        isWide: pendingExtraType === "wide",
+        isNoBall: pendingExtraType === "noball",
+        byes: 0,
+        legByes: 0,
+        region: ballRegion,
+      })
+    } else {
+      addBall({
+        runs: 0,
+        extras: pendingExtraType,
+        wicket: wicketType,
+        bowler: bowlerId,
+        striker: strikerId,
+        nonStriker: nonStrikerId,
+        wicketBatsman: wicketType ? (wicketBatsman || strikerId) : null,
+        wicketFielder: wicketType ? wicketFielder : null,
+        isWide: false,
+        isNoBall: false,
+        byes: pendingExtraType === "bye" ? runs : 0,
+        legByes: pendingExtraType === "legbye" ? runs : 0,
+        region: ballRegion,
+      })
+    }
   }
 
   async function handleEndMatch() {
@@ -1637,7 +1642,93 @@ export default function LiveScoringPage() {
                 </div>
               )}
 
-              {pendingExtraType && (
+              {pendingExtraType && (pendingExtraType === "wide" || pendingExtraType === "noball") && (
+                <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
+                  <p className="mb-2 text-xs font-bold text-yellow-600">
+                    {pendingExtraType === "wide" ? "WIDE" : "NO BALL"} — Runs off bat?
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {[0, 1, 2, 3, 4, 6].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => handleExtraRuns(r)}
+                        disabled={submitting}
+                        className={`flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold disabled:opacity-50 ${
+                          r === 0 ? "bg-[var(--muted)]" : r === 4 ? "bg-pink-500 text-white hover:bg-pink-600" : r === 6 ? "bg-red-500 text-white hover:bg-red-600" : "bg-yellow-500 text-white hover:bg-yellow-600"
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                    {pendingExtraType === "noball" && (
+                      <>
+                        <div className="w-px bg-yellow-600/30 mx-1" />
+                        <button
+                          onClick={() => setPendingExtraType("nb-bye")}
+                          disabled={submitting}
+                          className="flex h-12 items-center gap-1 rounded-lg bg-gray-500 px-3 text-sm font-bold text-white hover:bg-gray-600 disabled:opacity-50"
+                        >+ Bye</button>
+                        <button
+                          onClick={() => setPendingExtraType("nb-legbye")}
+                          disabled={submitting}
+                          className="flex h-12 items-center gap-1 rounded-lg bg-gray-500 px-3 text-sm font-bold text-white hover:bg-gray-600 disabled:opacity-50"
+                        >+ Leg Bye</button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => { setPendingExtraType(null); setPendingExtraRuns(null) }}
+                      className="rounded-lg bg-[var(--muted)] px-4 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted-foreground)]/20"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {pendingExtraType && (pendingExtraType === "nb-bye" || pendingExtraType === "nb-legbye") && (
+                <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
+                  <p className="mb-2 text-xs font-bold text-yellow-600">
+                    NO BALL + {pendingExtraType === "nb-bye" ? "BYE" : "LEG BYE"} — How many runs?
+                  </p>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => {
+                          if (!pendingExtraType) return
+                          addBall({
+                            runs: 0,
+                            extras: "noball",
+                            wicket: wicketType,
+                            bowler: bowlerId,
+                            striker: strikerId,
+                            nonStriker: nonStrikerId,
+                            wicketBatsman: wicketType ? (wicketBatsman || strikerId) : null,
+                            wicketFielder: wicketType ? wicketFielder : null,
+                            isWide: false,
+                            isNoBall: true,
+                            byes: pendingExtraType === "nb-bye" ? r : 0,
+                            legByes: pendingExtraType === "nb-legbye" ? r : 0,
+                            region: ballRegion,
+                          })
+                        }}
+                        disabled={submitting}
+                        className="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-500 text-lg font-bold text-white hover:bg-yellow-600 disabled:opacity-50"
+                      >
+                        {r}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => { setPendingExtraType(null); setPendingExtraRuns(null) }}
+                      className="rounded-lg bg-[var(--muted)] px-4 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted-foreground)]/20"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {pendingExtraType && pendingExtraType !== "wide" && pendingExtraType !== "noball" && pendingExtraType !== "nb-bye" && pendingExtraType !== "nb-legbye" && (
                 <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
                   <p className="mb-2 text-xs font-bold text-yellow-600">
                     {pendingExtraType === "bye" ? "BYE" : "LEG BYE"} — How many runs?
@@ -1762,7 +1853,8 @@ export default function LiveScoringPage() {
                   { type: "stumped", label: "Stumped" },
                   { type: "runout", label: "Run Out" },
                   { type: "hit wicket", label: "Hit Wicket" },
-                  { type: "retired", label: "Retired" },
+                  { type: "retired_hurt", label: "Ret Hurt" },
+                  { type: "retired_out", label: "Ret Out" },
                   { type: "obstructing", label: "Obstruct" },
                 ].map(({ type, label }) => (
                   <button

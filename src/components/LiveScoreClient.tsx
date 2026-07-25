@@ -111,7 +111,8 @@ function getDismissalText(ball: BallEvent, bowlingPlayers: { id: string; name: s
   if (type === "stumped") return `st ${fielderName} b ${bowlerName}`
   if (type === "runout") return `run out (${fielderName})`
   if (type === "hit wicket") return `hit wicket b ${bowlerName}`
-  if (type === "retired") return "retired"
+  if (type === "retired_hurt") return "retired hurt"
+  if (type === "retired_out") return "retired out"
   if (type === "obstructing") return "obstructing the field"
   return type
 }

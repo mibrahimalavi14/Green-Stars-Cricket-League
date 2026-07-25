@@ -56,7 +56,8 @@ function dismissText(p: Perf, allPerfs: Perf[], type: string, bowlerId: string, 
     case "run out":
     case "runout": return `run out (${fn || bn})`
     case "hit wicket": return `hit wicket b ${bn}`
-    case "retired": return "retired hurt"
+    case "retired_hurt": return "retired hurt"
+    case "retired_out": return "retired out"
     default: return type
   }
 }

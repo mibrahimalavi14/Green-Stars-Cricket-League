@@ -192,13 +192,13 @@ export async function POST(req: Request) {
         if (ball.isWide) bps.wides++
         if (ball.isNoBall) bps.noBalls++
 
-        if (ball.wicket && ball.wicket !== "runout") bps.bowlingWickets++
+        if (ball.wicket && ball.wicket !== "runout" && ball.wicket !== "retired_out" && ball.wicket !== "retired_hurt") bps.bowlingWickets++
         if (ball.wicket) {
           const dismissed = ball.wicketBatsman || ball.striker
           ensurePlayer(dismissed, inn.teamId)
           const dps = playerStats[dismissed]
-          dps.isOut = true
-          dps.wicketsLost = 1
+          dps.isOut = ball.wicket !== "retired_hurt"
+          dps.wicketsLost = ball.wicket !== "retired_hurt" ? 1 : 0
           dps.dismissalType = ball.wicket
           if (ball.wicket !== "runout") dps.dismissedByBowlerId = ball.bowler
           if (ball.wicketFielder) {
