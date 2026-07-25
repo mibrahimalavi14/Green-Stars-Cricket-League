@@ -58,7 +58,14 @@ export async function POST(req: Request) {
   }
 
   const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || ""
-  const { matchId, superOverT1Runs, superOverT1Wkts, superOverT2Runs, superOverT2Wkts } = await req.json()
+  const {
+    matchId,
+    superOverT1Runs,
+    superOverT1Wkts,
+    superOverT2Runs,
+    superOverT2Wkts,
+    superOverInningsData,
+  } = await req.json()
 
   if (!matchId) {
     return NextResponse.json({ error: "matchId required" }, { status: 400 })
@@ -265,6 +272,48 @@ export async function POST(req: Request) {
         superOverT2Wkts: superOverT2Wkts || 0,
       },
     })
+
+    // Save Super Over innings history
+    if (superOverInningsData && Array.isArray(superOverInningsData) && superOverInningsData.length > 0) {
+      for (const soInn of superOverInningsData) {
+        await prisma.superOverInnings.upsert({
+          where: {
+            matchId_superOverNumber_teamId: {
+              matchId,
+              superOverNumber: soInn.superOverNumber,
+              teamId: soInn.teamId,
+            },
+          },
+          update: {
+            battingTeamId: soInn.battingTeamId,
+            bowlingTeamId: soInn.bowlingTeamId,
+            runs: soInn.runs,
+            wickets: soInn.wickets,
+            balls: soInn.balls,
+            extras: soInn.extras || 0,
+            ballsData: JSON.stringify(soInn.ballsData || []),
+            isCompleted: soInn.isCompleted || false,
+            isWinner: soInn.isWinner || false,
+            result: soInn.result || "",
+          },
+          create: {
+            matchId,
+            superOverNumber: soInn.superOverNumber,
+            teamId: soInn.teamId,
+            battingTeamId: soInn.battingTeamId,
+            bowlingTeamId: soInn.bowlingTeamId,
+            runs: soInn.runs,
+            wickets: soInn.wickets,
+            balls: soInn.balls,
+            extras: soInn.extras || 0,
+            ballsData: JSON.stringify(soInn.ballsData || []),
+            isCompleted: soInn.isCompleted || false,
+            isWinner: soInn.isWinner || false,
+            result: soInn.result || "",
+          },
+        })
+      }
+    }
 
     // Audit log
     logAudit({

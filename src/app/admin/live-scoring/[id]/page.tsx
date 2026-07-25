@@ -176,6 +176,20 @@ export default function LiveScoringPage() {
   const [superOverPendingExtraRuns, setSuperOverPendingExtraRuns] = useState<number | null>(null)
   const [superOverRegion, setSuperOverRegion] = useState("")
   const [superOverSubmitting, setSuperOverSubmitting] = useState(false)
+  const [completedSuperOverInnings, setCompletedSuperOverInnings] = useState<Array<{
+    superOverNumber: number
+    teamId: string
+    battingTeamId: string
+    bowlingTeamId: string
+    runs: number
+    wickets: number
+    balls: number
+    extras: number
+    ballsData: BallEvent[]
+    isCompleted: boolean
+    isWinner: boolean
+    result: string
+  }>>([])
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -254,6 +268,7 @@ export default function LiveScoringPage() {
           superOverT1Wkts: so1w,
           superOverT2Runs: so2,
           superOverT2Wkts: so2w,
+          superOverInningsData: completedSuperOverInnings,
         }),
       })
       const data = await res.json()
@@ -275,7 +290,7 @@ export default function LiveScoringPage() {
     } catch {
       setAutoCompletePending(false)
     }
-  }, [matchId, superOverT1Runs, superOverT1Wkts, superOverT2Runs, superOverT2Wkts, fetchSummary])
+  }, [matchId, superOverT1Runs, superOverT1Wkts, superOverT2Runs, superOverT2Wkts, fetchSummary, completedSuperOverInnings])
 
   const startSuperOver = useCallback((teamId: string) => {
     setSuperOverMode(true)
@@ -315,13 +330,30 @@ export default function LiveScoringPage() {
       setSuperOverT2Wkts(String(soWkts))
     }
 
+    const soLegalBalls = (ballsOverride || superOverBalls).filter(b => !b.isWide && !b.isNoBall).length
+    const bowlingTeamId = superOverBattingTeamId === summary.match.team1.id ? summary.match.team2.id : summary.match.team1.id
+    setCompletedSuperOverInnings(prev => [...prev, {
+      superOverNumber,
+      teamId: superOverBattingTeamId,
+      battingTeamId: superOverBattingTeamId,
+      bowlingTeamId,
+      runs: soRuns,
+      wickets: soWkts,
+      balls: soLegalBalls,
+      extras: (ballsOverride || superOverBalls).reduce((sum, b) => sum + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0) + b.byes + b.legByes, 0),
+      ballsData: ballsOverride || superOverBalls,
+      isCompleted: true,
+      isWinner: false,
+      result: "",
+    }])
+
     setSuperOverCompleted(true)
     setSuperOverMode(false)
 
     if (superOverBattingTeamId === summary.match.team1.id) {
       startSuperOver(summary.match.team2.id)
     }
-  }, [summary, superOverBattingTeamId, superOverBalls, startSuperOver])
+  }, [summary, superOverBattingTeamId, superOverBalls, startSuperOver, superOverNumber])
 
   function addSuperOverBall(ball: BallEvent) {
     if (!superOverStrikerId || !superOverBowlerId) {

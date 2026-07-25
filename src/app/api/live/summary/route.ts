@@ -8,7 +8,7 @@ export async function GET(req: Request) {
 
   const match = await prisma.match.findUnique({
     where: { id: matchId },
-    include: { team1: true, team2: true, innings: true },
+    include: { team1: true, team2: true, innings: true, superOvers: true },
   })
 
   if (!match) return NextResponse.json({ error: "Match not found" }, { status: 404 })
@@ -17,6 +17,11 @@ export async function GET(req: Request) {
     ...inn,
     ballsData: JSON.parse(inn.ballsData || "[]"),
   }))
+
+  const superOverInnings = match.superOvers.map((so) => ({
+    ...so,
+    ballsData: JSON.parse(so.ballsData || "[]"),
+  })).sort((a, b) => a.superOverNumber - b.superOverNumber || a.teamId.localeCompare(b.teamId))
 
   const team1Players = await prisma.player.findMany({
     where: { teamId: match.team1Id },
@@ -43,8 +48,13 @@ export async function GET(req: Request) {
       tossDecision: match.tossDecision,
       inningsBreak: match.inningsBreak,
       customHighlights: match.customHighlights || "",
+      superOverT1Runs: match.superOverT1Runs,
+      superOverT1Wkts: match.superOverT1Wkts,
+      superOverT2Runs: match.superOverT2Runs,
+      superOverT2Wkts: match.superOverT2Wkts,
     },
     innings,
+    superOverInnings,
     team1Players,
     team2Players,
   })

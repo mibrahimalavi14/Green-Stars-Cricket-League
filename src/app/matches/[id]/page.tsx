@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import type { Match, Team, Inning, PlayerMatch, Player } from "@prisma/client"
+import type { Match, Team, Inning, PlayerMatch, Player, SuperOverInnings } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 import { ShareButtons } from "@/components/ShareButtons"
-import { Star } from "lucide-react"
+import { Star, Trophy } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 
 function getYoutubeId(url: string) {
@@ -20,6 +20,7 @@ type MatchWithRelations = Match & {
   season: { name: string }
   innings: Inning[]
   performances: Perf[]
+  superOvers: SuperOverInnings[]
 }
 
 export const revalidate = 30
@@ -283,6 +284,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
         season: true,
         innings: true,
         performances: { include: { player: true } },
+        superOvers: true,
       },
     }),
     prisma.squadMember.findMany({
@@ -482,6 +484,63 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
             {BowlingTable({ performances: secondBowlingPerf, heading: "Bowling" })}
             {PartnershipCard({ battingPerformances: secondBattingPerf, allPerformances: allPerfs, inning: secondInning })}
           </div>
+
+          {/* Super Over History */}
+          {m.superOvers.length > 0 && (() => {
+            const sorted = [...m.superOvers].sort((a, b) => a.superOverNumber - b.superOverNumber)
+            const totalSO = sorted.length > 0 ? sorted[sorted.length - 1].superOverNumber : 0
+            const soGroups: Record<number, typeof sorted> = {}
+            for (const so of sorted) {
+              if (!soGroups[so.superOverNumber]) soGroups[so.superOverNumber] = []
+              soGroups[so.superOverNumber].push(so)
+            }
+            return (
+              <div className="mb-8 rounded-xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                  <h2 className="text-lg font-bold">Super Over History</h2>
+                </div>
+                {Object.entries(soGroups).map(([num, innings]) => (
+                  <div key={num} className="mb-4 last:mb-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">🏏</span>
+                      <h3 className="font-bold text-amber-600 dark:text-amber-400">
+                        Super Over #{num} {Number(num) > 1 ? `(${Number(num) === totalSO ? "Final" : "Tied"})` : ""}
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {innings.map((inn) => {
+                        const team = inn.teamId === m.team1Id ? m.team1 : m.team2
+                        const legalBalls = inn.balls
+                        return (
+                          <div key={inn.id} className={`rounded-lg p-3 ${inn.isWinner ? "border-2 border-green-500/40 bg-green-500/10" : "border border-[var(--border)] bg-[var(--card)]"}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                              {team.logo && <img src={team.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                              <span className="font-semibold text-sm">{team.name}</span>
+                              {inn.isWinner && <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-600 dark:text-green-400">WINNER</span>}
+                            </div>
+                            <p className="text-2xl font-black">{inn.runs}/{inn.wickets}</p>
+                            <p className="text-xs text-[var(--muted-foreground)]">
+                              {inn.balls} {inn.balls === 1 ? "ball" : "balls"}{inn.extras > 0 ? ` · ${inn.extras} extras` : ""}
+                            </p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {(() => {
+                      const winner = innings.find(i => i.isWinner)
+                      const isTied = !winner && innings.length === 2 && innings[0].runs === innings[1].runs && innings[0].wickets === innings[1].wickets
+                      return (
+                        <p className="mt-2 text-xs font-medium text-[var(--muted-foreground)]">
+                          {winner ? `${(winner.teamId === m.team1Id ? m.team1 : m.team2).name} won Super Over #${num}` : isTied ? "Tied" : ""}
+                        </p>
+                      )
+                    })()}
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
 
           {m.youtubeUrl && (
             <div className="mt-6">
