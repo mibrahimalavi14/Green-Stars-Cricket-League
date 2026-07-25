@@ -160,6 +160,23 @@ export default function LiveScoringPage() {
   const [completedResult, setCompletedResult] = useState("")
   const [completedMotm, setCompletedMotm] = useState("")
 
+  const [superOverMode, setSuperOverMode] = useState(false)
+  const [superOverBattingTeamId, setSuperOverBattingTeamId] = useState("")
+  const [superOverBowlerId, setSuperOverBowlerId] = useState("")
+  const [superOverStrikerId, setSuperOverStrikerId] = useState("")
+  const [superOverNonStrikerId, setSuperOverNonStrikerId] = useState("")
+  const [superOverBalls, setSuperOverBalls] = useState<BallEvent[]>([])
+  const [superOverWickets, setSuperOverWickets] = useState(0)
+  const [superOverCompleted, setSuperOverCompleted] = useState(false)
+  const [superOverNumber, setSuperOverNumber] = useState(1)
+  const [superOverWicketType, setSuperOverWicketType] = useState<string | null>(null)
+  const [superOverWicketBatsman, setSuperOverWicketBatsman] = useState("")
+  const [superOverWicketFielder, setSuperOverWicketFielder] = useState("")
+  const [superOverPendingExtraType, setSuperOverPendingExtraType] = useState<string | null>(null)
+  const [superOverPendingExtraRuns, setSuperOverPendingExtraRuns] = useState<number | null>(null)
+  const [superOverRegion, setSuperOverRegion] = useState("")
+  const [superOverSubmitting, setSuperOverSubmitting] = useState(false)
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchSummary = useCallback(async () => {
@@ -223,15 +240,20 @@ export default function LiveScoringPage() {
   const submitSuperOver = useCallback(async () => {
     setAutoCompletePending(true)
     try {
+      const so1 = parseInt(superOverT1Runs) || 0
+      const so1w = parseInt(superOverT1Wkts) || 0
+      const so2 = parseInt(superOverT2Runs) || 0
+      const so2w = parseInt(superOverT2Wkts) || 0
+
       const res = await fetch("/api/live/complete-match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           matchId,
-          superOverT1Runs: parseInt(superOverT1Runs) || 0,
-          superOverT1Wkts: parseInt(superOverT1Wkts) || 0,
-          superOverT2Runs: parseInt(superOverT2Runs) || 0,
-          superOverT2Wkts: parseInt(superOverT2Wkts) || 0,
+          superOverT1Runs: so1,
+          superOverT1Wkts: so1w,
+          superOverT2Runs: so2,
+          superOverT2Wkts: so2w,
         }),
       })
       const data = await res.json()
@@ -241,11 +263,12 @@ export default function LiveScoringPage() {
         setCompletedMotm(data.manOfMatchName || "")
         setSuperOverRequired(false)
         setSuperOverTie(false)
+        setSuperOverMode(false)
         await fetchSummary()
       } else if (data.superOverTie) {
         setSuperOverTie(true)
+        setSuperOverMode(false)
         setAutoCompletePending(false)
-        alert("Super Over is tied! Enter new Super Over scores.")
       } else {
         setAutoCompletePending(false)
       }
@@ -253,6 +276,98 @@ export default function LiveScoringPage() {
       setAutoCompletePending(false)
     }
   }, [matchId, superOverT1Runs, superOverT1Wkts, superOverT2Runs, superOverT2Wkts, fetchSummary])
+
+  const startSuperOver = useCallback((teamId: string) => {
+    setSuperOverMode(true)
+    setSuperOverBattingTeamId(teamId)
+    setSuperOverBalls([])
+    setSuperOverWickets(0)
+    setSuperOverCompleted(false)
+    setSuperOverStrikerId("")
+    setSuperOverNonStrikerId("")
+    setSuperOverBowlerId("")
+    setSuperOverWicketType(null)
+    setSuperOverWicketBatsman("")
+    setSuperOverWicketFielder("")
+    setSuperOverPendingExtraType(null)
+    setSuperOverPendingExtraRuns(null)
+    setSuperOverRegion("")
+  }, [])
+
+  const completeSuperOverInnings = useCallback(async (ballsOverride?: BallEvent[]) => {
+    if (!summary) return
+    const team = superOverBattingTeamId === summary.match.team1.id ? summary.match.team1 : summary.match.team2
+
+    let soRuns = 0
+    let soWkts = 0
+    for (const b of (ballsOverride || superOverBalls)) {
+      soRuns += b.runs
+      if (b.isWide || b.isNoBall) soRuns += 1
+      soRuns += b.byes + b.legByes
+      if (b.wicket) soWkts++
+    }
+
+    if (superOverBattingTeamId === summary.match.team1.id) {
+      setSuperOverT1Runs(String(soRuns))
+      setSuperOverT1Wkts(String(soWkts))
+    } else {
+      setSuperOverT2Runs(String(soRuns))
+      setSuperOverT2Wkts(String(soWkts))
+    }
+
+    setSuperOverCompleted(true)
+    setSuperOverMode(false)
+
+    if (superOverBattingTeamId === summary.match.team1.id) {
+      startSuperOver(summary.match.team2.id)
+    }
+  }, [summary, superOverBattingTeamId, superOverBalls, startSuperOver])
+
+  function addSuperOverBall(ball: BallEvent) {
+    if (!superOverStrikerId || !superOverBowlerId) {
+      alert("Select striker and bowler for Super Over")
+      return
+    }
+
+    const legalBalls = superOverBalls.filter(b => !b.isWide && !b.isNoBall).length
+    if (!ball.isWide && !ball.isNoBall && legalBalls >= MATCH_CONFIG.superOverBalls) return
+
+    let wickets = superOverWickets
+    if (ball.wicket) wickets++
+    if (wickets > MATCH_CONFIG.superOverWickets) return
+
+    const updatedBalls = [...superOverBalls, ball]
+    setSuperOverBalls(updatedBalls)
+    setSuperOverWickets(wickets)
+
+    setSuperOverWicketType(null)
+    setSuperOverWicketBatsman("")
+    setSuperOverWicketFielder("")
+    setSuperOverPendingExtraRuns(null)
+    setSuperOverPendingExtraType(null)
+    setSuperOverRegion("")
+
+    const newLegalBalls = updatedBalls.filter(b => !b.isWide && !b.isNoBall).length
+    const overDone = newLegalBalls >= MATCH_CONFIG.superOverBalls
+    const allOut = wickets >= MATCH_CONFIG.superOverWickets
+
+    if (overDone || allOut) {
+      completeSuperOverInnings(updatedBalls)
+      return
+    }
+
+    const isLegal = !ball.isWide && !ball.isNoBall
+    if (ball.wicket) {
+      setSuperOverStrikerId("")
+    } else {
+      const totalRuns = ball.runs + ball.byes + ball.legByes
+      if (totalRuns % 2 === 1) {
+        const tmp = superOverStrikerId
+        setSuperOverStrikerId(superOverNonStrikerId)
+        setSuperOverNonStrikerId(tmp)
+      }
+    }
+  }
 
   const saveHighlights = useCallback(async (highlights: { icon: string; text: string; sub: string }[]) => {
     setSavingHighlights(true)
@@ -431,6 +546,30 @@ export default function LiveScoringPage() {
   const innings2 = useMemo(() => summary?.innings.find(
     (i) => i.teamId === (summary?.match.team2.id)
   ), [summary])
+
+  const superOverLiveScore = useMemo(() => {
+    if (!summary) return { battingTeamName: "", bowlingTeamName: "", runs: 0, wickets: 0, legalBalls: 0, ballsLeft: MATCH_CONFIG.superOverBalls, target: null as number | null, isSecondBatting: false, firstTeamScore: "" }
+    const battingTeam = superOverBattingTeamId === summary.match.team1.id ? summary.match.team1 : summary.match.team2
+    const bowlingTeam = superOverBattingTeamId === summary.match.team1.id ? summary.match.team2 : summary.match.team1
+    let runs = 0, wickets = 0, legalBalls = 0
+    for (const b of superOverBalls) {
+      runs += b.runs
+      if (b.isWide || b.isNoBall) runs += 1
+      runs += b.byes + b.legByes
+      if (b.wicket) wickets++
+      if (!b.isWide && !b.isNoBall) legalBalls++
+    }
+    const ballsLeft = MATCH_CONFIG.superOverBalls - legalBalls
+    const isSecondBatting = superOverBattingTeamId !== summary.match.team1.id
+    let firstTeamScore = ""
+    if (isSecondBatting) {
+      const s1 = parseInt(superOverT1Runs) || 0
+      const w1 = parseInt(superOverT1Wkts) || 0
+      firstTeamScore = `${summary.match.team1.shortName}: ${s1}/${w1}`
+    }
+    const target = isSecondBatting ? (parseInt(superOverT1Runs) || 0) + 1 : null
+    return { battingTeamName: battingTeam.shortName, bowlingTeamName: bowlingTeam.shortName, runs, wickets, legalBalls, ballsLeft, target, isSecondBatting, firstTeamScore }
+  }, [summary, superOverBattingTeamId, superOverBalls, superOverT1Runs, superOverT1Wkts])
 
   const requiredRunRate = useMemo(() => {
     if (!summary || summary.innings.length <= 1) return null
@@ -919,52 +1058,241 @@ export default function LiveScoringPage() {
           </div>
         )}
 
-        {superOverRequired && !matchCompleted && (
+        {superOverRequired && !matchCompleted && !superOverMode && !superOverCompleted && (
           <div className="mb-4 rounded-xl border-2 border-amber-500/30 bg-amber-500/5 p-6">
             <div className="flex items-center gap-2 mb-3">
               <Trophy className="h-5 w-5 text-amber-500" />
-              <h3 className="font-bold text-amber-600 dark:text-amber-400">Match Tied — Super Over Required!</h3>
+              <h3 className="font-bold text-amber-600 dark:text-amber-400">Match Tied — Super Over {superOverNumber}!</h3>
             </div>
-            <p className="text-sm text-[var(--muted-foreground)] mb-4">Both teams scored the same. Enter Super Over scores:</p>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">Both teams scored the same. Click to start ball-by-ball Super Over scoring:</p>
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="rounded-lg bg-[var(--muted)] p-3">
-                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team1.name}</p>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
-                    <input type="number" min={0} value={superOverT1Runs}
-                      onChange={e => setSuperOverT1Runs(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
-                    <input type="number" min={0} max={2} value={superOverT1Wkts}
-                      onChange={e => setSuperOverT1Wkts(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-lg bg-[var(--muted)] p-3">
-                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team2.name}</p>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
-                    <input type="number" min={0} value={superOverT2Runs}
-                      onChange={e => setSuperOverT2Runs(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
-                    <input type="number" min={0} max={2} value={superOverT2Wkts}
-                      onChange={e => setSuperOverT2Wkts(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                </div>
-              </div>
+              <button onClick={() => startSuperOver(summary.match.team1.id)}
+                className="rounded-lg border-2 border-amber-500/30 bg-[var(--card)] p-4 hover:bg-amber-500/10 transition-colors text-center">
+                <p className="font-bold text-[var(--foreground)]">{summary.match.team1.name}</p>
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">Bat First in Super Over</p>
+              </button>
+              <button onClick={() => startSuperOver(summary.match.team2.id)}
+                className="rounded-lg border-2 border-amber-500/30 bg-[var(--card)] p-4 hover:bg-amber-500/10 transition-colors text-center">
+                <p className="font-bold text-[var(--foreground)]">{summary.match.team2.name}</p>
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">Bat First in Super Over</p>
+              </button>
             </div>
+            <p className="text-xs text-[var(--muted-foreground)]">Super Over rules: 1 over (6 balls), max 2 wickets. Higher score wins. If tied again → another Super Over.</p>
+          </div>
+        )}
+
+        {superOverMode && !matchCompleted && summary && (
+          <div className="mb-4 rounded-xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-5">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-2xl">🏏</span>
+              <h2 className="text-lg font-black text-amber-600 dark:text-amber-400">
+                SUPER OVER {superOverNumber > 1 ? `#${superOverNumber}` : ""}
+              </h2>
+              <span className="text-2xl">🏏</span>
+            </div>
+
+            {superOverLiveScore.isSecondBatting && (
+              <div className="mb-3 rounded-lg bg-[var(--muted)] p-3 text-center">
+                <p className="text-xs font-semibold text-[var(--muted-foreground)]">First Innings</p>
+                <p className="text-sm font-bold text-[var(--foreground)]">{superOverLiveScore.firstTeamScore}</p>
+              </div>
+            )}
+
+            <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-4 text-center mb-3">
+              <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-1">Batting</p>
+              <p className="text-lg font-black text-amber-600 dark:text-amber-400">{superOverLiveScore.battingTeamName}</p>
+              <p className="text-3xl font-black text-[var(--foreground)] mt-1">{superOverLiveScore.runs}/{superOverLiveScore.wickets}</p>
+              {superOverLiveScore.target && superOverLiveScore.runs < superOverLiveScore.target && (
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                  Need {superOverLiveScore.target - superOverLiveScore.runs} from {superOverLiveScore.ballsLeft} {superOverLiveScore.ballsLeft === 1 ? "ball" : "balls"}
+                </p>
+              )}
+              {superOverLiveScore.target && superOverLiveScore.runs >= superOverLiveScore.target && (
+                <p className="text-xs font-bold text-green-600 dark:text-green-400 mt-1">
+                  Target achieved! {superOverLiveScore.bowlingTeamName} wins Super Over!
+                </p>
+              )}
+              {!superOverLiveScore.target && (
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                  {superOverLiveScore.ballsLeft} {superOverLiveScore.ballsLeft === 1 ? "ball" : "balls"} remaining
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-center mb-3">
+              <span className="rounded-full bg-amber-500/20 px-4 py-1.5 text-sm font-bold text-amber-600 dark:text-amber-400">
+                {superOverLiveScore.legalBalls}/{MATCH_CONFIG.superOverBalls} balls | {superOverLiveScore.wickets}/{MATCH_CONFIG.superOverWickets} wkts
+              </span>
+            </div>
+
+            <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1 justify-center">
+              {superOverBalls.map((b, i) => {
+                const d = ballDisplay(b)
+                return (
+                  <div key={i} className={`flex h-8 min-w-[2rem] flex-col items-center justify-center rounded px-1 text-xs font-bold ${d.color}`}>
+                    <span>{d.text}</span>
+                    {d.region && <span className="text-[8px] opacity-70">{d.region.slice(0, 3)}</span>}
+                  </div>
+                )
+              })}
+              {superOverBalls.length === 0 && <p className="text-xs text-[var(--muted-foreground)]">No balls yet</p>}
+            </div>
+
+            {summary && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div>
+                  <label className="text-xs font-semibold text-[var(--muted-foreground)]">Bowler</label>
+                  <select value={superOverBowlerId} onChange={e => setSuperOverBowlerId(e.target.value)}
+                    className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+                    <option value="">Select</option>
+                    {(superOverBattingTeamId === summary.match.team1.id ? summary.team2Players : summary.team1Players)
+                      .sort((a, b) => {
+                        const roleOrder: Record<string, number> = { Bowler: 0, "All-rounder": 1, "Wicket-keeper": 2, Batsman: 3 }
+                        return (roleOrder[a.role] ?? 9) - (roleOrder[b.role] ?? 9)
+                      })
+                      .map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-[var(--muted-foreground)]">Striker</label>
+                  <select value={superOverStrikerId} onChange={e => setSuperOverStrikerId(e.target.value)}
+                    className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+                    <option value="">Select</option>
+                    {(superOverBattingTeamId === summary.match.team1.id ? summary.team1Players : summary.team2Players)
+                      .filter(p => p.id !== superOverNonStrikerId)
+                      .map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-[var(--muted-foreground)]">Non-Striker</label>
+                  <select value={superOverNonStrikerId} onChange={e => setSuperOverNonStrikerId(e.target.value)}
+                    className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+                    <option value="">Select</option>
+                    {(superOverBattingTeamId === summary.match.team1.id ? summary.team1Players : summary.team2Players)
+                      .filter(p => p.id !== superOverStrikerId)
+                      .map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {superOverWicketType && (
+              <div className="mb-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3">
+                <p className="text-xs font-bold text-purple-600 dark:text-purple-400 mb-2">WICKET: {superOverWicketType.toUpperCase()}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-[var(--muted-foreground)]">Who is out?</label>
+                    <select value={superOverWicketBatsman} onChange={e => setSuperOverWicketBatsman(e.target.value)}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+                      <option value="">Select</option>
+                      {(superOverBattingTeamId === summary?.match.team1.id ? summary.team1Players : summary.team2Players)
+                        .filter(p => p.id !== superOverStrikerId || !superOverStrikerId)
+                        .map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                  {(superOverWicketType === "caught" || superOverWicketType === "stumped" || superOverWicketType === "runout") && (
+                    <div>
+                      <label className="text-xs text-[var(--muted-foreground)]">{superOverWicketType === "caught" ? "Caught by?" : superOverWicketType === "stumped" ? "Stumped by?" : "Run out by?"}</label>
+                      <select value={superOverWicketFielder} onChange={e => setSuperOverWicketFielder(e.target.value)}
+                        className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+                        <option value="">Select fielder</option>
+                        {(superOverBattingTeamId === summary?.match.team1.id ? summary.team2Players : summary.team1Players)
+                          .map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {superOverPendingExtraType && (
+              <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 flex items-center gap-3">
+                <p className="text-xs font-bold text-amber-600 dark:text-amber-400">{superOverPendingExtraType.toUpperCase()} — How many runs?</p>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4].map(r => (
+                    <button key={r} onClick={() => {
+                      if (!superOverPendingExtraType || !superOverStrikerId || !superOverBowlerId) return
+                      addSuperOverBall({
+                        runs: 0, extras: superOverPendingExtraType, wicket: superOverWicketType,
+                        bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId,
+                        wicketBatsman: superOverWicketType ? (superOverWicketBatsman || superOverStrikerId) : null,
+                        wicketFielder: superOverWicketType ? superOverWicketFielder : null,
+                        isWide: false, isNoBall: false,
+                        byes: superOverPendingExtraType === "bye" ? r : 0,
+                        legByes: superOverPendingExtraType === "legbye" ? r : 0,
+                        region: superOverRegion,
+                      })
+                    }} className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-sm font-bold text-amber-600 hover:bg-amber-500/20">{r}</button>
+                  ))}
+                </div>
+                <button onClick={() => { setSuperOverPendingExtraType(null); setSuperOverPendingExtraRuns(null) }} className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Cancel</button>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-semibold text-[var(--muted-foreground)]">RUNS</span>
+              {[0, 1, 2, 3, 4, 6].map(r => (
+                <button key={r} disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
+                  onClick={() => {
+                    if (superOverWicketType) {
+                      addSuperOverBall({ runs: r, extras: null, wicket: superOverWicketType, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: superOverWicketType ? (superOverWicketBatsman || superOverStrikerId) : null, wicketFielder: superOverWicketType ? superOverWicketFielder : null, isWide: false, isNoBall: false, byes: 0, legByes: 0, region: superOverRegion })
+                    } else {
+                      addSuperOverBall({ runs: r, extras: null, wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: false, isNoBall: false, byes: 0, legByes: 0, region: superOverRegion })
+                    }
+                  }}
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold disabled:opacity-30 ${
+                    r === 0 ? "bg-[var(--muted)]" : r === 4 ? "bg-pink-500/10 text-pink-500" : r === 6 ? "bg-red-500/10 text-red-500" : "bg-[var(--accent)]/10 text-[var(--accent)]"
+                  } hover:scale-105 transition-transform`}>{r}</button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-semibold text-[var(--muted-foreground)]">EXTRAS</span>
+              <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
+                onClick={() => addSuperOverBall({ runs: 0, extras: "wide", wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: true, isNoBall: false, byes: 0, legByes: 0, region: "" })}
+                className="flex h-10 items-center gap-1 rounded-lg bg-gray-500/10 px-3 text-xs font-bold disabled:opacity-30 hover:bg-gray-500/20"><Zap className="h-3 w-3" /> Wide</button>
+              <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
+                onClick={() => addSuperOverBall({ runs: 0, extras: "noball", wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: false, isNoBall: true, byes: 0, legByes: 0, region: "" })}
+                className="flex h-10 items-center gap-1 rounded-lg bg-gray-500/10 px-3 text-xs font-bold disabled:opacity-30 hover:bg-gray-500/20"><Zap className="h-3 w-3" /> No Ball</button>
+              <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
+                onClick={() => setSuperOverPendingExtraType("bye")}
+                className="flex h-10 items-center gap-1 rounded-lg bg-gray-600/10 px-3 text-xs font-bold text-gray-600 dark:text-gray-400 disabled:opacity-30 hover:bg-gray-600/20">Bye</button>
+              <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
+                onClick={() => setSuperOverPendingExtraType("legbye")}
+                className="flex h-10 items-center gap-1 rounded-lg bg-gray-600/10 px-3 text-xs font-bold text-gray-600 dark:text-gray-400 disabled:opacity-30 hover:bg-gray-600/20">Leg Bye</button>
+            </div>
+
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-semibold text-[var(--muted-foreground)]">WICKET</span>
+              {["bowled", "caught", "lbw", "stumped", "runout", "hit wicket"].map(w => (
+                <button key={w} disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
+                  onClick={() => setSuperOverWicketType(superOverWicketType === w ? null : w)}
+                  className={`flex h-10 items-center gap-1 rounded-lg px-3 text-xs font-bold disabled:opacity-30 transition-all ${
+                    superOverWicketType === w ? "bg-purple-600 text-white ring-2 ring-purple-400" : "bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20"
+                  }`}>{w.charAt(0).toUpperCase() + w.slice(1)}</button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSuperOverMode(false)} className="rounded-lg bg-[var(--muted)] px-3 py-2 text-xs font-semibold hover:bg-[var(--muted)]/80 transition-colors">
+                Cancel Super Over
+              </button>
+            </div>
+          </div>
+        )}
+
+        {superOverCompleted && !matchCompleted && !superOverMode && (
+          <div className="mb-4 rounded-xl border-2 border-green-500/30 bg-green-500/5 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <p className="font-bold text-green-600 dark:text-green-400">Super Over Innings Complete!</p>
+            </div>
+            <p className="text-sm text-[var(--muted-foreground)] mb-3">
+              {summary?.match.team1.shortName}: {superOverT1Runs || 0}/{superOverT1Wkts || 0} | {summary?.match.team2.shortName}: {superOverT2Runs || 0}/{superOverT2Wkts || 0}
+            </p>
             <button onClick={submitSuperOver} disabled={autoCompletePending}
-              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 transition-colors">
-              {autoCompletePending ? "Submitting..." : "Submit Super Over & Complete Match"}
+              className="rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-50 transition-colors">
+              {autoCompletePending ? "Completing..." : "Complete Match"}
             </button>
           </div>
         )}
@@ -973,48 +1301,22 @@ export default function LiveScoringPage() {
           <div className="mb-4 rounded-xl border-2 border-red-500/30 bg-red-500/5 p-6">
             <div className="flex items-center gap-2 mb-3">
               <Trophy className="h-5 w-5 text-red-500" />
-              <h3 className="font-bold text-red-600 dark:text-red-400">Super Over is also Tied!</h3>
+              <h3 className="font-bold text-red-600 dark:text-red-400">Super Over {superOverNumber} Tied!</h3>
             </div>
-            <p className="text-sm text-[var(--muted-foreground)] mb-4">Enter new Super Over scores for another Super Over:</p>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="rounded-lg bg-[var(--muted)] p-3">
-                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team1.name}</p>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
-                    <input type="number" min={0} value={superOverT1Runs}
-                      onChange={e => setSuperOverT1Runs(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
-                    <input type="number" min={0} max={2} value={superOverT1Wkts}
-                      onChange={e => setSuperOverT1Wkts(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-lg bg-[var(--muted)] p-3">
-                <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">{match.team2.name}</p>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Runs</label>
-                    <input type="number" min={0} value={superOverT2Runs}
-                      onChange={e => setSuperOverT2Runs(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--muted-foreground)]">Wickets (max 2)</label>
-                    <input type="number" min={0} max={2} value={superOverT2Wkts}
-                      onChange={e => setSuperOverT2Wkts(e.target.value)}
-                      className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <button onClick={submitSuperOver} disabled={autoCompletePending}
-              className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50 transition-colors">
-              {autoCompletePending ? "Submitting..." : "Submit New Super Over"}
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">Starting Super Over {superOverNumber + 1}...</p>
+            <button onClick={() => {
+              setSuperOverNumber(n => n + 1)
+              setSuperOverTie(false)
+              setSuperOverCompleted(false)
+              setSuperOverRequired(true)
+              setSuperOverBalls([])
+              setSuperOverWickets(0)
+              setSuperOverT1Runs("")
+              setSuperOverT1Wkts("")
+              setSuperOverT2Runs("")
+              setSuperOverT2Wkts("")
+            }} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-colors">
+              Start Super Over {superOverNumber + 1}
             </button>
           </div>
         )}
@@ -1564,7 +1866,7 @@ export default function LiveScoringPage() {
               </div>
             )}
 
-            {activeInnings && (
+            {activeInnings && !superOverMode && !matchCompleted && (
               <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
                 {summary && summary.innings.length >= 2 && (() => {
                   const firstInnings = summary.innings[0]
