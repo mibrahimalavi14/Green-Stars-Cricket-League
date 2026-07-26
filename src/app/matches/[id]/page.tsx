@@ -4,8 +4,9 @@ import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player, SuperOverInnings } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 import { ShareButtons } from "@/components/ShareButtons"
-import { Star, Trophy } from "lucide-react"
+import { Star, Trophy, Users } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
+import { calculatePartnerships, getHighestPartnership, type BallData, type Partnership } from "@/lib/partnerships"
 
 function getYoutubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -174,65 +175,63 @@ function BowlingTable({ performances, heading }: { performances: Perf[], heading
 }
 
 function PartnershipCard({ battingPerformances, allPerformances, inning }: { battingPerformances: Perf[], allPerformances: Perf[], inning: Inning | undefined }) {
-  const batters = battingPerformances.filter(p => p.ballsFaced > 0)
-  if (batters.length === 0) return null
-  const totalRuns = batters.reduce((s, p) => s + p.battingRuns, 0)
-  const totalBalls = batters.reduce((s, p) => s + p.ballsFaced, 0)
-  const totalFours = batters.reduce((s, p) => s + p.fours, 0)
-  const totalSixes = batters.reduce((s, p) => s + p.sixes, 0)
-  const maxRuns = Math.max(...batters.map(p => p.battingRuns), 1)
+  if (!inning) return null
+  const ballsData: BallData[] = JSON.parse(inning.ballsData || "[]")
+  if (ballsData.length === 0) return null
+
+  const partnerships = calculatePartnerships(ballsData)
+  if (partnerships.length === 0) return null
+
+  const highest = getHighestPartnership(partnerships)
+
+  function wicketLabel(wn: number) {
+    const labels = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"]
+    return labels[wn] || `${wn + 1}th`
+  }
+
+  function playerName(id: string) {
+    if (id.startsWith("batter_")) return `Batter ${id.replace("batter_", "")}`
+    return allPerformances.find(p => p.playerId === id)?.player.name || id.slice(0, 8)
+  }
+
+  const maxRuns = Math.max(...partnerships.map(p => p.runs), 1)
+
   return (
     <div className="mb-8">
-      <h3 className="mb-2 font-semibold">Partnership</h3>
+      <div className="mb-3 flex items-center gap-2">
+        <Users className="h-4 w-4 text-[var(--accent)]" />
+        <h3 className="font-semibold">Partnerships</h3>
+        {highest && (
+          <span className="rounded bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
+            Best: {highest.runs} ({wicketLabel(highest.wicketNumber)} wkt)
+          </span>
+        )}
+      </div>
       <div className="rounded-xl border border-[var(--border)] p-4">
-        {batters.map((p, i) => {
-          const pct = (p.battingRuns / totalRuns) * 100
-          return (
-            <div key={p.id} className="mb-2">
-              <div className="mb-1 flex items-center justify-between gap-2 text-sm min-w-0">
-                <Link href={`/players/${p.playerId}`} className="font-medium hover:text-[var(--accent)] underline underline-offset-2 shrink-0">
-                  {p.player.name}
-                </Link>
-                <span className="text-[var(--muted-foreground)] truncate text-right">
-                  {p.battingRuns} ({p.ballsFaced}){p.isOut ? ` ${getDismissalText(p, allPerformances)}` : " *"}
-                </span>
-              </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-[var(--muted)]">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${pct}%`,
-                    backgroundColor: i === 0 ? "var(--accent)" : "#22c55e",
-                  }}
-                />
-              </div>
+        {partnerships.map((p, i) => (
+          <div key={i} className="mb-3 last:mb-0">
+            <div className="mb-1 flex items-center justify-between text-xs">
+              <span className="font-medium">
+                {wicketLabel(p.wicketNumber)} wkt
+                {p.isCurrent && <span className="ml-1 text-green-500">(current)</span>}
+              </span>
+              <span className="text-[var(--muted-foreground)]">
+                <Link href={`/players/${p.batter1Id}`} className="hover:text-[var(--accent)]">{playerName(p.batter1Id)}</Link>
+                {" & "}
+                <Link href={`/players/${p.batter2Id}`} className="hover:text-[var(--accent)]">{playerName(p.batter2Id)}</Link>
+              </span>
             </div>
-          )
-        })}
-        <div className="mt-3 border-t border-[var(--border)] pt-3">
-          <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-            <span className="text-lg font-bold">{totalRuns}</span>
-            <span className="text-[var(--muted-foreground)]">runs</span>
-            <span className="text-[var(--muted-foreground)]">|</span>
-            <span className="font-semibold">{totalBalls}</span>
-            <span className="text-[var(--muted-foreground)]">balls</span>
-            <span className="text-[var(--muted-foreground)]">|</span>
-            <span>{totalFours}×4, {totalSixes}×6</span>
-            <span className="text-[var(--muted-foreground)]">|</span>
-            <span className="font-mono">SR {totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(1) : "-"}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-2.5 overflow-hidden rounded-full bg-[var(--muted)]">
+                <div className="h-full rounded-full bg-[var(--accent)] transition-all" style={{ width: `${(p.runs / maxRuns) * 100}%` }} />
+              </div>
+              <span className="w-20 text-right text-xs font-bold">{p.runs} <span className="font-normal text-[var(--muted-foreground)]">({p.balls}b)</span></span>
+            </div>
+            <p className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">
+              {playerName(p.batter1Id)}: {p.batsman1Runs} ({p.batsman1Balls}b) · {playerName(p.batter2Id)}: {p.batsman2Runs} ({p.batsman2Balls}b)
+            </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
-            <span>RR {inning && inning.balls > 0 ? ((inning.runs + inning.extras) / (inning.balls / 6)).toFixed(2) : "-"}</span>
-            {inning && (
-              <>
-                <span>|</span>
-                <span>Extras: {inning.extras}</span>
-                <span>|</span>
-                <span>Total: {inning.runs}/{inning.wickets} ({Math.floor(inning.balls / 6)}.{inning.balls % 6} ov)</span>
-              </>
-            )}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )

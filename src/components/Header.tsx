@@ -119,6 +119,7 @@ export function Header() {
           <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
+          <Link href="/records" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Records</Link>
           {hasLive && (
             <Link href="/live" className="flex items-center gap-1 text-sm font-medium text-red-500 transition-colors hover:text-red-400">
               <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live
@@ -186,6 +187,7 @@ export function Header() {
             <Link href="/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
             <Link href="/fixtures" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
             <Link href="/points-table" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Standings</Link>
+            <Link href="/records" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Records</Link>
             {hasLive && <Link href="/live" onClick={() => setOpen(false)} className="flex items-center gap-1 text-red-500"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live</Link>}
             <Link href="/predictions" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
             <Link href="/news" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">News</Link>
