@@ -159,6 +159,21 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
         </span>
       </div>
 
+      <div className="flex flex-wrap gap-2 mb-8">
+        <Link href={`/seasons/${id}/snapshots`} className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-400 hover:bg-amber-500/20 transition">
+          Season Timeline
+        </Link>
+        <a href={`/api/export?seasonId=${id}&type=points`} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-medium text-blue-400 hover:bg-blue-500/20 transition">
+          Export Points Table (CSV)
+        </a>
+        <a href={`/api/export?seasonId=${id}&type=players`} className="inline-flex items-center gap-1.5 rounded-lg bg-green-500/10 border border-green-500/20 px-3 py-1.5 text-xs font-medium text-green-400 hover:bg-green-500/20 transition">
+          Export Player Stats (CSV)
+        </a>
+        <a href={`/api/export?seasonId=${id}&type=matches`} className="inline-flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 text-xs font-medium text-purple-400 hover:bg-purple-500/20 transition">
+          Export Matches (CSV)
+        </a>
+      </div>
+
       {/* Tournament Leaders */}
       {allPlayers.length > 0 && (
         <section className="mb-12">

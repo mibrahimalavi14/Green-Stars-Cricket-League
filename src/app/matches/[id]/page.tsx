@@ -4,6 +4,7 @@ import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player, SuperOverInnings } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 import { ShareButtons } from "@/components/ShareButtons"
+import { ShareableScorecard } from "@/components/ShareableScorecard"
 import { Star, Trophy, Users } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import { calculatePartnerships, getHighestPartnership, type BallData, type Partnership } from "@/lib/partnerships"
@@ -17,6 +18,12 @@ function getYoutubeId(url: string) {
 
 type Perf = PlayerMatch & { player: Player }
 
+type MatchNotes = {
+  weather: string; temperature: string; pitchType: string; groundCondition: string
+  delayReason: string; delayDuration: string; refereeNotes: string
+  injuryNotes: string; replacements: string; fines: string; incidents: string
+} | null
+
 type MatchWithRelations = Match & {
   team1: Team
   team2: Team
@@ -24,6 +31,7 @@ type MatchWithRelations = Match & {
   innings: Inning[]
   performances: Perf[]
   superOvers: SuperOverInnings[]
+  notes: MatchNotes
 }
 
 export const revalidate = 30
@@ -287,6 +295,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
         innings: true,
         performances: { include: { player: true } },
         superOvers: true,
+        notes: true,
       },
     }),
     prisma.squadMember.findMany({
@@ -354,6 +363,30 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
         </div>
       </div>
 
+      {/* Shareable Scorecard (for completed matches) */}
+      {m.status === "completed" && (() => {
+        const inn1 = m.innings.find(i => i.teamId === m.team1Id)
+        const inn2 = m.innings.find(i => i.teamId === m.team2Id)
+        const formatSco = (inn: typeof inn1) => inn ? `${inn.runs + inn.extras}/${inn.wickets}` : "-"
+        const motmPerf = m.manOfMatch ? m.performances.find(p => p.playerId === m.manOfMatch) : null
+        return (
+          <div className="mb-6">
+            <ShareableScorecard
+              matchNo={m.matchNo}
+              team1={{ name: m.team1.name, shortName: m.team1.shortName, color: m.team1.color }}
+              team2={{ name: m.team2.name, shortName: m.team2.shortName, color: m.team2.color }}
+              t1Score={formatSco(inn1)}
+              t2Score={formatSco(inn2)}
+              result={m.result}
+              winner={m.winnerTeamId ? (m.winnerTeamId === m.team1Id ? m.team1.name : m.team2.name) : undefined}
+              motm={motmPerf?.player.name}
+              date={m.date ? new Date(m.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : undefined}
+              venue={m.venue}
+            />
+          </div>
+        )
+      })()}
+
       <H2H team1Id={m.team1Id} team2Id={m.team2Id} matchId={m.id} />
 
       {m.status === "upcoming" && (
@@ -392,6 +425,25 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
                 {m.matchStartTime && <div><span className="text-[var(--muted-foreground)]">Start:</span> <span className="font-medium">{m.matchStartTime}</span></div>}
                 {m.matchEndTime && <div><span className="text-[var(--muted-foreground)]">End:</span> <span className="font-medium">{m.matchEndTime}</span></div>}
                 {m.delayReason && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Delay:</span> <span className="font-medium text-amber-600">{m.delayReason}</span></div>}
+              </div>
+            </div>
+          )}
+
+          {/* Match Notes (Weather, Pitch, etc.) */}
+          {m.notes && (
+            <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+              <h3 className="mb-3 text-sm font-semibold">Match Conditions</h3>
+              <div className="grid gap-x-6 gap-y-2 text-sm md:grid-cols-2">
+                {m.notes.weather && <div><span className="text-[var(--muted-foreground)]">Weather:</span> <span className="font-medium">{m.notes.weather}</span></div>}
+                {m.notes.temperature && <div><span className="text-[var(--muted-foreground)]">Temperature:</span> <span className="font-medium">{m.notes.temperature}</span></div>}
+                {m.notes.pitchType && <div><span className="text-[var(--muted-foreground)]">Pitch:</span> <span className="font-medium">{m.notes.pitchType}</span></div>}
+                {m.notes.groundCondition && <div><span className="text-[var(--muted-foreground)]">Ground:</span> <span className="font-medium">{m.notes.groundCondition}</span></div>}
+                {m.notes.delayReason && <div><span className="text-[var(--muted-foreground)]">Delay:</span> <span className="font-medium text-amber-600">{m.notes.delayReason}{m.notes.delayDuration ? ` (${m.notes.delayDuration})` : ""}</span></div>}
+                {m.notes.injuryNotes && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Injuries:</span> <span className="font-medium">{m.notes.injuryNotes}</span></div>}
+                {m.notes.replacements && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Replacements:</span> <span className="font-medium">{m.notes.replacements}</span></div>}
+                {m.notes.refereeNotes && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Referee Notes:</span> <span className="font-medium">{m.notes.refereeNotes}</span></div>}
+                {m.notes.fines && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Fines:</span> <span className="font-medium text-red-600">{m.notes.fines}</span></div>}
+                {m.notes.incidents && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Incidents:</span> <span className="font-medium">{m.notes.incidents}</span></div>}
               </div>
             </div>
           )}

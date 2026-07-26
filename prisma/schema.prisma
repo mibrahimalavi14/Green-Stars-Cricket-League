@@ -64,6 +64,7 @@ model Season {
   createdAt         DateTime @default(now())
   teams             Team[]
   matches           Match[]
+  snapshots         SeasonSnapshot[]
 
   @@unique([name, year])
 }
@@ -189,6 +190,7 @@ model Match {
   potmVotes     PotmVote[]
   ballEvents    BallEvent[]
   superOvers    SuperOverInnings[]
+  notes         MatchNotes?
 
   @@index([status])
   @@index([seasonId])
@@ -515,4 +517,43 @@ model SuperOverInnings {
   @@unique([matchId, superOverNumber, teamId])
   @@index([matchId])
   @@index([teamId])
+}
+
+model SeasonSnapshot {
+  id              String   @id @default(cuid())
+  seasonId        String
+  season          Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  matchId         String
+  matchNo         Int      @default(0)
+  pointsTable     Json     @default("[]")
+  orangeCap       Json     @default("[]")
+  purpleCap       Json     @default("[]")
+  records         Json     @default("{}")
+  createdAt       DateTime @default(now())
+
+  @@unique([seasonId, matchId])
+  @@index([seasonId])
+  @@index([matchId])
+}
+
+model MatchNotes {
+  id              String   @id @default(cuid())
+  matchId         String
+  match           Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  weather         String   @default("")
+  temperature     String   @default("")
+  pitchType       String   @default("")
+  groundCondition String   @default("")
+  delayReason     String   @default("")
+  delayDuration   String   @default("")
+  refereeNotes    String   @default("")
+  injuryNotes     String   @default("")
+  replacements    String   @default("")
+  fines           String   @default("")
+  incidents       String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  @@unique([matchId])
+  @@index([matchId])
 }

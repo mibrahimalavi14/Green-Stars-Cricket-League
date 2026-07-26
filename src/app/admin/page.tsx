@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3 } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -115,6 +115,18 @@ async function AdminPage() {
           <BarChart3 className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Analytics</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Usage metrics & trends for v2.0 planning</p>
+        </Link>
+
+        <Link href="/admin/restore" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-amber-500/50 hover:shadow-lg">
+          <Database className="mb-3 h-8 w-8 text-amber-500" />
+          <h3 className="text-lg font-semibold">Data Restore</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Recalculate stats, rebuild snapshots, restore data</p>
+        </Link>
+
+        <Link href="/admin/match-notes" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-blue-500/50 hover:shadow-lg">
+          <FileText className="mb-3 h-8 w-8 text-blue-500" />
+          <h3 className="text-lg font-semibold">Match Notes</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Weather, pitch, injuries, fines, referee notes</p>
         </Link>
 
         <Link href="/admin/contact" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">

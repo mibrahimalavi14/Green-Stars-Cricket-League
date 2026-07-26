@@ -344,6 +344,14 @@ export async function POST(req: Request) {
     await recalcPointsTable(match.seasonId)
     await recalcPlayerStats()
 
+    // Save season snapshot after match completion
+    try {
+      const { saveSeasonSnapshot } = await import("@/lib/snapshots")
+      await saveSeasonSnapshot(match.seasonId, matchId)
+    } catch (snapErr) {
+      console.error("Snapshot save failed:", snapErr)
+    }
+
     // Get mom player name for notification
     let momName = ""
     if (momPlayerId) {
