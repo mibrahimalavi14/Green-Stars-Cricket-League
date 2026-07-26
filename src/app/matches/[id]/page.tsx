@@ -7,6 +7,8 @@ import { ShareButtons } from "@/components/ShareButtons"
 import { Star, Trophy, Users } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import { calculatePartnerships, getHighestPartnership, type BallData, type Partnership } from "@/lib/partnerships"
+import { OverByOver } from "@/components/OverByOver"
+import { WormChart } from "@/components/WormChart"
 
 function getYoutubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -501,6 +503,34 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
             {BowlingTable({ performances: secondBowlingPerf, heading: "Bowling" })}
             {PartnershipCard({ battingPerformances: secondBattingPerf, allPerformances: allPerfs, inning: secondInning })}
           </div>
+
+          {/* Over-by-Over & Worm Chart */}
+          {firstInning && (
+            <div className="mb-8">
+              <h3 className="mb-3 text-lg font-bold">Scorecard</h3>
+              <div className="grid gap-6 md:grid-cols-2">
+                {(() => {
+                  const b1: BallData[] = JSON.parse(firstInning.ballsData || "[]")
+                  return b1.length > 0 ? <OverByOver ballsData={b1} teamName={firstBattingTeam.name} /> : null
+                })()}
+                {(() => {
+                  const b2: BallData[] = JSON.parse(secondInning?.ballsData || "[]")
+                  return b2.length > 0 ? <OverByOver ballsData={b2} teamName={secondBattingTeam.name} /> : null
+                })()}
+              </div>
+              {firstInning && secondInning && (() => {
+                const b1: BallData[] = JSON.parse(firstInning.ballsData || "[]")
+                const b2: BallData[] = JSON.parse(secondInning.ballsData || "[]")
+                return b1.length > 0 && b2.length > 0 ? (
+                  <WormChart
+                    innings1={{ ballsData: b1, teamName: firstBattingTeam.name, color: firstBattingTeam.color || "#3b82f6" }}
+                    innings2={{ ballsData: b2, teamName: secondBattingTeam.name, color: secondBattingTeam.color || "#ef4444" }}
+                    maxOvers={MATCH_CONFIG.oversPerInnings}
+                  />
+                ) : null
+              })()}
+            </div>
+          )}
 
           {/* Super Over History */}
           {m.superOvers.length > 0 && (() => {
