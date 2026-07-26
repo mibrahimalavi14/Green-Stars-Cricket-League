@@ -7,6 +7,8 @@ import Link from "next/link"
 interface Match {
   id: string; matchNo: number; stage: string; date: string; status: string; result: string; team1Score: string; team2Score: string
   tossWinner: string; tossDecision: string; manOfMatch: string; venue: string
+  umpire1: string; umpire2: string; thirdUmpire: string; matchReferee: string; officialScorer: string
+  tossTime: string; matchStartTime: string; matchEndTime: string; delayReason: string
   team1: { id: string; shortName: string; name: string; color: string; logo: string }
   team2: { id: string; shortName: string; name: string; color: string; logo: string }
   season: { name: string }
@@ -15,6 +17,9 @@ interface Match {
 export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const router = useRouter()
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<Partial<Match>>({})
+  const [saving, setSaving] = useState(false)
 
   async function updateStatus(id: string, status: string) {
     await fetch("/api/matches", {
@@ -36,6 +41,33 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
     router.refresh()
   }
 
+  function openEdit(match: Match) {
+    setEditingId(match.id)
+    setEditForm({
+      umpire1: match.umpire1 || "", umpire2: match.umpire2 || "",
+      thirdUmpire: match.thirdUmpire || "", matchReferee: match.matchReferee || "",
+      officialScorer: match.officialScorer || "", tossTime: match.tossTime || "",
+      matchStartTime: match.matchStartTime || "", matchEndTime: match.matchEndTime || "",
+      delayReason: match.delayReason || "", tossWinner: match.tossWinner || "",
+      tossDecision: match.tossDecision || "",
+    })
+  }
+
+  async function saveEdit(id: string) {
+    setSaving(true)
+    await fetch("/api/matches", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...editForm }),
+    })
+    setSaving(false)
+    setEditingId(null)
+    router.refresh()
+  }
+
+  const inputCls = "w-full rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs"
+  const labelCls = "text-[10px] text-[var(--muted-foreground)] mb-0.5 block"
+
   return (
     <div className="space-y-3">
       {matches.map((m) => {
@@ -43,15 +75,16 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
           league: "", qualifier1: "Qualifier 1", eliminator: "Eliminator", qualifier2: "Qualifier 2", final: "Final",
         }
         const isPlayoff = m.stage !== "league"
+        const hasOfficials = m.umpire1 || m.umpire2 || m.thirdUmpire || m.matchReferee || m.officialScorer
         return (
         <div key={m.id} className={`rounded-lg border p-3 sm:p-4 ${isPlayoff ? 'border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10' : 'border-[var(--border)] bg-[var(--card)]'}`}>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">{isPlayoff ? `${stageLabel[m.stage] || m.stage}` : `${m.season.name} \u00b7 Match ${m.matchNo}`} &middot; {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} &middot; {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
+              <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">{isPlayoff ? `${stageLabel[m.stage] || m.stage}` : `${m.season.name} · Match ${m.matchNo}`} · {new Date(m.date).toLocaleDateString("en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", year: "numeric" })} · {new Date(m.date).toLocaleTimeString("en-US", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit", hour12: true })}</p>
               {isPlayoff ? (
                 <div className="flex items-center gap-2">
                   <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{stageLabel[m.stage] || m.stage}</span>
-                  <span className="text-xs text-[var(--muted-foreground)]">&middot;</span>
+                  <span className="text-xs text-[var(--muted-foreground)]">·</span>
                   <p className="font-bold text-amber-600 dark:text-amber-400">TBD</p>
                   <span className="text-xs text-amber-600 dark:text-amber-400">vs</span>
                   <p className="font-bold text-amber-600 dark:text-amber-400">TBD</p>
@@ -67,6 +100,14 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               )}
               {!isPlayoff && m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
               {!isPlayoff && m.result && <p className="text-xs text-[var(--muted-foreground)]">{m.result}</p>}
+              {hasOfficials && editingId !== m.id && (
+                <p className="mt-1 text-[10px] text-[var(--muted-foreground)]">
+                  {m.umpire1 && `UM1: ${m.umpire1}`}
+                  {m.umpire1 && m.umpire2 && " · "}
+                  {m.umpire2 && `UM2: ${m.umpire2}`}
+                  {m.matchReferee && ` · Ref: ${m.matchReferee}`}
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
               <span className={`rounded px-2 py-1 text-xs font-medium ${
@@ -87,10 +128,83 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   Scorecard
                 </Link>
               )}
+              <button onClick={() => editingId === m.id ? setEditingId(null) : openEdit(m)}
+                className="rounded bg-[var(--muted)] px-2 py-1 text-xs text-[var(--muted-foreground)] whitespace-nowrap hover:bg-[var(--muted-foreground)]/20">
+                {editingId === m.id ? "Close" : "Officials"}
+              </button>
               <button onClick={() => deleteMatch(m.id)} disabled={deleting === m.id}
                 className="rounded bg-red-600 px-2 py-1 text-xs text-white disabled:opacity-50 whitespace-nowrap">Delete</button>
             </div>
           </div>
+
+          {editingId === m.id && (
+            <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--muted)]/20 p-3 space-y-3">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div>
+                  <label className={labelCls}>Toss Winner</label>
+                  <select value={editForm.tossWinner || ""} onChange={e => setEditForm({...editForm, tossWinner: e.target.value})} className={inputCls}>
+                    <option value="">—</option>
+                    <option value={m.team1.id}>{m.team1.name}</option>
+                    <option value={m.team2.id}>{m.team2.name}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Toss Decision</label>
+                  <select value={editForm.tossDecision || ""} onChange={e => setEditForm({...editForm, tossDecision: e.target.value})} className={inputCls}>
+                    <option value="">—</option>
+                    <option value="bat">Bat</option>
+                    <option value="bowl">Bowl</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Toss Time</label>
+                  <input type="time" value={editForm.tossTime || ""} onChange={e => setEditForm({...editForm, tossTime: e.target.value})} className={inputCls} />
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+                <div>
+                  <label className={labelCls}>Umpire 1</label>
+                  <input value={editForm.umpire1 || ""} onChange={e => setEditForm({...editForm, umpire1: e.target.value})} placeholder="Name" className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Umpire 2</label>
+                  <input value={editForm.umpire2 || ""} onChange={e => setEditForm({...editForm, umpire2: e.target.value})} placeholder="Name" className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Third Umpire</label>
+                  <input value={editForm.thirdUmpire || ""} onChange={e => setEditForm({...editForm, thirdUmpire: e.target.value})} placeholder="Optional" className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Referee</label>
+                  <input value={editForm.matchReferee || ""} onChange={e => setEditForm({...editForm, matchReferee: e.target.value})} placeholder="Name" className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Scorer</label>
+                  <input value={editForm.officialScorer || ""} onChange={e => setEditForm({...editForm, officialScorer: e.target.value})} placeholder="Name" className={inputCls} />
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div>
+                  <label className={labelCls}>Match Start</label>
+                  <input type="time" value={editForm.matchStartTime || ""} onChange={e => setEditForm({...editForm, matchStartTime: e.target.value})} className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Match End</label>
+                  <input type="time" value={editForm.matchEndTime || ""} onChange={e => setEditForm({...editForm, matchEndTime: e.target.value})} className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Delay Reason</label>
+                  <input value={editForm.delayReason || ""} onChange={e => setEditForm({...editForm, delayReason: e.target.value})} placeholder="Rain, Bad light..." className={inputCls} />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <button onClick={() => saveEdit(m.id)} disabled={saving}
+                  className="rounded bg-[var(--accent)] px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+                  {saving ? "Saving..." : "Save Officials"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )})}
       {matches.length === 0 && <p className="text-center text-[var(--muted-foreground)] py-8">No matches yet.</p>}

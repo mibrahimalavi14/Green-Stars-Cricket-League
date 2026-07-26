@@ -375,7 +375,24 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           {m.tossWinner && (
             <p className="mb-4 text-sm text-[var(--muted-foreground)]">
               Toss: {m.tossWinner === m.team1Id ? m.team1.name : m.team2.name} won & elected to {m.tossDecision} first
+              {m.tossTime && ` at ${m.tossTime}`}
             </p>
+          )}
+
+          {(m.umpire1 || m.umpire2 || m.thirdUmpire || m.matchReferee || m.officialScorer || m.matchStartTime || m.matchEndTime || m.delayReason) && (
+            <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+              <h3 className="mb-3 text-sm font-semibold">Match Officials</h3>
+              <div className="grid gap-x-6 gap-y-2 text-sm md:grid-cols-2">
+                {m.umpire1 && <div><span className="text-[var(--muted-foreground)]">Umpire 1:</span> <span className="font-medium">{m.umpire1}</span></div>}
+                {m.umpire2 && <div><span className="text-[var(--muted-foreground)]">Umpire 2:</span> <span className="font-medium">{m.umpire2}</span></div>}
+                {m.thirdUmpire && <div><span className="text-[var(--muted-foreground)]">Third Umpire:</span> <span className="font-medium">{m.thirdUmpire}</span></div>}
+                {m.matchReferee && <div><span className="text-[var(--muted-foreground)]">Referee:</span> <span className="font-medium">{m.matchReferee}</span></div>}
+                {m.officialScorer && <div><span className="text-[var(--muted-foreground)]">Scorer:</span> <span className="font-medium">{m.officialScorer}</span></div>}
+                {m.matchStartTime && <div><span className="text-[var(--muted-foreground)]">Start:</span> <span className="font-medium">{m.matchStartTime}</span></div>}
+                {m.matchEndTime && <div><span className="text-[var(--muted-foreground)]">End:</span> <span className="font-medium">{m.matchEndTime}</span></div>}
+                {m.delayReason && <div className="md:col-span-2"><span className="text-[var(--muted-foreground)]">Delay:</span> <span className="font-medium text-amber-600">{m.delayReason}</span></div>}
+              </div>
+            </div>
           )}
 
           {squad.length > 0 && (
