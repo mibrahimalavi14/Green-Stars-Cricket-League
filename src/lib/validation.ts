@@ -181,3 +181,49 @@ export const gallerySchema = z.object({
   caption: z.string().max(500).optional(),
   matchId: z.string().optional(),
 })
+
+export const playerTransferSchema = z.object({
+  playerId: z.string().min(1),
+  seasonId: z.string().min(1),
+  fromTeamId: z.string().optional(),
+  toTeamId: z.string().min(1),
+  transferDate: z.string().optional(),
+  reason: z.string().max(500).optional(),
+})
+
+export const teamCaptaincySchema = z.object({
+  seasonId: z.string().min(1),
+  teamId: z.string().min(1),
+  captainId: z.string().min(1),
+  viceCaptainId: z.string().optional(),
+})
+
+export const leaguePenaltySchema = z.object({
+  seasonId: z.string().min(1),
+  teamId: z.string().min(1),
+  matchId: z.string().optional(),
+  type: z.enum(["over_rate", "fine", "points_deduction", "forfeit"]).default("fine"),
+  points: z.number().int().min(0).max(1000).default(0),
+  description: z.string().max(500).optional(),
+})
+
+export const seasonAwardSchema = z.object({
+  seasonId: z.string().min(1),
+  category: z.enum(["orange_cap", "purple_cap", "mvp", "best_batter", "best_bowler", "emerging_player", "fair_play"]),
+  playerId: z.string().optional(),
+  teamId: z.string().optional(),
+  note: z.string().max(500).optional(),
+})
+
+export const teamHonorSchema = z.object({
+  seasonId: z.string().min(1),
+  teamId: z.string().min(1),
+  title: z.string().min(1).max(100),
+  note: z.string().max(500).optional(),
+})
+
+export const abandonMatchSchema = z.object({
+  matchId: z.string().min(1),
+  reason: z.enum(["rain", "bad_light", "ground_issue", "walkover", "technical_issue"]),
+  description: z.string().max(500).optional(),
+})

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
-import { MATCH_CONFIG } from "@/lib/config"
 
 export const dynamic = "force-dynamic"
 
@@ -24,42 +23,9 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
   const teamIds = season.teams.map(t => t.id)
   const matchIds = season.matches.map(m => m.id)
 
-  // Compute standings from matches+innings data directly (no recalcPointsTable call)
-  const standings = season.teams.map(team => {
-    const s = { played: 0, won: 0, lost: 0, tied: 0, nr: 0, forRuns: 0, forBalls: 0, againstRuns: 0, againstBalls: 0 }
-    const teamMatches = season.matches.filter(m => (m.team1Id === team.id || m.team2Id === team.id) && m.status === "completed")
-    for (const m of teamMatches) {
-      s.played++
-      const result = m.result.toLowerCase()
-      if (result.includes("tied")) { s.tied++ }
-      else if (result === "no result" || result.includes("abandon")) { s.nr++ }
-      else {
-        const t1Match = result.includes(m.team1.name.toLowerCase()) || result.includes(m.team1.shortName.toLowerCase())
-        const t2Match = result.includes(m.team2.name.toLowerCase()) || result.includes(m.team2.shortName.toLowerCase())
-        if (t1Match && !t2Match) { if (m.team1Id === team.id) s.won++; else s.lost++ }
-        else if (t2Match && !t1Match) { if (m.team2Id === team.id) s.won++; else s.lost++ }
-      }
-      const inn1 = m.innings.find(i => i.teamId === m.team1Id)
-      const inn2 = m.innings.find(i => i.teamId === m.team2Id)
-      if (m.team1Id === team.id) {
-        if (inn1) { s.forRuns += inn1.runs + inn1.extras; s.forBalls += inn1.balls }
-        if (inn2) { s.againstRuns += inn2.runs + inn2.extras; s.againstBalls += inn2.balls }
-      } else {
-        if (inn2) { s.forRuns += inn2.runs + inn2.extras; s.forBalls += inn2.balls }
-        if (inn1) { s.againstRuns += inn1.runs + inn1.extras; s.againstBalls += inn1.balls }
-      }
-    }
-    const forOvers = s.forBalls / 6
-    const againstOvers = s.againstBalls / 6
-    const nrr = forOvers > 0 && againstOvers > 0
-      ? ((s.forRuns / forOvers) - (s.againstRuns / againstOvers))
-      : forOvers > 0 ? s.forRuns / forOvers : 0
-    return {
-      id: team.id, name: team.name, shortName: team.shortName, logo: team.logo, color: team.color,
-      played: s.played, won: s.won, lost: s.lost, tied: s.tied, nr: s.nr,
-      points: s.won * MATCH_CONFIG.pointsWin + s.tied * MATCH_CONFIG.pointsTie + s.nr * MATCH_CONFIG.pointsNoResult, nrr,
-    }
-  }).sort((a, b) => b.points - a.points || b.nrr - a.nrr)
+  // Standings computed via shared logic (includes league penalties, NR handling)
+  const { recalcPointsTable } = await import("@/lib/stats")
+  const standings = await recalcPointsTable(season.id)
 
   // Fetch player performances with minimal fields
   const perfs = matchIds.length > 0 ? await prisma.playerMatch.findMany({
@@ -85,6 +51,29 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
     select: { id: true, name: true, teamId: true, role: true, runs: true, wickets: true },
   })
   const pMap = new Map(allPlayers.map(p => [p.id, p]))
+
+  const awards = await prisma.seasonAward.findMany({
+    where: { seasonId: season.id },
+    orderBy: { createdAt: "asc" },
+  })
+  const awardPlayerIds = awards.filter(a => a.playerId).map(a => a.playerId)
+  const awardTeamIds = awards.filter(a => a.teamId).map(a => a.teamId)
+  const [awardPlayers, awardTeams] = await Promise.all([
+    awardPlayerIds.length ? prisma.player.findMany({ where: { id: { in: awardPlayerIds } }, select: { id: true, name: true, photo: true } }) : Promise.resolve([]),
+    awardTeamIds.length ? prisma.team.findMany({ where: { id: { in: awardTeamIds } }, select: { id: true, name: true, shortName: true, logo: true, color: true } }) : Promise.resolve([]),
+  ])
+  const awardPlayerMap = new Map(awardPlayers.map(p => [p.id, p]))
+  const awardTeamMap = new Map(awardTeams.map(t => [t.id, t]))
+
+  const AWARD_META: Record<string, { label: string; icon: string }> = {
+    orange_cap: { label: "Orange Cap", icon: "🧢" },
+    purple_cap: { label: "Purple Cap", icon: "🟣" },
+    mvp: { label: "MVP", icon: "🏅" },
+    best_batter: { label: "Best Batter", icon: "🏏" },
+    best_bowler: { label: "Best Bowler", icon: "🎳" },
+    emerging_player: { label: "Emerging Player", icon: "⭐" },
+    fair_play: { label: "Fair Play", icon: "🤝" },
+  }
 
   function stageLabel(stage: string): string {
     return stage === "qualifier1" ? "Qualifier 1" :
@@ -184,6 +173,42 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
             <LeaderCard label="Best Strike Rate" stat="SR" value={sR ? ((sR[1].runs / sR[1].balls) * 100).toFixed(1) : "-"} name={tName(sR?.[0]) || "Yet to be decided"} color="cyan" sub="min 10 balls" />
             <LeaderCard label="Purple Cap" stat="Wickets" value={tW ? String(tW[1].wickets) : "-"} name={tName(tW?.[0]) || "Yet to be decided"} color="violet" />
             <LeaderCard label="Best All-Rounder" stat="Pts" value={aR ? String(aR[1].runs + aR[1].wickets * 20) : "-"} name={tName(aR?.[0]) || "Yet to be decided"} color="amber" sub="min 20r 2w" />
+          </div>
+        </section>
+      )}
+
+      {/* Season Awards */}
+      {awards.length > 0 && (
+        <section className="mb-12">
+          <h2 className="mb-4 text-xl font-semibold">Season Awards</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {awards.map(a => {
+              const meta = AWARD_META[a.category] || { label: a.category, icon: "🏅" }
+              const awardPlayer = a.playerId ? awardPlayerMap.get(a.playerId) : null
+              const awardTeam = a.teamId ? awardTeamMap.get(a.teamId) : null
+              return (
+                <div key={a.id} className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                  <span className="text-2xl">{meta.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{meta.label}</p>
+                    {awardPlayer ? (
+                      <Link href={`/players/${awardPlayer.id}`} className="flex items-center gap-1.5 font-medium hover:text-[var(--accent)]">
+                        {awardPlayer.photo && awardPlayer.photo !== "/placeholder-player.svg"
+                          ? <img src={awardPlayer.photo} alt="" className="h-5 w-5 rounded-full object-cover" />
+                          : <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold">{awardPlayer.name.charAt(0)}</span>}
+                        <span className="truncate">{awardPlayer.name}</span>
+                      </Link>
+                    ) : awardTeam ? (
+                      <span className="flex items-center gap-1.5 font-medium">
+                        {awardTeam.logo && <img src={awardTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                        <span className="truncate">{awardTeam.name}</span>
+                      </span>
+                    ) : <span className="text-sm text-[var(--muted-foreground)]">—</span>}
+                    {a.note && <p className="truncate text-[11px] text-[var(--muted-foreground)]">{a.note}</p>}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </section>
       )}

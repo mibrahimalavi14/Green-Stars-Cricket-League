@@ -40,13 +40,23 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
   const fastest20: PlayerRecord[] = []
   const fastest30: PlayerRecord[] = []
   const fastest50: PlayerRecord[] = []
+  const fastestTeam50: TeamRecord[] = []
   const mostSixesInnings: PlayerRecord[] = []
   const mostFoursInnings: PlayerRecord[] = []
+  const mostRunsMatch: PlayerRecord[] = []
+  const bestBowling: PlayerRecord[] = []
   const highestPartnerships: PlayerRecord[] = []
   const potmMap: Record<string, { count: number; name: string; teamName: string }> = {}
   const catchMap: Record<string, { count: number; name: string; teamName: string }> = {}
   const runOutMap: Record<string, { count: number; name: string; teamName: string }> = {}
   const stumpingMap: Record<string, { count: number; name: string; teamName: string }> = {}
+  const seasonSixesMap: Record<string, { count: number; name: string; teamName: string }> = {}
+
+  const teamNameById = new Map<string, string>()
+  for (const m of matches) {
+    teamNameById.set(m.team1Id, m.team1.name)
+    teamNameById.set(m.team2Id, m.team2.name)
+  }
 
   for (const m of matches) {
     const ml = makeMatchLabel(m)
@@ -101,6 +111,22 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
           date: m.date,
         })
       }
+
+      let cumRuns = 0
+      let legalCount = 0
+      let fiftyAtBalls: number | null = null
+      for (const b of ballsData) {
+        cumRuns += b.runs + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0) + b.byes + b.legByes
+        if (!b.isWide && !b.isNoBall) legalCount++
+        if (fiftyAtBalls === null && cumRuns >= 50 && legalCount > 0) fiftyAtBalls = legalCount
+      }
+      if (fiftyAtBalls !== null && cumRuns >= 50) {
+        fastestTeam50.push({
+          type: "fastest_team_50", value: fiftyAtBalls,
+          teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml,
+          details: `Reached 50 in ${fiftyAtBalls} balls (finished ${inn.runs}/${inn.wickets})`, date: m.date,
+        })
+      }
     }
 
     for (const p of m.performances) {
@@ -110,6 +136,9 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
       if (p.battingRuns >= 50 && p.ballsFaced > 0) fastest50.push({ type: "fastest_50", value: p.ballsFaced, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} off ${p.ballsFaced} balls`, date: m.date })
       if (p.sixes > 0) mostSixesInnings.push({ type: "most_sixes_innings", value: p.sixes, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.sixes} sixes`, date: m.date })
       if (p.fours > 0) mostFoursInnings.push({ type: "most_fours_innings", value: p.fours, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.fours} fours`, date: m.date })
+      if (p.battingRuns > 0) mostRunsMatch.push({ type: "most_runs_match", value: p.battingRuns, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} runs${p.ballsFaced > 0 ? ` off ${p.ballsFaced} balls` : ""}`, date: m.date })
+      if (p.bowlingWickets > 0) bestBowling.push({ type: "best_bowling", value: p.bowlingWickets, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.bowlingWickets}/${p.bowlingRuns}`, date: m.date })
+      if (p.sixes > 0) { if (!seasonSixesMap[p.playerId]) seasonSixesMap[p.playerId] = { count: 0, name: p.player.name, teamName: tmName }; seasonSixesMap[p.playerId].count += p.sixes }
       if (p.catches > 0) { if (!catchMap[p.playerId]) catchMap[p.playerId] = { count: 0, name: p.player.name, teamName: tmName }; catchMap[p.playerId].count += p.catches }
       if (p.runOuts > 0) { if (!runOutMap[p.playerId]) runOutMap[p.playerId] = { count: 0, name: p.player.name, teamName: tmName }; runOutMap[p.playerId].count += p.runOuts }
       if (p.stumpings > 0) { if (!stumpingMap[p.playerId]) stumpingMap[p.playerId] = { count: 0, name: p.player.name, teamName: tmName }; stumpingMap[p.playerId].count += p.stumpings }
@@ -122,6 +151,38 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
         if (!potmMap[m.manOfMatch]) potmMap[m.manOfMatch] = { count: 0, name: motmPerf.player.name, teamName: tmName }
         potmMap[m.manOfMatch].count++
       }
+    }
+  }
+
+  const teamResults: Record<string, (boolean | null)[]> = {}
+  for (const m of matches) {
+    for (const tid of [m.team1Id, m.team2Id]) {
+      if (!teamResults[tid]) teamResults[tid] = []
+      if (m.status !== "completed") continue
+      const noResult = (m.result || "").toLowerCase().includes("no result")
+      if (m.winnerTeamId === tid) teamResults[tid].push(true)
+      else if (noResult) teamResults[tid].push(null)
+      else if (m.winnerTeamId) teamResults[tid].push(false)
+      else teamResults[tid].push(null)
+    }
+  }
+
+  const consecutiveStreaks: TeamRecord[] = []
+  const streakLabels: Record<string, { label: string; win: boolean }> = {
+    most_consecutive_wins: { label: "Most Consecutive Wins", win: true },
+    most_consecutive_losses: { label: "Most Consecutive Losses", win: false },
+  }
+  for (const [tid, results] of Object.entries(teamResults)) {
+    const teamName = teamNameById.get(tid) || tid
+    for (const [type, meta] of Object.entries(streakLabels)) {
+      let best = 0
+      let run = 0
+      for (const r of results) {
+        if (r === null) { run = 0; continue }
+        run = r === meta.win ? run + 1 : 0
+        if (run > best) best = run
+      }
+      if (best > 1) consecutiveStreaks.push({ type, value: best, teamName, teamId: tid, details: `${best} in a row` })
     }
   }
 
@@ -152,12 +213,15 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
     ...teamRecordGroups["biggest_win_wickets"]?.sort((a, b) => b.value - a.value).slice(0, 5) || [],
     ...teamRecordGroups["highest_successful_chase"]?.sort((a, b) => b.value - a.value).slice(0, 5) || [],
     ...teamRecordGroups["lowest_successful_defence"]?.sort((a, b) => b.value - a.value).slice(0, 5) || [],
+    ...fastestTeam50.sort((a, b) => a.value - b.value).slice(0, 5),
+    ...consecutiveStreaks.filter(r => r.type === "most_consecutive_wins").sort((a, b) => b.value - a.value).slice(0, 5),
+    ...consecutiveStreaks.filter(r => r.type === "most_consecutive_losses").sort((a, b) => b.value - a.value).slice(0, 5),
   ]
 
   const sortedPlayerRecords: PlayerRecord[] = [
     ...topN(fastest20), ...topN(fastest30), ...topN(fastest50),
-    ...topN(mostSixesInnings), ...topN(mostFoursInnings), ...topN(highestPartnerships, 5),
-    ...mapToRecords(potmMap, "most_potm"), ...mapToRecords(catchMap, "most_catches"),
+    ...topN(mostSixesInnings), ...topN(mostFoursInnings), ...topN(mostRunsMatch), ...topN(bestBowling), ...topN(highestPartnerships, 5),
+    ...mapToRecords(seasonSixesMap, "most_sixes_season"), ...mapToRecords(potmMap, "most_potm"), ...mapToRecords(catchMap, "most_catches"),
     ...mapToRecords(runOutMap, "most_run_outs"), ...mapToRecords(stumpingMap, "most_stumpings"),
   ]
 

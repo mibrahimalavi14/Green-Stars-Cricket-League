@@ -65,6 +65,11 @@ model Season {
   teams             Team[]
   matches           Match[]
   snapshots         SeasonSnapshot[]
+  transfers         PlayerTransfer[]
+  captaincies       TeamCaptaincy[]
+  penalties         LeaguePenalty[]
+  awards            SeasonAward[]
+  honors            TeamHonor[]
 
   @@unique([name, year])
 }
@@ -83,6 +88,9 @@ model Team {
   players     Player[]
   matches1    Match[]  @relation("Team1Matches")
   matches2    Match[]  @relation("Team2Matches")
+  captaincies TeamCaptaincy[]
+  penalties   LeaguePenalty[]
+  honors      TeamHonor[]
   createdAt   DateTime @default(now())
 }
 
@@ -138,6 +146,7 @@ model Player {
   performances PlayerMatch[]
   squadMembers SquadMember[]
   potmVotes     PotmVote[]
+  transfers     PlayerTransfer[]
 
   createdAt DateTime @default(now())
 
@@ -180,6 +189,8 @@ model Match {
   matchStartTime String   @default("")
   matchEndTime   String   @default("")
   delayReason    String   @default("")
+  abandonReason   String   @default("")
+  abandonDescription String @default("")
   isSquadLocked  Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
@@ -556,4 +567,80 @@ model MatchNotes {
 
   @@unique([matchId])
   @@index([matchId])
+}
+
+model PlayerTransfer {
+  id           String   @id @default(cuid())
+  playerId     String
+  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  seasonId     String
+  season       Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  fromTeamId   String   @default("")
+  toTeamId     String
+  transferDate DateTime @default(now())
+  reason       String   @default("")
+  createdAt    DateTime @default(now())
+
+  @@index([playerId])
+  @@index([seasonId])
+  @@index([toTeamId])
+}
+
+model TeamCaptaincy {
+  id            String   @id @default(cuid())
+  seasonId      String
+  season        Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamId        String
+  team          Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  captainId     String
+  viceCaptainId String   @default("")
+  createdAt     DateTime @default(now())
+
+  @@unique([seasonId, teamId])
+  @@index([teamId])
+}
+
+model LeaguePenalty {
+  id          String   @id @default(cuid())
+  seasonId    String
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  matchId     String   @default("")
+  type        String   @default("fine")
+  points      Int      @default(0)
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([seasonId])
+  @@index([teamId])
+}
+
+model SeasonAward {
+  id        String   @id @default(cuid())
+  seasonId  String
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  category  String
+  playerId  String   @default("")
+  teamId    String   @default("")
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([seasonId, category])
+  @@index([seasonId])
+}
+
+model TeamHonor {
+  id        String   @id @default(cuid())
+  seasonId  String
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  title     String
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([seasonId, teamId, title])
+  @@index([teamId])
 }

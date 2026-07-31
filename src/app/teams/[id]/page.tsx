@@ -18,6 +18,27 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
 
   if (!team) notFound()
 
+  const playerNameMap = new Map(team.players.map(p => [p.id, p]))
+
+  const [captaincies, honors] = await Promise.all([
+    prisma.teamCaptaincy.findMany({
+      where: { teamId: team.id },
+      include: {
+        season: { select: { id: true, name: true, year: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.teamHonor.findMany({
+      where: { teamId: team.id },
+      include: { season: { select: { id: true, name: true, year: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+  ])
+
+  const latest = captaincies[captaincies.length - 1]
+  const captainId = latest?.captainId
+  const viceCaptainId = latest?.viceCaptainId || ""
+
   const allMatches = await prisma.match.findMany({
     where: {
       seasonId: team.seasonId,
@@ -48,7 +69,13 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
         <div className="min-w-0">
           <h1 className="text-3xl font-bold truncate">{team.name}</h1>
           <p className="text-[var(--muted-foreground)] truncate">{team.players.length} Players &middot; {allMatches.length} Matches &middot; {won} Wins</p>
-          {team.captainName && <p className="text-xs text-amber-600 dark:text-amber-400">Captain: {team.captainName}</p>}
+          {latest && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Captain: {playerNameMap.get(latest.captainId)?.name || "—"}
+              {latest.viceCaptainId && <span className="text-[var(--muted-foreground)]"> &middot; VC: {playerNameMap.get(latest.viceCaptainId)?.name}</span>}
+            </p>
+          )}
+          {!latest && team.captainName && <p className="text-xs text-amber-600 dark:text-amber-400">Captain: {team.captainName}</p>}
         </div>
       </div>
 
@@ -115,7 +142,10 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1">
                     <p className="font-medium truncate">{player.name}</p>
-                    {(player as any).isCaptain && <Crown className="h-3 w-3 shrink-0 text-amber-500" />}
+                    {player.id === captainId && <Crown className="h-3 w-3 shrink-0 text-amber-500" />}
+                    {player.id === viceCaptainId && <Crown className="h-3 w-3 shrink-0 text-slate-400" />}
+                    {(player as any).isCaptain && !captaincies.length && <Crown className="h-3 w-3 shrink-0 text-amber-500" />}
+                    <span className="text-[9px] font-semibold text-[var(--muted-foreground)]">{player.id === captainId ? "C" : player.id === viceCaptainId ? "VC" : ""}</span>
                   </div>
                   <p className="text-xs text-[var(--muted-foreground)]">{player.role}</p>
                 </div>
@@ -128,6 +158,46 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
           </div>
         )}
       </div>
+
+      {captaincies.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold">Leadership History</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {captaincies.map(c => (
+              <div key={c.id} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+                <p className="mb-2 text-xs font-semibold text-[var(--muted-foreground)]">{c.season?.name}</p>
+                <div className="space-y-1 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <span className="font-medium">{playerNameMap.get(c.captainId)?.name || "Unknown"}</span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">C</span>
+                  </div>
+                  {c.viceCaptainId && playerNameMap.get(c.viceCaptainId) && (
+                    <div className="flex items-center gap-2">
+                      <Crown className="h-4 w-4 text-slate-400" />
+                      <span>{playerNameMap.get(c.viceCaptainId)?.name}</span>
+                      <span className="text-[10px] text-[var(--muted-foreground)]">VC</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {honors.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold">Honors</h2>
+          <div className="flex flex-wrap gap-2">
+            {honors.map(h => (
+              <span key={h.id} className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                <Trophy className="h-3.5 w-3.5" /> {h.title} <span className="text-[var(--muted-foreground)]">· {h.season?.name}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <details className="group rounded-xl border border-[var(--border)] bg-[var(--card)]" open>
         <summary className="flex cursor-pointer items-center justify-between p-4 text-lg font-semibold hover:bg-[var(--muted)]/50">

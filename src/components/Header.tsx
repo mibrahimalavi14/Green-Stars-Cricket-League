@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -42,6 +42,13 @@ export function Header() {
         { href: "/admin/predictions", label: "Predictions", icon: Trophy },
         { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
       ],
+      league: [
+        { href: "/admin/transfers", label: "Transfers", icon: ArrowLeftRight },
+        { href: "/admin/captaincy", label: "Captaincy", icon: Crown },
+        { href: "/admin/honors", label: "Team Honors", icon: Trophy },
+        { href: "/admin/penalties", label: "Penalties", icon: Shield },
+        { href: "/admin/awards", label: "Season Awards", icon: Award },
+      ],
       system: [
         { href: "/admin/notifications", label: "Notifications", icon: Bell },
         { href: "/admin/contact", label: "Messages", icon: MessageSquare },
@@ -66,6 +73,9 @@ export function Header() {
                 <div className="my-1 border-t border-[var(--border)]" />
                 <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Manage</p>
                 {adminLinks.manage.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
+                <div className="my-1 border-t border-[var(--border)]" />
+                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">League</p>
+                {adminLinks.league.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
                 <div className="my-1 border-t border-[var(--border)]" />
                 <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">System</p>
                 {adminLinks.system.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
@@ -92,6 +102,9 @@ export function Header() {
               <div className="border-t border-[var(--border)]" />
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Manage</p>
               {adminLinks.manage.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+              <div className="border-t border-[var(--border)]" />
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">League</p>
+              {adminLinks.league.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
               <div className="border-t border-[var(--border)]" />
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">System</p>
               {adminLinks.system.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}

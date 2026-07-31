@@ -14,12 +14,24 @@ interface Match {
   season: { name: string }
 }
 
+const ABANDON_REASONS = [
+  { value: "rain", label: "Rain" },
+  { value: "bad_light", label: "Bad Light" },
+  { value: "ground_issue", label: "Ground Issue" },
+  { value: "walkover", label: "Walkover" },
+  { value: "technical_issue", label: "Technical Issue" },
+]
+
 export function AdminMatchesList({ matches }: { matches: Match[] }) {
   const router = useRouter()
   const [deleting, setDeleting] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<Match>>({})
   const [saving, setSaving] = useState(false)
+  const [abandoningId, setAbandoningId] = useState<string | null>(null)
+  const [abandonReason, setAbandonReason] = useState("rain")
+  const [abandonDesc, setAbandonDesc] = useState("")
+  const [abandoning, setAbandoning] = useState(false)
 
   async function updateStatus(id: string, status: string) {
     await fetch("/api/matches", {
@@ -38,6 +50,19 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       body: JSON.stringify({ id }),
     })
     setDeleting(null)
+    router.refresh()
+  }
+
+  async function abandonMatch(id: string) {
+    setAbandoning(true)
+    await fetch("/api/matches/abandon", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId: id, reason: abandonReason, description: abandonDesc }),
+    })
+    setAbandoning(false)
+    setAbandoningId(null)
+    setAbandonDesc("")
     router.refresh()
   }
 
@@ -128,6 +153,12 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                   Scorecard
                 </Link>
               )}
+              {m.status !== "completed" && (
+                <button onClick={() => { setAbandoningId(m.id); setAbandonReason("rain"); setAbandonDesc("") }}
+                  className="rounded bg-orange-600 px-2 py-1 text-xs text-white whitespace-nowrap hover:bg-orange-700">
+                  Abandon
+                </button>
+              )}
               <button onClick={() => editingId === m.id ? setEditingId(null) : openEdit(m)}
                 className="rounded bg-[var(--muted)] px-2 py-1 text-xs text-[var(--muted-foreground)] whitespace-nowrap hover:bg-[var(--muted-foreground)]/20">
                 {editingId === m.id ? "Close" : "Officials"}
@@ -208,6 +239,32 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
         </div>
       )})}
       {matches.length === 0 && <p className="text-center text-[var(--muted-foreground)] py-8">No matches yet.</p>}
+
+      {abandoningId && (() => {
+        const m = matches.find(x => x.id === abandoningId)
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !abandoning && setAbandoningId(null)}>
+            <div className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <h3 className="mb-1 text-lg font-bold">Abandon Match</h3>
+              {m && <p className="mb-4 text-sm text-[var(--muted-foreground)]">{m.team1.shortName} vs {m.team2.shortName} — result will be No Result (1 point each)</p>}
+              <label className="mb-1 block text-xs text-[var(--muted-foreground)]">Reason</label>
+              <select value={abandonReason} onChange={e => setAbandonReason(e.target.value)} className="mb-3 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
+                {ABANDON_REASONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+              <label className="mb-1 block text-xs text-[var(--muted-foreground)]">Details (optional)</label>
+              <textarea value={abandonDesc} onChange={e => setAbandonDesc(e.target.value)} rows={2} placeholder="e.g. Heavy rain after 2.3 overs"
+                className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm" />
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setAbandoningId(null)} disabled={abandoning} className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm">Cancel</button>
+                <button onClick={() => abandonMatch(abandoningId)} disabled={abandoning}
+                  className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                  {abandoning ? "Abandoning..." : "Confirm Abandon"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

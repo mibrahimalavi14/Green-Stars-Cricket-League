@@ -13,7 +13,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
   })
   if (!player) notFound()
 
-  const [performances, seasons] = await Promise.all([
+  const [performances, seasons, transfers] = await Promise.all([
     prisma.playerMatch.findMany({
       where: { playerId: player.id },
       include: {
@@ -22,7 +22,25 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
       orderBy: { match: { date: "desc" } },
     }),
     prisma.season.findMany({ orderBy: { year: "desc" } }),
+    prisma.playerTransfer.findMany({
+      where: { playerId: player.id },
+      include: { season: { select: { id: true, name: true, year: true } } },
+      orderBy: [{ transferDate: "desc" }, { createdAt: "desc" }],
+    }),
   ])
+
+  const transferTeamIds = new Set<string>()
+  for (const t of transfers) {
+    if (t.fromTeamId) transferTeamIds.add(t.fromTeamId)
+    transferTeamIds.add(t.toTeamId)
+  }
+  const transferTeams = await prisma.team.findMany({ where: { id: { in: [...transferTeamIds] } }, select: { id: true, name: true, shortName: true, logo: true, color: true } })
+  const transferTeamMap = new Map(transferTeams.map(t => [t.id, t]))
+  const transfersWithTeams = transfers.map(t => ({
+    ...t,
+    fromTeam: t.fromTeamId ? transferTeamMap.get(t.fromTeamId) || null : null,
+    toTeam: transferTeamMap.get(t.toTeamId) || null,
+  }))
 
   const seasonStats = seasons.map(s => {
     const p = performances.filter(x => x.match.seasonId === s.id)
@@ -55,6 +73,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
       performances={JSON.parse(JSON.stringify(performances))}
       seasonStats={JSON.parse(JSON.stringify(seasonStats))}
       activePerfs={JSON.parse(JSON.stringify(activePerfs))}
+      transfers={JSON.parse(JSON.stringify(transfersWithTeams))}
     />
   )
 }

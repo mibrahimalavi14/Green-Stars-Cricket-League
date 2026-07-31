@@ -1,0 +1,125 @@
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import { Trophy, Trash2, Loader2 } from "lucide-react"
+
+const TITLES = ["Championship", "Runner-up", "Fair Play", "Best Fielding Team", "Most Improved Team"]
+
+export default function AdminHonorsPage() {
+  const [seasons, setSeasons] = useState<any[]>([])
+  const [teams, setTeams] = useState<any[]>([])
+  const [honors, setHonors] = useState<any[]>([])
+  const [form, setForm] = useState({ seasonId: "", teamId: "", title: "", note: "" })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/seasons").then(r => r.json()),
+      fetch("/api/teams").then(r => r.json()),
+    ]).then(([s, t]) => {
+      setSeasons(Array.isArray(s) ? s : [])
+      setTeams(Array.isArray(t) ? t : [])
+      setLoading(false)
+    })
+  }, [])
+
+  const loadHonors = useCallback(async () => {
+    const data = await fetch("/api/honors").then(r => r.json())
+    setHonors(Array.isArray(data) ? data : [])
+  }, [])
+
+  useEffect(() => { loadHonors() }, [loadHonors])
+
+  async function submit() {
+    if (!form.seasonId || !form.teamId || !form.title) return
+    setSaving(true)
+    await fetch("/api/honors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    })
+    setSaving(false)
+    setForm(f => ({ ...f, teamId: "", title: "", note: "" }))
+    await loadHonors()
+  }
+
+  async function remove(id: string) {
+    await fetch(`/api/honors?id=${id}`, { method: "DELETE" })
+    await loadHonors()
+  }
+
+  const inputCls = "w-full rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+  const labelCls = "mb-1 block text-xs text-[var(--muted-foreground)]"
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mb-8 flex items-center gap-3">
+        <Trophy className="h-6 w-6 text-amber-500" />
+        <div>
+          <h1 className="text-3xl font-bold">Team Honors</h1>
+          <p className="text-[var(--muted-foreground)]">Championships, runner-ups and achievements — shown on team pages</p>
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+        <h2 className="mb-3 font-semibold">Add Honor</h2>
+        <div className="grid gap-3 md:grid-cols-4">
+          <div>
+            <label className={labelCls}>Season</label>
+            <select value={form.seasonId} onChange={e => setForm(f => ({ ...f, seasonId: e.target.value }))} className={inputCls}>
+              <option value="">Select season...</option>
+              {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Team</label>
+            <select value={form.teamId} onChange={e => setForm(f => ({ ...f, teamId: e.target.value }))} className={inputCls}>
+              <option value="">Select team...</option>
+              {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Title</label>
+            <select value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls}>
+              <option value="">Select title...</option>
+              {TITLES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Note (optional)</label>
+            <input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. Defeated X in final" className={inputCls} />
+          </div>
+        </div>
+        <button onClick={submit} disabled={saving || !form.seasonId || !form.teamId || !form.title}
+          className="mt-3 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+          {saving ? "Saving..." : "Add Honor"}
+        </button>
+      </div>
+
+      <h2 className="mb-4 text-lg font-semibold">All Honors</h2>
+      <div className="rounded-xl border border-[var(--border)]">
+        {honors.length === 0 ? (
+          <div className="p-8 text-center text-[var(--muted-foreground)]">No honors yet</div>
+        ) : (
+          <div className="divide-y divide-[var(--border)]">
+            {honors.map(h => (
+              <div key={h.id} className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                  <div>
+                    <p className="text-sm font-medium">{h.team?.name} — <span className="text-amber-600 dark:text-amber-400">{h.title}</span></p>
+                    <p className="text-xs text-[var(--muted-foreground)]">{h.season?.name}{h.note ? ` · ${h.note}` : ""}</p>
+                  </div>
+                </div>
+                <button onClick={() => remove(h.id)} className="rounded-lg p-2 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -9,6 +9,7 @@ export default function AdminSquadPage() {
   const [members, setMembers] = useState<any[]>([])
   const [selectedMatch, setSelectedMatch] = useState("")
   const [selectedPlayer, setSelectedPlayer] = useState("")
+  const [selectedRole, setSelectedRole] = useState("playing")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,12 +35,25 @@ export default function AdminSquadPage() {
 
   async function addMember() {
     if (!selectedMatch || !selectedPlayer) return
+    const player = players.find(p => p.id === selectedPlayer)
     await fetch("/api/squad", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ matchId: selectedMatch, playerId: selectedPlayer, teamId: "" }),
+      body: JSON.stringify({ matchId: selectedMatch, playerId: selectedPlayer, teamId: player?.teamId || "", role: selectedRole }),
     })
     setSelectedPlayer("")
+    setSelectedRole("playing")
+    const res = await fetch(`/api/squad?matchId=${selectedMatch}`)
+    setMembers(await res.json())
+  }
+
+  async function updateRole(id: string, role: string) {
+    const member = members.find(m => m.id === id)
+    await fetch("/api/squad", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId: selectedMatch, playerId: member?.playerId, teamId: member?.teamId || "", role }),
+    })
     const res = await fetch(`/api/squad?matchId=${selectedMatch}`)
     setMembers(await res.json())
   }
@@ -70,12 +84,17 @@ export default function AdminSquadPage() {
 
       {selectedMatch && (
         <>
-          <div className="mb-6 flex gap-3">
+          <div className="mb-6 flex flex-wrap gap-3">
             <select value={selectedPlayer} onChange={e => setSelectedPlayer(e.target.value)} className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm">
               <option value="">Add a player...</option>
               {players.filter((p: any) => !members.find(m => m.playerId === p.id)).map((p: any) => (
                 <option key={p.id} value={p.id}>{p.name} ({p.team?.shortName || p.role})</option>
               ))}
+            </select>
+            <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
+              <option value="playing">Playing XI</option>
+              <option value="substitute">Substitute</option>
+              <option value="reserve">Reserve</option>
             </select>
             <button onClick={addMember} disabled={!selectedPlayer} className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)] disabled:opacity-50">
               <Plus className="h-4 w-4" /> Add Player
@@ -103,7 +122,18 @@ export default function AdminSquadPage() {
                         <p className="text-xs text-[var(--muted-foreground)]">{m.player?.role || ""}</p>
                       </div>
                     </div>
-                    <button onClick={() => removeMember(m.id)} className="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded px-2 py-0.5 text-[10px] font-semibold ${m.role === "playing" ? "bg-green-500/15 text-green-600" : m.role === "substitute" ? "bg-amber-500/15 text-amber-600" : "bg-gray-500/15 text-gray-500"}`}>
+                        {m.role || "playing"}
+                      </span>
+                      <select value={m.role || "playing"} onChange={e => updateRole(m.id, e.target.value)}
+                        className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
+                        <option value="playing">Playing XI</option>
+                        <option value="substitute">Substitute</option>
+                        <option value="reserve">Reserve</option>
+                      </select>
+                      <button onClick={() => removeMember(m.id)} className="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50"><Trash2 className="h-4 w-4" /></button>
+                    </div>
                   </div>
                 ))}
               </div>

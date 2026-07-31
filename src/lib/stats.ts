@@ -6,11 +6,14 @@ export function ballsToOvers(balls: number) {
 }
 
 export async function recalcPointsTable(seasonId: string) {
-  const teams = await prisma.team.findMany({ where: { seasonId } })
-  const matches = await prisma.match.findMany({
-    where: { seasonId, status: "completed" },
-    include: { innings: true, team1: true, team2: true },
-  })
+  const [teams, matches, penalties] = await Promise.all([
+    prisma.team.findMany({ where: { seasonId } }),
+    prisma.match.findMany({
+      where: { seasonId, status: "completed" },
+      include: { innings: true, team1: true, team2: true },
+    }),
+    prisma.leaguePenalty.findMany({ where: { seasonId } }),
+  ])
 
   const stats: Record<string, { played: number; won: number; lost: number; tied: number; nr: number; forRuns: number; forBalls: number; againstRuns: number; againstBalls: number }> = {}
 
@@ -26,7 +29,7 @@ export async function recalcPointsTable(seasonId: string) {
     if (result.includes("tied")) {
       if (stats[m.team1Id]) stats[m.team1Id].tied++
       if (stats[m.team2Id]) stats[m.team2Id].tied++
-    } else if (result === "no result" || result.includes("abandon")) {
+    } else if (result.includes("no result") || result.includes("abandon")) {
       if (stats[m.team1Id]) stats[m.team1Id].nr++
       if (stats[m.team2Id]) stats[m.team2Id].nr++
     } else if (m.winnerTeamId) {
@@ -66,6 +69,11 @@ export async function recalcPointsTable(seasonId: string) {
     }
   }
 
+  const penaltyByTeam: Record<string, number> = {}
+  for (const p of penalties) {
+    penaltyByTeam[p.teamId] = (penaltyByTeam[p.teamId] || 0) + p.points
+  }
+
   return teams.map(team => {
     const s = stats[team.id] || { played: 0, won: 0, lost: 0, tied: 0, nr: 0, forRuns: 0, forBalls: 0, againstRuns: 0, againstBalls: 0 }
     const forOvers = s.forBalls / 6
@@ -75,6 +83,8 @@ export async function recalcPointsTable(seasonId: string) {
       : forOvers > 0
         ? s.forRuns / forOvers
         : 0
+    const basePoints = s.won * MATCH_CONFIG.pointsWin + s.tied * MATCH_CONFIG.pointsTie + s.nr * MATCH_CONFIG.pointsNoResult
+    const pointsDeducted = penaltyByTeam[team.id] || 0
 
     return {
       id: team.id,
@@ -87,7 +97,8 @@ export async function recalcPointsTable(seasonId: string) {
       lost: s.lost,
       tied: s.tied,
       nr: s.nr,
-      points: s.won * MATCH_CONFIG.pointsWin + s.tied * MATCH_CONFIG.pointsTie + s.nr * MATCH_CONFIG.pointsNoResult,
+      points: Math.max(0, basePoints - pointsDeducted),
+      pointsDeducted,
       nrr,
       forRuns: s.forRuns,
       forBalls: s.forBalls,

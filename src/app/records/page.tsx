@@ -14,22 +14,28 @@ export default async function RecordsPage() {
 
   const season = await prisma.season.findFirst({ where: { isActive: true } })
 
-  const teamRecordGroups: { title: string; type: string; icon: string; unit: string }[] = [
+  const teamRecordGroups: { title: string; type: string; icon: string; unit: string; lowerBetter?: boolean }[] = [
     { title: "Highest Team Score", type: "highest_team_score", icon: "🏏", unit: "runs" },
-    { title: "Lowest Team Score", type: "lowest_team_score", icon: "📉", unit: "runs" },
+    { title: "Lowest Team Score", type: "lowest_team_score", icon: "📉", unit: "runs", lowerBetter: true },
     { title: "Highest Successful Chase", type: "highest_successful_chase", icon: "🎯", unit: "runs" },
-    { title: "Lowest Successful Defence", type: "lowest_successful_defence", icon: "🛡️", unit: "runs" },
+    { title: "Lowest Successful Defence", type: "lowest_successful_defence", icon: "🛡️", unit: "runs", lowerBetter: true },
     { title: "Biggest Win (by Runs)", type: "biggest_win_runs", icon: "🏆", unit: "runs" },
     { title: "Biggest Win (by Wickets)", type: "biggest_win_wickets", icon: "🏆", unit: "wickets" },
+    { title: "Fastest Team 50", type: "fastest_team_50", icon: "⚡", unit: "balls", lowerBetter: true },
+    { title: "Most Consecutive Wins", type: "most_consecutive_wins", icon: "🔥", unit: "wins" },
+    { title: "Most Consecutive Losses", type: "most_consecutive_losses", icon: "😬", unit: "losses" },
   ]
 
   const playerRecordGroups: { title: string; type: string; icon: string; unit: string; lowerBetter?: boolean }[] = [
     { title: "Fastest 20", type: "fastest_20", icon: "⚡", unit: "balls", lowerBetter: true },
     { title: "Fastest 30", type: "fastest_30", icon: "⚡", unit: "balls", lowerBetter: true },
     { title: "Fastest 50", type: "fastest_50", icon: "⚡", unit: "balls", lowerBetter: true },
+    { title: "Most Runs (Innings)", type: "most_runs_match", icon: "🏏", unit: "runs" },
     { title: "Most Sixes (Innings)", type: "most_sixes_innings", icon: "💥", unit: "sixes" },
     { title: "Most Fours (Innings)", type: "most_fours_innings", icon: "🏏", unit: "fours" },
+    { title: "Best Bowling (Innings)", type: "best_bowling", icon: "🎳", unit: "wickets" },
     { title: "Highest Partnership", type: "highest_partnership", icon: "🤝", unit: "runs" },
+    { title: "Most Sixes (Season)", type: "most_sixes_season", icon: "💥", unit: "sixes" },
     { title: "Most POTM Awards", type: "most_potm", icon: "⭐", unit: "awards" },
     { title: "Most Catches", type: "most_catches", icon: "🧤", unit: "catches" },
     { title: "Most Run Outs", type: "most_run_outs", icon: "🏃", unit: "run outs" },
@@ -47,7 +53,7 @@ export default async function RecordsPage() {
         <h2 className="mb-6 text-xl font-bold">Team Records</h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {teamRecordGroups.map(group => {
-            const records = teamRecords.filter(r => r.type === group.type).sort((a, b) => group.unit === "runs" ? b.value - a.value : b.value - a.value).slice(0, 5)
+            const records = teamRecords.filter(r => r.type === group.type).sort((a, b) => group.lowerBetter ? a.value - b.value : b.value - a.value).slice(0, 5)
             if (records.length === 0) return null
             return (
               <div key={group.type} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">

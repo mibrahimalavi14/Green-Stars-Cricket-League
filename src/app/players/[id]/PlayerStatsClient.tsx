@@ -8,7 +8,7 @@ import { Trophy, Zap, Target, Star, Medal, ArrowUp, CircleDot } from "lucide-rea
 type PerfMin = { battingRuns: number; ballsFaced: number; fours: number; sixes: number; isOut: boolean; wicketsLost: number; dismissalType: string; secondDismissalType: string; bowlingWickets: number; bowlingRuns: number; ballsBowled: number; catches: number; dismissedByBowlerId: string; dismissedByFielderId: string; secondDismissedByBowlerId: string; secondDismissedByFielderId: string; match: { id: string; team1: { logo: string; shortName: string }; team2: { logo: string; shortName: string }; seasonId: string; date: string } }
 type SeasonStat = { seasonId: string; seasonName: string; seasonYear: number; inns: number; runs: number; ballsFaced: number; wickets: number; ballsBowled: number; runsConceded: number; fours: number; sixes: number; dismissals: number; catches: number; stumpings: number; hs: number }
 
-export function PlayerStatsClient({ player, performances, seasonStats, activePerfs }: { player: any; performances: PerfMin[]; seasonStats: SeasonStat[]; activePerfs: PerfMin[] }) {
+export function PlayerStatsClient({ player, performances, seasonStats, activePerfs, transfers }: { player: any; performances: PerfMin[]; seasonStats: SeasonStat[]; activePerfs: PerfMin[]; transfers: any[] }) {
   const [view, setView] = useState<string>("all")
 
   const p = player
@@ -228,6 +228,35 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
                     <span className="text-[var(--muted-foreground)]">Catches: </span>
                     <span className="font-medium">{p.catches}</span>
                   </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {transfers.length > 0 && (
+        <div className="mt-8 border-t border-[var(--border)] pt-6">
+          <h2 className="mb-4 text-lg font-semibold">Transfer History</h2>
+          <div className="space-y-3">
+            {transfers.map(t => (
+              <div key={t.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+                <div className="flex items-center gap-2">
+                  {t.fromTeam ? (
+                    <span className="flex items-center gap-1.5 rounded-lg bg-[var(--muted)] px-2.5 py-1 text-sm font-medium">
+                      {t.fromTeam.logo && <img src={t.fromTeam.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                      {t.fromTeam.name}
+                    </span>
+                  ) : <span className="rounded-lg bg-[var(--muted)] px-2.5 py-1 text-sm text-[var(--muted-foreground)]">New entry</span>}
+                  <ArrowUp className="h-4 w-4 rotate-90 text-[var(--accent)]" />
+                  <span className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)]/10 px-2.5 py-1 text-sm font-semibold text-[var(--accent)]">
+                    {t.toTeam?.logo && <img src={t.toTeam.logo} alt="" className="h-4 w-4 rounded-full object-cover" />}
+                    {t.toTeam?.name || "Unknown"}
+                  </span>
+                </div>
+                <div className="text-xs text-[var(--muted-foreground)]">
+                  {t.season?.name} &middot; {new Date(t.transferDate).toLocaleDateString("en-GB")}
+                  {t.reason && <span className="ml-2 italic">{t.reason}</span>}
                 </div>
               </div>
             ))}
