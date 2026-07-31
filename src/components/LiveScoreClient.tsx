@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { RefreshCw } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { PartnershipCard } from "./PartnershipCard"
+import { MilestoneCelebration } from "./MilestoneCelebration"
 import { MATCH_CONFIG, formatOvers } from "@/lib/config"
 
 interface LiveMatch {
@@ -14,6 +15,7 @@ interface LiveMatch {
   team2Score: string
   status: string
   result: string
+  winnerTeamId: string | null
   venue: string
   tossWinner: string
   tossDecision: string
@@ -498,9 +500,11 @@ function BowlingScorecard({
 export function LiveScoreClient({
   liveMatch,
   upcomingMatches,
+  showRecentCompleted = false,
 }: {
   liveMatch: LiveMatch | null
   upcomingMatches: UpcomingMatch[]
+  showRecentCompleted?: boolean
 }) {
   const [match, setMatch] = useState<LiveMatch | null>(liveMatch)
   const [refreshing, setRefreshing] = useState(false)
@@ -508,20 +512,22 @@ export function LiveScoreClient({
   const timelineRef = useRef<HTMLDivElement>(null)
   const userScrolledUp = useRef(false)
   const abortRef = useRef<AbortController | null>(null)
+  const [celebration, setCelebration] = useState<{ type: "fifty" | "hundred"; playerName: string; runs: number } | null>(null)
+  const milestoneRef = useRef<{ inningsId: string; ballCount: number; strikerRuns: Record<string, number> } | null>(null)
 
   const refreshScore = useCallback(async () => {
     abortRef.current?.abort()
     const ctrl = new AbortController()
     abortRef.current = ctrl
     try {
-      const res = await fetch("/api/matches/live", { signal: ctrl.signal })
+      const res = await fetch(`/api/matches/live${showRecentCompleted ? "?recent=1" : ""}`, { signal: ctrl.signal })
       if (res.ok) {
         const data = await res.json()
         setMatch(data)
       }
     } catch {}
     setRefreshing(false)
-  }, [])
+  }, [showRecentCompleted])
 
   useEffect(() => {
     const id = setInterval(refreshScore, 5000)
@@ -537,6 +543,56 @@ export function LiveScoreClient({
       abortRef.current?.abort()
     }
   }, [refreshScore])
+
+  // Detect fifty/century milestones as new balls arrive
+  useEffect(() => {
+    if (!match) return
+    const currentInn = match.innings[match.innings.length - 1]
+    if (!currentInn) return
+    const balls = parseBallsData(currentInn.ballsData)
+    const battingSide = currentInn.teamId === match.team1.id ? match.team1Players : match.team2Players
+    const playerMap = new Map(battingSide.map((p) => [p.id, p.name]))
+
+    const computeStrikerRuns = (): Record<string, number> => {
+      const runs: Record<string, number> = {}
+      for (const p of battingSide) runs[p.id] = 0
+      for (const b of balls) {
+        if (b.striker && runs[b.striker] !== undefined) runs[b.striker] += b.runs || 0
+      }
+      return runs
+    }
+
+    const prev = milestoneRef.current
+    const isNewInnings = !prev || prev.inningsId !== currentInn.id
+
+    if (isNewInnings) {
+      milestoneRef.current = { inningsId: currentInn.id, ballCount: balls.length, strikerRuns: computeStrikerRuns() }
+      return
+    }
+
+    if (balls.length < prev.ballCount) {
+      milestoneRef.current = { inningsId: currentInn.id, ballCount: balls.length, strikerRuns: computeStrikerRuns() }
+      return
+    }
+
+    if (balls.length === prev.ballCount) return
+
+    const newBalls = balls.slice(prev.ballCount)
+    const strikerRuns = { ...prev.strikerRuns }
+    for (const b of newBalls) {
+      const sid = b.striker
+      if (!sid || strikerRuns[sid] === undefined) continue
+      const before = strikerRuns[sid]
+      strikerRuns[sid] = before + (b.runs || 0)
+      const after = strikerRuns[sid]
+      if (before < 100 && after >= 100) {
+        setCelebration({ type: "hundred", playerName: playerMap.get(sid) || "Batsman", runs: after })
+      } else if (before < 50 && after >= 50) {
+        setCelebration({ type: "fifty", playerName: playerMap.get(sid) || "Batsman", runs: after })
+      }
+    }
+    milestoneRef.current = { inningsId: currentInn.id, ballCount: balls.length, strikerRuns }
+  }, [match])
 
   useEffect(() => {
     if (!match) return
@@ -860,7 +916,7 @@ export function LiveScoreClient({
             Toss: {match.tossWinner === match.team1.id ? match.team1.name : match.team2.name} won & elected to {match.tossDecision} first
           </p>
         )}
-        {(() => {
+        {match.status !== "completed" && (() => {
           if (!inn1 || !inn2 || !currentInn || !currentBattingTeam) return null
           const target = inn1.runs + inn1.extras + 1
           const chasingTotal = currentInn.teamId === match.team1.id ? t1Total : t2Total
@@ -877,7 +933,7 @@ export function LiveScoreClient({
           )
         })()}
 
-        {currentInn && (
+        {match.status !== "completed" && currentInn && (
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
             <div className="rounded-lg bg-[var(--muted)] p-2">
               <p className="text-[10px] text-[var(--muted-foreground)]">Powerplay</p>
@@ -910,7 +966,7 @@ export function LiveScoreClient({
         )}
       </div>
 
-      {currentInn && (
+      {match.status !== "completed" && currentInn && (
         <div className="mt-4 rounded-xl border border-[var(--accent)]/30 bg-[var(--card)] p-4">
           <p className="mb-2 text-xs font-semibold text-[var(--accent)]">
             {currentBattingTeam?.shortName} Batting &middot; {currentBowlingTeam?.shortName} Bowling
@@ -953,7 +1009,7 @@ export function LiveScoreClient({
         </div>
       )}
 
-      {currentOverBalls.length > 0 && (
+      {match.status !== "completed" && currentOverBalls.length > 0 && (
         <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
           <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Current Over</h3>
           <div className="flex flex-wrap gap-2">
@@ -972,7 +1028,7 @@ export function LiveScoreClient({
         </div>
       )}
 
-      {last6Balls.length > 0 && (
+      {match.status !== "completed" && last6Balls.length > 0 && (
         <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
           <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Last 6 Balls</h3>
           <div className="flex gap-2">
@@ -991,7 +1047,7 @@ export function LiveScoreClient({
         </div>
       )}
 
-      {currentInn && (
+      {match.status !== "completed" && currentInn && (
         <div className="mt-4 grid grid-cols-3 gap-2">
           <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center">
             <p className="text-[10px] text-[var(--muted-foreground)]">4s</p>
@@ -1015,7 +1071,7 @@ export function LiveScoreClient({
         </div>
       )}
 
-      {currentInn && overScores.length > 1 && (
+      {match.status !== "completed" && currentInn && overScores.length > 1 && (
         <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
           <h3 className="mb-3 text-sm font-semibold text-[var(--muted-foreground)]">Over-by-Over</h3>
           <div className="flex gap-1.5">
@@ -1038,7 +1094,7 @@ export function LiveScoreClient({
         </div>
       )}
 
-      {inn1 && (
+      {inn1 && !match.inningsBreak && match.status !== "completed" && (
         <div className="mt-4">
           <BattingScorecard
             stats={inn1Stats.batting}
@@ -1064,7 +1120,7 @@ export function LiveScoreClient({
         </div>
       )}
 
-      {inn2 && (
+      {inn2 && match.status !== "completed" && (
         <div className="mt-4">
           <BattingScorecard
             stats={inn2Stats.batting}
@@ -1087,6 +1143,116 @@ export function LiveScoreClient({
             battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
             inning={inn2}
           />
+        </div>
+      )}
+
+      {/* Innings Break: special first-innings scorecard */}
+      {match.inningsBreak && match.status !== "completed" && inn1 && (
+        <div className="relative mt-6 overflow-hidden rounded-2xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 via-[var(--card)] to-[var(--card)] p-5">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-amber-500/5 blur-3xl" />
+          <p className="text-[10px] font-black tracking-[0.35em] text-amber-500">1ST INNINGS COMPLETE</p>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-lg font-bold text-white">
+              {(inn1.teamId === match.team1.id ? match.team1 : match.team2).name}{" "}
+              <span className="ml-2 font-mono text-amber-400">
+                {inn1.runs + inn1.extras}/{inn1.wickets} ({overs1} ov)
+              </span>
+            </h3>
+            <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400">Innings Break</span>
+          </div>
+          <div className="mt-4">
+            <BattingScorecard
+              stats={inn1Stats.batting}
+              players={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
+              battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
+              currentStrikerId={inn1Last?.striker}
+              currentNonStrikerId={inn1Last?.nonStriker}
+            />
+            <div className="mt-3">
+              <BowlingScorecard
+                stats={inn1Stats.bowling}
+                players={inn1.teamId === match.team1.id ? match.team2Players : match.team1Players}
+                bowlingTeam={inn1.teamId === match.team1.id ? match.team2 : match.team1}
+                currentBowlerId={inn1Last?.bowler}
+              />
+            </div>
+            <div className="mt-3">
+              <PartnershipCard
+                ballsData={inn1BallsParsed}
+                battingPlayers={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
+                battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
+                inning={inn1}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Match Complete: special dual scorecard */}
+      {match.status === "completed" && inn1 && inn2 && (
+        <div className="relative mt-6 overflow-hidden rounded-2xl border-2 border-green-500/50 bg-gradient-to-b from-green-500/10 via-[var(--card)] to-[var(--card)] p-5">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-green-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-green-500/5 blur-3xl" />
+          <div className="mb-4 text-center">
+            <p className="text-[10px] font-black tracking-[0.35em] text-green-500">MATCH COMPLETE</p>
+            <h3 className="mt-1 text-xl font-bold text-white">Full Scorecard</h3>
+            {match.result && <p className="mt-1 text-sm font-medium text-green-400">{match.result}</p>}
+          </div>
+          <div className="space-y-4">
+            <div className={`rounded-xl border-2 p-3 ${match.winnerTeamId === inn1.teamId ? "border-green-500/60 bg-green-500/5" : "border-[var(--border)]"}`}>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2 font-bold">
+                  {(inn1.teamId === match.team1.id ? match.team1.logo : match.team2.logo) && (
+                    <img src={(inn1.teamId === match.team1.id ? match.team1.logo : match.team2.logo) || ""} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" />
+                  )}
+                  <span className="truncate">{(inn1.teamId === match.team1.id ? match.team1 : match.team2).name}</span>
+                  {match.winnerTeamId === inn1.teamId && <span className="shrink-0">🏆</span>}
+                </div>
+                <span className="shrink-0 font-mono font-bold">
+                  {inn1.runs + inn1.extras}/{inn1.wickets} ({overs1} ov)
+                </span>
+              </div>
+              <BattingScorecard
+                stats={inn1Stats.batting}
+                players={inn1.teamId === match.team1.id ? match.team1Players : match.team2Players}
+                battingTeam={inn1.teamId === match.team1.id ? match.team1 : match.team2}
+              />
+              <div className="mt-3">
+                <BowlingScorecard
+                  stats={inn1Stats.bowling}
+                  players={inn1.teamId === match.team1.id ? match.team2Players : match.team1Players}
+                  bowlingTeam={inn1.teamId === match.team1.id ? match.team2 : match.team1}
+                />
+              </div>
+            </div>
+            <div className={`rounded-xl border-2 p-3 ${match.winnerTeamId === inn2.teamId ? "border-green-500/60 bg-green-500/5" : "border-[var(--border)]"}`}>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2 font-bold">
+                  {(inn2.teamId === match.team1.id ? match.team1.logo : match.team2.logo) && (
+                    <img src={(inn2.teamId === match.team1.id ? match.team1.logo : match.team2.logo) || ""} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" />
+                  )}
+                  <span className="truncate">{(inn2.teamId === match.team1.id ? match.team1 : match.team2).name}</span>
+                  {match.winnerTeamId === inn2.teamId && <span className="shrink-0">🏆</span>}
+                </div>
+                <span className="shrink-0 font-mono font-bold">
+                  {inn2.runs + inn2.extras}/{inn2.wickets} ({overs2} ov)
+                </span>
+              </div>
+              <BattingScorecard
+                stats={inn2Stats.batting}
+                players={inn2.teamId === match.team1.id ? match.team1Players : match.team2Players}
+                battingTeam={inn2.teamId === match.team1.id ? match.team1 : match.team2}
+              />
+              <div className="mt-3">
+                <BowlingScorecard
+                  stats={inn2Stats.bowling}
+                  players={inn2.teamId === match.team1.id ? match.team2Players : match.team1Players}
+                  bowlingTeam={inn2.teamId === match.team1.id ? match.team2 : match.team1}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1167,6 +1333,15 @@ export function LiveScoreClient({
           <p className="text-sm text-[var(--muted-foreground)]">No ball data yet.</p>
         )}
       </div>
+
+      {celebration && (
+        <MilestoneCelebration
+          type={celebration.type}
+          playerName={celebration.playerName}
+          runs={celebration.runs}
+          onClose={() => setCelebration(null)}
+        />
+      )}
     </div>
   )
 }
