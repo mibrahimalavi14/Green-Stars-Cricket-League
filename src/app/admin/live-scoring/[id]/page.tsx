@@ -617,6 +617,33 @@ export default function LiveScoringPage() {
     return Number((((activeInnings.runs + activeInnings.extras) / activeInnings.balls) * 6).toFixed(2))
   }, [activeInnings?.runs, activeInnings?.extras, activeInnings?.balls])
 
+  const winProbability = useMemo(() => {
+    if (!summary || !activeInnings || superOverMode || matchCompleted) return null
+    const inn1 = summary.innings[0]
+    if (!inn1) return null
+    if (inningsNum === 1) {
+      const ballsFaced = activeInnings.balls
+      const projected = ballsFaced > 0 ? Math.round(((activeInnings.runs + activeInnings.extras) / ballsFaced) * MATCH_CONFIG.totalBalls) : 0
+      const strength = Math.min(100, Math.max(0, 50 + (projected - 30) * 1.5))
+      return { team1: Math.round(strength), team2: Math.round(100 - strength) }
+    }
+    if (inningsNum === 2) {
+      const target = inn1.runs + inn1.extras + 1
+      const isTeam1Batting = activeInnings.teamId === summary.match.team1.id
+      const chasingTotal = activeInnings.runs + activeInnings.extras
+      const needed = target - chasingTotal
+      const ballsLeft = MATCH_CONFIG.totalBalls - activeInnings.balls
+      const wktsLeft = MATCH_CONFIG.wicketsPerInnings - activeInnings.wickets
+      if (ballsLeft <= 0 || wktsLeft <= 0) return null
+      const reqRate = needed / ballsLeft
+      const strength = Math.min(100, Math.max(0, 50 + (4 - reqRate) * 12 + (wktsLeft - 1) * 2))
+      return isTeam1Batting
+        ? { team1: Math.round(strength), team2: Math.round(100 - strength) }
+        : { team1: Math.round(100 - strength), team2: Math.round(strength) }
+    }
+    return null
+  }, [summary, activeInnings, inningsNum, superOverMode, matchCompleted])
+
   async function addBall(ball: BallEvent) {
     if (!battingTeamId || !strikerId || !bowlerId) {
       alert("Please select batting team, striker, and bowler")
@@ -2013,6 +2040,23 @@ export default function LiveScoringPage() {
                     <p className="text-xl font-bold tabular-nums">{rrr !== null ? rrr : "-"}</p>
                   </div>
                 </div>
+                {winProbability && (
+                  <div className="mt-3">
+                    <div className="mb-1 flex items-center justify-between text-[10px] font-semibold text-[var(--muted-foreground)]">
+                      <span>{summary.match.team1.shortName}</span>
+                      <span>EST. WIN PROB</span>
+                      <span>{summary.match.team2.shortName}</span>
+                    </div>
+                    <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                      <div className="bg-blue-500" style={{ width: `${winProbability.team1}%` }} />
+                      <div className="bg-red-500" style={{ width: `${winProbability.team2}%` }} />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-xs font-bold tabular-nums">
+                      <span className="text-blue-500">{winProbability.team1}%</span>
+                      <span className="text-red-500">{winProbability.team2}%</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
