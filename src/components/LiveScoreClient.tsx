@@ -5,6 +5,8 @@ import { RefreshCw } from "lucide-react"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { PartnershipCard } from "./PartnershipCard"
 import { MilestoneCelebration } from "./MilestoneCelebration"
+import { MatchTimeline } from "./MatchTimeline"
+import { generateMatchTimeline } from "@/lib/match-timeline"
 import { MATCH_CONFIG, formatOvers } from "@/lib/config"
 
 interface LiveMatch {
@@ -16,6 +18,7 @@ interface LiveMatch {
   status: string
   result: string
   winnerTeamId: string | null
+  manOfMatch: string
   venue: string
   tossWinner: string
   tossDecision: string
@@ -773,6 +776,24 @@ export function LiveScoreClient({
     return [...manualHighlights, ...autoHighlights]
   }, [inn1BallsParsed, inn2BallsParsed, match])
 
+  const liveTimelineEvents = useMemo(() => {
+    if (!match || !inn1) return []
+    const playerNames: Record<string, string> = {}
+    for (const p of [...match.team1Players, ...match.team2Players]) playerNames[p.id] = p.name
+    return generateMatchTimeline({
+      tossWinner: match.tossWinner || null,
+      tossDecision: match.tossDecision || null,
+      result: match.result || null,
+      manOfMatch: match.manOfMatch || null,
+      winnerTeamId: match.winnerTeamId,
+      team1: match.team1,
+      team2: match.team2,
+      innings: match.innings,
+      playerNames,
+      hasSuperOver: match.innings.length > 2,
+    })
+  }, [match, inn1])
+
   const recentOverElements = useMemo(() => {
     if (allBallsParsed.length === 0) return null
     const elements: React.ReactElement[] = []
@@ -1270,6 +1291,12 @@ export function LiveScoreClient({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {liveTimelineEvents.length > 0 && (
+        <div className="mt-4">
+          <MatchTimeline events={liveTimelineEvents} />
         </div>
       )}
 

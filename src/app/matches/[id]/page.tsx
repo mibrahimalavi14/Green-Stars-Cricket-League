@@ -8,6 +8,8 @@ import { ShareableScorecard } from "@/components/ShareableScorecard"
 import { Star, Trophy, Users } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import { calculatePartnerships, getHighestPartnership, type BallData, type Partnership } from "@/lib/partnerships"
+import { generateMatchTimeline } from "@/lib/match-timeline"
+import { MatchTimeline } from "@/components/MatchTimeline"
 import { OverByOver } from "@/components/OverByOver"
 import { WormChart } from "@/components/WormChart"
 
@@ -328,6 +330,24 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
   const secondBowlingPerf = team1BatFirst ? team1Performances : team2Performances
   const secondInning = team1BatFirst ? team2Inning : team1Inning
 
+  const playerNames: Record<string, string> = {}
+  for (const p of m.performances) {
+    if (!playerNames[p.playerId]) playerNames[p.playerId] = p.player.name
+  }
+
+  const timelineEvents = generateMatchTimeline({
+    tossWinner: m.tossWinner || null,
+    tossDecision: m.tossDecision || null,
+    result: m.result || null,
+    manOfMatch: m.manOfMatch || null,
+    winnerTeamId: m.winnerTeamId,
+    team1: { id: m.team1.id, name: m.team1.name, shortName: m.team1.shortName },
+    team2: { id: m.team2.id, name: m.team2.name, shortName: m.team2.shortName },
+    innings: m.innings,
+    playerNames,
+    hasSuperOver: m.superOvers.length > 0,
+  })
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <Link href={`/seasons/${m.seasonId}`} className="mb-4 inline-block text-sm text-[var(--accent)] hover:underline">
@@ -388,6 +408,12 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
       })()}
 
       <H2H team1Id={m.team1Id} team2Id={m.team2Id} matchId={m.id} />
+
+      {timelineEvents.length > 0 && (
+        <div className="mt-6">
+          <MatchTimeline events={timelineEvents} />
+        </div>
+      )}
 
       {m.status === "upcoming" && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
