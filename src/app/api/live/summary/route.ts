@@ -25,12 +25,12 @@ export async function GET(req: Request) {
 
   const team1Players = await prisma.player.findMany({
     where: { teamId: match.team1Id },
-    select: { id: true, name: true, role: true },
+    select: { id: true, name: true, role: true, jerseyNumber: true },
   })
 
   const team2Players = await prisma.player.findMany({
     where: { teamId: match.team2Id },
-    select: { id: true, name: true, role: true },
+    select: { id: true, name: true, role: true, jerseyNumber: true },
   })
 
   return NextResponse.json({

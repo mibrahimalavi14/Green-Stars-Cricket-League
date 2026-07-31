@@ -102,6 +102,8 @@ model Player {
   bowlingStyle  String  @default("Right-arm fast")
   photo         String  @default("/placeholder-player.svg")
   isCaptain     Boolean @default(false)
+  jerseyNumber  Int?
+  status        String  @default("available")
   teamId        String
   team          Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
@@ -189,8 +191,10 @@ model Match {
   matchStartTime String   @default("")
   matchEndTime   String   @default("")
   delayReason    String   @default("")
-  abandonReason   String   @default("")
+  abandonReason   String @default("")
   abandonDescription String @default("")
+  attendance     Int     @default(0)
+  dls            Boolean @default(false)
   isSquadLocked  Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt

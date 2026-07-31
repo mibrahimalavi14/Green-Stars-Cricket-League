@@ -82,6 +82,14 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
           )}
           <div>
             <h1 className="text-3xl font-bold">{p.name}</h1>
+            {p.jerseyNumber != null && <span className="ml-2 text-sm font-semibold text-[var(--muted-foreground)]">#{p.jerseyNumber}</span>}
+            {p.status && p.status !== "available" && (
+              <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                p.status === "injured" ? "bg-red-500/15 text-red-500"
+                : p.status === "suspended" ? "bg-orange-500/15 text-orange-500"
+                : "bg-slate-500/15 text-slate-400"
+              }`}>{p.status}</span>
+            )}
             <p className="text-lg text-[var(--muted-foreground)]">
               {p.role} &middot;
               {p.team?.logo && <img src={p.team.logo} alt="" className="mr-1 inline-block h-6 w-6 rounded-full object-cover" />}

@@ -52,7 +52,7 @@ export function SearchOverlay() {
             ref={inputRef}
             value={query}
             onChange={e => search(e.target.value)}
-            placeholder="Search players, teams..."
+            placeholder="Search players, teams, jersey #, match no..."
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--muted-foreground)]"
           />
           <button onClick={() => setOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--muted)] hover:bg-[var(--accent)]">
@@ -65,7 +65,7 @@ export function SearchOverlay() {
             <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">No results found</p>
           )}
           {!loading && !query && (
-            <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">Search players, teams, matches, news & seasons</p>
+            <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">Search players, teams, jersey #, match no, captain, umpire & POTM</p>
           )}
           {results.map((r, i) => {
             const iconMap: Record<string, string> = { player: "👤", team: "🏏", match: "⚔️", news: "📰", season: "🏆" }

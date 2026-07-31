@@ -31,6 +31,8 @@ export async function POST(req: Request) {
       bowlingStyle: data.bowlingStyle || "",
       teamId: data.teamId,
       photo: data.image || "/placeholder-player.svg",
+      jerseyNumber: data.jerseyNumber ?? null,
+      status: data.status || "available",
     },
   })
 

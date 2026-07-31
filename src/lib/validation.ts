@@ -19,6 +19,8 @@ export const createMatchSchema = z.object({
   tossTime: z.string().optional(),
   matchStartTime: z.string().optional(),
   delayReason: z.string().max(500).optional(),
+  attendance: z.number().int().min(0).optional(),
+  dls: z.boolean().optional(),
 })
 
 export const updateMatchSchema = z.object({
@@ -52,6 +54,9 @@ export const updateMatchSchema = z.object({
   matchStartTime: z.string().optional(),
   matchEndTime: z.string().optional(),
   delayReason: z.string().max(500).optional(),
+  attendance: z.number().int().min(0).optional(),
+  dls: z.boolean().optional(),
+  override: z.boolean().optional(),
 })
 
 export const createTeamSchema = z.object({
@@ -72,6 +77,8 @@ export const createPlayerSchema = z.object({
   teamId: z.string().min(1),
   image: z.string().optional(),
   country: z.string().max(50).optional(),
+  jerseyNumber: z.number().int().min(0).max(999).nullable().optional(),
+  status: z.enum(["available", "injured", "suspended", "unavailable"]).optional(),
 })
 
 export const createSeasonSchema = z.object({

@@ -302,7 +302,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
     }),
     prisma.squadMember.findMany({
       where: { matchId: id },
-      include: { player: { select: { name: true, role: true, photo: true } } },
+      include: { player: { select: { name: true, role: true, photo: true, jerseyNumber: true, status: true } } },
     }),
   ])
   if (!match) notFound()
@@ -477,6 +477,11 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           {squad.length > 0 && (
             <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
               <h3 className="mb-3 text-sm font-semibold">Playing XI</h3>
+              {squad.some(s => s.player.status && s.player.status !== "available") && (
+                <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-500">
+                  Warning: Playing XI mein unavailable players hain (injured/suspended) — check karein.
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
                 {squad.map(s => (
                   <div key={s.id} className="flex items-center gap-2 min-w-0 overflow-hidden">
@@ -484,7 +489,15 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
                       ? <img src={s.player.photo} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
                       : <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-[10px] font-bold">{s.player.name.charAt(0)}</div>}
                     <span className="truncate">{s.player.name}</span>
+                    {s.player.jerseyNumber != null && <span className="shrink-0 text-[10px] text-[var(--muted-foreground)]">#{s.player.jerseyNumber}</span>}
                     <span className="text-[10px] text-[var(--muted-foreground)] shrink-0">{s.player.role}</span>
+                    {s.player.status !== "available" && (
+                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                        s.player.status === "injured" ? "bg-red-500/15 text-red-500"
+                        : s.player.status === "suspended" ? "bg-orange-500/15 text-orange-500"
+                        : "bg-slate-500/15 text-slate-400"
+                      }`}>{s.player.status}</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -545,7 +558,21 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
           })()}
 
           {m.result && (
-            <p className="mb-6 text-sm font-medium text-green-600 dark:text-green-400">{m.result}</p>
+            <p className="mb-2 text-sm font-medium text-green-600 dark:text-green-400">{m.result}</p>
+          )}
+          {m.dls && (
+            <p className="mb-2 inline-block rounded-full bg-sky-500/15 px-3 py-1 text-xs font-semibold text-sky-500">
+              Match decided by DLS
+            </p>
+          )}
+          {m.attendance > 0 && (
+            <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+              Attendance: <span className="font-semibold text-[var(--foreground)]">{m.attendance.toLocaleString()}</span> spectators
+              &middot; Crowd: {(() => {
+                const level = m.attendance >= 500 ? "🔴 Full House" : m.attendance >= 300 ? "🟠 High" : m.attendance >= 150 ? "🟡 Medium" : "🟢 Low"
+                return level
+              })()}
+            </p>
           )}
 
           {m.manOfMatch && (

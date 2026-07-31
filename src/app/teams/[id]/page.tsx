@@ -142,10 +142,18 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1">
                     <p className="font-medium truncate">{player.name}</p>
+                    {player.jerseyNumber != null && <span className="shrink-0 text-[10px] font-semibold text-[var(--muted-foreground)]">#{player.jerseyNumber}</span>}
                     {player.id === captainId && <Crown className="h-3 w-3 shrink-0 text-amber-500" />}
                     {player.id === viceCaptainId && <Crown className="h-3 w-3 shrink-0 text-slate-400" />}
                     {(player as any).isCaptain && !captaincies.length && <Crown className="h-3 w-3 shrink-0 text-amber-500" />}
                     <span className="text-[9px] font-semibold text-[var(--muted-foreground)]">{player.id === captainId ? "C" : player.id === viceCaptainId ? "VC" : ""}</span>
+                    {player.status !== "available" && (
+                      <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                        player.status === "injured" ? "bg-red-500/15 text-red-500"
+                        : player.status === "suspended" ? "bg-orange-500/15 text-orange-500"
+                        : "bg-slate-500/15 text-slate-400"
+                      }`}>{player.status}</span>
+                    )}
                   </div>
                   <p className="text-xs text-[var(--muted-foreground)]">{player.role}</p>
                 </div>

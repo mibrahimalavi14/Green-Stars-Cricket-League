@@ -88,7 +88,7 @@ export default function AdminSquadPage() {
             <select value={selectedPlayer} onChange={e => setSelectedPlayer(e.target.value)} className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm">
               <option value="">Add a player...</option>
               {players.filter((p: any) => !members.find(m => m.playerId === p.id)).map((p: any) => (
-                <option key={p.id} value={p.id}>{p.name} ({p.team?.shortName || p.role})</option>
+                <option key={p.id} value={p.id}>{p.name} ({p.team?.shortName || p.role}){p.status && p.status !== "available" ? ` - ${p.status}` : ""}</option>
               ))}
             </select>
             <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
@@ -105,6 +105,11 @@ export default function AdminSquadPage() {
             <div className="border-b border-[var(--border)] bg-[var(--muted)] px-4 py-3">
               <h3 className="font-semibold">Squad ({members.length} players)</h3>
             </div>
+            {members.some(m => m.role === "playing" && m.player?.status && m.player.status !== "available") && (
+              <div className="border-b border-red-500/30 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-500">
+                Warning: Playing XI mein unavailable player hai — match start karne se pehle check karein.
+              </div>
+            )}
             {members.length === 0 ? (
               <div className="p-8 text-center text-[var(--muted-foreground)]">No players added yet</div>
             ) : (
@@ -118,7 +123,17 @@ export default function AdminSquadPage() {
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--muted)]"><Users className="h-4 w-4" /></div>
                       )}
                       <div>
-                        <p className="text-sm font-medium">{m.player?.name || "Unknown"}</p>
+                        <p className="flex items-center gap-1 text-sm font-medium">
+                          {m.player?.jerseyNumber != null && <span className="text-xs text-[var(--muted-foreground)]">#{m.player.jerseyNumber}</span>}
+                          {m.player?.name || "Unknown"}
+                          {m.player?.status && m.player.status !== "available" && (
+                            <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                              m.player.status === "injured" ? "bg-red-500/15 text-red-500"
+                              : m.player.status === "suspended" ? "bg-orange-500/15 text-orange-500"
+                              : "bg-slate-500/15 text-slate-400"
+                            }`}>{m.player.status}</span>
+                          )}
+                        </p>
                         <p className="text-xs text-[var(--muted-foreground)]">{m.player?.role || ""}</p>
                       </div>
                     </div>

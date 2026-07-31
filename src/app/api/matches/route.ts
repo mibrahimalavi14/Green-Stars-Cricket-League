@@ -84,7 +84,17 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
 
-  const { id, ...data } = parsed.data
+  const { id, override, ...data } = parsed.data
+
+  if ((data.tossWinner !== undefined || data.tossDecision !== undefined) && !override) {
+    const ballsBowled = await prisma.ballEvent.count({ where: { matchId: id } })
+    if (ballsBowled > 0) {
+      return NextResponse.json(
+        { error: "Toss is locked once the match has started. Use the admin override to force a change." },
+        { status: 400 }
+      )
+    }
+  }
 
   const updateData: Record<string, unknown> = { ...data }
   if (data.date) updateData.date = new Date(data.date)

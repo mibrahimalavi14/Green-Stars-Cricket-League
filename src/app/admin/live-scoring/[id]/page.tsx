@@ -143,6 +143,7 @@ export default function LiveScoringPage() {
   const [endingMatch, setEndingMatch] = useState(false)
   const [tossWinner, setTossWinner] = useState("")
   const [tossDecision, setTossDecision] = useState("")
+  const [tossOverrideOpen, setTossOverrideOpen] = useState(false)
   const [superOverT1Runs, setSuperOverT1Runs] = useState("")
   const [superOverT1Wkts, setSuperOverT1Wkts] = useState("")
   const [superOverT2Runs, setSuperOverT2Runs] = useState("")
@@ -1475,8 +1476,13 @@ export default function LiveScoringPage() {
                     <span className="text-xs text-red-400">Not set yet</span>
                   )}
                 </div>
-                {!(summary.match.tossWinner && summary.match.tossDecision) ? (
+                {!(summary.match.tossWinner && summary.match.tossDecision) || tossOverrideOpen ? (
                   <div className="mt-3 grid grid-cols-2 gap-3">
+                    {tossOverrideOpen && (
+                      <div className="col-span-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-600">
+                        OVERRIDE MODE — Toss locked hai, yeh change match started hone ke baad bhi force karega.
+                      </div>
+                    )}
                     <div>
                       <label className="mb-1 block text-xs font-semibold text-[var(--muted-foreground)]">Toss Winner</label>
                       <select
@@ -1513,21 +1519,23 @@ export default function LiveScoringPage() {
                             const res = await fetch("/api/matches", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: matchId, tossWinner, tossDecision }),
+                              body: JSON.stringify({ id: matchId, tossWinner, tossDecision, override: tossOverrideOpen }),
                             })
-                            if (!res.ok) { alert("Failed to save toss"); return }
+                            if (!res.ok) { alert("Failed to save toss — match started hone ke baad override use karo"); return }
                             await fetchSummary()
+                            setTossOverrideOpen(false)
                           }}
                           disabled={!tossWinner || !tossDecision}
                           className="flex items-center gap-1 rounded-lg bg-yellow-500 px-4 py-2 text-sm font-bold text-white hover:bg-yellow-600 disabled:opacity-40"
                         >
-                          Set Toss
+                          {tossOverrideOpen ? "Save Override" : "Set Toss"}
                         </button>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="mt-3">
+                    <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
                         <Shield className="h-3 w-3" /> Batting Team
@@ -1544,10 +1552,23 @@ export default function LiveScoringPage() {
                         {bowlingTeamId === match.team1.id ? match.team1.name : match.team2.name}
                       </div>
                     </div>
-                    <div className="col-span-2 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
-                      {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won the toss & elected to {tossDecision} first
+                    <div className="col-span-2 flex items-center justify-between gap-2 text-xs text-[var(--muted-foreground)]">
+                      <span className="flex items-center gap-2">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+                        {tossWinner === match.team1.id ? match.team1.name : match.team2.name} won the toss & elected to {tossDecision} first
+                      </span>
+                      <button
+                        onClick={() => {
+                          setTossWinner(summary.match.tossWinner || "")
+                          setTossDecision(summary.match.tossDecision || "")
+                          setTossOverrideOpen(true)
+                        }}
+                        className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20"
+                      >
+                        Override Toss
+                      </button>
                     </div>
+                  </div>
                   </div>
                 )}
               </div>

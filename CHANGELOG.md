@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.1.0 (Launch Polish)
+- Toss edit lock: live matches can no longer change toss result/decision without admin override
+- Player jersey numbers + availability status (available/injured/suspended/unavailable)
+- Injury tracker: status badges on team page, player page, match Playing XI, admin squad + warning banner
+- Match attendance + DLS (rain-rule) flag recorded by admin, shown on match detail with crowd level
+- Advanced search: match no., jersey number, captain, umpire, Player-of-the-Match-by-name
+- Version info page at /about/version (commit SHA, build info, stack versions, DB health)
+- Admin squad warnings for unavailable players in Playing XI
+
 ## v1.0.1 (T4 Edition)
 - Migrated from T10 to T4 format (4 overs per innings)
 - Added centralized MATCH_CONFIG (config-driven format, bowling, points)

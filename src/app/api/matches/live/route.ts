@@ -23,8 +23,8 @@ export async function GET(req: Request) {
     })
     if (!recentCompleted) return NextResponse.json(null)
     const [team1Players, team2Players] = await Promise.all([
-      prisma.player.findMany({ where: { teamId: recentCompleted.team1Id }, select: { id: true, name: true } }),
-      prisma.player.findMany({ where: { teamId: recentCompleted.team2Id }, select: { id: true, name: true } }),
+      prisma.player.findMany({ where: { teamId: recentCompleted.team1Id }, select: { id: true, name: true, jerseyNumber: true } }),
+      prisma.player.findMany({ where: { teamId: recentCompleted.team2Id }, select: { id: true, name: true, jerseyNumber: true } }),
     ])
     return NextResponse.json({ ...recentCompleted, team1Players, team2Players })
   }
@@ -32,8 +32,8 @@ export async function GET(req: Request) {
   if (!match) return NextResponse.json(null)
 
   const [team1Players, team2Players] = await Promise.all([
-    prisma.player.findMany({ where: { teamId: match.team1Id }, select: { id: true, name: true } }),
-    prisma.player.findMany({ where: { teamId: match.team2Id }, select: { id: true, name: true } }),
+    prisma.player.findMany({ where: { teamId: match.team1Id }, select: { id: true, name: true, jerseyNumber: true } }),
+    prisma.player.findMany({ where: { teamId: match.team2Id }, select: { id: true, name: true, jerseyNumber: true } }),
   ])
 
   return NextResponse.json({ ...match, team1Players, team2Players })

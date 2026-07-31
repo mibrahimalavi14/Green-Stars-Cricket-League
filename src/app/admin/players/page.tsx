@@ -72,6 +72,7 @@ async function AdminPlayersPage() {
                             ) : <img src="/placeholder-player.svg" alt="" className="h-7 w-7 rounded-full bg-[var(--muted)] p-1" />}
                             <div>
                               <div className="flex items-center gap-1 font-medium">
+                                {p.jerseyNumber != null && <span className="text-xs text-[var(--muted-foreground)]">#{p.jerseyNumber}</span>}
                                 {p.name}
                                 {p.isCaptain && <Crown className="h-3.5 w-3.5 text-amber-500" aria-label="Captain" />}
                               </div>
@@ -79,7 +80,18 @@ async function AdminPlayersPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="p-3 text-center">{p.role}</td>
+                        <td className="p-3 text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <span>{p.role}</span>
+                            {p.status !== "available" && (
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                p.status === "injured" ? "bg-red-500/15 text-red-500"
+                                : p.status === "suspended" ? "bg-orange-500/15 text-orange-500"
+                                : "bg-slate-500/15 text-slate-400"
+                              }`}>{p.status}</span>
+                            )}
+                          </div>
+                        </td>
                         <td className="p-3 text-center font-medium">{p.runs}</td>
                         <td className="p-3 text-center font-medium">{p.wickets}</td>
                         <td className="p-3 text-center">{p.matchesPlayed}</td>

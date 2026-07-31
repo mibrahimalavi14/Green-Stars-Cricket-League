@@ -113,6 +113,9 @@ function AboutPage() {
           <a href="/contact" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
             Contact Us
           </a>
+          <a href="/about/version" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
+            Version Info
+          </a>
         </div>
       </div>
     </div>

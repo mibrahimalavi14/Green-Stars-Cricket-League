@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 export function AdminPlayerForm() {
   const router = useRouter()
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([])
-  const [form, setForm] = useState({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast", isCaptain: false })
+  const [form, setForm] = useState({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast", isCaptain: false, jerseyNumber: "", status: "available" })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { fetch("/api/teams").then(r => r.json()).then(setTeams) }, [])
@@ -17,9 +17,12 @@ export function AdminPlayerForm() {
     await fetch("/api/players", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        jerseyNumber: form.jerseyNumber === "" ? null : Number(form.jerseyNumber),
+      }),
     })
-    setForm({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast", isCaptain: false })
+    setForm({ name: "", role: "Batsman", teamId: "", battingStyle: "Right-handed", bowlingStyle: "Right-arm fast", isCaptain: false, jerseyNumber: "", status: "available" })
     setLoading(false)
     router.refresh()
   }
@@ -61,6 +64,22 @@ export function AdminPlayerForm() {
           className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
           <option value="">Select</option>
           {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs">Jersey No</label>
+        <input type="number" min="0" max="999" value={form.jerseyNumber}
+          onChange={e => setForm({...form, jerseyNumber: e.target.value})}
+          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm w-20" />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs">Status</label>
+        <select value={form.status} onChange={e => setForm({...form, status: e.target.value})}
+          className="rounded border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm">
+          <option value="available">Available</option>
+          <option value="injured">Injured</option>
+          <option value="suspended">Suspended</option>
+          <option value="unavailable">Unavailable</option>
         </select>
       </div>
       <div className="flex items-end pb-1">

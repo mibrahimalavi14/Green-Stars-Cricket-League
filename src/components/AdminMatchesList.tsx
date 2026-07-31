@@ -9,6 +9,7 @@ interface Match {
   tossWinner: string; tossDecision: string; manOfMatch: string; venue: string
   umpire1: string; umpire2: string; thirdUmpire: string; matchReferee: string; officialScorer: string
   tossTime: string; matchStartTime: string; matchEndTime: string; delayReason: string
+  attendance: number; dls: boolean
   team1: { id: string; shortName: string; name: string; color: string; logo: string }
   team2: { id: string; shortName: string; name: string; color: string; logo: string }
   season: { name: string }
@@ -74,7 +75,7 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
       officialScorer: match.officialScorer || "", tossTime: match.tossTime || "",
       matchStartTime: match.matchStartTime || "", matchEndTime: match.matchEndTime || "",
       delayReason: match.delayReason || "", tossWinner: match.tossWinner || "",
-      tossDecision: match.tossDecision || "",
+      tossDecision: match.tossDecision || "", attendance: match.attendance || 0, dls: match.dls || false,
     })
   }
 
@@ -125,6 +126,8 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
               )}
               {!isPlayoff && m.team1Score && <p className="text-sm">{m.team1Score} - {m.team2Score}</p>}
               {!isPlayoff && m.result && <p className="text-xs text-[var(--muted-foreground)]">{m.result}</p>}
+              {m.dls && <span className="mt-0.5 inline-block rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-bold text-sky-500">DLS</span>}
+              {m.attendance > 0 && <span className="mt-0.5 ml-1 inline-block text-[10px] text-[var(--muted-foreground)]">{m.attendance} spectators</span>}
               {hasOfficials && editingId !== m.id && (
                 <p className="mt-1 text-[10px] text-[var(--muted-foreground)]">
                   {m.umpire1 && `UM1: ${m.umpire1}`}
@@ -226,6 +229,20 @@ export function AdminMatchesList({ matches }: { matches: Match[] }) {
                 <div>
                   <label className={labelCls}>Delay Reason</label>
                   <input value={editForm.delayReason || ""} onChange={e => setEditForm({...editForm, delayReason: e.target.value})} placeholder="Rain, Bad light..." className={inputCls} />
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div>
+                  <label className={labelCls}>Attendance (spectators)</label>
+                  <input type="number" min="0" value={editForm.attendance || 0}
+                    onChange={e => setEditForm({...editForm, attendance: Number(e.target.value)})} className={inputCls} />
+                </div>
+                <div className="flex items-end pb-1">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs">
+                    <input type="checkbox" checked={!!editForm.dls}
+                      onChange={e => setEditForm({...editForm, dls: e.target.checked})} className="h-4 w-4" />
+                    <span>Match decided by DLS</span>
+                  </label>
                 </div>
               </div>
               <div className="flex justify-end">

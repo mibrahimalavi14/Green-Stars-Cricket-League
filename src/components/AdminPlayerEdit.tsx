@@ -19,7 +19,7 @@ interface Team { id: string; name: string }
 
 export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team[] }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ name: player.name, role: player.role, battingStyle: player.battingStyle, bowlingStyle: player.bowlingStyle, teamId: player.teamId, isCaptain: (player as any).isCaptain })
+  const [form, setForm] = useState({ name: player.name, role: player.role, battingStyle: player.battingStyle, bowlingStyle: player.bowlingStyle, teamId: player.teamId, isCaptain: (player as any).isCaptain, jerseyNumber: (player as any).jerseyNumber ?? "", status: (player as any).status || "available" })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -28,7 +28,11 @@ export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team
     await fetch("/api/players", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: player.id, ...form }),
+      body: JSON.stringify({
+        id: player.id,
+        ...form,
+        jerseyNumber: form.jerseyNumber === "" ? null : Number(form.jerseyNumber),
+      }),
     })
     setLoading(false)
     setEditing(false)
@@ -66,6 +70,16 @@ export function AdminPlayerEdit({ player, teams }: { player: Player; teams: Team
       <select value={form.teamId} onChange={e => setForm({...form, teamId: e.target.value})}
         className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
         {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+      </select>
+      <input type="number" min="0" max="999" value={form.jerseyNumber} placeholder="#"
+        onChange={e => setForm({...form, jerseyNumber: e.target.value})}
+        className="w-14 rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs" />
+      <select value={form.status} onChange={e => setForm({...form, status: e.target.value})}
+        className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs">
+        <option value="available">Available</option>
+        <option value="injured">Injured</option>
+        <option value="suspended">Suspended</option>
+        <option value="unavailable">Unavailable</option>
       </select>
       <label className="flex items-center gap-1 text-xs cursor-pointer">
         <input type="checkbox" checked={form.isCaptain} onChange={e => setForm({...form, isCaptain: e.target.checked})} className="h-3 w-3" />

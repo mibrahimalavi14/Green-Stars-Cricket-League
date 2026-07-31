@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const where = matchId ? { matchId } : {}
   const members = await prisma.squadMember.findMany({
     where,
-    include: { player: { select: { name: true, role: true, photo: true } } },
+    include: { player: { select: { name: true, role: true, photo: true, jerseyNumber: true, status: true } } },
     orderBy: { createdAt: "asc" },
   })
   return NextResponse.json(members)

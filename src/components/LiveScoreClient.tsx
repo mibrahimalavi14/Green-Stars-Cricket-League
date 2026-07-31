@@ -24,7 +24,7 @@ interface LiveMatch {
   tossDecision: string
   inningsBreak: boolean
   innings: { id: string; teamId: string; runs: number; wickets: number; balls: number; extras: number; ballsData: string }[]
-  team1Players: { id: string; name: string }[]
+  team1Players: { id: string; name: string; jerseyNumber?: number | null }[]
   team2Players: { id: string; name: string }[]
   customHighlights: string
 }
@@ -367,7 +367,7 @@ function BattingScorecard({
   currentNonStrikerId,
 }: {
   stats: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }>
-  players: { id: string; name: string }[]
+  players: { id: string; name: string; jerseyNumber?: number | null }[]
   battingTeam: { name: string; shortName: string; logo: string }
   currentStrikerId?: string
   currentNonStrikerId?: string
@@ -418,6 +418,7 @@ function BattingScorecard({
               return (
                 <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isStriker ? "bg-[var(--accent)]/10 font-bold" : isNonStriker ? "bg-green-500/5" : ""}`}>
                   <td className="py-1.5 font-medium">
+                    {p.jerseyNumber != null && <span className="mr-1 text-[10px] text-[var(--muted-foreground)]">#{p.jerseyNumber}</span>}
                     {p.name}
                     {isStriker ? " *" : isNonStriker ? " •" : s.isOut ? " †" : ""}
                   </td>
