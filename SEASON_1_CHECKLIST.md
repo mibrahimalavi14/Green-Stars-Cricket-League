@@ -129,6 +129,17 @@ Complete this checklist before Season 1 goes live.
 - [ ] Verify audit logs populated
 - [ ] Verify analytics events firing
 - [ ] Health endpoint stable
+- [ ] Dress rehearsal passes: `npm run dress:rehearsal` → `55/55 checks passed`
+- [ ] System Monitor (`/admin/system`) renders all panels with health = OK, errors = 0
+- [ ] Admin home shows the "System Monitor" card
+
+## Daily Monitoring (post-launch)
+
+- [ ] Open `/admin/system` → health OK, error count 0
+- [ ] Latest match snapshot shows fresh (Last Backup = "just now")
+- [ ] `/api/health` returns `{"status":"ok","database":"connected"}`
+- [ ] Neon dashboard: no connection/storage anomalies
+- [ ] Vercel dashboard: deployments green, no function 500s/timeouts
 
 ## Sign-Off
 

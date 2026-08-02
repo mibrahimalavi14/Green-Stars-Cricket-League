@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -121,6 +121,12 @@ async function AdminPage() {
           <Database className="mb-3 h-8 w-8 text-amber-500" />
           <h3 className="text-lg font-semibold">Data Restore</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Recalculate stats, rebuild snapshots, restore data</p>
+        </Link>
+
+        <Link href="/admin/system" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-green-500/50 hover:shadow-lg">
+          <Activity className="mb-3 h-8 w-8 text-green-500" />
+          <h3 className="text-lg font-semibold">System Monitor</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Health, DB, errors, backups, storage</p>
         </Link>
 
         <Link href="/admin/match-notes" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-blue-500/50 hover:shadow-lg">

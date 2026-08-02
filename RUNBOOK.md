@@ -102,3 +102,33 @@ If live scoring stops responding:
 2. Check `/api/health` for database status
 3. If database is down, check Neon dashboard
 4. If match status is wrong, admin can manually update via Admin → Matches
+
+## Daily Monitoring (Post-Launch)
+
+Use **Admin → System Monitor** (`/admin/system`) for a single-pane view of the whole
+platform. It auto-refreshes every 60 seconds and shows:
+
+| Indicator | What to look for |
+|-----------|------------------|
+| Health banner | `OK` (green) = API + DB connected. `DEGRADED` (amber) = DB unreachable. |
+| API Requests | Total analytics events. Spikes = traffic; near-zero = something may be broken. |
+| Error Count | Should be `0`. Any entry means investigate via Vercel logs + `AuditLog`. |
+| Last Backup | Snapshot timestamp. Should be "just now" after every match. If old, snapshots stopped. |
+| Last Restore | Only appears after a manual restore/recalc. Not expected in normal operation. |
+| Active Season | Teams/players/matches counts should look sane. |
+| Active Match | Live match shown; queue shows live + scheduled + unread notifications. |
+| Storage | DB row counts. Check no table grew unexpectedly (e.g., AuditLog ballooning). |
+| Analytics Summary | Matches scored/completed should match what you know happened. |
+
+### Daily checklist
+1. Open `/admin/system` → verify health is `OK`, errors = 0.
+2. Confirm the latest match has a fresh snapshot (Last Backup = "just now").
+3. Check `AuditLog` via Admin → Restore/Audit if any restore/error action appears.
+4. Spot-check `/api/health` returns `{"status":"ok","database":"connected"}`.
+5. Review Neon dashboard (console.neon.tech) for connection/storage usage trend.
+6. Check Vercel dashboard → Deployments (build green) and Functions (no 500s/timeouts).
+
+### Weekly
+1. Review analytics trends in **Admin → Analytics** (page views, searches, predictions).
+2. Verify `DISASTER_RECOVERY.md` steps still match current data model.
+3. Confirm the dress rehearsal still passes: `npm run dress:rehearsal` → expect `55/55 checks passed`.

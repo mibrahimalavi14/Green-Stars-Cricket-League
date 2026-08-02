@@ -87,8 +87,11 @@ export async function PATCH(req: Request) {
   const { id, override, ...data } = parsed.data
 
   if ((data.tossWinner !== undefined || data.tossDecision !== undefined) && !override) {
-    const ballsBowled = await prisma.ballEvent.count({ where: { matchId: id } })
-    if (ballsBowled > 0) {
+    const inningsStarted = await prisma.inning.findFirst({
+      where: { matchId: id, ballsData: { not: "[]" } },
+      select: { id: true },
+    })
+    if (inningsStarted) {
       return NextResponse.json(
         { error: "Toss is locked once the match has started. Use the admin override to force a change." },
         { status: 400 }

@@ -78,8 +78,7 @@ export async function POST(req: Request) {
     if (dismissed.has(ball.striker)) throw new Error("Dismissed batsman cannot bat again")
 
     const legalBefore = ballsData.filter(b => !b.isWide && !b.isNoBall).length
-    const ballsInCurrentOver = legalBefore % MATCH_CONFIG.ballsPerOver
-    if (isLegalDelivery(ball) && ballsInCurrentOver >= MATCH_CONFIG.ballsPerOver) throw new Error(`Over already complete (${MATCH_CONFIG.ballsPerOver} legal balls)`)
+    if (isLegalDelivery(ball) && legalBefore >= MATCH_CONFIG.totalBalls) throw new Error(`Innings complete (${MATCH_CONFIG.totalBalls} legal balls)`)
 
     const bowlerLegalBalls = ballsData.filter(b => b.bowler === ball.bowler && !b.isWide && !b.isNoBall).length
     if (isLegalDelivery(ball) && bowlerLegalBalls >= MATCH_CONFIG.maxBallsPerBowler) throw new Error(`Bowler cannot bowl more than ${MATCH_CONFIG.maxOversPerBowler} over`)

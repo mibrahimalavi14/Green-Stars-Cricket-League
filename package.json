@@ -11,6 +11,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "dress:rehearsal": "tsx scripts/dress-rehearsal-runner.ts",
     "deploy": "vercel --prod"
   },
   "dependencies": {
