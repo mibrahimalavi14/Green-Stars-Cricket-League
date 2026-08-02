@@ -1,6 +1,6 @@
 {
   "name": "green-stars-cricket-league",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,6 +12,10 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "dress:rehearsal": "tsx scripts/dress-rehearsal-runner.ts",
+    "backup:db": "node --env-file=.env scripts/backup-db.mjs daily",
+    "backup:weekly": "node --env-file=.env scripts/backup-db.mjs weekly",
+    "backup:monthly": "node --env-file=.env scripts/backup-db.mjs monthly",
+    "restore:db": "node --env-file=.env scripts/restore-backup.mjs",
     "deploy": "vercel --prod"
   },
   "dependencies": {

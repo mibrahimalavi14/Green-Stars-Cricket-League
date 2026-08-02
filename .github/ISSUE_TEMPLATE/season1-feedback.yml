@@ -1,0 +1,81 @@
+name: Season 1 Feedback
+description: Report feedback from Season 1 (bug, feature request, scorer/player/captain/spectator feedback). Drives the v2.0 roadmap.
+title: "[Feedback] <short summary>"
+labels: ["feedback", "season-1"]
+body:
+  - type: dropdown
+    id: source
+    attributes:
+      label: Feedback Source
+      description: Who is this feedback from?
+      options:
+        - Bug Report
+        - Feature Request
+        - Scorer Feedback
+        - Player Feedback
+        - Captain Feedback
+        - Spectator Feedback
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Low
+        - Medium (Recommended)
+        - High
+        - Critical
+      default: 1
+    validations:
+      required: true
+  - type: input
+    id: match
+    attributes:
+      label: Related Match (optional)
+      description: e.g. "M12 — Bravo XI vs Echo XI"
+      placeholder: "M12 — Bravo XI vs Echo XI"
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened / what would you like changed? Be specific.
+      placeholder: |
+        - What did you expect?
+        - What actually happened?
+        - How often does it occur?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce (for bugs)
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - Live Scoring
+        - Super Over
+        - Points Table / NRR
+        - Stats / Records
+        - Players / Squads
+        - Notifications
+        - Predictions / Quiz / POTM
+        - Admin Panel
+        - Mobile / Responsive
+        - Other
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots (optional)
+      description: Drag & drop images or paste a link.
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement (for v2.0)
+      description: How could this be improved? This feeds directly into the v2.0 roadmap.

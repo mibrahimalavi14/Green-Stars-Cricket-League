@@ -147,7 +147,7 @@ export async function GET(req: Request) {
       api: "ok",
       database,
       status: database === "connected" ? "ok" : "degraded",
-      version: "v1.0.1",
+      version: "v1.0.2",
       commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "dev",
       deployment: process.env.VERCEL_ENV || "local",
       region: process.env.VERCEL_REGION || null,
