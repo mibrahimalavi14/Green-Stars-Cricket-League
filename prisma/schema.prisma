@@ -61,6 +61,7 @@ model Season {
   isActive          Boolean  @default(true)
   scheduleAnnounced Boolean  @default(false)
   winnerId          String?  @default("")
+  seasonQuizLocked  Boolean  @default(false)
   createdAt         DateTime @default(now())
   teams             Team[]
   matches           Match[]

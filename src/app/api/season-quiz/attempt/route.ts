@@ -19,6 +19,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please provide a valid email" }, { status: 400 })
   }
 
+  const season = await prisma.season.findUnique({ where: { id: seasonId } })
+  if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
+  if (season.seasonQuizLocked) {
+    return NextResponse.json({ error: "This season quiz is now closed" }, { status: 403 })
+  }
+
   const questions = await prisma.seasonQuiz.findMany({
     where: { seasonId, active: true, id: { in: answers.map((a: any) => a.questionId) } },
     select: { id: true, correctAnswer: true, pointValue: true },

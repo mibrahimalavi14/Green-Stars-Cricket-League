@@ -29,10 +29,14 @@ auto-generation feature ship during Season 1. Follow this strict workflow for an
 ### Season Quiz Auto-Generation (v1.1.0)
 - Runs automatically when the last match of a season is completed.
 - Admin can also regenerate manually at **Admin → Quizzes → Season Quiz (Auto-generated)**.
-- The admin panel shows a **Season Quiz Status** indicator (Generated / Questions /
-  Generated On / Attempts) for the selected season.
+- The admin panel shows a **Season Quiz Status** indicator (Generated / Open·Locked /
+  Questions / Generated On / Attempts) for the selected season.
+- **Lock/Unlock**: admins can lock the quiz with one click (e.g. once the season ends or
+  before regenerating). Locking blocks all new submissions server-side; the public `/quiz`
+  page then shows a "quiz closed" notice.
 - Generates 30–40 questions (4 options each) from season data. Regenerating deletes
-  existing questions and all attempts — only regenerate before the quiz is live to users.
+  existing questions and all attempts — lock first, then only regenerate before the quiz is
+  live to users.
 - Users answer once per email on `/quiz`; scores and leaderboard are per season.
 
 ## Pre-Match (30 minutes before)

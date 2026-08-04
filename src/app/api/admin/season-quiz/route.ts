@@ -39,3 +39,32 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true, count })
 }
+
+export async function PATCH(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const body = await req.json()
+  const seasonId = body?.seasonId
+  const locked = body?.locked
+
+  if (!seasonId || typeof locked !== "boolean") {
+    return NextResponse.json({ error: "seasonId and locked are required" }, { status: 400 })
+  }
+
+  const season = await prisma.season.findUnique({ where: { id: seasonId } })
+  if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
+
+  await prisma.season.update({
+    where: { id: seasonId },
+    data: { seasonQuizLocked: locked },
+  })
+
+  logAudit({
+    action: locked ? "season_quiz_lock" : "season_quiz_unlock",
+    entity: "season",
+    entityId: seasonId,
+    details: JSON.stringify({ season: season.name }),
+  })
+
+  return NextResponse.json({ success: true, locked })
+}

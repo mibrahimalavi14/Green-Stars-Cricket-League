@@ -42,6 +42,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     season: { id: season.id, name: season.name, year: season.year, isActive: season.isActive, winnerId: season.winnerId },
     ready,
+    locked: season.seasonQuizLocked,
     questions: quiz.map(q => ({
       id: q.id,
       question: q.question,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Trash2, Loader2, Brain, ChevronDown, ChevronUp, Check, X, Sparkles, RotateCcw } from "lucide-react"
+import { Plus, Trash2, Loader2, Brain, ChevronDown, ChevronUp, Check, X, Sparkles, RotateCcw, Lock, LockOpen } from "lucide-react"
 
 export default function AdminQuizPage() {
   const [quizzes, setQuizzes] = useState<any[]>([])
@@ -11,6 +11,8 @@ export default function AdminQuizPage() {
   const [seasons, setSeasons] = useState<any[]>([])
   const [selectedSeason, setSelectedSeason] = useState("")
   const [seasonQuestions, setSeasonQuestions] = useState<any[]>([])
+  const [sqLocked, setSqLocked] = useState(false)
+  const [sqToggling, setSqToggling] = useState(false)
   const [sqLoading, setSqLoading] = useState(false)
   const [sqGenerating, setSqGenerating] = useState(false)
   const [sqMessage, setSqMessage] = useState("")
@@ -50,11 +52,13 @@ export default function AdminQuizPage() {
   }
 
   async function loadSeasonQuestions(seasonId: string) {
-    if (!seasonId) { setSeasonQuestions([]); return }
+    if (!seasonId) { setSeasonQuestions([]); setSqLocked(false); return }
     setSqLoading(true)
     const res = await fetch(`/api/admin/season-quiz?seasonId=${seasonId}`)
     const data = await res.json()
-    setSeasonQuestions(Array.isArray(data) ? data : [])
+    const arr = Array.isArray(data) ? data : []
+    setSeasonQuestions(arr)
+    setSqLocked(arr.length > 0 ? !!arr[0]?.season?.seasonQuizLocked : false)
     setSqLoading(false)
   }
 
@@ -79,6 +83,26 @@ export default function AdminQuizPage() {
     } else {
       setSqMessage(`Generated ${data.count} questions`)
       loadSeasonQuestions(selectedSeason)
+    }
+  }
+
+  async function toggleSeasonQuizLock() {
+    if (!selectedSeason) return
+    const next = !sqLocked
+    setSqToggling(true)
+    setSqMessage("")
+    const res = await fetch("/api/admin/season-quiz", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seasonId: selectedSeason, locked: next }),
+    })
+    const data = await res.json()
+    setSqToggling(false)
+    if (!res.ok) {
+      setSqMessage(`Error: ${data.error || "Failed to update"}`)
+    } else {
+      setSqLocked(data.locked)
+      setSqMessage(data.locked ? "Season quiz locked — users can no longer submit" : "Season quiz unlocked — submissions are open again")
     }
   }
 
@@ -271,6 +295,18 @@ export default function AdminQuizPage() {
             {sqGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
             Generate Season Quiz
           </button>
+          <button
+            onClick={toggleSeasonQuizLock}
+            disabled={!selectedSeason || sqToggling}
+            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
+              sqLocked
+                ? "border-green-500/40 text-green-500 hover:bg-green-500/10"
+                : "border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--muted-foreground)]"
+            }`}
+          >
+            {sqToggling ? <Loader2 className="h-4 w-4 animate-spin" /> : sqLocked ? <LockOpen className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            {sqLocked ? "Unlock" : "Lock"}
+          </button>
         </div>
         {sqMessage && <p className="mb-3 text-sm text-[var(--muted-foreground)]">{sqMessage}</p>}
 
@@ -279,6 +315,10 @@ export default function AdminQuizPage() {
             <span className="flex items-center gap-2">
               <span className={`h-2.5 w-2.5 rounded-full ${seasonQuestions.length > 0 ? "bg-green-500" : "bg-[var(--muted-foreground)]"}`} />
               <span className="font-medium text-green-500">Generated</span>
+            </span>
+            <span className={`flex items-center gap-2 ${sqLocked ? "text-[var(--muted-foreground)]" : "text-green-500"}`}>
+              {sqLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
+              <span className="font-medium">{sqLocked ? "Locked" : "Open"}</span>
             </span>
             <span className="text-[var(--muted-foreground)]">Questions: <span className="font-medium text-[var(--foreground)]">{seasonQuestions.length}</span></span>
             <span className="text-[var(--muted-foreground)]">

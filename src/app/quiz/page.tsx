@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw } from "lucide-react"
+import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock } from "lucide-react"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -218,6 +218,16 @@ export default function QuizPage() {
       {sqLoading ? (
         <div className="mb-8 flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-[var(--accent)]" />
+        </div>
+      ) : seasonQuiz?.locked && seasonQuiz.questions.length > 0 ? (
+        <div className="mb-10 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
+          <h2 className="mb-2 flex items-center justify-center gap-2 text-xl font-bold">
+            <Lock className="h-5 w-5 text-[var(--muted-foreground)]" />
+            Season Quiz — {seasonQuiz.season.name}
+          </h2>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            This season quiz has closed. Thanks for playing!
+          </p>
         </div>
       ) : seasonQuiz?.ready && seasonQuiz.questions.length > 0 ? (
         <div className="mb-10 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
