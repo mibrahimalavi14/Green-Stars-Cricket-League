@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Brain, Trophy, Medal, Check, X, Loader2, ChevronDown, ChevronUp } from "lucide-react"
+import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw } from "lucide-react"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -30,9 +30,76 @@ export default function QuizPage() {
   const [showLb, setShowLb] = useState(false)
   const [error, setError] = useState("")
 
+  const [seasonQuiz, setSeasonQuiz] = useState<any>(null)
+  const [sqLoading, setSqLoading] = useState(true)
+  const [sqEmail, setSqEmail] = useState("")
+  const [sqName, setSqName] = useState("")
+  const [sqAnswers, setSqAnswers] = useState<Record<string, string>>({})
+  const [sqSubmitting, setSqSubmitting] = useState(false)
+  const [sqResult, setSqResult] = useState<any>(null)
+  const [sqError, setSqError] = useState("")
+  const [sqLb, setSqLb] = useState<any[]>([])
+
   useEffect(() => {
     fetchData()
+    fetchSeasonQuiz()
   }, [])
+
+  async function fetchSeasonQuiz() {
+    setSqLoading(true)
+    try {
+      const res = await fetch("/api/season-quiz")
+      const data = await res.json()
+      setSeasonQuiz(data)
+      setSqLoading(false)
+    } catch {
+      setSqLoading(false)
+    }
+  }
+
+  async function submitSeasonQuiz() {
+    if (!sqEmail.trim() || !seasonQuiz) return
+    const answered = Object.keys(sqAnswers).length
+    if (answered < seasonQuiz.questions.length) {
+      setSqError(`Please answer all ${seasonQuiz.questions.length} questions (${answered} answered so far)`)
+      return
+    }
+    setSqSubmitting(true)
+    setSqError("")
+    const res = await fetch("/api/season-quiz/attempt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        seasonId: seasonQuiz.season.id,
+        email: sqEmail.trim(),
+        name: sqName.trim() || "Anonymous",
+        answers: Object.entries(sqAnswers).map(([questionId, selectedAnswer]) => ({ questionId, selectedAnswer })),
+      }),
+    })
+    const data = await res.json()
+    setSqSubmitting(false)
+    if (!res.ok) {
+      setSqError(data.error || "Failed to submit")
+    } else {
+      setSqResult(data)
+      fetchSeasonLeaderboard()
+    }
+  }
+
+  async function fetchSeasonLeaderboard() {
+    if (!seasonQuiz) return
+    const res = await fetch(`/api/season-quiz/leaderboard?seasonId=${seasonQuiz.season.id}`)
+    const data = await res.json()
+    setSqLb(Array.isArray(data) ? data : [])
+  }
+
+  function resetSeasonQuiz() {
+    setSqAnswers({})
+    setSqResult(null)
+    setSqError("")
+    setSqLb([])
+    fetchSeasonQuiz()
+  }
 
   async function fetchData() {
     const [matchesRes, quizzesRes] = await Promise.all([
@@ -147,6 +214,149 @@ export default function QuizPage() {
         </h1>
         <p className="text-[var(--muted-foreground)]">Test your cricket knowledge after each match</p>
       </div>
+
+      {sqLoading ? (
+        <div className="mb-8 flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-[var(--accent)]" />
+        </div>
+      ) : seasonQuiz?.ready && seasonQuiz.questions.length > 0 ? (
+        <div className="mb-10 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-bold">
+                <Sparkles className="h-5 w-5 text-[var(--accent)]" />
+                Season Quiz — {seasonQuiz.season.name}
+              </h2>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                {seasonQuiz.questions.length} questions · {seasonQuiz.questions[0]?.pointValue || 10} points each · one attempt per email
+              </p>
+            </div>
+          </div>
+
+          {!sqResult ? (
+            <>
+              <div className="mb-6 flex flex-col gap-3 rounded-lg bg-[var(--muted)] p-4 sm:flex-row">
+                <input
+                  value={sqName}
+                  onChange={e => setSqName(e.target.value)}
+                  placeholder="Your name"
+                  className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+                <input
+                  value={sqEmail}
+                  onChange={e => setSqEmail(e.target.value)}
+                  placeholder="Your email"
+                  type="email"
+                  required
+                  className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+              </div>
+
+              <div className="space-y-5">
+                {seasonQuiz.questions.map((q: any, qi: number) => (
+                  <div key={q.id} className="rounded-lg border border-[var(--border)] p-4">
+                    <p className="mb-3 text-sm font-medium">
+                      <span className="mr-2 text-[var(--muted-foreground)]">{qi + 1}.</span>
+                      {q.question}
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {q.options.map((opt: string) => (
+                        <label
+                          key={opt}
+                          className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm transition-all ${
+                            sqAnswers[q.id] === opt
+                              ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                              : "border-[var(--border)] hover:border-[var(--muted-foreground)]"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`sq-${q.id}`}
+                            value={opt}
+                            checked={sqAnswers[q.id] === opt}
+                            onChange={() => setSqAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                            className="accent-[var(--accent)]"
+                          />
+                          <span>{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {sqError && <p className="mt-4 text-sm text-red-500">{sqError}</p>}
+              <button
+                onClick={submitSeasonQuiz}
+                disabled={!sqEmail.trim() || sqSubmitting}
+                className="mt-6 w-full rounded-lg bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {sqSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Submit Season Quiz"}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="mb-6 rounded-lg bg-[var(--muted)] p-4 text-center">
+                <p className="text-3xl font-bold text-[var(--accent)]">
+                  {sqResult.score} / {sqResult.total}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                  {sqResult.score === sqResult.total
+                    ? "Perfect score — you're a GSCL legend!"
+                    : sqResult.score >= sqResult.total * 0.7
+                      ? "Great cricket knowledge!"
+                      : sqResult.score >= sqResult.total * 0.4
+                        ? "Not bad — keep watching!"
+                        : "Time to watch more matches!"}
+                </p>
+                <div className="mt-4 flex justify-center gap-3">
+                  <button onClick={resetSeasonQuiz} className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:border-[var(--muted-foreground)]">
+                    <RotateCcw className="h-4 w-4" /> Retry
+                  </button>
+                  <button onClick={fetchSeasonLeaderboard} className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:border-[var(--muted-foreground)]">
+                    <Trophy className="h-4 w-4" /> View Leaderboard
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {seasonQuiz.questions.map((q: any, qi: number) => {
+                  const result = sqResult.results?.find((r: any) => r.questionId === q.id)
+                  return (
+                    <div key={q.id} className="flex items-start gap-2 rounded-lg border border-[var(--border)] p-3 text-sm">
+                      {result?.correct ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" /> : <X className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
+                      <div>
+                        <p className="font-medium">{q.question}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          Your answer: <strong>{sqAnswers[q.id]}</strong>
+                          {!result?.correct && <> · Correct: <strong className="text-green-500">{result?.correctAnswer}</strong></>}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {sqLb.length > 0 && (
+                <div className="mt-6 rounded-lg border border-[var(--border)] p-4">
+                  <h3 className="mb-3 flex items-center gap-2 font-semibold">
+                    <Trophy className="h-4 w-4 text-[var(--accent)]" /> Leaderboard
+                  </h3>
+                  <div className="space-y-1.5">
+                    {sqLb.map((a: any, i: number) => (
+                      <div key={a.email} className="flex items-center gap-3 rounded-lg bg-[var(--muted)] px-3 py-2 text-sm">
+                        <span className="w-6 text-xs font-bold text-[var(--muted-foreground)]">{i + 1}</span>
+                        <span className="font-medium">{a.name}</span>
+                        <span className="ml-auto font-semibold text-[var(--accent)]">{a.score} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      ) : null}
 
       {activeQuiz && !result && !userAttempt && (
         <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">

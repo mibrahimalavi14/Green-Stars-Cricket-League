@@ -1,12 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Trash2, Loader2, Brain, ChevronDown, ChevronUp, Check, X } from "lucide-react"
+import { Plus, Trash2, Loader2, Brain, ChevronDown, ChevronUp, Check, X, Sparkles, RotateCcw } from "lucide-react"
 
 export default function AdminQuizPage() {
   const [quizzes, setQuizzes] = useState<any[]>([])
   const [matches, setMatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [seasons, setSeasons] = useState<any[]>([])
+  const [selectedSeason, setSelectedSeason] = useState("")
+  const [seasonQuestions, setSeasonQuestions] = useState<any[]>([])
+  const [sqLoading, setSqLoading] = useState(false)
+  const [sqGenerating, setSqGenerating] = useState(false)
+  const [sqMessage, setSqMessage] = useState("")
 
   const [matchId, setMatchId] = useState("")
   const [question, setQuestion] = useState("")
@@ -23,15 +30,56 @@ export default function AdminQuizPage() {
   }, [])
 
   async function fetchData() {
-    const [matchesRes, quizzesRes] = await Promise.all([
+    const [matchesRes, quizzesRes, seasonsRes] = await Promise.all([
       fetch("/api/matches"),
       fetch("/api/quiz"),
+      fetch("/api/seasons"),
     ])
     const matchesData = await matchesRes.json()
     const quizzesData = await quizzesRes.json()
+    const seasonsData = await seasonsRes.json()
     setMatches(Array.isArray(matchesData) ? matchesData : [])
     setQuizzes(Array.isArray(quizzesData) ? quizzesData : [])
+    const seasonsArr = Array.isArray(seasonsData) ? seasonsData : Array.isArray(seasonsData?.seasons) ? seasonsData.seasons : []
+    setSeasons(seasonsArr)
+    if (seasonsArr.length > 0) {
+      const active = seasonsArr.find((s: any) => s.isActive) || seasonsArr[0]
+      setSelectedSeason(active.id)
+    }
     setLoading(false)
+  }
+
+  async function loadSeasonQuestions(seasonId: string) {
+    if (!seasonId) { setSeasonQuestions([]); return }
+    setSqLoading(true)
+    const res = await fetch(`/api/admin/season-quiz?seasonId=${seasonId}`)
+    const data = await res.json()
+    setSeasonQuestions(Array.isArray(data) ? data : [])
+    setSqLoading(false)
+  }
+
+  useEffect(() => {
+    if (selectedSeason) loadSeasonQuestions(selectedSeason)
+  }, [selectedSeason])
+
+  async function generateSeasonQuiz() {
+    if (!selectedSeason) return
+    if (!confirm("Regenerate the season quiz? This deletes existing questions and all attempts.")) return
+    setSqGenerating(true)
+    setSqMessage("")
+    const res = await fetch("/api/admin/season-quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seasonId: selectedSeason }),
+    })
+    const data = await res.json()
+    setSqGenerating(false)
+    if (!res.ok) {
+      setSqMessage(`Error: ${data.error || "Failed to generate"}`)
+    } else {
+      setSqMessage(`Generated ${data.count} questions`)
+      loadSeasonQuestions(selectedSeason)
+    }
   }
 
   function timeAgo(dateStr: string) {
@@ -194,6 +242,70 @@ export default function AdminQuizPage() {
             Create Quiz
           </button>
         </div>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <h2 className="mb-1 flex items-center gap-2 font-semibold">
+          <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+          Season Quiz (Auto-generated)
+        </h2>
+        <p className="mb-4 text-sm text-[var(--muted-foreground)]">
+          Generates 30–40 questions from the season's data with 4 options each. Runs automatically when the season completes.
+        </p>
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+          <select
+            value={selectedSeason}
+            onChange={e => setSelectedSeason(e.target.value)}
+            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+          >
+            <option value="">Select a season</option>
+            {seasons.map(s => (
+              <option key={s.id} value={s.id}>{s.name} ({s.year})</option>
+            ))}
+          </select>
+          <button
+            onClick={generateSeasonQuiz}
+            disabled={!selectedSeason || sqGenerating}
+            className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)] disabled:opacity-50"
+          >
+            {sqGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+            Generate Season Quiz
+          </button>
+        </div>
+        {sqMessage && <p className="mb-3 text-sm text-[var(--muted-foreground)]">{sqMessage}</p>}
+
+        {sqLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : selectedSeason && seasonQuestions.length > 0 ? (
+          <div className="space-y-2">
+            {seasonQuestions.map((q: any, i: number) => (
+              <div key={q.id} className="rounded-lg border border-[var(--border)] p-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[var(--muted-foreground)]">{q.position}.</span>
+                  <p className="flex-1 text-sm font-medium">{q.question}</p>
+                  <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-500">Answer: {q.correctAnswer}</span>
+                </div>
+                <div className="mt-2 grid gap-1 sm:grid-cols-2">
+                  {(() => {
+                    let opts: string[] = []
+                    try { opts = JSON.parse(q.options) } catch {}
+                    return opts.map((opt: string, oi: number) => (
+                      <div key={oi} className="flex items-center gap-1.5 text-xs">
+                        <span className="text-[var(--muted-foreground)]">{String.fromCharCode(65 + oi)}.</span>
+                        <span>{opt}</span>
+                        {opt === q.correctAnswer && <Check className="h-3 w-3 text-green-500" />}
+                      </div>
+                    ))
+                  })()}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : selectedSeason ? (
+          <div className="rounded-lg border border-[var(--border)] p-8 text-center text-sm text-[var(--muted-foreground)]">
+            No season quiz yet — click Generate to create one
+          </div>
+        ) : null}
       </div>
 
       {loading ? (

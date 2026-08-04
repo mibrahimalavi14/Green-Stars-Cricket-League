@@ -70,6 +70,7 @@ model Season {
   penalties         LeaguePenalty[]
   awards            SeasonAward[]
   honors            TeamHonor[]
+  seasonQuizzes     SeasonQuiz[]
 
   @@unique([name, year])
 }
@@ -647,4 +648,36 @@ model TeamHonor {
 
   @@unique([seasonId, teamId, title])
   @@index([teamId])
+}
+
+model SeasonQuiz {
+  id            String              @id @default(cuid())
+  seasonId      String
+  season        Season              @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  question      String
+  options       String              @default("[]")
+  correctAnswer String
+  position      Int                 @default(0)
+  pointValue    Int                 @default(10)
+  active        Boolean             @default(true)
+  attempts      SeasonQuizAttempt[]
+  createdAt     DateTime            @default(now())
+
+  @@unique([seasonId, position])
+  @@index([seasonId])
+}
+
+model SeasonQuizAttempt {
+  id             String     @id @default(cuid())
+  seasonQuizId   String
+  seasonQuiz     SeasonQuiz @relation(fields: [seasonQuizId], references: [id], onDelete: Cascade)
+  email          String
+  name           String     @default("Anonymous")
+  answers        String     @default("[]")
+  score          Int        @default(0)
+  total          Int        @default(0)
+  createdAt      DateTime   @default(now())
+
+  @@unique([seasonQuizId, email])
+  @@index([seasonQuizId])
 }

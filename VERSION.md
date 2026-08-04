@@ -25,7 +25,7 @@
 | Version | Date | Change |
 |---------|------|--------|
 | v1.0.1 | Jul 2026 | Initial production release |
-| v1.0.2 | Aug 2026 | Dress rehearsal (55 checks), System Monitor dashboard, backup policy scripts, Season 1 feedback template. Feature freeze maintained. |
+| v1.0.2 | Aug 2026 | Dress rehearsal (55 checks), System Monitor dashboard, backup policy scripts, Season 1 feedback template, **Season Quiz auto-generation (30–40 questions, 4 options each, auto at season end + admin generate)**. Feature freeze otherwise maintained. |
 
 ## v2.0 Backlog (post-Season 1 feedback)
 

@@ -1,6 +1,35 @@
-# GSCL v1.0.1 — RUNBOOK
+# GSCL v1.0.2 — RUNBOOK
 
 Match day operations guide for scorers and admins.
+
+## Release Workflow (Post-Launch Updates)
+
+Feature development is frozen post-launch. Only bug fixes and the approved season-quiz
+auto-generation feature ship during Season 1. Follow this strict workflow for any change:
+
+1. **Patch versioning**: Bump the minor version for new features, patch for bug fixes
+   (e.g. `v1.0.2` → `v1.0.3` bugfix → `v1.0.4` feature). Update all three places:
+   `package.json`, `VERSION.md`, and the version strings in `src/app/api/health/route.ts`
+   and `src/app/api/admin/system/route.ts`.
+2. **Never hot-edit the live branch.** All work happens on a dev branch / local `main`,
+   is validated locally, then pushed.
+3. **Validate before deploy**, in this order:
+   - `npm run typecheck` (or `npx tsc --noEmit`) → clean
+   - `npm run build` → all pages green
+   - `npm run dress:rehearsal` → expect `55/55 checks passed`
+   - Review the diff (`git diff`) before committing
+4. **Deploy order**: dev environment first → verify → then production via Vercel.
+5. After a successful deploy, confirm `/api/health` reports the new version and
+   `GET /admin/system` shows healthy counts.
+6. If a bug ships to production, fix forward with a new patch commit — never amend or
+   force-push a release commit.
+
+### Season Quiz Auto-Generation (v1.0.2)
+- Runs automatically when the last match of a season is completed.
+- Admin can also regenerate manually at **Admin → Quizzes → Season Quiz (Auto-generated)**.
+- Generates 30–40 questions (4 options each) from season data. Regenerating deletes
+  existing questions and all attempts — only regenerate before the quiz is live to users.
+- Users answer once per email on `/quiz`; scores and leaderboard are per season.
 
 ## Pre-Match (30 minutes before)
 
@@ -132,3 +161,4 @@ platform. It auto-refreshes every 60 seconds and shows:
 1. Review analytics trends in **Admin → Analytics** (page views, searches, predictions).
 2. Verify `DISASTER_RECOVERY.md` steps still match current data model.
 3. Confirm the dress rehearsal still passes: `npm run dress:rehearsal` → expect `55/55 checks passed`.
+4. If the season is complete, confirm the Season Quiz generated (Admin → Quizzes → Season Quiz) and is playable at `/quiz`.
