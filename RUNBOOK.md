@@ -1,4 +1,4 @@
-# GSCL v1.0.2 — RUNBOOK
+# GSCL v1.1.0 — RUNBOOK
 
 Match day operations guide for scorers and admins.
 
@@ -7,10 +7,12 @@ Match day operations guide for scorers and admins.
 Feature development is frozen post-launch. Only bug fixes and the approved season-quiz
 auto-generation feature ship during Season 1. Follow this strict workflow for any change:
 
-1. **Patch versioning**: Bump the minor version for new features, patch for bug fixes
-   (e.g. `v1.0.2` → `v1.0.3` bugfix → `v1.0.4` feature). Update all three places:
-   `package.json`, `VERSION.md`, and the version strings in `src/app/api/health/route.ts`
-   and `src/app/api/admin/system/route.ts`.
+1. **Semantic versioning** (see `VERSION.md`):
+   - `v1.1.0` — minor (feature) releases, e.g. Season Quiz.
+   - `v1.1.x` — patch (bug/security fix) releases for the current minor.
+   - `v2.0.0` — major (Season 2) features.
+   Update all four places: `package.json`, `VERSION.md`, and the version strings in
+   `src/app/api/health/route.ts` and `src/app/api/admin/system/route.ts`.
 2. **Never hot-edit the live branch.** All work happens on a dev branch / local `main`,
    is validated locally, then pushed.
 3. **Validate before deploy**, in this order:
@@ -24,9 +26,11 @@ auto-generation feature ship during Season 1. Follow this strict workflow for an
 6. If a bug ships to production, fix forward with a new patch commit — never amend or
    force-push a release commit.
 
-### Season Quiz Auto-Generation (v1.0.2)
+### Season Quiz Auto-Generation (v1.1.0)
 - Runs automatically when the last match of a season is completed.
 - Admin can also regenerate manually at **Admin → Quizzes → Season Quiz (Auto-generated)**.
+- The admin panel shows a **Season Quiz Status** indicator (Generated / Questions /
+  Generated On / Attempts) for the selected season.
 - Generates 30–40 questions (4 options each) from season data. Regenerating deletes
   existing questions and all attempts — only regenerate before the quiz is live to users.
 - Users answer once per email on `/quiz`; scores and leaderboard are per season.

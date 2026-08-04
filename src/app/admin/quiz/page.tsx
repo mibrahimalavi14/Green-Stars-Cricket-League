@@ -274,6 +274,28 @@ export default function AdminQuizPage() {
         </div>
         {sqMessage && <p className="mb-3 text-sm text-[var(--muted-foreground)]">{sqMessage}</p>}
 
+        {selectedSeason && seasonQuestions.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm">
+            <span className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${seasonQuestions.length > 0 ? "bg-green-500" : "bg-[var(--muted-foreground)]"}`} />
+              <span className="font-medium text-green-500">Generated</span>
+            </span>
+            <span className="text-[var(--muted-foreground)]">Questions: <span className="font-medium text-[var(--foreground)]">{seasonQuestions.length}</span></span>
+            <span className="text-[var(--muted-foreground)]">
+              Generated On:{" "}
+              <span className="font-medium text-[var(--foreground)]">
+                {new Date(seasonQuestions[0]?.createdAt).toLocaleString("en-GB")}
+              </span>
+            </span>
+            <span className="text-[var(--muted-foreground)]">
+              Attempts:{" "}
+              <span className="font-medium text-[var(--foreground)]">
+                {seasonQuestions.reduce((sum, q) => sum + (q._count?.attempts || 0), 0)}
+              </span>
+            </span>
+          </div>
+        )}
+
         {sqLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
         ) : selectedSeason && seasonQuestions.length > 0 ? (

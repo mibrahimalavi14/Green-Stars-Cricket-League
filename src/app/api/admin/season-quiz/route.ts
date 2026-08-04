@@ -12,7 +12,7 @@ export async function GET(req: Request) {
 
   const questions = await prisma.seasonQuiz.findMany({
     where: seasonId ? { seasonId } : {},
-    include: { season: true },
+    include: { season: true, _count: { select: { attempts: true } } },
     orderBy: [{ seasonId: "asc" }, { position: "asc" }],
   })
 

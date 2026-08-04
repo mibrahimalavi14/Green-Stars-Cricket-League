@@ -2,11 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.0.2 |
+| **Current Version** | v1.1.0 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes |
-| **Launch Tag** | `v1.0.2-season1` |
+| **Stable Production Tag** | `v1.0.2-season1` (launch) |
+| **Current Release Tag** | `v1.1.0-season1` (Season Quiz feature)
 
 ## Runtime
 
@@ -25,7 +26,17 @@
 | Version | Date | Change |
 |---------|------|--------|
 | v1.0.1 | Jul 2026 | Initial production release |
-| v1.0.2 | Aug 2026 | Dress rehearsal (55 checks), System Monitor dashboard, backup policy scripts, Season 1 feedback template, **Season Quiz auto-generation (30–40 questions, 4 options each, auto at season end + admin generate)**. Feature freeze otherwise maintained. |
+| v1.0.2 | Aug 2026 | Dress rehearsal (55 checks), System Monitor dashboard, backup policy scripts, Season 1 feedback template. |
+| v1.1.0 | Aug 2026 | **Season Quiz auto-generation** — new `SeasonQuiz`/`SeasonQuizAttempt` tables, new public + admin APIs, public play UI on `/quiz`, admin generate/review UI, auto-generation on season completion. Minor (feature) release per semantic versioning. |
+
+## Versioning Policy (Semantic)
+
+| Version | Purpose |
+|---------|---------|
+| v1.0.2-season1 | Stable production release (Season 1 launch) |
+| v1.1.0 | Season Quiz + new features |
+| v1.1.1+ | Future bug/security fixes for v1.1.x |
+| v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)
 
