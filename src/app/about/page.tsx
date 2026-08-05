@@ -49,11 +49,11 @@ function AboutPage() {
           The <strong className="text-[var(--foreground)]">Green Stars Cricket League (GSCL)</strong> is a
           fast-growing grassroots cricket league based in Haripur, Pakistan. Founded with the mission to
           discover and nurture local cricketing talent, GSCL brings together teams from across the region
-          to compete in an exciting, high-energy 5-over format.
+          to compete in an exciting, high-energy 4-over format.
         </p>
         <p>
         Our league is built on the values of sportsmanship, competition, and community. Every season, 8
-        teams battle through a double round-robin league stage, followed by playoffs, culminating in a
+        teams battle through a round-robin league stage, followed by playoffs, culminating in a
         grand final to crown the champion. From raw pace to classic swing, from powerful hitting to
         clever spin — GSCL is where the future stars of Pakistan cricket rise.
         </p>
@@ -78,7 +78,7 @@ function AboutPage() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/10">
             <Star className="h-6 w-6 text-[var(--accent)]" />
           </div>
-          <h3 className="mb-1 font-semibold">5-Over Format</h3>
+          <h3 className="mb-1 font-semibold">4-Over Format</h3>
           <p className="text-xs text-[var(--muted-foreground)]">
             Fast-paced, action-packed cricket where every ball counts — perfect for modern audiences and players alike.
           </p>

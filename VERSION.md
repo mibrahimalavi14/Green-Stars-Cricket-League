@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.1.3 |
+| **Current Version** | v1.1.4 |
 | **Release Date** | August 2026 |
 | **Status** | Production �?" Season 1 |
 | **Feature Freeze** | Yes |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.1.3-season1` (live scoring crash fix)
+| **Current Release Tag** | `v1.1.4-season1` (format text correction)
 
 ## Runtime
 
@@ -31,6 +31,7 @@
 | v1.1.1 | Aug 2026 | **Patch release** — certificate deployment fix. `next/og` certificate route moved off Edge runtime (exceeds 1 MB Vercel edge limit) to a standard serverless function; Satori `display: flex` fix for multi-child divs. No database, scoring, statistics, or UI behavior changed. |
 | v1.1.2 | Aug 2026 | **Patch release** — automatic playoff qualification. Dynamic Top 3 / Top 4 qualification based on total teams (`qualifiedTeams = totalTeams <= 5 ? 3 : 4`), Playoff Qualification info card, green/red Qualified/Eliminated row highlighting, dynamic playoff note on Fixtures. No DB schema, scoring engine, statistics, or API changes. |
 | v1.1.3 | Aug 2026 | **Patch release** — Live Scoring crash fix. `/live` page crashed with "Something went wrong" (`TypeError: Cannot read properties of null (reading 'team1Players')`) when no live match and no recently completed match existed. Added null-match guard in the match highlights memo. No DB schema, scoring engine, statistics, or API changes. |
+| v1.1.4 | Aug 2026 | **Patch release** — format text correction. Removed stale hardcoded "5-over" references that contradicted the actual T4 (4-over) config: fixtures subtitle, About page (4-Over Format card + round-robin wording), FAQ, Match Center, and the scoring guide (Balls Faced max 24, not 30). No DB schema, scoring engine, statistics, or API changes. |
 
 ## Versioning Policy (Semantic)
 
@@ -40,7 +41,8 @@
 | v1.1.1-season1 | Bug fix #1 — certificate deployment fix |
 | v1.1.2-season1 | Patch — automatic playoff qualification rules |
 | v1.1.3-season1 | Patch — live scoring crash fix |
-| v1.1.4+ | Future bug/security fixes for v1.1.x |
+| v1.1.4-season1 | Patch — format text correction |
+| v1.1.5+ | Future bug/security fixes for v1.1.x |
 | v1.2.0 | Minor, backward-compatible improvements (if feature freeze lifts) |
 | v2.0.0 | Major Season 2 features |
 

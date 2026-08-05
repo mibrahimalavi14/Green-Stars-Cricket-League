@@ -73,7 +73,7 @@ async function FixturesPage() {
       <AutoRefresh interval={30000} />
       <Breadcrumbs items={[{ label: "Fixtures" }]} />
       <h1 className="mb-2 text-3xl font-bold">Season 1 — Full Schedule</h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">8 teams • 5-over format • Double Round Robin • 30 league matches</p>
+      <p className="mb-8 text-[var(--muted-foreground)]">8 teams • 4-over format • Round Robin • 28 league matches</p>
 
       <div className="mb-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
         <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-3">

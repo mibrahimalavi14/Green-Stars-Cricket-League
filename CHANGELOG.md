@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.1.4-season1
+
+Fixed
+- Updated stale hardcoded format text that still referenced the old 5-over format and wrong match counts:
+  - Fixtures subtitle now reads "8 teams • 4-over format • Round Robin • 28 league matches".
+  - About page now shows "4-Over Format" and describes the round-robin league stage correctly.
+  - FAQ "What format does GSCL follow?" now says 4-over per side.
+  - Match Center subtitle now says 4-over format.
+  - Scoring guide: Balls Faced max is 24 (4 overs), not 30 (5 overs).
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes.
+
 ## v1.1.3-season1
 
 Fixed

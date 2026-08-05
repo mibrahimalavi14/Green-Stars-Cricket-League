@@ -33,7 +33,7 @@ export function MatchCenterClient({ matches }: { matches: MatchWithRelations[] }
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="mb-1 text-2xl font-bold sm:text-3xl">Match Center</h1>
       <p className="mb-6 text-sm text-[var(--muted-foreground)]">
-        {matches.length} matches &middot; 5-over format
+        {matches.length} matches &middot; 4-over format
       </p>
 
       <div className="mb-6 flex gap-2">
