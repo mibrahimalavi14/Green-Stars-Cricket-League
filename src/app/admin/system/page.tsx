@@ -85,7 +85,7 @@ export default function AdminSystemPage() {
     let mounted = true
     const load = () => {
       fetch("/api/admin/system")
-        .then((r) => r.json())
+        .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json() })
         .then((d) => {
           if (!mounted) return
           setData(d)
@@ -146,7 +146,7 @@ export default function AdminSystemPage() {
           onClick={() => {
             setLoading(true)
             fetch("/api/admin/system")
-              .then((r) => r.json())
+              .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json() })
               .then((d) => { setData(d); setLastRefresh(new Date()) })
               .finally(() => setLoading(false))
           }}

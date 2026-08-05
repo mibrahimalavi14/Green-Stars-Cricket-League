@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
-      path: "/admin",
+      path: "/",
     })
     return NextResponse.json({ success: true })
   }
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
 
 export async function DELETE() {
   const cookieStore = await cookies()
-  cookieStore.delete("admin_auth")
+  cookieStore.delete({ name: "admin_auth", path: "/" })
+  cookieStore.delete({ name: "admin_auth", path: "/admin" })
   return NextResponse.json({ success: true })
 }

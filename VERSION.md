@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.1.4 |
+| **Current Version** | v1.1.5 |
 | **Release Date** | August 2026 |
 | **Status** | Production �?" Season 1 |
 | **Feature Freeze** | Yes |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.1.4-season1` (format text correction)
+| **Current Release Tag** | `v1.1.5-season1` (admin auth cookie fix)
 
 ## Runtime
 
@@ -32,6 +32,7 @@
 | v1.1.2 | Aug 2026 | **Patch release** — automatic playoff qualification. Dynamic Top 3 / Top 4 qualification based on total teams (`qualifiedTeams = totalTeams <= 5 ? 3 : 4`), Playoff Qualification info card, green/red Qualified/Eliminated row highlighting, dynamic playoff note on Fixtures. No DB schema, scoring engine, statistics, or API changes. |
 | v1.1.3 | Aug 2026 | **Patch release** — Live Scoring crash fix. `/live` page crashed with "Something went wrong" (`TypeError: Cannot read properties of null (reading 'team1Players')`) when no live match and no recently completed match existed. Added null-match guard in the match highlights memo. No DB schema, scoring engine, statistics, or API changes. |
 | v1.1.4 | Aug 2026 | **Patch release** — format text correction. Removed stale hardcoded "5-over" references that contradicted the actual T4 (4-over) config: fixtures subtitle, About page (4-Over Format card + round-robin wording), FAQ, Match Center, and the scoring guide (Balls Faced max 24, not 30). No DB schema, scoring engine, statistics, or API changes. |
+| v1.1.5 | Aug 2026 | **Patch release** — admin auth cookie fix. The `admin_auth` cookie was set with `path=/admin`, so browsers never sent it to `/api/*` requests; every admin client-side API call (`/api/admin/system`, `/api/admin/analytics`, fair-play, moments, quiz, awards, practice, workspace, etc.) returned 401 and the System Monitor / Analytics pages crashed to "Something went wrong". Cookie path is now `/`; admin pages also handle non-2xx responses gracefully instead of crashing. No DB schema, scoring engine, statistics, or API changes. |
 
 ## Versioning Policy (Semantic)
 
@@ -42,7 +43,8 @@
 | v1.1.2-season1 | Patch — automatic playoff qualification rules |
 | v1.1.3-season1 | Patch — live scoring crash fix |
 | v1.1.4-season1 | Patch — format text correction |
-| v1.1.5+ | Future bug/security fixes for v1.1.x |
+| v1.1.5-season1 | Patch — admin auth cookie fix |
+| v1.1.6+ | Future bug/security fixes for v1.1.x |
 | v1.2.0 | Minor, backward-compatible improvements (if feature freeze lifts) |
 | v2.0.0 | Major Season 2 features |
 

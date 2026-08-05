@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.1.5-season1
+
+Fixed
+- Admin auth cookie was set with `path=/admin`, so browsers never attached it to `/api/*` requests. Every admin client-side API call (System Monitor, Analytics, fair-play, moments, quiz, awards, practice, workspace, season-lock) returned 401, and the System Monitor / Analytics pages crashed to the "Something went wrong" error page (`Cannot read properties of undefined (reading 'status' / 'matchScored')`).
+  - Cookie path is now `/` so admin APIs authenticate correctly.
+  - Logout now clears the cookie at both `/` and the legacy `/admin` path.
+  - System Monitor and Analytics pages now treat non-2xx API responses as load failures ("Failed to load …") instead of crashing to the error boundary.
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes.
+
 ## v1.1.4-season1
 
 Fixed
