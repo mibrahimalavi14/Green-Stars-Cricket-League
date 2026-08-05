@@ -1,8 +1,6 @@
 import { ImageResponse } from "next/og"
 import { prisma } from "@/lib/prisma"
 
-export const runtime = "edge"
-
 const CATEGORY_LABELS: Record<string, string> = {
   champion: "Season Champion",
   runner_up: "Runners-up",
