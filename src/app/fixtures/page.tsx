@@ -3,10 +3,15 @@ import { MatchCard } from "@/components/MatchCard"
 import { getVenueMapsUrl } from "@/lib/utils"
 import { Breadcrumbs } from "@/components/Breadcrumbs"
 import { AutoRefresh } from "@/components/AutoRefresh"
+import { getQualifiedTeams } from "@/components/PlayoffQualification"
 
 export const dynamic = "force-dynamic"
 
 async function FixturesPage() {
+  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const totalTeams = season ? await prisma.team.count({ where: { seasonId: season.id } }) : 0
+  const qualifiedTeams = getQualifiedTeams(totalTeams)
+
   const matches = await prisma.match.findMany({
     include: { team1: true, team2: true },
     orderBy: { date: "asc" },
@@ -123,7 +128,7 @@ async function FixturesPage() {
           <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-3">
             <h2 className="text-lg font-semibold text-amber-600 dark:text-amber-400">Playoffs</h2>
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-              Top 4 teams from the Points Table will qualify for the Playoffs.
+              Top {qualifiedTeams} teams from the Points Table will qualify for the Playoffs.
             </p>
           </div>
           <div className="divide-y divide-[var(--border)]">

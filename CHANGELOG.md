@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.1.2-season1
+
+Added
+- Automatic Playoff Qualification based on total teams.
+- Dynamic Top 3 / Top 4 qualification rules.
+- Playoff Qualification information card.
+- Automatic Qualified (green) and Eliminated (red) row highlighting.
+- Dynamic playoff note on Fixtures page.
+
+Changed
+- Qualification rules now adapt automatically:
+  - 4–5 Teams → Top 3 qualify
+  - 6+ Teams → Top 4 qualify
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes.
+
+Final Rule (Official)
+- 4–5 Teams — Top 3 qualify. Qualifier 1: Rank #1 vs Rank #2 → Winner → Final, Loser → Eliminator. Eliminator: Rank #3 vs Qualifier 1 Loser → Winner → Final.
+- 6 or more Teams — Top 4 qualify. Standard PSL/IPL playoff format: Qualifier 1 (#1 vs #2), Eliminator (#3 vs #4), Qualifier 2, Final.
+
 ## v1.1.1-season1
 
 Fixed

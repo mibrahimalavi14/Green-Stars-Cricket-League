@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { relativeDateLabel, getVenueMapsUrl } from "@/lib/utils"
+import PlayoffQualification, { getQualifiedTeams } from "@/components/PlayoffQualification"
 
 export const dynamic = "force-dynamic"
 
@@ -19,6 +20,9 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
   })
 
   if (!season) notFound()
+
+  const totalTeams = season.teams.length
+  const qualifiedTeams = getQualifiedTeams(totalTeams)
 
   const teamIds = season.teams.map(t => t.id)
   const matchIds = season.matches.map(m => m.id)
@@ -233,31 +237,40 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
                 <th className="p-3 text-center">NR</th>
                 <th className="p-3 text-center font-bold">Pts</th>
                 <th className="p-3 text-center">NRR</th>
+                <th className="p-3 text-center">Status</th>
               </tr>
             </thead>
             <tbody>
-              {standings.map((t, i) => (
-                <tr key={t.id} className={`border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)] ${i < 4 ? "bg-emerald-100 dark:bg-emerald-900/30" : i >= 4 ? "bg-red-100 dark:bg-red-900/30" : ""}`}>
-                  <td className="p-3 font-medium">{i + 1}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      {t.logo && <img src={t.logo} loading="lazy" alt={t.name} className="h-6 w-6 rounded-full object-cover" />}
-                      <span className="font-medium">{t.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-3 text-center">{t.played}</td>
-                  <td className="p-3 text-center text-green-600 dark:text-green-400">{t.won}</td>
-                  <td className="p-3 text-center text-red-500">{t.lost}</td>
-                  <td className="p-3 text-center">{t.tied}</td>
-                  <td className="p-3 text-center">{t.nr}</td>
-                  <td className="p-3 text-center font-bold">{t.points}</td>
-                  <td className={`p-3 text-center font-mono ${t.nrr > 0 ? "text-green-600 dark:text-green-400" : t.nrr < 0 ? "text-red-500" : ""}`}>{t.nrr.toFixed(3)}</td>
-                </tr>
-              ))}
+              {standings.map((t, i) => {
+                const isQualified = i + 1 <= qualifiedTeams
+                return (
+                  <tr key={t.id} className={`border-b border-[var(--border)] border-l-4 transition-colors hover:bg-[var(--muted)] ${isQualified ? "border-l-green-600 bg-green-50 dark:bg-green-900/20" : "border-l-red-600 bg-red-50 dark:bg-red-900/20"}`}>
+                    <td className="p-3 font-medium">{i + 1}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        {t.logo && <img src={t.logo} loading="lazy" alt={t.name} className="h-6 w-6 rounded-full object-cover" />}
+                        <span className="font-medium">{t.name}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-center">{t.played}</td>
+                    <td className="p-3 text-center text-green-600 dark:text-green-400">{t.won}</td>
+                    <td className="p-3 text-center text-red-500">{t.lost}</td>
+                    <td className="p-3 text-center">{t.tied}</td>
+                    <td className="p-3 text-center">{t.nr}</td>
+                    <td className="p-3 text-center font-bold">{t.points}</td>
+                    <td className={`p-3 text-center font-mono ${t.nrr > 0 ? "text-green-600 dark:text-green-400" : t.nrr < 0 ? "text-red-500" : ""}`}>{t.nrr.toFixed(3)}</td>
+                    <td className="p-3 text-center">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${isQualified ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" : "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400"}`}>
+                        {isQualified ? "🏆 Qualified" : "❌ Eliminated"}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-center text-sm font-semibold text-amber-600 dark:text-amber-400">TOP 4 TEAMS QUALIFY FOR PLAYOFFS</p>
+        {standings.length > 0 && <PlayoffQualification totalTeams={totalTeams} />}
       </section>
 
       {/* Matches */}
@@ -321,7 +334,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
               <div>
                 <h3 className="mb-1 text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Playoffs</h3>
                 <p className="mb-3 text-xs text-[var(--muted-foreground)]">
-                  Top 4 teams from the Points Table will qualify for the Playoffs.
+                  Top {qualifiedTeams} teams from the Points Table will qualify for the Playoffs.
                 </p>
                 <div className="space-y-3">
                   {season.matches.filter(match => match.stage !== "league").map((match) => (

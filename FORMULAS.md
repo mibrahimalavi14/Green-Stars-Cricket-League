@@ -57,6 +57,13 @@ Let `t1 = team1 runs + extras`, `t2 = team2 runs + extras`:
 
 **Tie-break sorting:** `points (desc)` then `NRR (desc)`.
 
+**Playoff qualification (official):** `qualifiedTeams = totalTeams <= 5 ? 3 : 4`.
+Top-N teams qualify (green rows, `🏆 Qualified` badge); the rest are eliminated
+(red rows, `❌ Eliminated` badge). The playoff format shown under the points table:
+- ≤5 teams → Q1 (#1 vs #2), Eliminator (#3 vs Q1 Loser), Final.
+- ≥6 teams → Q1 (#1 vs #2), Eliminator (#3 vs #4), Q2 (Q1 Loser vs Eliminator
+  Winner), Final.
+
 ## 6. Net Run Rate (NRR)
 
 ```

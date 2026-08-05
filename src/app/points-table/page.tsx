@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import PlayoffQualification, { getQualifiedTeams } from "@/components/PlayoffQualification"
 
 export const dynamic = "force-dynamic"
 
@@ -13,6 +14,9 @@ async function PointsTablePage() {
       </div>
     )
   }
+
+  const totalTeams = await prisma.team.count({ where: { seasonId: season.id } })
+  const qualifiedTeams = getQualifiedTeams(totalTeams)
 
   const { recalcPointsTable } = await import("@/lib/stats")
   const standings = await recalcPointsTable(season.id)
@@ -40,32 +44,41 @@ async function PointsTablePage() {
                 <th className="p-4 text-center">NR</th>
                 <th className="p-4 text-center font-bold">Pts</th>
                 <th className="p-4 text-center">NRR</th>
+                <th className="p-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody>
-              {standings.map((t, i) => (
-                <tr key={t.id} className={`border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)] ${i < 4 ? "bg-emerald-100 dark:bg-emerald-900/30" : i >= 4 ? "bg-red-100 dark:bg-red-900/30" : ""}`}>
-                  <td className="p-4 font-medium">{i + 1}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      {t.logo && <img src={t.logo} alt={t.name} className="h-8 w-8 rounded-full object-cover" />}
-                      <span className="font-medium">{t.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-center font-medium">{t.played}</td>
-                  <td className="p-4 text-center text-green-600 dark:text-green-400">{t.won}</td>
-                  <td className="p-4 text-center text-red-500">{t.lost}</td>
-                  <td className="p-4 text-center">{t.tied}</td>
-                  <td className="p-4 text-center">{t.nr}</td>
-                  <td className="p-4 text-center font-bold text-lg">{t.points}</td>
-                  <td className="p-4 text-center font-mono">{t.nrr.toFixed(3)}</td>
-                </tr>
-              ))}
+              {standings.map((t, i) => {
+                const isQualified = i + 1 <= qualifiedTeams
+                return (
+                  <tr key={t.id} className={`border-b border-[var(--border)] border-l-4 transition-colors hover:bg-[var(--muted)] ${isQualified ? "border-l-green-600 bg-green-50 dark:bg-green-900/20" : "border-l-red-600 bg-red-50 dark:bg-red-900/20"}`}>
+                    <td className="p-4 font-medium">{i + 1}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        {t.logo && <img src={t.logo} alt={t.name} className="h-8 w-8 rounded-full object-cover" />}
+                        <span className="font-medium">{t.name}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-center font-medium">{t.played}</td>
+                    <td className="p-4 text-center text-green-600 dark:text-green-400">{t.won}</td>
+                    <td className="p-4 text-center text-red-500">{t.lost}</td>
+                    <td className="p-4 text-center">{t.tied}</td>
+                    <td className="p-4 text-center">{t.nr}</td>
+                    <td className="p-4 text-center font-bold text-lg">{t.points}</td>
+                    <td className="p-4 text-center font-mono">{t.nrr.toFixed(3)}</td>
+                    <td className="p-4 text-center">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${isQualified ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" : "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400"}`}>
+                        {isQualified ? "🏆 Qualified" : "❌ Eliminated"}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
       )}
-      <p className="mt-3 text-center text-sm font-semibold text-amber-600 dark:text-amber-400">TOP 4 TEAMS QUALIFY FOR PLAYOFFS</p>
+      {standings.length > 0 && <PlayoffQualification totalTeams={totalTeams} />}
 
       <h2 className="mt-12 mb-2 text-2xl font-bold">Fair Play Table</h2>
       <p className="mb-6 text-sm text-[var(--muted-foreground)]">
