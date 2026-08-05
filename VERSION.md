@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.1.0 |
+| **Current Version** | v1.1.1 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes |
-| **Stable Production Tag** | `v1.0.2-season1` (launch) |
-| **Current Release Tag** | `v1.1.0-season1` (Season Quiz feature)
+| **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
+| **Current Release Tag** | `v1.1.1-season1` (patch — certificate fix)
 
 ## Runtime
 
@@ -27,15 +27,17 @@
 |---------|------|--------|
 | v1.0.1 | Jul 2026 | Initial production release |
 | v1.0.2 | Aug 2026 | Dress rehearsal (55 checks), System Monitor dashboard, backup policy scripts, Season 1 feedback template. |
-| v1.1.0 | Aug 2026 | **Season Quiz auto-generation** — new `SeasonQuiz`/`SeasonQuizAttempt` tables, new public + admin APIs, public play UI on `/quiz`, admin generate/review UI, auto-generation on season completion. **Practice Center** — official/practice workspace isolation (`Workspace` table + `Season.workspaceId`), admin Workspace Switcher, Clone Official → Practice, Reset Practice, Copy Setup → Official (setup-only promote), Practice Report. Workspace-scoped public routes/APIs/records. Minor (feature) release per semantic versioning. |
+| v1.1.0 | Aug 2026 | **Initial Season 1 production release** — Season Quiz auto-generation (`SeasonQuiz`/`SeasonQuizAttempt` tables, public play UI on `/quiz`, admin generate/review UI, lock/status), **Practice Center** (official/practice workspace isolation, admin Workspace Switcher, Clone Official → Practice, Reset Practice, Copy Setup → Official, Practice Report), workspace-scoped public routes/APIs/records. |
+| v1.1.1 | Aug 2026 | **Patch release** — certificate deployment fix. `next/og` certificate route moved off Edge runtime (exceeds 1 MB Vercel edge limit) to a standard serverless function; Satori `display: flex` fix for multi-child divs. No database, scoring, statistics, or UI behavior changed. |
 
 ## Versioning Policy (Semantic)
 
 | Version | Purpose |
 |---------|---------|
-| v1.0.2-season1 | Stable production release (Season 1 launch) |
-| v1.1.0 | Season Quiz + new features |
-| v1.1.1+ | Future bug/security fixes for v1.1.x |
+| v1.1.0-season1 | Initial production release (immutable) |
+| v1.1.1-season1 | Bug fix #1 — certificate deployment fix |
+| v1.1.2+ | Future bug/security fixes for v1.1.x |
+| v1.2.0 | Minor, backward-compatible improvements (if feature freeze lifts) |
 | v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)

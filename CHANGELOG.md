@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.1-season1
+
+Fixed
+- Fixed certificate generation deployment issue caused by Edge Runtime bundle size exceeding Vercel limits.
+- Certificate route now runs as a standard serverless function.
+- No database, scoring, statistics, or UI behavior changed.
+
 ## v1.1.0 (Launch Polish)
 - Practice Center: official/practice workspace isolation (Workspace table + Season.workspaceId)
 - Admin Workspace Switcher (OFFICIAL / PRACTICE MODE)
