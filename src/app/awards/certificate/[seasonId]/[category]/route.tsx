@@ -55,9 +55,9 @@ export async function GET(
     (
       <div
         style={{
+          display: "flex",
           width: "100%",
           height: "100%",
-          display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -69,28 +69,29 @@ export async function GET(
       >
         <div
           style={{
+            display: "flex",
             position: "absolute",
             inset: 24,
             border: `3px solid ${gold}`,
             borderRadius: 16,
-            display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <div style={{ fontSize: 40, letterSpacing: 12, color: gold, textTransform: "uppercase", fontWeight: 600 }}>
+          <div style={{ display: "flex", fontSize: 40, letterSpacing: 12, color: gold, textTransform: "uppercase", fontWeight: 600 }}>
             Green Stars Cricket League
           </div>
-          <div style={{ marginTop: 16, fontSize: 22, letterSpacing: 4, color: "#a8a29e", textTransform: "uppercase" }}>
+          <div style={{ display: "flex", marginTop: 16, fontSize: 22, letterSpacing: 4, color: "#a8a29e", textTransform: "uppercase" }}>
             Season {season.year}
           </div>
-          <div style={{ marginTop: 48, fontSize: 26, letterSpacing: 6, color: "#d6d3d1", textTransform: "uppercase" }}>
+          <div style={{ display: "flex", marginTop: 48, fontSize: 26, letterSpacing: 6, color: "#d6d3d1", textTransform: "uppercase" }}>
             Award Winner
           </div>
-          <div style={{ marginTop: 12, fontSize: 72, fontWeight: 800, color: "#fafaf9" }}>{subject}</div>
+          <div style={{ display: "flex", marginTop: 12, fontSize: 72, fontWeight: 800, color: "#fafaf9" }}>{subject}</div>
           <div
             style={{
+              display: "flex",
               marginTop: 28,
               padding: "12px 40px",
               background: gold,
@@ -102,8 +103,8 @@ export async function GET(
           >
             {CATEGORY_LABELS[category] || category.replace(/_/g, " ")}
           </div>
-          {detail ? <div style={{ marginTop: 24, fontSize: 24, color: "#a8a29e" }}>{detail}</div> : null}
-          <div style={{ position: "absolute", bottom: 40, fontSize: 18, color: "#78716c", letterSpacing: 2 }}>
+          {detail ? <div style={{ display: "flex", marginTop: 24, fontSize: 24, color: "#a8a29e" }}>{detail}</div> : null}
+          <div style={{ display: "flex", position: "absolute", bottom: 40, fontSize: 18, color: "#78716c", letterSpacing: 2 }}>
             GSCL · Season {season.name}
           </div>
         </div>
