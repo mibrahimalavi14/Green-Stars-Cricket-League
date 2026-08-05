@@ -1,5 +1,6 @@
 import { prisma } from "./prisma"
 import { calculatePartnerships, getHighestPartnership, type BallData } from "./partnerships"
+import { WORKSPACE_OFFICIAL } from "./workspace"
 
 export interface TeamRecord {
   type: string
@@ -10,6 +11,9 @@ export interface TeamRecord {
   matchLabel?: string
   details?: string
   date?: Date
+  venue?: string
+  opponent?: string
+  seasonName?: string
 }
 
 export interface PlayerRecord {
@@ -22,6 +26,9 @@ export interface PlayerRecord {
   matchLabel?: string
   details?: string
   date?: Date
+  venue?: string
+  opponent?: string
+  seasonName?: string
 }
 
 function makeMatchLabel(m: { matchNo: number; stage: string; team1: { name: string }; team2: { name: string }; season: { name: string } }) {
@@ -29,9 +36,9 @@ function makeMatchLabel(m: { matchNo: number; stage: string; team1: { name: stri
   return `M${m.matchNo} — ${m.team1.name} vs ${m.team2.name}`
 }
 
-export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; playerRecords: PlayerRecord[] }> {
+export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL): Promise<{ teamRecords: TeamRecord[]; playerRecords: PlayerRecord[] }> {
   const matches = await prisma.match.findMany({
-    where: { status: "completed" },
+    where: { status: "completed", season: { workspaceId } },
     include: { team1: true, team2: true, season: true, innings: true, performances: { include: { player: true } } },
     orderBy: { date: "asc" },
   })
@@ -51,6 +58,9 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
   const runOutMap: Record<string, { count: number; name: string; teamName: string }> = {}
   const stumpingMap: Record<string, { count: number; name: string; teamName: string }> = {}
   const seasonSixesMap: Record<string, { count: number; name: string; teamName: string }> = {}
+  const dotBallsMap: Record<string, { count: number; name: string; teamName: string }> = {}
+  const fastestFiftyAcc: PlayerRecord[] = []
+  const fastestCentury: PlayerRecord[] = []
 
   const teamNameById = new Map<string, string>()
   for (const m of matches) {
@@ -60,6 +70,12 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
 
   for (const m of matches) {
     const ml = makeMatchLabel(m)
+
+    const perfInfo = new Map<string, { name: string; teamName: string }>()
+    for (const p of m.performances) {
+      perfInfo.set(p.playerId, { name: p.player.name, teamName: m.team1Id === p.teamId ? m.team1.name : m.team2.name })
+    }
+    const accurateFiftyPlayers = new Set<string>()
 
     for (const inn of m.innings) {
       const teamName = inn.teamId === m.team1Id ? m.team1.name : m.team2.name
@@ -127,13 +143,49 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
           details: `Reached 50 in ${fiftyAtBalls} balls (finished ${inn.runs}/${inn.wickets})`, date: m.date,
         })
       }
+
+      const perStriker = new Map<string, { runs: number; legal: number; dots: number; fifty: number | null; century: number | null }>()
+      for (const b of ballsData) {
+        const strikerRuns = b.runs - b.byes - b.legByes
+        const isLegal = !b.isWide && !b.isNoBall
+        if (!perStriker.has(b.striker)) perStriker.set(b.striker, { runs: 0, legal: 0, dots: 0, fifty: null, century: null })
+        const st = perStriker.get(b.striker)!
+        st.runs += strikerRuns
+        if (isLegal) {
+          st.legal++
+          if (strikerRuns === 0) st.dots++
+        }
+        if (st.fifty === null && st.runs >= 50) st.fifty = st.legal
+        if (st.century === null && st.runs >= 100) st.century = st.legal
+      }
+      for (const [pid, st] of perStriker) {
+        const info = perfInfo.get(pid)
+        if (!info) continue
+        if (st.fifty !== null && st.fifty > 0) {
+          accurateFiftyPlayers.add(pid)
+          fastestFiftyAcc.push({
+            type: "fastest_fifty", value: st.fifty, playerName: info.name, playerId: pid, teamName: info.teamName,
+            matchId: m.id, matchLabel: ml, details: `Fifty in ${st.fifty} balls`, date: m.date,
+          })
+        }
+        if (st.century !== null && st.century > 0) {
+          fastestCentury.push({
+            type: "fastest_century", value: st.century, playerName: info.name, playerId: pid, teamName: info.teamName,
+            matchId: m.id, matchLabel: ml, details: `Century in ${st.century} balls`, date: m.date,
+          })
+        }
+        if (st.dots > 0) {
+          if (!dotBallsMap[pid]) dotBallsMap[pid] = { count: 0, name: info.name, teamName: info.teamName }
+          dotBallsMap[pid].count += st.dots
+        }
+      }
     }
 
     for (const p of m.performances) {
       const tmName = m.team1Id === p.teamId ? m.team1.name : m.team2.name
       if (p.battingRuns >= 20 && p.ballsFaced > 0) fastest20.push({ type: "fastest_20", value: p.ballsFaced, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} off ${p.ballsFaced} balls`, date: m.date })
       if (p.battingRuns >= 30 && p.ballsFaced > 0) fastest30.push({ type: "fastest_30", value: p.ballsFaced, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} off ${p.ballsFaced} balls`, date: m.date })
-      if (p.battingRuns >= 50 && p.ballsFaced > 0) fastest50.push({ type: "fastest_50", value: p.ballsFaced, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} off ${p.ballsFaced} balls`, date: m.date })
+      if (p.battingRuns >= 50 && p.ballsFaced > 0 && !accurateFiftyPlayers.has(p.playerId)) fastestFiftyAcc.push({ type: "fastest_fifty", value: p.ballsFaced, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} off ${p.ballsFaced} balls`, date: m.date })
       if (p.sixes > 0) mostSixesInnings.push({ type: "most_sixes_innings", value: p.sixes, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.sixes} sixes`, date: m.date })
       if (p.fours > 0) mostFoursInnings.push({ type: "most_fours_innings", value: p.fours, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.fours} fours`, date: m.date })
       if (p.battingRuns > 0) mostRunsMatch.push({ type: "most_runs_match", value: p.battingRuns, playerName: p.player.name, playerId: p.playerId, teamName: tmName, matchId: m.id, matchLabel: ml, details: `${p.battingRuns} runs${p.ballsFaced > 0 ? ` off ${p.ballsFaced} balls` : ""}`, date: m.date })
@@ -188,7 +240,8 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
 
   fastest20.sort((a, b) => a.value - b.value)
   fastest30.sort((a, b) => a.value - b.value)
-  fastest50.sort((a, b) => a.value - b.value)
+  fastestFiftyAcc.sort((a, b) => a.value - b.value)
+  fastestCentury.sort((a, b) => a.value - b.value)
   mostSixesInnings.sort((a, b) => b.value - a.value)
   mostFoursInnings.sort((a, b) => b.value - a.value)
   highestPartnerships.sort((a, b) => b.value - a.value)
@@ -219,11 +272,44 @@ export async function computeAllRecords(): Promise<{ teamRecords: TeamRecord[]; 
   ]
 
   const sortedPlayerRecords: PlayerRecord[] = [
-    ...topN(fastest20), ...topN(fastest30), ...topN(fastest50),
+    ...topN(fastest20), ...topN(fastest30), ...topN(fastestFiftyAcc), ...topN(fastestCentury),
     ...topN(mostSixesInnings), ...topN(mostFoursInnings), ...topN(mostRunsMatch), ...topN(bestBowling), ...topN(highestPartnerships, 5),
     ...mapToRecords(seasonSixesMap, "most_sixes_season"), ...mapToRecords(potmMap, "most_potm"), ...mapToRecords(catchMap, "most_catches"),
-    ...mapToRecords(runOutMap, "most_run_outs"), ...mapToRecords(stumpingMap, "most_stumpings"),
+    ...mapToRecords(runOutMap, "most_run_outs"), ...mapToRecords(stumpingMap, "most_stumpings"), ...mapToRecords(dotBallsMap, "most_dot_balls"),
   ]
 
-  return { teamRecords: sortedTeamRecords, playerRecords: sortedPlayerRecords }
+  const matchCtxById = new Map<string, { venue: string; seasonName: string; opponentByTeam: Map<string, string>; teamIdByName: Map<string, string>; date: Date }>()
+  for (const m of matches) {
+    matchCtxById.set(m.id, {
+      venue: m.venue || "",
+      seasonName: m.season?.name || "",
+      date: m.date,
+      opponentByTeam: new Map([[m.team1Id, m.team2?.name || ""], [m.team2Id, m.team1?.name || ""]]),
+      teamIdByName: new Map([[m.team1?.name || "", m.team1Id], [m.team2?.name || "", m.team2Id]]),
+    })
+  }
+
+  const enrichTeam = (r: TeamRecord): TeamRecord => {
+    const ctx = r.matchId ? matchCtxById.get(r.matchId) : undefined
+    if (ctx) {
+      r.venue = ctx.venue
+      r.opponent = ctx.opponentByTeam.get(r.teamId) || ""
+      r.seasonName = ctx.seasonName
+      r.date = r.date || ctx.date
+    }
+    return r
+  }
+  const enrichPlayer = (r: PlayerRecord): PlayerRecord => {
+    const ctx = r.matchId ? matchCtxById.get(r.matchId) : undefined
+    if (ctx) {
+      r.venue = ctx.venue
+      r.seasonName = ctx.seasonName
+      r.date = r.date || ctx.date
+      const teamId = r.teamName ? ctx.teamIdByName.get(r.teamName) : undefined
+      if (teamId) r.opponent = ctx.opponentByTeam.get(teamId) || ""
+    }
+    return r
+  }
+
+  return { teamRecords: sortedTeamRecords.map(enrichTeam), playerRecords: sortedPlayerRecords.map(enrichPlayer) }
 }

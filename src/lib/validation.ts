@@ -216,9 +216,22 @@ export const leaguePenaltySchema = z.object({
 
 export const seasonAwardSchema = z.object({
   seasonId: z.string().min(1),
-  category: z.enum(["orange_cap", "purple_cap", "mvp", "best_batter", "best_bowler", "emerging_player", "fair_play"]),
+  category: z.enum([
+    "champion",
+    "runner_up",
+    "orange_cap",
+    "purple_cap",
+    "mvp",
+    "best_batter",
+    "best_bowler",
+    "best_fielder",
+    "most_improved",
+    "emerging_player",
+    "fair_play",
+  ]),
   playerId: z.string().optional(),
   teamId: z.string().optional(),
+  value: z.string().optional(),
   note: z.string().max(500).optional(),
 })
 

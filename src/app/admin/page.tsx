@@ -1,15 +1,17 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity } from "lucide-react"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
 async function AdminPage() {
+  const workspaceId = await getCurrentWorkspaceId()
 
   const [teams, players, matches, news, contacts] = await Promise.all([
-    prisma.team.count(),
-    prisma.player.count(),
-    prisma.match.count(),
+    prisma.team.count({ where: { season: { workspaceId } } }),
+    prisma.player.count({ where: { team: { season: { workspaceId } } } }),
+    prisma.match.count({ where: { season: { workspaceId } } }),
     prisma.news.count(),
     prisma.contact.count(),
   ])
@@ -48,6 +50,12 @@ async function AdminPage() {
           <Calendar className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Seasons</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Manage seasons & prediction lock</p>
+        </Link>
+
+        <Link href="/admin/practice" className="rounded-xl border border-purple-500/40 bg-[var(--card)] p-6 transition-all hover:border-purple-500 hover:shadow-lg">
+          <FlaskConical className="mb-3 h-8 w-8 text-purple-500" />
+          <h3 className="text-lg font-semibold">Practice / Training</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Clone season, practice matches, promote setups</p>
         </Link>
 
         <Link href="/admin/performances" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">

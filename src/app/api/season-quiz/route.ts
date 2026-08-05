@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -7,8 +8,8 @@ export async function GET(req: Request) {
   const email = searchParams.get("email")?.trim()
 
   const season = seasonId
-    ? await prisma.season.findUnique({ where: { id: seasonId } })
-    : await prisma.season.findFirst({ where: { isActive: true } })
+    ? await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
+    : await prisma.season.findFirst({ where: { isActive: true, workspaceId: WORKSPACE_OFFICIAL } })
 
   if (!season) return NextResponse.json({ season: null, ready: false, questions: [], attempt: null })
 

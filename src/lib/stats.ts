@@ -108,29 +108,55 @@ export async function recalcPointsTable(seasonId: string) {
   }).sort((a, b) => b.points - a.points || b.nrr - a.nrr)
 }
 
-export async function recalcPlayerStats() {
+export async function recalcPlayerStats(seasonId?: string) {
   const [players, allMatches, performances] = await Promise.all([
-    prisma.player.findMany(),
-    prisma.playerMatch.findMany({
-      select: {
-        playerId: true,
-        battingRuns: true, ballsFaced: true, isOut: true,
-        bowlingWickets: true, bowlingRuns: true, ballsBowled: true,
-        dismissalType: true, secondDismissalType: true,
-        threes: true, dotBalls: true, maidens: true, wides: true, noBalls: true, hattricks: true,
-      },
-    }),
-    prisma.playerMatch.groupBy({
-      by: ["playerId"],
-      _sum: {
-        battingRuns: true, ballsFaced: true, fours: true, sixes: true,
-        ones: true, twos: true, bowlingWickets: true, bowlingRuns: true,
-        ballsBowled: true, maidens: true, wides: true, noBalls: true,
-        threes: true, dotBalls: true, hattricks: true,
-        catches: true, stumpings: true, runOuts: true,
-      },
-      _count: { id: true },
-    }),
+    seasonId
+      ? prisma.player.findMany({ where: { team: { seasonId } } })
+      : prisma.player.findMany(),
+    seasonId
+      ? prisma.playerMatch.findMany({
+          where: { match: { seasonId } },
+          select: {
+            playerId: true,
+            battingRuns: true, ballsFaced: true, isOut: true,
+            bowlingWickets: true, bowlingRuns: true, ballsBowled: true,
+            dismissalType: true, secondDismissalType: true,
+            threes: true, dotBalls: true, maidens: true, wides: true, noBalls: true, hattricks: true,
+          },
+        })
+      : prisma.playerMatch.findMany({
+          select: {
+            playerId: true,
+            battingRuns: true, ballsFaced: true, isOut: true,
+            bowlingWickets: true, bowlingRuns: true, ballsBowled: true,
+            dismissalType: true, secondDismissalType: true,
+            threes: true, dotBalls: true, maidens: true, wides: true, noBalls: true, hattricks: true,
+          },
+        }),
+    seasonId
+      ? prisma.playerMatch.groupBy({
+          by: ["playerId"],
+          where: { match: { seasonId } },
+          _sum: {
+            battingRuns: true, ballsFaced: true, fours: true, sixes: true,
+            ones: true, twos: true, bowlingWickets: true, bowlingRuns: true,
+            ballsBowled: true, maidens: true, wides: true, noBalls: true,
+            threes: true, dotBalls: true, hattricks: true,
+            catches: true, stumpings: true, runOuts: true,
+          },
+          _count: { id: true },
+        })
+      : prisma.playerMatch.groupBy({
+          by: ["playerId"],
+          _sum: {
+            battingRuns: true, ballsFaced: true, fours: true, sixes: true,
+            ones: true, twos: true, bowlingWickets: true, bowlingRuns: true,
+            ballsBowled: true, maidens: true, wides: true, noBalls: true,
+            threes: true, dotBalls: true, hattricks: true,
+            catches: true, stumpings: true, runOuts: true,
+          },
+          _count: { id: true },
+        }),
   ])
 
   const perfMap = new Map(performances.map(p => [p.playerId, p]))

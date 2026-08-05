@@ -8,10 +8,58 @@ import { Trophy, Zap, Target, Star, Medal, ArrowUp, CircleDot } from "lucide-rea
 type PerfMin = { battingRuns: number; ballsFaced: number; fours: number; sixes: number; isOut: boolean; wicketsLost: number; dismissalType: string; secondDismissalType: string; bowlingWickets: number; bowlingRuns: number; ballsBowled: number; catches: number; dismissedByBowlerId: string; dismissedByFielderId: string; secondDismissedByBowlerId: string; secondDismissedByFielderId: string; match: { id: string; team1: { logo: string; shortName: string }; team2: { logo: string; shortName: string }; seasonId: string; date: string } }
 type SeasonStat = { seasonId: string; seasonName: string; seasonYear: number; inns: number; runs: number; ballsFaced: number; wickets: number; ballsBowled: number; runsConceded: number; fours: number; sixes: number; dismissals: number; catches: number; stumpings: number; hs: number }
 
-export function PlayerStatsClient({ player, performances, seasonStats, activePerfs, transfers }: { player: any; performances: PerfMin[]; seasonStats: SeasonStat[]; activePerfs: PerfMin[]; transfers: any[] }) {
+export function PlayerStatsClient({ player, performances, seasonStats, activePerfs, transfers, awards }: { player: any; performances: PerfMin[]; seasonStats: SeasonStat[]; activePerfs: PerfMin[]; transfers: any[]; awards?: any[] }) {
   const [view, setView] = useState<string>("all")
 
   const p = player
+
+  const badgeMap: Record<string, { label: string; icon: string; cls: string }> = {
+    champion: { label: "Champion", icon: "🏆", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400" },
+    runner_up: { label: "Runner-up", icon: "🥈", cls: "bg-slate-400/15 text-slate-500" },
+    orange_cap: { label: "Orange Cap", icon: "🧢", cls: "bg-orange-500/15 text-orange-600 dark:text-orange-400" },
+    purple_cap: { label: "Purple Cap", icon: "🟣", cls: "bg-violet-500/15 text-violet-600 dark:text-violet-400" },
+    mvp: { label: "MVP", icon: "🏅", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400" },
+    best_batter: { label: "Best Batter", icon: "🏏", cls: "bg-sky-500/15 text-sky-600 dark:text-sky-400" },
+    best_bowler: { label: "Best Bowler", icon: "🎳", cls: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400" },
+    best_fielder: { label: "Best Fielder", icon: "🧤", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
+    most_improved: { label: "Most Improved", icon: "📈", cls: "bg-lime-500/15 text-lime-600 dark:text-lime-400" },
+    emerging_player: { label: "Emerging Player", icon: "⭐", cls: "bg-rose-500/15 text-rose-600 dark:text-rose-400" },
+    fair_play: { label: "Fair Play", icon: "🤝", cls: "bg-teal-500/15 text-teal-600 dark:text-teal-400" },
+  }
+
+  const careerHundreds = performances.filter(x => x.battingRuns >= 100).length
+  const careerFifties = performances.filter(x => x.battingRuns >= 50).length
+  const careerFiveWickets = performances.filter(x => x.bowlingWickets >= 5).length
+  const careerHattricks = performances.reduce((a, x) => a + ((x as any).hattricks || 0), 0)
+
+  const awardPriority: Record<string, number> = {
+    champion: 0,
+    runner_up: 1,
+    orange_cap: 2,
+    purple_cap: 3,
+    mvp: 4,
+    best_batter: 5,
+    best_bowler: 6,
+    best_fielder: 7,
+    most_improved: 8,
+    emerging_player: 9,
+    fair_play: 10,
+  }
+
+  const badges = [
+    ...(awards || []).map(a => {
+      const meta = badgeMap[a.category]
+      if (!meta) return null
+      return { key: `${a.seasonId}-${a.category}`, label: meta.label, icon: meta.icon, cls: meta.cls, sub: a.season?.name || "", order: awardPriority[a.category] ?? 50 }
+    }),
+    ...(careerHattricks > 0 ? [{ key: "ht", label: `${careerHattricks} Hat-trick${careerHattricks > 1 ? "s" : ""}`, icon: "🎩", cls: "bg-purple-500/15 text-purple-600 dark:text-purple-400", order: 11 }] : []),
+    ...(careerHundreds > 0 ? [{ key: "100s", label: `${careerHundreds} Century${careerHundreds > 1 ? "s" : ""}`, icon: "💯", cls: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400", order: 12 }] : []),
+    ...(careerFiveWickets > 0 ? [{ key: "5w", label: `${careerFiveWickets} Five-for${careerFiveWickets > 1 ? "s" : ""}`, icon: "🧨", cls: "bg-red-500/15 text-red-600 dark:text-red-400", order: 13 }] : []),
+    ...(careerFifties >= 5 ? [{ key: "50s", label: `${careerFifties} Fifties`, icon: "🎯", cls: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400", order: 14 }] : []),
+  ].filter(Boolean) as { key: string; label: string; icon: string; cls: string; sub?: string; order: number }[]
+
+  badges.sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
+
   const selPerfs = view === "all" ? performances : view === "latest" ? activePerfs : performances.filter(x => x.match.seasonId === view)
   const selStat = view === "all" ? null : view === "latest" ? seasonStats.find(s => s.seasonId === p.team?.seasonId) || seasonStats[0] : seasonStats.find(s => s.seasonId === view)
 
@@ -104,6 +152,17 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             </div>
           </div>
         </div>
+
+        {badges.length > 0 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            {badges.map(b => (
+              <span key={b.key} title={b.sub || b.label} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${b.cls}`}>
+                <span>{b.icon}</span> {b.label}
+                {b.sub && <span className="opacity-70">· {b.sub}</span>}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--border)] pb-3">
           {tabs.map(t => (

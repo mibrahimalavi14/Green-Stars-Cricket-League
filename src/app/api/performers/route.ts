@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET() {
   const players = await prisma.player.findMany({
+    where: { team: { season: { workspaceId: WORKSPACE_OFFICIAL } } },
     include: { team: { select: { name: true, shortName: true } } },
     orderBy: { runs: "desc" },
   })

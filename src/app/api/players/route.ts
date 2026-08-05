@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { createPlayerSchema } from "@/lib/validation"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
 
 export async function GET() {
-  const players = await prisma.player.findMany({ include: { team: true } })
+  const workspaceId = await getCurrentWorkspaceId()
+  const players = await prisma.player.findMany({ where: { team: { season: { workspaceId } } }, include: { team: true } })
   return NextResponse.json(players)
 }
 
@@ -21,6 +23,10 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
+
+  const workspaceId = await getCurrentWorkspaceId()
+  const team = await prisma.team.findFirst({ where: { id: parsed.data.teamId, season: { workspaceId } }, select: { id: true } })
+  if (!team) return NextResponse.json({ error: "Team not found in this workspace" }, { status: 404 })
 
   const data = parsed.data
   const player = await prisma.player.create({
@@ -50,6 +56,10 @@ export async function PATCH(req: Request) {
   const body = await req.json()
   const { id, ...data } = body
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+
+  const workspaceId = await getCurrentWorkspaceId()
+  const existing = await prisma.player.findFirst({ where: { id, team: { season: { workspaceId } } }, select: { id: true } })
+  if (!existing) return NextResponse.json({ error: "Player not found in this workspace" }, { status: 404 })
 
   if (data.resetStats) {
     const reset = Object.fromEntries(STAT_FIELDS.map(f => [f, 0]))
@@ -83,6 +93,9 @@ export async function DELETE(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await req.json()
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+  const workspaceId = await getCurrentWorkspaceId()
+  const existing = await prisma.player.findFirst({ where: { id, team: { season: { workspaceId } } }, select: { id: true } })
+  if (!existing) return NextResponse.json({ error: "Player not found in this workspace" }, { status: 404 })
   const player = await prisma.player.findUnique({ where: { id }, select: { teamId: true, name: true, isCaptain: true } })
   if (player?.isCaptain) {
     await prisma.team.update({ where: { id: player.teamId }, data: { captainName: "" } })

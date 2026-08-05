@@ -64,6 +64,11 @@ const _config = {
   motmCatchesWeight: 5,
   motmRunOutsWeight: 5,
   motmStumpingsWeight: 5,
+  fairPlayBasePoints: 100,
+  fairPlayWarningDeduction: 5,
+  fairPlayOverRateDeduction: 10,
+  fairPlayBehaviorDeduction: 15,
+  fairPlaySportsmanshipBonus: 2,
 } as const
 
 export const MATCH_CONFIG = {

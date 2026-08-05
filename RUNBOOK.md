@@ -39,6 +39,78 @@ auto-generation feature ship during Season 1. Follow this strict workflow for an
   live to users.
 - Users answer once per email on `/quiz`; scores and leaderboard are per season.
 
+### Practice Center (v1.1.0)
+A safe, isolated playground for the admin to rehearse scoring, match flow, and Super
+Over — **without touching any official Season 1 data**.
+
+#### What is a Practice Workspace?
+The database is split into two logical **workspaces**:
+- **Official** (`official`) — the real Season 1 data (teams, players, matches, stats,
+  records, awards, snapshots, points table). This is what fans see on the public site.
+- **Practice** (`practice`) — a disposable copy for drills. Every Practice feature is
+  hard-scoped to the `practice` workspace; public pages and public APIs never read it.
+
+The active workspace is chosen with the admin **Workspace Switcher** (shown at the top of
+every admin page). The choice is stored in an admin-only cookie and is **never** exposed to
+visitors.
+
+#### Official vs Practice
+| Aspect | Official | Practice |
+|--------|----------|----------|
+| Purpose | Real Season 1 | Rehearsal / drills |
+| Data | Permanent | Disposable (Reset clears it) |
+| Public visibility | Yes | **No** — invisible to fans |
+| Stats / records / awards | Real | Ignored / wiped by Reset |
+| Season snapshot | Auto after each match | Never saved to public snapshot |
+| Score via | `/admin/live-scoring/[matchId]` | Same scorer, in Practice mode |
+| Played by | Fans | Only admins (invisible otherwise) |
+
+#### Switching workspaces
+1. Log in as admin.
+2. On any admin page, use the **Workspace Switcher** at the top.
+3. **OFFICIAL SEASON** (amber) = real data. **PRACTICE MODE** (purple) = drill mode.
+4. Switch back to **Official** before any real match-day work.
+
+> ⚠️ All admin pages and admin APIs are workspace-aware. While PRACTICE MODE is active,
+> the admin panel shows practice data — double-check the purple badge before editing.
+
+#### Copy Setup → Official (promote)
+Use this to carry a well-rehearsed match **setup** into the official season:
+
+1. Build your practice match in PRACTICE MODE (set teams, Playing XI, toss, officials,
+   venue — you can even run a full ball-by-ball rehearsal).
+2. On **Admin → Practice Center**, pick the practice match and click **Copy Setup →
+   Official**.
+3. The system creates an official **upcoming** match with:
+   - Same teams (mapped to the official originals)
+   - Playing XI copied and mapped to official players
+   - Toss result, venue, officials, match time copied
+   - **No innings, no runs, no stats** — it is setup-only.
+4. Finish the match on the official season exactly as you would on match day.
+
+> Copy Setup is **setup-only by design**. It never copies scores, stats, or results.
+
+#### Reset Practice — when to use it
+Reset wipes **practice-only** data:
+- Practice matches, innings, ball events, squads, predictions, quizzes, POTM votes
+- Practice awards, honors, transfers, fair-play, penalties, captaincies, snapshots
+- Practice player statistics (reset to zero)
+
+Reset **never touches** the official workspace. It also keeps practice teams/players/seasons
+(so you don't need to re-clone). Use Reset:
+- Before a fresh rehearsal session (to start from a clean slate)
+- After a drill that went badly
+- Before cloning again from official
+
+#### Safety warnings
+- ✅ Practice data **cannot** affect official stats, records, awards, snapshots, or the
+  public points table.
+- ✅ Reset and Copy Setup are admin-only, server-side guarded, and refuse to run outside
+  the `practice` workspace.
+- ⚠️ Do **not** switch to Official mid-rehearsal — you'd be scoring the real season.
+- ⚠️ Verify the Workspace Switcher shows **PRACTICE MODE** before running a drill and
+  **OFFICIAL SEASON** before match day.
+
 ## Pre-Match (30 minutes before)
 
 ### 1. Verify System Health

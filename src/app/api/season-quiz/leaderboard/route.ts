@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const seasonId = searchParams.get("seasonId")
 
   if (!seasonId) return NextResponse.json({ error: "Missing seasonId" }, { status: 400 })
+
+  const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
+  if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
 
   const questions = await prisma.seasonQuiz.findMany({
     where: { seasonId, active: true },

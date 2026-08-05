@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
 import { AdminMatchForm } from "@/components/AdminMatchForm"
 import { AdminMatchesList } from "@/components/AdminMatchesList"
 
@@ -6,8 +7,10 @@ export const dynamic = "force-dynamic"
 
 async function AdminMatchesPage({ searchParams }: { searchParams: Promise<{ action?: string }> }) {
   const { action } = await searchParams
+  const workspaceId = await getCurrentWorkspaceId()
 
   const matches = await prisma.match.findMany({
+    where: { season: { workspaceId } },
     include: { team1: true, team2: true, season: true },
     orderBy: { date: "asc" },
   })

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       const match = await prisma.match.findUnique({ where: { id: matchId } })
       if (!match) return NextResponse.json({ error: "Match not found" }, { status: 404 })
 
-      await recalcPlayerStats()
+      await recalcPlayerStats(match.seasonId || undefined)
       if (match.status === "completed" && match.seasonId) {
         await saveSeasonSnapshot(match.seasonId, matchId)
       }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     if (action === "recalc_season" && seasonId) {
       const { recalcPointsTable, recalcPlayerStats } = await import("@/lib/stats")
       await recalcPointsTable(seasonId)
-      await recalcPlayerStats()
+      await recalcPlayerStats(seasonId)
 
       const matches = await prisma.match.findMany({ where: { seasonId, status: "completed" }, select: { id: true } })
       const { saveSeasonSnapshot } = await import("@/lib/snapshots")
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
       const { recalcPlayerStats, recalcPointsTable } = await import("@/lib/stats")
       await recalcPointsTable(match.seasonId)
-      await recalcPlayerStats()
+      await recalcPlayerStats(match.seasonId)
       logAudit({ action: "restore_match", entity: "match", entityId: matchId, ip })
       return NextResponse.json({ success: true, message: "Match restored" })
     }

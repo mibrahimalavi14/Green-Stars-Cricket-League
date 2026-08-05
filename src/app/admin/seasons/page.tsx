@@ -1,11 +1,14 @@
 import { prisma } from "@/lib/prisma"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
 import { AdminSeasonForm } from "@/components/AdminSeasonForm"
 import { PredictionLockToggle } from "@/components/PredictionLockToggle"
+import { SeasonLockToggle } from "@/components/SeasonLockToggle"
 
 export const dynamic = "force-dynamic"
 
 async function AdminSeasonsPage() {
-  const seasons = await prisma.season.findMany({ orderBy: { year: "desc" } })
+  const workspaceId = await getCurrentWorkspaceId()
+  const seasons = await prisma.season.findMany({ where: { workspaceId }, orderBy: { year: "desc" } })
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -22,6 +25,7 @@ async function AdminSeasonsPage() {
             </div>
           </div>
           <div className="mt-3"><PredictionLockToggle seasonId={s.id} locked={s.scheduleAnnounced} /></div>
+          <SeasonLockToggle seasonId={s.id} locked={s.isLocked} reason={s.lockedReason} />
         </div>
       ))}
     </div>

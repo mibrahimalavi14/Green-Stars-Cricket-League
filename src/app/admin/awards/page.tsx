@@ -4,11 +4,15 @@ import { useState, useEffect, useCallback } from "react"
 import { Award, Trash2, Loader2 } from "lucide-react"
 
 const CATEGORIES = [
+  { value: "champion", label: "Champion", icon: "🏆" },
+  { value: "runner_up", label: "Runner-up", icon: "🥈" },
   { value: "orange_cap", label: "Orange Cap", icon: "🧢" },
   { value: "purple_cap", label: "Purple Cap", icon: "🟣" },
   { value: "mvp", label: "MVP", icon: "🏅" },
   { value: "best_batter", label: "Best Batter", icon: "🏏" },
   { value: "best_bowler", label: "Best Bowler", icon: "🎳" },
+  { value: "best_fielder", label: "Best Fielder", icon: "🧤" },
+  { value: "most_improved", label: "Most Improved", icon: "📈" },
   { value: "emerging_player", label: "Emerging Player", icon: "⭐" },
   { value: "fair_play", label: "Fair Play", icon: "🤝" },
 ]
@@ -18,9 +22,10 @@ export default function AdminAwardsPage() {
   const [players, setPlayers] = useState<any[]>([])
   const [teams, setTeams] = useState<any[]>([])
   const [awards, setAwards] = useState<any[]>([])
-  const [form, setForm] = useState({ seasonId: "", category: "orange_cap", playerId: "", teamId: "", note: "" })
+  const [form, setForm] = useState({ seasonId: "", category: "orange_cap", playerId: "", teamId: "", note: "", value: "" })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -51,7 +56,21 @@ export default function AdminAwardsPage() {
       body: JSON.stringify(form),
     })
     setSaving(false)
-    setForm(f => ({ ...f, playerId: "", teamId: "", note: "" }))
+    setForm(f => ({ ...f, playerId: "", teamId: "", note: "", value: "" }))
+    await loadAwards()
+  }
+
+  async function autoGenerate() {
+    if (!form.seasonId) return
+    setGenerating(true)
+    const res = await fetch("/api/admin/awards/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seasonId: form.seasonId }),
+    })
+    const data = await res.json()
+    setGenerating(false)
+    alert(data.error || `Generated ${data.count} awards`)
     await loadAwards()
   }
 
@@ -110,11 +129,21 @@ export default function AdminAwardsPage() {
             <label className={labelCls}>Note (optional)</label>
             <input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. 210 runs, 3 fifties" className={inputCls} />
           </div>
+          <div className="md:col-span-2">
+            <label className={labelCls}>Value (optional)</label>
+            <input value={form.value} onChange={e => setForm(f => ({ ...f, value: e.target.value }))} placeholder="e.g. 210 runs, 3 fifties" className={inputCls} />
+          </div>
         </div>
-        <button onClick={submit} disabled={saving || !form.seasonId}
-          className="mt-3 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-          {saving ? "Saving..." : `${selectedCategory?.icon} Assign ${selectedCategory?.label}`}
-        </button>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <button onClick={submit} disabled={saving || !form.seasonId}
+            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+            {saving ? "Saving..." : `${selectedCategory?.icon} Assign ${selectedCategory?.label}`}
+          </button>
+          <button onClick={autoGenerate} disabled={generating || !form.seasonId}
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-semibold hover:bg-[var(--muted)] disabled:opacity-50">
+            {generating ? "Generating..." : "✨ Auto-generate from match data"}
+          </button>
+        </div>
       </div>
 
       <h2 className="mb-4 text-lg font-semibold">Award History</h2>
@@ -132,6 +161,7 @@ export default function AdminAwardsPage() {
                     <p className="text-xs text-[var(--muted-foreground)]">
                       {a.player?.name || a.team?.name || "—"}
                       {a.player && a.team?.name ? ` (${a.team.name})` : ""}
+                      {a.value ? ` · ${a.value}` : ""}
                       {a.note ? ` · ${a.note}` : ""}
                     </p>
                   </div>

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { leaguePenaltySchema } from "@/lib/validation"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   try {
@@ -10,8 +11,12 @@ export async function GET(req: Request) {
     const seasonId = searchParams.get("seasonId")
     const teamId = searchParams.get("teamId")
 
-    const where: any = {}
-    if (seasonId) where.seasonId = seasonId
+    const where: any = { season: { workspaceId: WORKSPACE_OFFICIAL } }
+    if (seasonId) {
+      const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
+      if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
+      where.seasonId = seasonId
+    }
     if (teamId) where.teamId = teamId
 
     const penalties = await prisma.leaguePenalty.findMany({
@@ -45,6 +50,10 @@ export async function POST(req: Request) {
     const { seasonId, teamId, matchId, type, points, description } = parsed.data
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown"
 
+    const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+    const lockErr = await assertSeasonUnlocked(seasonId)
+    if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
+
     const penalty = await prisma.leaguePenalty.create({
       data: { seasonId, teamId, matchId: matchId || "", type, points, description: description || "" },
     })
@@ -67,6 +76,11 @@ export async function DELETE(req: Request) {
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
 
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown"
+
+    const penalty = await prisma.leaguePenalty.findUnique({ where: { id } })
+    const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+    const lockErr = await assertSeasonUnlocked(penalty?.seasonId)
+    if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
 
     await prisma.leaguePenalty.delete({ where: { id } })
     logAudit({ action: "delete_penalty", entity: "penalty", entityId: id, ip })

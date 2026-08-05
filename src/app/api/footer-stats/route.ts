@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET() {
-  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const season = await prisma.season.findFirst({ where: { isActive: true, workspaceId: WORKSPACE_OFFICIAL } })
   if (!season) return NextResponse.json({ teams: 0, players: 0, matches: 0 })
 
   const teams = await prisma.team.count({ where: { seasonId: season.id } })

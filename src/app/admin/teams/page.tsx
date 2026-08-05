@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
 import { AdminTeamForm } from "@/components/AdminTeamForm"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 
 export const dynamic = "force-dynamic"
 
 async function AdminTeamsPage() {
-  const teams = await prisma.team.findMany({ include: { _count: { select: { players: true } }, season: true } })
+  const workspaceId = await getCurrentWorkspaceId()
+  const teams = await prisma.team.findMany({ where: { season: { workspaceId } }, include: { _count: { select: { players: true } }, season: true } })
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">

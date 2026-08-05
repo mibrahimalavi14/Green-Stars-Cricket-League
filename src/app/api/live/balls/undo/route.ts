@@ -39,9 +39,13 @@ export async function POST(req: Request) {
     const innings = await tx.inning.findUnique({ where: { id: inningsId } })
     if (!innings) throw new Error("Innings not found")
 
-    const match = await tx.match.findUnique({ where: { id: innings.matchId }, select: { status: true } })
+    const match = await tx.match.findUnique({ where: { id: innings.matchId }, select: { status: true, seasonId: true } })
     if (!match) throw new Error("Match not found")
     if (match.status === "completed") throw new Error("Match is completed. Cannot undo balls.")
+
+    const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+    const lockErr = await assertSeasonUnlocked(match.seasonId)
+    if (lockErr) throw new Error(lockErr)
 
     const ballsData: BallEvent[] = JSON.parse(innings.ballsData || "[]")
     if (ballsData.length === 0) throw new Error("No balls to undo")

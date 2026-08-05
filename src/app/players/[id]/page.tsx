@@ -67,6 +67,12 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
 
   const activePerfs = performances.filter(x => x.match.season?.isActive)
 
+  const playerAwards = await prisma.seasonAward.findMany({
+    where: { playerId: player.id },
+    include: { season: { select: { id: true, name: true, year: true } } },
+    orderBy: { season: { year: "desc" } },
+  })
+
   return (
     <PlayerStatsClient
       player={JSON.parse(JSON.stringify(player))}
@@ -74,6 +80,7 @@ async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> })
       seasonStats={JSON.parse(JSON.stringify(seasonStats))}
       activePerfs={JSON.parse(JSON.stringify(activePerfs))}
       transfers={JSON.parse(JSON.stringify(transfersWithTeams))}
+      awards={JSON.parse(JSON.stringify(playerAwards))}
     />
   )
 }

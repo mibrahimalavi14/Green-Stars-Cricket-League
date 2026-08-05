@@ -27,7 +27,7 @@
 |---------|------|--------|
 | v1.0.1 | Jul 2026 | Initial production release |
 | v1.0.2 | Aug 2026 | Dress rehearsal (55 checks), System Monitor dashboard, backup policy scripts, Season 1 feedback template. |
-| v1.1.0 | Aug 2026 | **Season Quiz auto-generation** — new `SeasonQuiz`/`SeasonQuizAttempt` tables, new public + admin APIs, public play UI on `/quiz`, admin generate/review UI, auto-generation on season completion. Minor (feature) release per semantic versioning. |
+| v1.1.0 | Aug 2026 | **Season Quiz auto-generation** — new `SeasonQuiz`/`SeasonQuizAttempt` tables, new public + admin APIs, public play UI on `/quiz`, admin generate/review UI, auto-generation on season completion. **Practice Center** — official/practice workspace isolation (`Workspace` table + `Season.workspaceId`), admin Workspace Switcher, Clone Official → Practice, Reset Practice, Copy Setup → Official (setup-only promote), Practice Report. Workspace-scoped public routes/APIs/records. Minor (feature) release per semantic versioning. |
 
 ## Versioning Policy (Semantic)
 

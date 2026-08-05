@@ -3,12 +3,13 @@ import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { predictionSchema } from "@/lib/validation"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const email = searchParams.get("email")
 
-  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const season = await prisma.season.findFirst({ where: { isActive: true, workspaceId: WORKSPACE_OFFICIAL } })
   if (!season) return NextResponse.json({ teams: [], season: null, prediction: null, teamVotes: [], predictions: [] })
 
   const teams = await prisma.team.findMany({
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
   const { email, predictedTeamId } = parsed.data
   const { name } = body
 
-  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const season = await prisma.season.findFirst({ where: { isActive: true, workspaceId: WORKSPACE_OFFICIAL } })
   if (!season) return NextResponse.json({ error: "No active season" }, { status: 404 })
   if (season.scheduleAnnounced) {
     return NextResponse.json({ error: "Predictions locked" }, { status: 403 })

@@ -28,6 +28,10 @@ export async function POST(req: Request) {
   const season = await prisma.season.findUnique({ where: { id: seasonId } })
   if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
 
+  const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+  const lockErr = await assertSeasonUnlocked(seasonId)
+  if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
+
   const { count } = await regenerateSeasonQuiz(seasonId)
 
   logAudit({

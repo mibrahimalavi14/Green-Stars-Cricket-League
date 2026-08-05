@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please provide a valid email" }, { status: 400 })
   }
 
-  const season = await prisma.season.findUnique({ where: { id: seasonId } })
+  const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
   if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
   if (season.seasonQuizLocked) {
     return NextResponse.json({ error: "This season quiz is now closed" }, { status: 403 })

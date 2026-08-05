@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 interface BallEvent {
   runs: number
@@ -16,7 +17,7 @@ interface BallEvent {
 
 export async function GET() {
   const matches = await prisma.match.findMany({
-    where: { status: "completed", innings: { some: { ballsData: { not: "[]" } } } },
+    where: { status: "completed", innings: { some: { ballsData: { not: "[]" } } }, season: { workspaceId: WORKSPACE_OFFICIAL } },
     include: {
       innings: true,
       team1: true,

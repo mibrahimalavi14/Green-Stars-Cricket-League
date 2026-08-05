@@ -43,11 +43,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
-  const match = await prisma.match.findUnique({ where: { id: matchId }, select: { status: true } })
+  const match = await prisma.match.findUnique({ where: { id: matchId }, select: { status: true, seasonId: true } })
   if (!match) return NextResponse.json({ error: "Match not found" }, { status: 404 })
   if (match.status === "completed") {
     return NextResponse.json({ error: "Match is completed. Cannot add balls." }, { status: 400 })
   }
+
+  const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+  const lockErr = await assertSeasonUnlocked(match.seasonId)
+  if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
 
   const result = await prisma.$transaction(async (tx) => {
     let innings = await tx.inning.findUnique({

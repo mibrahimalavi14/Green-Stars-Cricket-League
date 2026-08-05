@@ -3,13 +3,18 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { seasonAwardSchema } from "@/lib/validation"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 const CATEGORY_LABELS: Record<string, string> = {
+  champion: "Champion",
+  runner_up: "Runner-up",
   orange_cap: "Orange Cap",
   purple_cap: "Purple Cap",
   mvp: "MVP",
   best_batter: "Best Batter",
   best_bowler: "Best Bowler",
+  best_fielder: "Best Fielder",
+  most_improved: "Most Improved Player",
   emerging_player: "Emerging Player",
   fair_play: "Fair Play",
 }
@@ -19,8 +24,12 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const seasonId = searchParams.get("seasonId")
 
-    const where: any = {}
-    if (seasonId) where.seasonId = seasonId
+    const where: any = { season: { workspaceId: WORKSPACE_OFFICIAL } }
+    if (seasonId) {
+      const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
+      if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
+      where.seasonId = seasonId
+    }
 
     const awards = await prisma.seasonAward.findMany({
       where,
@@ -59,8 +68,12 @@ export async function POST(req: Request) {
     const parsed = seasonAwardSchema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
 
-    const { seasonId, category, playerId, teamId, note } = parsed.data
+    const { seasonId, category, playerId, teamId, note, value } = parsed.data
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown"
+
+    const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+    const lockErr = await assertSeasonUnlocked(seasonId)
+    if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
 
     const existing = await prisma.seasonAward.findUnique({ where: { seasonId_category: { seasonId, category } } })
 
@@ -68,11 +81,11 @@ export async function POST(req: Request) {
     if (existing) {
       award = await prisma.seasonAward.update({
         where: { id: existing.id },
-        data: { playerId: playerId || "", teamId: teamId || "", note: note || "" },
+        data: { playerId: playerId || "", teamId: teamId || "", note: note || "", value: value || "" },
       })
     } else {
       award = await prisma.seasonAward.create({
-        data: { seasonId, category, playerId: playerId || "", teamId: teamId || "", note: note || "" },
+        data: { seasonId, category, playerId: playerId || "", teamId: teamId || "", note: note || "", value: value || "" },
       })
     }
 

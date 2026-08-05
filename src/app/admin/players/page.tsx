@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
 import { AdminPlayerForm } from "@/components/AdminPlayerForm"
 import { AdminPlayerEdit } from "@/components/AdminPlayerEdit"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
@@ -19,9 +20,10 @@ function perfScore(player: { runs: number; ballsFaced: number; matchesPlayed: nu
 }
 
 async function AdminPlayersPage() {
+  const workspaceId = await getCurrentWorkspaceId()
   const [allPlayers, teams] = await Promise.all([
-    prisma.player.findMany({ include: { team: true }, orderBy: [{ teamId: "asc" }, { runs: "desc" }] }),
-    prisma.team.findMany({ select: { id: true, name: true, shortName: true, captainName: true, logo: true, color: true } }),
+    prisma.player.findMany({ where: { team: { season: { workspaceId } } }, include: { team: true }, orderBy: [{ teamId: "asc" }, { runs: "desc" }] }),
+    prisma.team.findMany({ where: { season: { workspaceId } }, select: { id: true, name: true, shortName: true, captainName: true, logo: true, color: true } }),
   ])
 
   const grouped = new Map<string, typeof allPlayers>()

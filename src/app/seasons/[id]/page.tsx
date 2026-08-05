@@ -66,11 +66,15 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
   const awardTeamMap = new Map(awardTeams.map(t => [t.id, t]))
 
   const AWARD_META: Record<string, { label: string; icon: string }> = {
+    champion: { label: "Champion", icon: "🏆" },
+    runner_up: { label: "Runner-up", icon: "🥈" },
     orange_cap: { label: "Orange Cap", icon: "🧢" },
     purple_cap: { label: "Purple Cap", icon: "🟣" },
     mvp: { label: "MVP", icon: "🏅" },
     best_batter: { label: "Best Batter", icon: "🏏" },
     best_bowler: { label: "Best Bowler", icon: "🎳" },
+    best_fielder: { label: "Best Fielder", icon: "🧤" },
+    most_improved: { label: "Most Improved", icon: "📈" },
     emerging_player: { label: "Emerging Player", icon: "⭐" },
     fair_play: { label: "Fair Play", icon: "🤝" },
   }

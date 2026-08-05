@@ -7,12 +7,13 @@ export const revalidate = 300
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { prisma } = await import("@/lib/prisma")
+    const { WORKSPACE_OFFICIAL } = await import("@/lib/workspace")
 
     const [teams, players, news, seasons] = await Promise.all([
-      prisma.team.findMany({ select: { id: true } }),
-      prisma.player.findMany({ select: { id: true } }),
+      prisma.team.findMany({ where: { season: { workspaceId: WORKSPACE_OFFICIAL } }, select: { id: true } }),
+      prisma.player.findMany({ where: { team: { season: { workspaceId: WORKSPACE_OFFICIAL } } }, select: { id: true } }),
       prisma.news.findMany({ select: { id: true } }),
-      prisma.season.findMany({ select: { id: true } }),
+      prisma.season.findMany({ where: { workspaceId: WORKSPACE_OFFICIAL }, select: { id: true } }),
     ])
 
     return [

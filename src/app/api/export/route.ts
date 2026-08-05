@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { recalcPointsTable } from "@/lib/stats"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   try {
@@ -21,7 +22,7 @@ export async function GET(req: Request) {
 
     if (type === "players") {
       const players = await prisma.player.findMany({
-        where: { team: { seasonId } },
+        where: { team: { seasonId, season: { workspaceId: WORKSPACE_OFFICIAL } } },
         include: { team: { select: { name: true, shortName: true } } },
       })
       const header = "Player,Team,Role,Matches,Runs,Balls Faced,Average,Strike Rate,Wickets,Bowling Balls,Bowling Average,Economy,Best Bowling"
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
 
     if (type === "matches") {
       const matches = await prisma.match.findMany({
-        where: { seasonId },
+        where: { seasonId, season: { workspaceId: WORKSPACE_OFFICIAL } },
         orderBy: { matchNo: "asc" },
         include: { team1: { select: { name: true, shortName: true } }, team2: { select: { name: true, shortName: true } }, innings: true },
       })

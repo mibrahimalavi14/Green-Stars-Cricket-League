@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -22,6 +23,7 @@ export async function GET(req: Request) {
   const matches = await prisma.match.findMany({
     where: {
       status: "completed",
+      season: { workspaceId: WORKSPACE_OFFICIAL },
       OR: [
         { team1Id, team2Id },
         { team1Id: team2Id, team2Id: team1Id },

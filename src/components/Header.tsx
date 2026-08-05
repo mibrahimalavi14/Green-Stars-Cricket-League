@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -48,6 +48,7 @@ export function Header() {
         { href: "/admin/honors", label: "Team Honors", icon: Trophy },
         { href: "/admin/penalties", label: "Penalties", icon: Shield },
         { href: "/admin/awards", label: "Season Awards", icon: Award },
+        { href: "/admin/fair-play", label: "Fair Play", icon: Handshake },
       ],
       system: [
         { href: "/admin/notifications", label: "Notifications", icon: Bell },

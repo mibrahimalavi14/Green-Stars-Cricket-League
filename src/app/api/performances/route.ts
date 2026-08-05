@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   if (match) {
     const { recalcPointsTable, recalcPlayerStats } = await import("@/lib/stats")
     await recalcPointsTable(match.seasonId)
-    await recalcPlayerStats()
+    await recalcPlayerStats(match.seasonId)
   }
 
   return NextResponse.json({ success: true })

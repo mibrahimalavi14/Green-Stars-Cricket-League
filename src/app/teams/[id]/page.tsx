@@ -56,6 +56,35 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const teamRuns = team.players.reduce((a, p) => a + p.runs, 0)
   const teamWickets = team.players.reduce((a, p) => a + p.wickets, 0)
 
+  let streak = 0
+  for (let i = completedMatches.length - 1; i >= 0; i--) {
+    if (completedMatches[i].result?.startsWith(team.name)) streak++
+    else break
+  }
+
+  const teamAwards = await prisma.seasonAward.findMany({
+    where: { teamId: team.id },
+    include: { season: { select: { id: true, name: true, year: true } } },
+    orderBy: { season: { year: "desc" } },
+  })
+
+  const latestChampionSeason = teamAwards.find(a => a.category === "champion")?.season
+  const isDefendingChampion = !!latestChampionSeason && latestChampionSeason.id !== team.seasonId
+
+  const awardBadge = (category: string, icon: string, cls: string, label: string) =>
+    teamAwards.filter(a => a.category === category).map(a => (
+      { key: `${a.seasonId}-${category}`, icon, cls, label, sub: a.season?.name || "" }
+    ))
+
+  const teamBadges = [
+    ...(isDefendingChampion ? [{ key: "defending", icon: "🏆", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400", label: "Defending Champion", sub: latestChampionSeason?.name || "" }] : []),
+    ...awardBadge("champion", "🏆", "bg-amber-500/15 text-amber-600 dark:text-amber-400", "Champion"),
+    ...awardBadge("runner_up", "🥈", "bg-slate-400/15 text-slate-500", "Runner-up"),
+    ...awardBadge("fair_play", "🤝", "bg-teal-500/15 text-teal-600 dark:text-teal-400", "Fair Play"),
+    ...(streak >= 3 ? [{ key: "streak", icon: "🔥", cls: "bg-orange-500/15 text-orange-600 dark:text-orange-400", label: `${streak} Win Streak`, sub: "" }] : []),
+    ...(won >= 5 ? [{ key: "wins", icon: "✅", cls: "bg-green-500/15 text-green-600 dark:text-green-400", label: `${won} Wins`, sub: "" }] : []),
+  ]
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <div className="mb-8 flex items-center gap-6 min-w-0">
@@ -76,6 +105,16 @@ async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
             </p>
           )}
           {!latest && team.captainName && <p className="text-xs text-amber-600 dark:text-amber-400">Captain: {team.captainName}</p>}
+          {teamBadges.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {teamBadges.map(b => (
+                <span key={b.key} title={b.sub || b.label} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${b.cls}`}>
+                  <span>{b.icon}</span> {b.label}
+                  {b.sub && <span className="opacity-70">· {b.sub}</span>}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

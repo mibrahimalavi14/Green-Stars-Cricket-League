@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET() {
   const seasons = await prisma.season.findMany({
+    where: { workspaceId: WORKSPACE_OFFICIAL },
     orderBy: { year: "desc" },
   })
 

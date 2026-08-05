@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -9,7 +10,7 @@ export async function GET(req: Request) {
 
   const qNum = /^\d+$/.test(q) ? parseInt(q, 10) : null
   const playerNameMatches = await prisma.player.findMany({
-    where: { name: { contains: q, mode: "insensitive" } },
+    where: { name: { contains: q, mode: "insensitive" }, team: { season: { workspaceId: WORKSPACE_OFFICIAL } } },
     select: { id: true },
     take: 5,
   })
@@ -18,6 +19,7 @@ export async function GET(req: Request) {
   const [players, teams, matches, news, seasons] = await Promise.all([
     prisma.player.findMany({
       where: {
+        team: { season: { workspaceId: WORKSPACE_OFFICIAL } },
         OR: [
           { name: { contains: q, mode: "insensitive" } },
           ...(qNum !== null ? [{ jerseyNumber: qNum }] : []),
@@ -28,6 +30,7 @@ export async function GET(req: Request) {
     }),
     prisma.team.findMany({
       where: {
+        season: { workspaceId: WORKSPACE_OFFICIAL },
         OR: [
           { name: { contains: q, mode: "insensitive" } },
           { captainName: { contains: q, mode: "insensitive" } },
@@ -37,6 +40,7 @@ export async function GET(req: Request) {
     }),
     prisma.match.findMany({
       where: {
+        season: { workspaceId: WORKSPACE_OFFICIAL },
         OR: [
           { team1: { name: { contains: q, mode: "insensitive" } } },
           { team2: { name: { contains: q, mode: "insensitive" } } },
@@ -55,7 +59,7 @@ export async function GET(req: Request) {
       take: 3,
     }),
     prisma.season.findMany({
-      where: { name: { contains: q, mode: "insensitive" } },
+      where: { name: { contains: q, mode: "insensitive" }, workspaceId: WORKSPACE_OFFICIAL },
       take: 3,
     }),
   ])

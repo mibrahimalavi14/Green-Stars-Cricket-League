@@ -2,12 +2,15 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { squadMemberSchema } from "@/lib/validation"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const matchId = searchParams.get("matchId")
+  const workspaceId = await getCurrentWorkspaceId()
 
-  const where = matchId ? { matchId } : {}
+  const where: any = { player: { team: { season: { workspaceId } } } }
+  if (matchId) where.matchId = matchId
   const members = await prisma.squadMember.findMany({
     where,
     include: { player: { select: { name: true, role: true, photo: true, jerseyNumber: true, status: true } } },
@@ -31,13 +34,18 @@ export async function POST(req: Request) {
 
   const { matchId, playerId, teamId, role } = parsed.data
 
-  const match = await prisma.match.findUnique({ where: { id: matchId }, select: { isSquadLocked: true, status: true } })
+  const workspaceId = await getCurrentWorkspaceId()
+  const match = await prisma.match.findFirst({ where: { id: matchId, season: { workspaceId } }, select: { isSquadLocked: true, status: true, seasonId: true } })
   if (match && match.isSquadLocked) {
     return NextResponse.json({ error: "Squad is locked. Match is already live." }, { status: 403 })
   }
   if (match && match.status !== "upcoming") {
     return NextResponse.json({ error: "Can only edit squad for upcoming matches." }, { status: 403 })
   }
+
+  const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+  const lockErr = await assertSeasonUnlocked(match?.seasonId)
+  if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
 
   const existing = await prisma.squadMember.findUnique({ where: { matchId_playerId: { matchId, playerId } } })
   if (existing) {
@@ -62,7 +70,8 @@ export async function DELETE(req: Request) {
 
   const member = await prisma.squadMember.findUnique({ where: { id }, select: { matchId: true } })
   if (member) {
-    const match = await prisma.match.findUnique({ where: { id: member.matchId }, select: { isSquadLocked: true, status: true } })
+    const workspaceId = await getCurrentWorkspaceId()
+    const match = await prisma.match.findFirst({ where: { id: member.matchId, season: { workspaceId } }, select: { isSquadLocked: true, status: true } })
     if (match && match.isSquadLocked) {
       return NextResponse.json({ error: "Squad is locked. Match is already live." }, { status: 403 })
     }

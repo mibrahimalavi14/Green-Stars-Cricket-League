@@ -53,6 +53,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Workspace {
+  id        String   @id
+  name      String
+  type      String   @default("OFFICIAL") // OFFICIAL | PRACTICE
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  seasons   Season[]
+}
+
 model Season {
   id                String   @id @default(cuid())
   name              String
@@ -61,7 +70,13 @@ model Season {
   isActive          Boolean  @default(true)
   scheduleAnnounced Boolean  @default(false)
   winnerId          String?  @default("")
+  runnerUpId        String   @default("")
   seasonQuizLocked  Boolean  @default(false)
+  isLocked          Boolean  @default(false)
+  lockedAt          DateTime?
+  lockedReason      String   @default("")
+  workspaceId       String   @default("official")
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
   createdAt         DateTime @default(now())
   teams             Team[]
   matches           Match[]
@@ -69,11 +84,12 @@ model Season {
   transfers         PlayerTransfer[]
   captaincies       TeamCaptaincy[]
   penalties         LeaguePenalty[]
+  fairPlayRecords   FairPlayRecord[]
   awards            SeasonAward[]
   honors            TeamHonor[]
   seasonQuizzes     SeasonQuiz[]
 
-  @@unique([name, year])
+  @@unique([name, year, workspaceId])
 }
 
 model Team {
@@ -92,6 +108,7 @@ model Team {
   matches2    Match[]  @relation("Team2Matches")
   captaincies TeamCaptaincy[]
   penalties   LeaguePenalty[]
+  fairPlay    FairPlayRecord[]
   honors      TeamHonor[]
   createdAt   DateTime @default(now())
 }
@@ -349,6 +366,20 @@ model SquadMember {
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, playerId])
+}
+
+model PracticeCloneMapping {
+  id               String   @id @default(cuid())
+  sourceSeasonId   String
+  sourceTeamId     String
+  sourcePlayerId   String
+  practiceSeasonId String
+  practiceTeamId   String
+  practicePlayerId String
+  createdAt        DateTime @default(now())
+
+  @@index([practiceSeasonId])
+  @@index([practiceTeamId])
 }
 
 model Review {
@@ -630,10 +661,26 @@ model SeasonAward {
   category  String
   playerId  String   @default("")
   teamId    String   @default("")
+  value     String   @default("")
   note      String   @default("")
   createdAt DateTime @default(now())
 
   @@unique([seasonId, category])
+  @@index([seasonId])
+}
+
+model FairPlayRecord {
+  id            String   @id @default(cuid())
+  seasonId      String
+  season        Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamId        String
+  team          Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  warnings      Int      @default(0)
+  behavior      Int      @default(0)
+  sportsmanship Int      @default(10)
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  @@unique([seasonId, teamId])
   @@index([seasonId])
 }
 

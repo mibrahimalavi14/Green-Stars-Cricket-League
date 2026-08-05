@@ -549,7 +549,7 @@ async function completeMatch(
   await trackEvent("match_completed", { matchId, result, auto: "true", manOfMatch: momPlayerId, [MARKER]: "true" }, MARKER)
 
   await recalcPointsTable(seasonId)
-  await recalcPlayerStats()
+  await recalcPlayerStats(seasonId)
 
   try {
     await saveSeasonSnapshot(seasonId, matchId)
@@ -1173,7 +1173,7 @@ async function main() {
 
   // Restore: recalc_season replica
   await recalcPointsTable(season.id)
-  await recalcPlayerStats()
+  await recalcPlayerStats(season.id)
   for (const m of completed) {
     await saveSeasonSnapshot(season.id, m.id)
   }

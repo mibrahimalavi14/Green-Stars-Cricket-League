@@ -1,16 +1,45 @@
 import { prisma } from "@/lib/prisma"
-import { Trophy, Award, Star, Zap, Target } from "lucide-react"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
+import { Trophy, Award, Star, Zap, Target, Medal, Download } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
+const CEREMONY_ORDER = ["champion", "runner_up", "orange_cap", "purple_cap", "mvp", "best_batter", "best_bowler", "best_fielder", "most_improved", "emerging_player", "fair_play"]
+
 async function AwardsPage() {
   const seasons = await prisma.season.findMany({
+    where: { workspaceId: WORKSPACE_OFFICIAL },
     orderBy: { year: "desc" },
     include: { teams: true },
   })
 
+  const seasonAwards = await prisma.seasonAward.findMany({
+    where: { season: { workspaceId: WORKSPACE_OFFICIAL } },
+    include: {
+      season: { select: { id: true, name: true } },
+    },
+  })
+  const awardsBySeason = new Map<string, any[]>()
+  for (const a of seasonAwards) {
+    if (!awardsBySeason.has(a.seasonId)) awardsBySeason.set(a.seasonId, [])
+    awardsBySeason.get(a.seasonId)!.push(a)
+  }
+
+  const allAwardPlayerIds = [...new Set(seasonAwards.filter(a => a.playerId).map(a => a.playerId))]
+  const allAwardTeamIds = [...new Set(seasonAwards.filter(a => a.teamId).map(a => a.teamId))]
+  const [awardPlayers, awardTeams] = await Promise.all([
+    allAwardPlayerIds.length
+      ? prisma.player.findMany({ where: { id: { in: allAwardPlayerIds } }, include: { team: true } })
+      : Promise.resolve([]),
+    allAwardTeamIds.length
+      ? prisma.team.findMany({ where: { id: { in: allAwardTeamIds } } })
+      : Promise.resolve([]),
+  ])
+  const playerMap = new Map(awardPlayers.map(p => [p.id, p]))
+  const teamMap = new Map(awardTeams.map(t => [t.id, t]))
+
   const completedMatches = await prisma.match.findMany({
-    where: { status: "completed" },
+    where: { status: "completed", season: { workspaceId: WORKSPACE_OFFICIAL } },
     include: { team1: true, team2: true },
     orderBy: { date: "desc" },
   })
@@ -23,6 +52,7 @@ async function AwardsPage() {
   }
 
   const allPlayerMatches = await prisma.playerMatch.findMany({
+    where: { match: { season: { workspaceId: WORKSPACE_OFFICIAL } } },
     include: { player: { include: { team: true } } },
   })
 
@@ -70,7 +100,12 @@ async function AwardsPage() {
       <h1 className="mb-2 text-3xl font-bold">Awards</h1>
       <p className="mb-10 text-[var(--muted-foreground)]">Season-wise award winners and achievements</p>
 
-      {seasonsAwards.map(({ season, winner, topScorer, topWicketTaker, mostSixes, bestStrikeRate, bestAllRounder, mostCatches, potmList }) => (
+      {seasonsAwards.map(({ season, winner, topScorer, topWicketTaker, mostSixes, bestStrikeRate, bestAllRounder, mostCatches, potmList }) => {
+        const ceremony = (awardsBySeason.get(season.id) || [])
+          .filter(a => CEREMONY_ORDER.includes(a.category))
+          .sort((a, b) => CEREMONY_ORDER.indexOf(a.category) - CEREMONY_ORDER.indexOf(b.category))
+
+        return (
         <div key={season.id} className="mb-12">
           <div className="mb-6 flex flex-wrap items-center gap-4">
             <h2 className="text-2xl font-bold">{season.name} ({season.year})</h2>
@@ -80,6 +115,39 @@ async function AwardsPage() {
               </span>
             )}
           </div>
+
+          {ceremony.length > 0 && (
+            <div className="mb-8 overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-br from-amber-50 to-transparent p-6 dark:from-amber-900/10">
+              <div className="mb-4 flex items-center gap-2">
+                <Medal className="h-5 w-5 text-gscl-gold" />
+                <h3 className="text-lg font-bold">Awards Ceremony</h3>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {ceremony.map(a => {
+                  const player = a.playerId ? playerMap.get(a.playerId) : null
+                  const team = a.teamId ? teamMap.get(a.teamId) : null
+                  const subject = player?.name || team?.name || "—"
+                  const sub = player?.team ? player.team.name : ""
+                  const certUrl = `/awards/certificate/${season.id}/${a.category}`
+                  return (
+                    <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">{a.categoryLabel}</p>
+                        <p className="truncate font-semibold">{subject}</p>
+                        {(sub || a.value) && (
+                          <p className="truncate text-xs text-[var(--muted-foreground)]">{sub || a.value}</p>
+                        )}
+                      </div>
+                      <a href={certUrl} target="_blank" rel="noopener noreferrer" title="Download certificate"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--muted-foreground)] transition-colors hover:border-gscl-gold hover:text-gscl-gold">
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <AwardCard icon={Trophy} label="Orange Cap" value={topScorer ? String(topScorer.runs) : "-"} stat="Runs" name={topScorer?.name || "N/A"} team={topScorer?.team?.shortName} color="orange" />
@@ -107,7 +175,8 @@ async function AwardsPage() {
             )}
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

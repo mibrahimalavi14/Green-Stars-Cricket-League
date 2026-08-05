@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { teamHonorSchema } from "@/lib/validation"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export async function GET(req: Request) {
   try {
@@ -10,9 +11,13 @@ export async function GET(req: Request) {
     const teamId = searchParams.get("teamId")
     const seasonId = searchParams.get("seasonId")
 
-    const where: any = {}
+    const where: any = { season: { workspaceId: WORKSPACE_OFFICIAL } }
     if (teamId) where.teamId = teamId
-    if (seasonId) where.seasonId = seasonId
+    if (seasonId) {
+      const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
+      if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
+      where.seasonId = seasonId
+    }
 
     const honors = await prisma.teamHonor.findMany({
       where,
@@ -40,6 +45,10 @@ export async function POST(req: Request) {
 
     const { seasonId, teamId, title, note } = parsed.data
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown"
+
+    const { assertSeasonUnlocked } = await import("@/lib/season-guard")
+    const lockErr = await assertSeasonUnlocked(seasonId)
+    if (lockErr) return NextResponse.json({ error: lockErr }, { status: 423 })
 
     const honor = await prisma.teamHonor.create({
       data: { seasonId, teamId, title, note: note || "" },

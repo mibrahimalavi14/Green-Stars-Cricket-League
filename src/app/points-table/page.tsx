@@ -16,6 +16,8 @@ async function PointsTablePage() {
 
   const { recalcPointsTable } = await import("@/lib/stats")
   const standings = await recalcPointsTable(season.id)
+  const { computeFairPlayTable } = await import("@/lib/fair-play")
+  const fairPlay = await computeFairPlayTable(season.id)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
@@ -64,6 +66,51 @@ async function PointsTablePage() {
         </div>
       )}
       <p className="mt-3 text-center text-sm font-semibold text-amber-600 dark:text-amber-400">TOP 4 TEAMS QUALIFY FOR PLAYOFFS</p>
+
+      <h2 className="mt-12 mb-2 text-2xl font-bold">Fair Play Table</h2>
+      <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+        Fair Play Points = 100 − Warnings(5) − Over-Rate(10) − Behavior(15) − Penalties + Sportsmanship(×2)
+      </p>
+
+      {fairPlay.length === 0 ? (
+        <p className="py-6 text-center text-[var(--muted-foreground)]">No data yet.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+          <table className="min-w-[700px] w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+                <th className="p-4 text-left">#</th>
+                <th className="p-4 text-left">Team</th>
+                <th className="p-4 text-center font-bold">FP Pts</th>
+                <th className="p-4 text-center">Warnings</th>
+                <th className="p-4 text-center">Over-Rate</th>
+                <th className="p-4 text-center">Behavior</th>
+                <th className="p-4 text-center">Penalties</th>
+                <th className="p-4 text-center">Sportsmanship</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fairPlay.map((t, i) => (
+                <tr key={t.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
+                  <td className="p-4 font-medium">{i + 1}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      {t.logo && <img src={t.logo} alt={t.name} className="h-8 w-8 rounded-full object-cover" />}
+                      <span className="font-medium">{t.name}</span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-center font-bold text-lg">{t.fairPlayPoints}</td>
+                  <td className="p-4 text-center">{t.warnings}</td>
+                  <td className="p-4 text-center">{t.slowOverRate}</td>
+                  <td className="p-4 text-center">{t.behavior}</td>
+                  <td className="p-4 text-center text-red-500">-{t.penaltyPoints}</td>
+                  <td className="p-4 text-center">{t.sportsmanship}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

@@ -82,7 +82,7 @@ export async function recalcEverything(seasonId?: string) {
   }
 
   const { recalcPlayerStats } = await import("./stats")
-  await recalcPlayerStats()
+  await recalcPlayerStats(seasonId)
 
   return { success: true, seasonsReprocessed: seasons.length }
 }

@@ -1,6 +1,11 @@
 # Changelog
 
 ## v1.1.0 (Launch Polish)
+- Practice Center: official/practice workspace isolation (Workspace table + Season.workspaceId)
+- Admin Workspace Switcher (OFFICIAL / PRACTICE MODE)
+- Clone Official → Practice, Reset Practice, Copy Setup → Official (setup-only), Practice Report
+- Workspace-scoped public routes, APIs, records, and admin lists
+- Season Quiz lock/unlock + status indicator
 - Toss edit lock: live matches can no longer change toss result/decision without admin override
 - Player jersey numbers + availability status (available/injured/suspended/unavailable)
 - Injury tracker: status badges on team page, player page, match Playing XI, admin squad + warning banner

@@ -6,7 +6,7 @@ import {
   Brain, UserCheck, Award, Bell, MessageSquare, BarChart3, Target, Zap,
   Server, Lock, Database, Rocket, AlertTriangle, ChevronRight, ExternalLink,
   Menu, X, Play, CircleDot, SkipForward, RotateCcw, Monitor, Globe, Heart,
-  ChevronDown, ChevronUp, Info, Flag
+  ChevronDown, ChevronUp, Info, Flag, Handshake
 } from "lucide-react"
 
 const sections = [
@@ -281,6 +281,9 @@ export default function GuidePage() {
                   { name: "Moments", url: "/admin/moments", desc: "Moment of the Day", icon: Star, hot: false },
                   { name: "Notifications", url: "/admin/notifications", desc: "Push notifications", icon: Bell, hot: false },
                   { name: "Reviews", url: "/admin/reviews", desc: "Approve/reject reviews", icon: MessageSquare, hot: false },
+                  { name: "Penalties", url: "/admin/penalties", desc: "Team penalties & deductions", icon: Shield, hot: false },
+                  { name: "Season Awards", url: "/admin/awards", desc: "Awards + auto-generate ceremony", icon: Trophy, hot: false },
+                  { name: "Fair Play", url: "/admin/fair-play", desc: "Warnings, sportsmanship, FP points", icon: Handshake, hot: false },
                   { name: "Contact", url: "/admin/contact", desc: "Contact form messages", icon: MessageSquare, hot: false },
                   { name: "Analytics", url: "/admin/analytics", desc: "Usage metrics & trends", icon: BarChart3, hot: true },
                 ].map((p) => (
