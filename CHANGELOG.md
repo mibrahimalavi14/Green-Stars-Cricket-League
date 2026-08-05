@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.3-season1
+
+Fixed
+- Fixed Live Scoring page crash (`/live`) when no live match and no recently completed match exists (empty database). The page threw `TypeError: Cannot read properties of null (reading 'team1Players')` in the match highlights memo, triggering the "Something went wrong" error page. Added a null-match guard; the page now correctly shows the "No live match at the moment." empty state.
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes.
+
 ## v1.1.2-season1
 
 Added

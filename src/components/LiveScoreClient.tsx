@@ -762,6 +762,7 @@ export function LiveScoreClient({
   }, [inn1BallsParsed, inn2BallsParsed, inn1, inn2])
 
   const matchHighlights = useMemo(() => {
+    if (!match) return []
     const autoHighlights = computeMatchHighlights(
       inn1BallsParsed,
       inn2BallsParsed,
