@@ -20,8 +20,6 @@ export default function QuizPage() {
   const [quizMap, setQuizMap] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null)
-  const [email, setEmail] = useState("")
-  const [name, setName] = useState("")
   const [selectedAnswer, setSelectedAnswer] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ correct: boolean; correctAnswer: string; points: number } | null>(null)
@@ -153,8 +151,8 @@ export default function QuizPage() {
   }
 
   async function checkExisting() {
-    if (!email.trim() || !activeQuizId) return
-    const res = await fetch(`/api/quiz/my-score?email=${encodeURIComponent(email.trim())}&quizId=${activeQuizId}`)
+    if (!sqEmail.trim() || !activeQuizId) return
+    const res = await fetch(`/api/quiz/my-score?email=${encodeURIComponent(sqEmail.trim())}&quizId=${activeQuizId}`)
     const data = await res.json()
     if (data.attempt) {
       setUserAttempt(data.attempt)
@@ -164,14 +162,14 @@ export default function QuizPage() {
   }
 
   useEffect(() => {
-    if (email.trim() && activeQuizId) {
+    if (sqEmail.trim() && activeQuizId) {
       const timer = setTimeout(checkExisting, 500)
       return () => clearTimeout(timer)
     }
-  }, [email, activeQuizId])
+  }, [sqEmail, activeQuizId])
 
   async function handleSubmit() {
-    if (!email.trim() || !selectedAnswer || !activeQuizId) return
+    if (!sqEmail.trim() || !selectedAnswer || !activeQuizId) return
     setSubmitting(true)
     setError("")
 
@@ -180,8 +178,8 @@ export default function QuizPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         quizId: activeQuizId,
-        email: email.trim(),
-        name: name.trim() || "Anonymous",
+        email: sqEmail.trim(),
+        name: sqName.trim() || "Anonymous",
         selectedAnswer,
       }),
     })
@@ -201,8 +199,6 @@ export default function QuizPage() {
     setActiveQuizId(null)
     setResult(null)
     setUserAttempt(null)
-    setEmail("")
-    setName("")
     setSelectedAnswer("")
     setError("")
     setShowLb(false)
@@ -226,6 +222,38 @@ export default function QuizPage() {
           Match Quiz
         </h1>
         <p className="text-[var(--muted-foreground)]">Test your cricket knowledge after each match</p>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <h2 className="mb-1 flex items-center gap-2 font-semibold">
+          <User className="h-4 w-4 text-[var(--accent)]" />
+          Your Details
+        </h2>
+        <p className="mb-4 text-sm text-[var(--muted-foreground)]">
+          Enter your name &amp; email to participate &mdash; one attempt per email
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <input
+            value={sqName}
+            onChange={e => setSqName(e.target.value)}
+            placeholder="Your name"
+            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+          />
+          <input
+            value={sqEmail}
+            onChange={e => setSqEmail(e.target.value)}
+            placeholder="Your email"
+            type="email"
+            required
+            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+          />
+        </div>
+        {sqName.trim() && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--accent)]/10 px-3 py-2 text-sm">
+            <User className="h-4 w-4 text-[var(--accent)]" />
+            Taking quiz as: <strong>{sqName.trim()}</strong>
+          </div>
+        )}
       </div>
 
       {sqLoading ? (
@@ -258,30 +286,6 @@ export default function QuizPage() {
 
           {!sqResult ? (
             <>
-              <div className="mb-6 flex flex-col gap-3 rounded-lg bg-[var(--muted)] p-4 sm:flex-row">
-                <input
-                  value={sqName}
-                  onChange={e => setSqName(e.target.value)}
-                  placeholder="Your name"
-                  className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-                />
-                <input
-                  value={sqEmail}
-                  onChange={e => setSqEmail(e.target.value)}
-                  placeholder="Your email"
-                  type="email"
-                  required
-                  className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-                />
-              </div>
-
-              {sqName.trim() && (
-                <div className="mb-4 flex items-center gap-2 rounded-lg bg-[var(--accent)]/10 px-3 py-2 text-sm">
-                  <User className="h-4 w-4 text-[var(--accent)]" />
-                  Taking quiz as: <strong>{sqName.trim()}</strong>
-                </div>
-              )}
-
               <div className="space-y-5">
                 {seasonQuiz.questions.map((q: any, qi: number) => (
                   <div key={q.id} className="rounded-lg border border-[var(--border)] p-4">
@@ -418,29 +422,6 @@ export default function QuizPage() {
         </div>
       )}
 
-      {activeQuiz && !result && !userAttempt && (
-        <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-          <h2 className="mb-2 font-semibold">Your Details</h2>
-          <p className="mb-4 text-sm text-[var(--muted-foreground)]">Enter your details to take the quiz</p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Your name"
-              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-            />
-            <input
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="Your email"
-              type="email"
-              required
-              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-            />
-          </div>
-        </div>
-      )}
-
       {activeQuiz && (result || userAttempt) && (
         <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
           <div className="mb-4 flex items-center gap-2">
@@ -509,7 +490,7 @@ export default function QuizPage() {
           {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
           <button
             onClick={handleSubmit}
-            disabled={!email.trim() || !selectedAnswer || submitting}
+            disabled={!sqEmail.trim() || !selectedAnswer || submitting}
             className="mt-4 w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Submit Answer"}

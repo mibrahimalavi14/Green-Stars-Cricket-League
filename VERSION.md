@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.2.0 |
+| **Current Version** | v1.2.1 |
 | **Release Date** | August 2026 |
 | **Status** | Production �?" Season 1 |
 | **Feature Freeze** | Yes (v1.2.0 exception: quiz leaderboard, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.2.0-season1` (season quiz leaderboard)
+| **Current Release Tag** | `v1.2.1-season1` (quiz details card)
 
 ## Runtime
 
@@ -34,6 +34,7 @@
 | v1.1.4 | Aug 2026 | **Patch release** — format text correction. Removed stale hardcoded "5-over" references that contradicted the actual T4 (4-over) config: fixtures subtitle, About page (4-Over Format card + round-robin wording), FAQ, Match Center, and the scoring guide (Balls Faced max 24, not 30). No DB schema, scoring engine, statistics, or API changes. |
 | v1.1.5 | Aug 2026 | **Patch release** — admin auth cookie fix. The `admin_auth` cookie was set with `path=/admin`, so browsers never sent it to `/api/*` requests; every admin client-side API call (`/api/admin/system`, `/api/admin/analytics`, fair-play, moments, quiz, awards, practice, workspace, etc.) returned 401 and the System Monitor / Analytics pages crashed to "Something went wrong". Cookie path is now `/`; admin pages also handle non-2xx responses gracefully instead of crashing. No DB schema, scoring engine, statistics, or API changes. |
 | v1.2.0 | Aug 2026 | **Minor feature release (freeze exception, explicitly requested)** — Season Quiz Leaderboard. New `SeasonQuizStanding` table; `/quiz` shows the participant's name during the quiz and an always-visible top-10 leaderboard (auto by score, live positions, top-3 medals, "You" highlight). Non-top-10 players stay hidden unless the admin shows them; admin can also hide anyone in the top 10. Admin `/admin/quiz` gained a Leaderboard Control panel with per-participant Show / Hide / Auto. New admin API `GET/PATCH /api/admin/season-quiz/standings`. |
+| v1.2.1 | Aug 2026 | **Patch release** — `/quiz` page now has an always-visible "Your Details" card (name + email) at the top like the prediction page, shared by both the Season Quiz and the Match Quiz, so the inputs appear even when no quizzes exist yet. No DB schema, scoring engine, statistics, or API changes. |
 
 ## Versioning Policy (Semantic)
 
@@ -46,7 +47,8 @@
 | v1.1.4-season1 | Patch — format text correction |
 | v1.1.5-season1 | Patch — admin auth cookie fix |
 | v1.2.0-season1 | Feature — season quiz leaderboard (freeze exception) |
-| v1.2.1+ | Future bug/security fixes for v1.2.x |
+| v1.2.1-season1 | Patch — always-visible quiz details card |
+| v1.2.2+ | Future bug/security fixes for v1.2.x |
 | v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)

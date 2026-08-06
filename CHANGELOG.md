@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.1-season1
+
+Added
+- `/quiz` page now shows an **always-visible "Your Details" card** (name + email inputs) at the top, matching the prediction page, so the fields are present even when no quizzes exist yet. The single card is shared by both the Season Quiz and the Match Quiz (name + email no longer duplicated in each quiz section).
+- Submitting a Match Quiz still requires an email; name defaults to "Anonymous" when left blank.
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes.
+
 ## v1.2.0-season1
 
 Added
