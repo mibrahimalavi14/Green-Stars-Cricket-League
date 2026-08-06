@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.3.2-season1
+
+Fixed
+- Mobile header menu scroll issue: when the hamburger (3-line) menu is opened, the page behind no longer scrolls first. Opening the menu now locks the page scroll and the menu itself scrolls independently (`max-h` + `overflow-y-auto`), so the menu items stay reachable without scrolling the background page to its bottom first.
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API changes.
+
 ## v1.3.1-season1
 
 Fixed

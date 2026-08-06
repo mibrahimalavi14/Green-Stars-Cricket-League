@@ -20,6 +20,14 @@ export function Header() {
     fetch("/api/matches/count?status=completed").then(r => r.json()).then(d => setHasPotm(d?.count > 0)).catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [open])
+
   if (isAdmin) {
     const adminLinks = {
       main: [
@@ -93,7 +101,7 @@ export function Header() {
           </div>
         </div>
         {open && (
-          <nav className="border-t border-[var(--border)] px-4 py-3 md:hidden">
+          <nav className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-[var(--border)] px-4 py-3 md:hidden">
             <div className="flex flex-col gap-3 text-sm font-medium">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Main</p>
               {adminLinks.main.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
@@ -194,7 +202,7 @@ export function Header() {
       </div>
 
       {open && (
-        <nav className="border-t border-[var(--border)] px-4 py-3 md:hidden">
+        <nav className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-[var(--border)] px-4 py-3 md:hidden">
           <div className="flex flex-col gap-3 text-sm font-medium">
             <Link href="/" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Home</Link>
             <Link href="/teams" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Teams</Link>
