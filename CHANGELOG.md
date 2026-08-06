@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.0-season1
+
+Added
+- **Season Quiz Leaderboard** with player names, live positions, and admin control:
+  - New `SeasonQuizStanding` table — one row per participant per season for leaderboard visibility control.
+  - Public `/quiz` page now shows the participant's name while taking the quiz ("Taking quiz as: …").
+  - An always-visible leaderboard card lists the **top 10 players automatically by score**, with medal icons for the top 3 and live positions.
+  - Anyone outside the top 10 stays hidden unless the admin manually shows them; the admin can also hide anyone inside the top 10. A "You" highlight marks the current user's own row after submitting.
+  - Admin `/admin/quiz` page gained a **Leaderboard Control** panel: full ranked list (position, name, email, score) with Show / Hide / Auto toggle per participant.
+  - New admin API `GET/PATCH /api/admin/season-quiz/standings`; public leaderboard endpoint now returns `{ entries, top }` with rank + uid per entry.
+
+Database: adds `SeasonQuizStanding` table (applied via `prisma db push`). No existing table or field changed.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes (public leaderboard shape extended from array to `{ entries, top }` — consumers updated).
+
 ## v1.1.5-season1
 
 Fixed

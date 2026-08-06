@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
+import { createHash } from "crypto"
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
@@ -67,5 +68,6 @@ export async function POST(req: Request) {
     score,
     total: questions.reduce((a, q) => a + q.pointValue, 0),
     results,
+    uid: createHash("sha256").update(cleanEmail).digest("hex").slice(0, 10),
   })
 }

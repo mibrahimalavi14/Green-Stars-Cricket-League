@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Trash2, Loader2, Brain, ChevronDown, ChevronUp, Check, X, Sparkles, RotateCcw, Lock, LockOpen } from "lucide-react"
+import { Plus, Trash2, Loader2, Brain, ChevronDown, ChevronUp, Check, X, Sparkles, RotateCcw, Lock, LockOpen, Trophy, RefreshCw } from "lucide-react"
 
 export default function AdminQuizPage() {
   const [quizzes, setQuizzes] = useState<any[]>([])
@@ -16,6 +16,11 @@ export default function AdminQuizPage() {
   const [sqLoading, setSqLoading] = useState(false)
   const [sqGenerating, setSqGenerating] = useState(false)
   const [sqMessage, setSqMessage] = useState("")
+
+  const [standings, setStandings] = useState<any[]>([])
+  const [standingsLoading, setStandingsLoading] = useState(false)
+  const [standingsBusy, setStandingsBusy] = useState("")
+  const [standingsMessage, setStandingsMessage] = useState("")
 
   const [matchId, setMatchId] = useState("")
   const [question, setQuestion] = useState("")
@@ -63,8 +68,41 @@ export default function AdminQuizPage() {
   }
 
   useEffect(() => {
-    if (selectedSeason) loadSeasonQuestions(selectedSeason)
+    if (selectedSeason) {
+      loadSeasonQuestions(selectedSeason)
+      loadStandings(selectedSeason)
+    }
   }, [selectedSeason])
+
+  async function loadStandings(seasonId: string) {
+    setStandingsLoading(true)
+    try {
+      const res = await fetch(`/api/admin/season-quiz/standings?seasonId=${seasonId}`)
+      const data = await res.json()
+      setStandings(Array.isArray(data?.entries) ? data.entries : [])
+    } catch {
+      setStandings([])
+    }
+    setStandingsLoading(false)
+  }
+
+  async function setStanding(email: string, action: "hide" | "show" | "auto") {
+    if (!selectedSeason) return
+    setStandingsBusy(email)
+    setStandingsMessage("")
+    const res = await fetch("/api/admin/season-quiz/standings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seasonId: selectedSeason, email, action }),
+    })
+    const data = await res.json()
+    setStandingsBusy("")
+    if (!res.ok) {
+      setStandingsMessage(`Error: ${data.error || "Failed to update"}`)
+    } else {
+      loadStandings(selectedSeason)
+    }
+  }
 
   async function generateSeasonQuiz() {
     if (!selectedSeason) return
@@ -368,6 +406,92 @@ export default function AdminQuizPage() {
             No season quiz yet — click Generate to create one
           </div>
         ) : null}
+
+        {selectedSeason && (
+          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--background)] p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <Trophy className="h-4 w-4 text-[var(--accent)]" /> Leaderboard Control
+                </h3>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Top 10 show automatically · hide/show anyone manually · others stay hidden
+                </p>
+              </div>
+              <button
+                onClick={() => loadStandings(selectedSeason)}
+                className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium hover:border-[var(--accent)]"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Refresh
+              </button>
+            </div>
+            {standingsMessage && <p className="mb-2 text-xs text-[var(--muted-foreground)]">{standingsMessage}</p>}
+
+            {standingsLoading ? (
+              <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin" /></div>
+            ) : standings.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--muted-foreground)]">
+                No participants yet
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {standings.map((s: any) => (
+                  <div
+                    key={s.email}
+                    className={`flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm ${
+                      s.visible ? "bg-[var(--muted)]" : "bg-red-500/5"
+                    }`}
+                  >
+                    <span className={`w-6 shrink-0 text-xs font-bold ${s.rank <= 3 ? "text-[var(--accent)]" : "text-[var(--muted-foreground)]"}`}>
+                      {s.rank}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="font-medium">{s.name}</span>
+                      <span className="ml-2 text-[10px] text-[var(--muted-foreground)]">{s.email}</span>
+                    </span>
+                    <span className="shrink-0 font-semibold text-[var(--accent)]">{s.score} pts</span>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                        s.visible ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+                      }`}
+                    >
+                      {s.visible ? "Visible" : "Hidden"}
+                    </span>
+                    {standingsBusy === s.email ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    ) : (
+                      <div className="flex shrink-0 gap-1.5">
+                        {s.autoVisible || s.isShown ? (
+                          <button
+                            onClick={() => setStanding(s.email, "hide")}
+                            className="rounded-md bg-red-500/10 px-2 py-1 text-[10px] font-semibold text-red-500 hover:bg-red-500/20"
+                          >
+                            Hide
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setStanding(s.email, "show")}
+                            className="rounded-md bg-green-500/10 px-2 py-1 text-[10px] font-semibold text-green-500 hover:bg-green-500/20"
+                          >
+                            Show
+                          </button>
+                        )}
+                        {(s.isHidden || s.isShown) && (
+                          <button
+                            onClick={() => setStanding(s.email, "auto")}
+                            className="rounded-md bg-[var(--muted)] px-2 py-1 text-[10px] font-semibold text-[var(--muted-foreground)] hover:bg-[var(--muted)]/60"
+                          >
+                            Auto
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {loading ? (

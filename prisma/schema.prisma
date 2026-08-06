@@ -88,6 +88,7 @@ model Season {
   awards            SeasonAward[]
   honors            TeamHonor[]
   seasonQuizzes     SeasonQuiz[]
+  seasonQuizStandings SeasonQuizStanding[]
 
   @@unique([name, year, workspaceId])
 }
@@ -728,4 +729,19 @@ model SeasonQuizAttempt {
 
   @@unique([seasonQuizId, email])
   @@index([seasonQuizId])
+}
+
+model SeasonQuizStanding {
+  id        String   @id @default(cuid())
+  seasonId  String
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  email     String
+  name      String   @default("")
+  isHidden  Boolean  @default(false)
+  isShown   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([seasonId, email])
+  @@index([seasonId])
 }

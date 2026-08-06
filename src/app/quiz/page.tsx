@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock } from "lucide-react"
+import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User } from "lucide-react"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -39,11 +39,17 @@ export default function QuizPage() {
   const [sqResult, setSqResult] = useState<any>(null)
   const [sqError, setSqError] = useState("")
   const [sqLb, setSqLb] = useState<any[]>([])
+  const [sqUid, setSqUid] = useState("")
+  const [sqLbLoading, setSqLbLoading] = useState(false)
 
   useEffect(() => {
     fetchData()
     fetchSeasonQuiz()
   }, [])
+
+  useEffect(() => {
+    if (seasonQuiz?.season?.id) fetchSeasonLeaderboard(seasonQuiz.season.id)
+  }, [seasonQuiz])
 
   async function fetchSeasonQuiz() {
     setSqLoading(true)
@@ -81,22 +87,29 @@ export default function QuizPage() {
     if (!res.ok) {
       setSqError(data.error || "Failed to submit")
     } else {
+      setSqUid(data.uid || "")
       setSqResult(data)
-      fetchSeasonLeaderboard()
+      fetchSeasonLeaderboard(seasonQuiz.season.id)
     }
   }
 
-  async function fetchSeasonLeaderboard() {
-    if (!seasonQuiz) return
-    const res = await fetch(`/api/season-quiz/leaderboard?seasonId=${seasonQuiz.season.id}`)
-    const data = await res.json()
-    setSqLb(Array.isArray(data) ? data : [])
+  async function fetchSeasonLeaderboard(seasonId: string) {
+    setSqLbLoading(true)
+    try {
+      const res = await fetch(`/api/season-quiz/leaderboard?seasonId=${seasonId}`)
+      const data = await res.json()
+      setSqLb(Array.isArray(data?.entries) ? data.entries : [])
+    } catch {
+      setSqLb([])
+    }
+    setSqLbLoading(false)
   }
 
   function resetSeasonQuiz() {
     setSqAnswers({})
     setSqResult(null)
     setSqError("")
+    setSqUid("")
     setSqLb([])
     fetchSeasonQuiz()
   }
@@ -262,6 +275,13 @@ export default function QuizPage() {
                 />
               </div>
 
+              {sqName.trim() && (
+                <div className="mb-4 flex items-center gap-2 rounded-lg bg-[var(--accent)]/10 px-3 py-2 text-sm">
+                  <User className="h-4 w-4 text-[var(--accent)]" />
+                  Taking quiz as: <strong>{sqName.trim()}</strong>
+                </div>
+              )}
+
               <div className="space-y-5">
                 {seasonQuiz.questions.map((q: any, qi: number) => (
                   <div key={q.id} className="rounded-lg border border-[var(--border)] p-4">
@@ -323,9 +343,6 @@ export default function QuizPage() {
                   <button onClick={resetSeasonQuiz} className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:border-[var(--muted-foreground)]">
                     <RotateCcw className="h-4 w-4" /> Retry
                   </button>
-                  <button onClick={fetchSeasonLeaderboard} className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:border-[var(--muted-foreground)]">
-                    <Trophy className="h-4 w-4" /> View Leaderboard
-                  </button>
                 </div>
               </div>
 
@@ -346,27 +363,60 @@ export default function QuizPage() {
                   )
                 })}
               </div>
-
-              {sqLb.length > 0 && (
-                <div className="mt-6 rounded-lg border border-[var(--border)] p-4">
-                  <h3 className="mb-3 flex items-center gap-2 font-semibold">
-                    <Trophy className="h-4 w-4 text-[var(--accent)]" /> Leaderboard
-                  </h3>
-                  <div className="space-y-1.5">
-                    {sqLb.map((a: any, i: number) => (
-                      <div key={a.email} className="flex items-center gap-3 rounded-lg bg-[var(--muted)] px-3 py-2 text-sm">
-                        <span className="w-6 text-xs font-bold text-[var(--muted-foreground)]">{i + 1}</span>
-                        <span className="font-medium">{a.name}</span>
-                        <span className="ml-auto font-semibold text-[var(--accent)]">{a.score} pts</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
       ) : null}
+
+      {seasonQuiz?.questions?.length > 0 && (
+        <div className="mb-10 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
+            <Trophy className="h-5 w-5 text-[var(--accent)]" /> Season Quiz Leaderboard
+          </h2>
+          <p className="mb-4 text-sm text-[var(--muted-foreground)]">
+            Top 10 players shown automatically · positions update live
+          </p>
+          {sqLbLoading ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
+            </div>
+          ) : sqLb.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--muted-foreground)]">
+              No entries yet — be the first to take the quiz!
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              {sqLb.map((a: any) => (
+                <div
+                  key={a.uid}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
+                    a.uid === sqUid ? "bg-[var(--accent)]/10 ring-1 ring-[var(--accent)]" : "bg-[var(--muted)]"
+                  }`}
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center">
+                    {a.rank === 1 ? (
+                      <Medal className="h-5 w-5 text-yellow-500" />
+                    ) : a.rank === 2 ? (
+                      <Medal className="h-5 w-5 text-gray-400" />
+                    ) : a.rank === 3 ? (
+                      <Medal className="h-5 w-5 text-amber-600" />
+                    ) : (
+                      <span className="text-xs font-bold text-[var(--muted-foreground)]">{a.rank}</span>
+                    )}
+                  </div>
+                  <span className="min-w-0 flex-1 truncate font-medium">
+                    {a.name}
+                    {a.uid === sqUid && (
+                      <span className="ml-2 rounded-full bg-[var(--accent)]/20 px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]">You</span>
+                    )}
+                  </span>
+                  <span className="shrink-0 font-semibold text-[var(--accent)]">{a.score} pts</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {activeQuiz && !result && !userAttempt && (
         <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">

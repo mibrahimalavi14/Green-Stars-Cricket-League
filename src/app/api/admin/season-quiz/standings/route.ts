@@ -1,18 +1,16 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
-import { createHash } from "crypto"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { logAudit } from "@/lib/audit"
 
 const TOP_VISIBLE = 10
 
 export async function GET(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   const { searchParams } = new URL(req.url)
   const seasonId = searchParams.get("seasonId")
-
   if (!seasonId) return NextResponse.json({ error: "Missing seasonId" }, { status: 400 })
-
-  const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
-  if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
 
   const questions = await prisma.seasonQuiz.findMany({
     where: { seasonId, active: true },
@@ -50,10 +48,51 @@ export async function GET(req: Request) {
       const isHidden = control?.isHidden ?? false
       const isShown = control?.isShown ?? false
       const rank = i + 1
-      const visible = (rank <= TOP_VISIBLE && !isHidden) || isShown
-      const uid = createHash("sha256").update(email).digest("hex").slice(0, 10)
-      return { ...entry, rank, uid, visible }
+      return {
+        ...entry,
+        email,
+        rank,
+        isHidden,
+        isShown,
+        autoVisible: rank <= TOP_VISIBLE && !isHidden,
+        visible: (rank <= TOP_VISIBLE && !isHidden) || isShown,
+      }
     })
 
-  return NextResponse.json({ entries: ranked.filter(e => e.visible), top: TOP_VISIBLE })
+  return NextResponse.json({ entries: ranked, top: TOP_VISIBLE })
+}
+
+export async function PATCH(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const body = await req.json()
+  const { seasonId, email, action } = body
+
+  if (!seasonId || !email || !["hide", "show", "auto"].includes(action)) {
+    return NextResponse.json({ error: "seasonId, email and action (hide|show|auto) are required" }, { status: 400 })
+  }
+
+  const cleanEmail = String(email).trim().toLowerCase()
+  const data =
+    action === "hide"
+      ? { isHidden: true, isShown: false }
+      : action === "show"
+        ? { isShown: true, isHidden: false }
+        : { isHidden: false, isShown: false }
+
+  const standing = await prisma.seasonQuizStanding.upsert({
+    where: { seasonId_email: { seasonId, email: cleanEmail } },
+    create: { seasonId, email: cleanEmail, ...data },
+    update: data,
+    select: { email: true, isHidden: true, isShown: true },
+  })
+
+  logAudit({
+    action: `season_quiz_${action}`,
+    entity: "season",
+    entityId: seasonId,
+    details: JSON.stringify({ email: cleanEmail }),
+  })
+
+  return NextResponse.json({ success: true, standing })
 }
