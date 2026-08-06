@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.2 |
+| **Current Version** | v1.3.3 |
 | **Release Date** | August 2026 |
 | **Status** | Production �?" Season 1 |
 | **Feature Freeze** | Yes (v1.3.0 exception: quiz timer + email removal, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.2-season1` (mobile menu scroll fix)
+| **Current Release Tag** | `v1.3.3-season1` (seasons titles leaderboard + season card summary)
 
 ## Runtime
 
@@ -38,6 +38,7 @@
 | v1.3.0 | Aug 2026 | **Minor feature release (freeze exception, explicitly requested)** — Quiz timer + email removal. Season Quiz gets a 3-minute countdown: quiz locks automatically when time runs out and the participant's name lands on the leaderboard (server-side time guard too). Email removed from all quiz flows — `QuizAttempt`, `SeasonQuizAttempt`, `SeasonQuizStanding` are now keyed by name; the `/quiz` details card asks only for a name; admin standings control operates on names. |
 | v1.3.1 | Aug 2026 | **Patch release** — Season Quiz countdown fix: the timer no longer resets on every answer selection (it now runs on a stable 1-second interval until expiry or submit). No DB schema, scoring engine, statistics, or API changes. |
 | v1.3.2 | Aug 2026 | **Patch release** — Mobile header menu scroll fix: opening the hamburger menu now locks the page scroll and the menu scrolls independently instead of the background page scrolling first. No DB schema, scoring engine, statistics, or API changes. |
+| v1.3.3 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — `/seasons` page: all-time Titles leaderboard (team → number of titles + which seasons) and a Runner-ups leaderboard, plus a summary line on each season card showing the season date range, season winner, runner-up, and Player of the Tournament (MVP award). No DB schema changes. |
 
 ## Versioning Policy (Semantic)
 
@@ -54,7 +55,8 @@
 | v1.3.0-season1 | Feature — season quiz timer + email removal (freeze exception) |
 | v1.3.1-season1 | Patch — quiz countdown timer fix |
 | v1.3.2-season1 | Patch — mobile header menu scroll fix |
-| v1.3.3+ | Future bug/security fixes for v1.3.x |
+| v1.3.3-season1 | Feature — seasons titles/runner-up leaderboards + season card summary |
+| v1.3.4+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)

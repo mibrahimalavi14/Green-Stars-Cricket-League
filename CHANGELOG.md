@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.3-season1
+
+Added
+- `/seasons` page now has an all-time **Titles leaderboard** (each team shown with its number of season titles and the names of the seasons it won) and a **Runner-ups leaderboard** (same view for runner-up finishes), ordered by count. Shown only when at least one season has a winner or runner-up recorded.
+- Each season card now shows a summary line at the top: the season date range (first match date – last match date), the season winner, the runner-up, and the Player of the Tournament (from the season's `mvp` award). Teams/Matches counts and the Active badge remain unchanged.
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API changes.
+
 ## v1.3.2-season1
 
 Fixed
