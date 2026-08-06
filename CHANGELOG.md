@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.3.0-season1
+
+Added
+- **Season Quiz now has a 3-minute countdown timer.** The participant clicks "Start Season Quiz", a timer appears, and when time runs out the quiz locks automatically — no further answers can be submitted — and the participant's name lands on the leaderboard via automatic submission of their answers.
+- The leaderboard (public `/quiz` and admin `/admin/quiz`) now shows **names + points only**. Email was removed from all quiz flows.
+
+Changed
+- Email removed everywhere in the quiz module:
+  - `QuizAttempt`, `SeasonQuizAttempt`, `SeasonQuizStanding` tables are now keyed by participant **name** instead of email (no email column anymore).
+  - Public `/quiz` "Your Details" card now asks only for a name (shared by the Match Quiz and the Season Quiz).
+  - Match Quiz no longer requires an email; name is the identity (first answer per name per quiz wins).
+  - Season Quiz leaderboard `uid` is now derived from the name; admin standings control (Show / Hide / Auto) operates on names.
+- Season Quiz no longer requires all questions to be answered — you may submit partial answers before the timer ends.
+- Server-side time guard: the attempt API rejects submissions received after the 3-minute window (+10s grace), and anchors the clock to the participant's earliest attempt, so refreshing the page doesn't reset the timer.
+
+Database: `QuizAttempt`, `SeasonQuizAttempt`, `SeasonQuizStanding` — email columns removed, unique keys now on name (applied via `prisma db push`). Database was empty (no quiz data), so no data was affected.
+No scoring engine changes.
+No statistics changes.
+No API breaking changes (public endpoints same shape; identity field changed from email to name).
+
 ## v1.2.1-season1
 
 Added

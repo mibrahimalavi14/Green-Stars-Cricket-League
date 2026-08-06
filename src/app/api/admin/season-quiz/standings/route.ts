@@ -21,36 +21,36 @@ export async function GET(req: Request) {
   const quizIds = questions.map(q => q.id)
   const attempts = await prisma.seasonQuizAttempt.findMany({
     where: { seasonQuizId: { in: quizIds } },
-    select: { email: true, name: true, score: true, createdAt: true },
+    select: { name: true, score: true, createdAt: true },
   })
 
   const standings = await prisma.seasonQuizStanding.findMany({
     where: { seasonId },
-    select: { email: true, isHidden: true, isShown: true },
+    select: { name: true, isHidden: true, isShown: true },
   })
-  const controlByEmail = new Map(standings.map(s => [s.email, s]))
+  const controlByName = new Map(standings.map(s => [s.name, s]))
 
-  const byEmail = new Map<string, { name: string; score: number; lastAttempt: Date }>()
+  const byName = new Map<string, { score: number; lastAttempt: Date }>()
   for (const a of attempts) {
-    const existing = byEmail.get(a.email)
+    const existing = byName.get(a.name)
     if (existing) {
       existing.score += a.score
       if (a.createdAt > existing.lastAttempt) existing.lastAttempt = a.createdAt
     } else {
-      byEmail.set(a.email, { name: a.name, score: a.score, lastAttempt: a.createdAt })
+      byName.set(a.name, { score: a.score, lastAttempt: a.createdAt })
     }
   }
 
-  const ranked = [...byEmail.entries()]
+  const ranked = [...byName.entries()]
     .sort((a, b) => b[1].score - a[1].score || a[1].lastAttempt.getTime() - b[1].lastAttempt.getTime())
-    .map(([email, entry], i) => {
-      const control = controlByEmail.get(email)
+    .map(([name, entry], i) => {
+      const control = controlByName.get(name)
       const isHidden = control?.isHidden ?? false
       const isShown = control?.isShown ?? false
       const rank = i + 1
       return {
+        name,
         ...entry,
-        email,
         rank,
         isHidden,
         isShown,
@@ -66,13 +66,13 @@ export async function PATCH(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { seasonId, email, action } = body
+  const { seasonId, name, action } = body
 
-  if (!seasonId || !email || !["hide", "show", "auto"].includes(action)) {
-    return NextResponse.json({ error: "seasonId, email and action (hide|show|auto) are required" }, { status: 400 })
+  if (!seasonId || !name || !["hide", "show", "auto"].includes(action)) {
+    return NextResponse.json({ error: "seasonId, name and action (hide|show|auto) are required" }, { status: 400 })
   }
 
-  const cleanEmail = String(email).trim().toLowerCase()
+  const cleanName = String(name).trim().slice(0, 80)
   const data =
     action === "hide"
       ? { isHidden: true, isShown: false }
@@ -81,17 +81,17 @@ export async function PATCH(req: Request) {
         : { isHidden: false, isShown: false }
 
   const standing = await prisma.seasonQuizStanding.upsert({
-    where: { seasonId_email: { seasonId, email: cleanEmail } },
-    create: { seasonId, email: cleanEmail, ...data },
+    where: { seasonId_name: { seasonId, name: cleanName } },
+    create: { seasonId, name: cleanName, ...data },
     update: data,
-    select: { email: true, isHidden: true, isShown: true },
+    select: { name: true, isHidden: true, isShown: true },
   })
 
   logAudit({
     action: `season_quiz_${action}`,
     entity: "season",
     entityId: seasonId,
-    details: JSON.stringify({ email: cleanEmail }),
+    details: JSON.stringify({ name: cleanName }),
   })
 
   return NextResponse.json({ success: true, standing })

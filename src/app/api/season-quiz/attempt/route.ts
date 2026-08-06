@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
+import { MATCH_CONFIG } from "@/lib/config"
 import { createHash } from "crypto"
+
+const TIME_LIMIT_MS = MATCH_CONFIG.seasonQuizTimeLimitSeconds * 1000
+const GRACE_MS = MATCH_CONFIG.seasonQuizGraceSeconds * 1000
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
@@ -10,15 +14,11 @@ export async function POST(req: Request) {
   if (!rl.allowed) return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 })
 
   const body = await req.json()
-  const { seasonId, email, name, answers } = body
+  const { seasonId, name, answers, startedAt } = body
 
-  if (!seasonId || !email || !Array.isArray(answers) || answers.length === 0) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-  }
-
-  const cleanEmail = String(email).trim().toLowerCase()
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-    return NextResponse.json({ error: "Please provide a valid email" }, { status: 400 })
+  const cleanName = String(name || "").trim().slice(0, 80)
+  if (!seasonId || !cleanName || !Array.isArray(answers) || answers.length === 0) {
+    return NextResponse.json({ error: "Please provide your name and answers" }, { status: 400 })
   }
 
   const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
@@ -32,6 +32,18 @@ export async function POST(req: Request) {
     select: { id: true, correctAnswer: true, pointValue: true },
   })
   if (questions.length === 0) return NextResponse.json({ error: "Quiz not found" }, { status: 404 })
+
+  const clientStartedAt = typeof startedAt === "number" && Number.isFinite(startedAt) ? startedAt : Date.now()
+
+  const earliestExisting = await prisma.seasonQuizAttempt.findFirst({
+    where: { seasonQuiz: { seasonId }, name: cleanName },
+    orderBy: { createdAt: "asc" },
+    select: { createdAt: true },
+  })
+  const anchor = earliestExisting ? Math.max(earliestExisting.createdAt.getTime(), clientStartedAt) : clientStartedAt
+  if (Date.now() - anchor > TIME_LIMIT_MS + GRACE_MS) {
+    return NextResponse.json({ error: "Time's up! The quiz has closed." }, { status: 403 })
+  }
 
   const questionById = new Map(questions.map(q => [q.id, q]))
 
@@ -47,11 +59,10 @@ export async function POST(req: Request) {
     results.map(r => {
       const q = questionById.get(r.questionId)!
       return prisma.seasonQuizAttempt.upsert({
-        where: { seasonQuizId_email: { seasonQuizId: r.questionId, email: cleanEmail } },
+        where: { seasonQuizId_name: { seasonQuizId: r.questionId, name: cleanName } },
         create: {
           seasonQuizId: r.questionId,
-          email: cleanEmail,
-          name: String(name || "Anonymous").slice(0, 80),
+          name: cleanName,
           answers: JSON.stringify(r.selectedAnswer),
           score: r.correct ? q.pointValue : 0,
           total: q.pointValue,
@@ -68,6 +79,6 @@ export async function POST(req: Request) {
     score,
     total: questions.reduce((a, q) => a + q.pointValue, 0),
     results,
-    uid: createHash("sha256").update(cleanEmail).digest("hex").slice(0, 10),
+    uid: createHash("sha256").update(cleanName).digest("hex").slice(0, 10),
   })
 }

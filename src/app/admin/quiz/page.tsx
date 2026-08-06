@@ -86,14 +86,14 @@ export default function AdminQuizPage() {
     setStandingsLoading(false)
   }
 
-  async function setStanding(email: string, action: "hide" | "show" | "auto") {
+  async function setStanding(name: string, action: "hide" | "show" | "auto") {
     if (!selectedSeason) return
-    setStandingsBusy(email)
+    setStandingsBusy(name)
     setStandingsMessage("")
     const res = await fetch("/api/admin/season-quiz/standings", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ seasonId: selectedSeason, email, action }),
+      body: JSON.stringify({ seasonId: selectedSeason, name, action }),
     })
     const data = await res.json()
     setStandingsBusy("")
@@ -437,7 +437,7 @@ export default function AdminQuizPage() {
               <div className="space-y-1.5">
                 {standings.map((s: any) => (
                   <div
-                    key={s.email}
+                    key={s.name}
                     className={`flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm ${
                       s.visible ? "bg-[var(--muted)]" : "bg-red-500/5"
                     }`}
@@ -447,7 +447,6 @@ export default function AdminQuizPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="font-medium">{s.name}</span>
-                      <span className="ml-2 text-[10px] text-[var(--muted-foreground)]">{s.email}</span>
                     </span>
                     <span className="shrink-0 font-semibold text-[var(--accent)]">{s.score} pts</span>
                     <span
@@ -457,20 +456,20 @@ export default function AdminQuizPage() {
                     >
                       {s.visible ? "Visible" : "Hidden"}
                     </span>
-                    {standingsBusy === s.email ? (
+                    {standingsBusy === s.name ? (
                       <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
                     ) : (
                       <div className="flex shrink-0 gap-1.5">
                         {s.autoVisible || s.isShown ? (
                           <button
-                            onClick={() => setStanding(s.email, "hide")}
+                            onClick={() => setStanding(s.name, "hide")}
                             className="rounded-md bg-red-500/10 px-2 py-1 text-[10px] font-semibold text-red-500 hover:bg-red-500/20"
                           >
                             Hide
                           </button>
                         ) : (
                           <button
-                            onClick={() => setStanding(s.email, "show")}
+                            onClick={() => setStanding(s.name, "show")}
                             className="rounded-md bg-green-500/10 px-2 py-1 text-[10px] font-semibold text-green-500 hover:bg-green-500/20"
                           >
                             Show
@@ -478,7 +477,7 @@ export default function AdminQuizPage() {
                         )}
                         {(s.isHidden || s.isShown) && (
                           <button
-                            onClick={() => setStanding(s.email, "auto")}
+                            onClick={() => setStanding(s.name, "auto")}
                             className="rounded-md bg-[var(--muted)] px-2 py-1 text-[10px] font-semibold text-[var(--muted-foreground)] hover:bg-[var(--muted)]/60"
                           >
                             Auto
@@ -554,7 +553,6 @@ export default function AdminQuizPage() {
                           {attempts[q.id].map((a: any) => (
                             <div key={a.id} className="flex items-center gap-3 rounded-lg bg-[var(--muted)] px-3 py-2 text-sm">
                               <span className="font-medium">{a.name}</span>
-                              <span className="text-[var(--muted-foreground)]">{a.email}</span>
                               {a.correct ? (
                                 <Check className="ml-auto h-4 w-4 text-green-500" />
                               ) : (
