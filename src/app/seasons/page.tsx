@@ -54,14 +54,18 @@ function LeaderboardPanel({
 }
 
 async function SeasonsPage() {
-  const seasons = await prisma.season.findMany({
-    orderBy: { year: "desc" },
-    include: {
-      teams: { select: { id: true, name: true } },
-      matches: { select: { date: true }, orderBy: { date: "asc" } },
-      awards: { where: { category: "mvp" }, select: { playerId: true } },
-    },
-  })
+  const [seasons, workspace] = await Promise.all([
+    prisma.season.findMany({
+      orderBy: { year: "desc" },
+      include: {
+        teams: { select: { id: true, name: true } },
+        matches: { select: { date: true }, orderBy: { date: "asc" } },
+        awards: { where: { category: "mvp" }, select: { playerId: true } },
+      },
+    }),
+    prisma.workspace.findUnique({ where: { id: "official" }, select: { titlesLeaderboardVisible: true } }),
+  ])
+  const leaderboardVisible = workspace?.titlesLeaderboardVisible ?? true
 
   const mvpPlayerIds = [...new Set(seasons.flatMap(s => s.awards.filter(a => a.playerId).map(a => a.playerId)))]
   const mvpPlayers = mvpPlayerIds.length
@@ -105,7 +109,7 @@ async function SeasonsPage() {
       <h1 className="mb-2 text-3xl font-bold">Seasons</h1>
       <p className="mb-8 text-[var(--muted-foreground)]">Browse all seasons of the Green Stars Cricket League.</p>
 
-      {(titles.length > 0 || runnerUps.length > 0) && (
+      {(leaderboardVisible && (titles.length > 0 || runnerUps.length > 0)) && (
         <div className="mb-10 grid gap-6 sm:grid-cols-2">
           <LeaderboardPanel title="Most Titles" icon="🏆" items={titles} accent="bg-amber-500/20 text-amber-600 dark:text-amber-400" />
           <LeaderboardPanel title="Most Runner-up Finishes" icon="🥈" items={runnerUps} accent="bg-slate-400/20 text-slate-500" />

@@ -58,6 +58,7 @@ model Workspace {
   name      String
   type      String   @default("OFFICIAL") // OFFICIAL | PRACTICE
   isActive  Boolean  @default(true)
+  titlesLeaderboardVisible Boolean @default(true)
   createdAt DateTime @default(now())
   seasons   Season[]
 }

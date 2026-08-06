@@ -3,6 +3,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace"
 import { AdminSeasonForm } from "@/components/AdminSeasonForm"
 import { PredictionLockToggle } from "@/components/PredictionLockToggle"
 import { SeasonLockToggle } from "@/components/SeasonLockToggle"
+import { TitlesLeaderboardToggle } from "@/components/TitlesLeaderboardToggle"
 
 export const dynamic = "force-dynamic"
 
@@ -14,6 +15,11 @@ async function AdminSeasonsPage() {
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-8 text-3xl font-bold">Manage Seasons</h1>
       <div className="mb-8"><AdminSeasonForm /></div>
+      <div className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+        <p className="font-semibold">All-Time Titles &amp; Runner-ups Leaderboards</p>
+        <p className="text-sm text-[var(--muted-foreground)]">Show or hide the titles/runner-up leaderboards on the public /seasons page.</p>
+        <TitlesLeaderboardToggle />
+      </div>
       {seasons.map((s) => (
         <div key={s.id} className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
           <div className="flex items-center justify-between">

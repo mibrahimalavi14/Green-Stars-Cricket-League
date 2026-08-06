@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.3.4-season1
+
+Added
+- Admin can now show or hide the all-time **Titles** and **Runner-ups** leaderboards on the public `/seasons` page. New `titlesLeaderboardVisible` flag on the `Workspace` model (default `true`), a Show/Hide toggle on `/admin/seasons`, and a new admin API `GET/PATCH /api/admin/leaderboard-visibility`. When hidden, the leaderboard section no longer renders.
+
+Database schema change:
+- `Workspace.titlesLeaderboardVisible` (Boolean, default `true`).
+
+No scoring engine changes.
+No statistics changes.
+No other API changes.
+
 ## v1.3.3-season1
 
 Added
