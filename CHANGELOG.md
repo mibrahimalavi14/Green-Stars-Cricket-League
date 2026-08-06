@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.3.1-season1
+
+Fixed
+- Season Quiz countdown no longer resets while answering. Previously every answer selection restarted the 1-second timer (the effect re-ran on every answer change), so the countdown could stall for users answering continuously. The timer now runs on a stable 1-second interval until it expires or the quiz is submitted.
+
+No database schema changes.
+No scoring engine changes.
+No statistics changes.
+No API changes.
+
 ## v1.3.0-season1
 
 Added

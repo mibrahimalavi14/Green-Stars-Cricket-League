@@ -106,14 +106,21 @@ export default function QuizPage() {
 
   useEffect(() => {
     if (!sqStarted || sqResult || sqExpired) return
-    if (sqTimeLeft <= 0) {
+    const interval = setInterval(() => setSqTimeLeft(prev => prev - 1), 1000)
+    return () => clearInterval(interval)
+  }, [sqStarted, sqResult, sqExpired])
+
+  useEffect(() => {
+    if (sqStarted && !sqResult && !sqExpired && sqTimeLeft <= 0) {
       setSqExpired(true)
-      if (Object.keys(sqAnswers).length > 0) submitSeasonQuiz()
-      return
     }
-    const t = setTimeout(() => setSqTimeLeft(s => s - 1), 1000)
-    return () => clearTimeout(t)
-  }, [sqStarted, sqResult, sqExpired, sqTimeLeft, sqAnswers])
+  }, [sqTimeLeft, sqStarted, sqResult, sqExpired])
+
+  useEffect(() => {
+    if (sqExpired && !sqResult && Object.keys(sqAnswers).length > 0) {
+      submitSeasonQuiz()
+    }
+  }, [sqExpired])
 
   async function fetchSeasonLeaderboard(seasonId: string) {
     setSqLbLoading(true)
