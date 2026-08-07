@@ -90,6 +90,7 @@ model Season {
   honors            TeamHonor[]
   seasonQuizzes     SeasonQuiz[]
   seasonQuizStandings SeasonQuizStanding[]
+  playerOfSeasonVotes PlayerOfSeasonVote[]
 
   @@unique([name, year, workspaceId])
 }
@@ -170,6 +171,7 @@ model Player {
   squadMembers SquadMember[]
   potmVotes     PotmVote[]
   transfers     PlayerTransfer[]
+  playerOfSeasonVotes PlayerOfSeasonVote[]
 
   createdAt DateTime @default(now())
 
@@ -473,6 +475,20 @@ model PotmVote {
   createdAt DateTime @default(now())
 
   @@unique([matchId, email])
+}
+
+model PlayerOfSeasonVote {
+  id        String   @id @default(cuid())
+  seasonId  String
+  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  email     String
+  name      String   @default("Anonymous")
+  createdAt DateTime @default(now())
+
+  @@unique([seasonId, email])
+  @@index([seasonId])
 }
 
 model BallEvent {

@@ -4,7 +4,7 @@ import { Trophy, Award, Star, Zap, Target, Medal, Download } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
-const CEREMONY_ORDER = ["champion", "runner_up", "orange_cap", "purple_cap", "mvp", "best_batter", "best_bowler", "best_fielder", "most_improved", "emerging_player", "fair_play"]
+const CEREMONY_ORDER = ["champion", "runner_up", "player_of_season", "orange_cap", "purple_cap", "mvp", "best_batter", "best_bowler", "best_fielder", "most_improved", "emerging_player", "fair_play"]
 
 async function AwardsPage() {
   const seasons = await prisma.season.findMany({

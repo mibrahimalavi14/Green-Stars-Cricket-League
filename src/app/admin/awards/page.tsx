@@ -9,6 +9,7 @@ const CATEGORIES = [
   { value: "orange_cap", label: "Orange Cap", icon: "🧢" },
   { value: "purple_cap", label: "Purple Cap", icon: "🟣" },
   { value: "mvp", label: "MVP", icon: "🏅" },
+  { value: "player_of_season", label: "Player of the Season", icon: "🏅" },
   { value: "best_batter", label: "Best Batter", icon: "🏏" },
   { value: "best_bowler", label: "Best Bowler", icon: "🎳" },
   { value: "best_fielder", label: "Best Fielder", icon: "🧤" },

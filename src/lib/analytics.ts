@@ -9,6 +9,7 @@ export type AnalyticsEventType =
   | "prediction_submitted"
   | "quiz_attempted"
   | "potm_vote"
+  | "player_of_season_vote"
   | "notification_sent"
   | "feature_feedback"
 

@@ -7,6 +7,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   orange_cap: "Orange Cap",
   purple_cap: "Purple Cap",
   mvp: "Most Valuable Player",
+  player_of_season: "Player of the Season",
   best_batter: "Best Batter",
   best_bowler: "Best Bowler",
   best_fielder: "Best Fielder",

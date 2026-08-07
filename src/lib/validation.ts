@@ -130,6 +130,12 @@ export const potmVoteSchema = z.object({
   email: z.string().email().max(200),
 })
 
+export const playerOfSeasonVoteSchema = z.object({
+  seasonId: z.string().min(1),
+  playerId: z.string().min(1),
+  email: z.string().email().max(200),
+})
+
 export const predictionSchema = z.object({
   matchId: z.string().min(1),
   predictedTeamId: z.string().min(1),
@@ -222,6 +228,7 @@ export const seasonAwardSchema = z.object({
     "orange_cap",
     "purple_cap",
     "mvp",
+    "player_of_season",
     "best_batter",
     "best_bowler",
     "best_fielder",

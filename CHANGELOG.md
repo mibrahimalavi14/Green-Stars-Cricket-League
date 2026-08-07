@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.5-season1
+
+Added
+- **Player of the Season public voting.** Visitors can vote for the standout performer of a season. New `PlayerOfSeasonVote` table with a per-season email uniqueness constraint (one vote per email per season, name defaults to "Anonymous"), mirroring the existing POTM voting pattern.
+- New API `GET /api/player-of-season?seasonId=&email=` returns the season's nominees (top performers by impact with their season runs/wickets/catches/innings), live vote counts, total votes, and the user's existing vote. `POST /api/player-of-season` validates the season/player, enforces the one-vote-per-email rule, and is rate-limited (3 per hour per IP).
+- Public `/player-of-season` page: season selector, nominee cards with team + season stats and live vote progress bars, a vote modal (email + optional name), and the "You voted for ..." confirmation state.
+- Admin `/admin/player-of-season` page: per-season vote breakdowns and an "Announce Player of the Season" action that writes a `player_of_season` `SeasonAward` for the chosen player. Also linked from the admin header and dashboard.
+- New `player_of_season` award category wired through the awards API labels, the public Awards page ceremony order, season detail page, and award certificates.
+- Public header "More → Games & Features" now links to `/player-of-season` on both desktop and mobile.
+
+Database schema change:
+- `PlayerOfSeasonVote` (seasonId, playerId, email, name; `@@unique([seasonId, email])`, `@@index([seasonId])`, cascade deletes on Season/Player).
+
+No scoring engine changes.
+No statistics changes.
+
 ## v1.3.4-season1
 
 Added

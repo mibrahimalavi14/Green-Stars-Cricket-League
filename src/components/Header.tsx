@@ -47,6 +47,7 @@ export function Header() {
         { href: "/admin/seasons", label: "Seasons", icon: Calendar },
         { href: "/admin/squad", label: "Squad", icon: Users },
         { href: "/admin/potm", label: "POTM", icon: Star },
+        { href: "/admin/player-of-season", label: "Player of Season", icon: Crown },
         { href: "/admin/predictions", label: "Predictions", icon: Trophy },
         { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
       ],
@@ -163,6 +164,7 @@ export function Header() {
                 <Link href="/quiz" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Brain className="h-3.5 w-3.5" /> Quiz</Link>
                 <Link href="/dream-team" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Users className="h-3.5 w-3.5" /> Dream Team</Link>
                 <Link href="/potm-gallery" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Award className="h-3.5 w-3.5" /> POTM Gallery</Link>
+                <Link href="/player-of-season" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crown className="h-3.5 w-3.5" /> Player of the Season</Link>
 
                 <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
                 <Link href="/compare" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
@@ -219,6 +221,7 @@ export function Header() {
             <Link href="/quiz" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Brain className="h-3 w-3" /> Quiz</Link>
             <Link href="/dream-team" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Dream Team</Link>
             <Link href="/potm-gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">POTM Gallery</Link>
+            <Link href="/player-of-season" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Player of the Season</Link>
             <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
             <Link href="/compare" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Crosshair className="h-3 w-3" /> Player Comparison</Link>
             <Link href="/head-to-head" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Sword className="h-3 w-3" /> Head to Head</Link>

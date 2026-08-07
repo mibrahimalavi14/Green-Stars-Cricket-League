@@ -100,6 +100,12 @@ async function AdminPage() {
           <p className="text-sm text-[var(--muted-foreground)]">View votes & set official MOTM</p>
         </Link>
 
+        <Link href="/admin/player-of-season" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Trophy className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Player of Season</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">View votes & announce winner</p>
+        </Link>
+
         <Link href="/admin/news" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Newspaper className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">News</h3>

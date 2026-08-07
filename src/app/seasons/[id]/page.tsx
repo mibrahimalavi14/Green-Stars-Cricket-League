@@ -75,6 +75,7 @@ async function SeasonDetailPage({ params }: { params: Promise<{ id: string }> })
     orange_cap: { label: "Orange Cap", icon: "🧢" },
     purple_cap: { label: "Purple Cap", icon: "🟣" },
     mvp: { label: "MVP", icon: "🏅" },
+    player_of_season: { label: "Player of the Season", icon: "🏅" },
     best_batter: { label: "Best Batter", icon: "🏏" },
     best_bowler: { label: "Best Bowler", icon: "🎳" },
     best_fielder: { label: "Best Fielder", icon: "🧤" },
