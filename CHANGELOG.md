@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.10-season1
+
+Automatic push notifications. Subscribers now get notified automatically on key events instead of only when an admin manually broadcasts from `/admin/notifications`.
+
+Added
+- **Match completion** — when a match is completed via Live Scoring, subscribers get a "Match Complete!" push with the result and a link to that match's POTM voting page.
+- **Season Quiz live** — when the Season Quiz auto-generates after the season's last match, subscribers get a push with a link to `/quiz`.
+- **News publish** — when admin publishes a news item (`POST /api/news`), subscribers get a "New News" push linking to the article.
+- **Shared `sendPushNotification` helper** (`src/lib/push.ts`) — single implementation for the manual admin broadcast and the automatic triggers; cleans up dead subscriptions (404/410) on every send.
+
+Changed
+- `/api/notifications/send` refactored onto the shared helper (still admin-auth protected).
+
+Unchanged
+- Notification enabling/disabling UX and the footer toggle are untouched.
+- No database schema changes, no scoring engine changes.
+
 ## v1.3.9-season1
 
 Auto-ranked Player of the Match candidates. POTM candidates are still 100% automatic (built from the completed match's real `playerMatch` stats — no manual selection), but now the best performers surface first.

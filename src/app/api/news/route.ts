@@ -14,5 +14,17 @@ export async function POST(req: Request) {
   const news = await prisma.news.create({
     data: { ...body, type: body.type || "general", slug, published: true },
   })
+
+  try {
+    const { sendPushNotification } = await import("@/lib/push")
+    await sendPushNotification({
+      title: "New News",
+      body: news.title,
+      link: `/news/${slug}`,
+    })
+  } catch (pushErr) {
+    console.error("Push notification failed:", pushErr)
+  }
+
   return NextResponse.json(news)
 }

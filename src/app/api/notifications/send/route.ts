@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import webpush from "web-push"
-import { vapidKeys } from "../vapid"
-
-webpush.setVapidDetails(
-  "mailto:greenstarscricketleague@gmail.com",
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-)
+import { sendPushNotification } from "@/lib/push"
 
 export async function POST(req: Request) {
   try {
@@ -22,39 +14,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Title and body are required" }, { status: 400 })
     }
 
-    const subscriptions = await prisma.pushSubscription.findMany()
+    const result = await sendPushNotification({ title, body, link: link || "/" })
 
-    if (subscriptions.length === 0) {
-      return NextResponse.json({ success: true, sent: 0, failed: 0 })
-    }
-
-    const payload = JSON.stringify({ title, body, link: link || "/" })
-
-    let sent = 0
-    let failed = 0
-
-    const results = await Promise.allSettled(
-      subscriptions.map(async (sub) => {
-        try {
-          await webpush.sendNotification(
-            {
-              endpoint: sub.endpoint,
-              keys: { p256dh: sub.p256dh, auth: sub.auth },
-            },
-            payload
-          )
-          sent++
-        } catch (err: unknown) {
-          failed++
-          const statusCode = (err as { statusCode?: number }).statusCode
-          if (statusCode === 404 || statusCode === 410) {
-            await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {})
-          }
-        }
-      })
-    )
-
-    return NextResponse.json({ success: true, sent, failed: results.length - sent })
+    return NextResponse.json({ success: true, sent: result.sent, failed: result.failed })
   } catch {
     return NextResponse.json({ error: "Failed to send notifications" }, { status: 500 })
   }
