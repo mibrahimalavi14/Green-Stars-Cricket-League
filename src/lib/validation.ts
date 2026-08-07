@@ -116,6 +116,12 @@ export const contactSchema = z.object({
   email: z.string().email().max(200),
   subject: z.string().min(1).max(200).optional(),
   message: z.string().min(1).max(2000),
+  purpose: z.enum(["general", "sponsorship"]).default("general"),
+  phone: z.string().max(30).optional(),
+  company: z.string().max(100).optional(),
+  sponsorshipType: z.string().max(50).optional(),
+  budgetRange: z.string().max(50).optional(),
+  verifiedToken: z.string().min(1),
 })
 
 export const reviewSchema = z.object({

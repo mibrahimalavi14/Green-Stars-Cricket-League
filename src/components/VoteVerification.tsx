@@ -9,10 +9,12 @@ const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""
 interface VoteVerificationProps {
   email: string
   name: string
-  purpose: "potm" | "pos" | "quiz" | "seasonQuiz"
+  purpose: "potm" | "pos" | "quiz" | "seasonQuiz" | "prediction" | "contact"
   verifiedToken: string
   onVerified: (token: string) => void
   onReset: () => void
+  verifiedLabel?: string
+  noteLabel?: string
 }
 
 export default function VoteVerification({
@@ -22,6 +24,8 @@ export default function VoteVerification({
   verifiedToken,
   onVerified,
   onReset,
+  verifiedLabel,
+  noteLabel,
 }: VoteVerificationProps) {
   const [otpSent, setOtpSent] = useState(false)
   const [otp, setOtp] = useState("")
@@ -34,7 +38,7 @@ export default function VoteVerification({
     return (
       <div className="flex items-center gap-2 rounded-lg border border-green-500/40 bg-green-500/10 px-3 py-2 text-sm text-green-500">
         <ShieldCheck className="h-4 w-4 shrink-0" />
-        <span className="min-w-0 flex-1">Email verified &mdash; you can now vote</span>
+        <span className="min-w-0 flex-1">{verifiedLabel || "Email verified &mdash; you can now vote"}</span>
         <button
           type="button"
           onClick={onReset}
@@ -159,7 +163,7 @@ export default function VoteVerification({
       {!verifiedToken && otpSent && (
         <div className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
           <Check className="h-3.5 w-3.5 text-green-500" />
-          One vote per email address
+          {noteLabel || "One vote per email address"}
         </div>
       )}
     </div>

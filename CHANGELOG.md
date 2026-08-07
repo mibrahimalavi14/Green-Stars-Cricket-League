@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.3.13-season1
+
+Anti-spam contact & sponsorship form. Bots aur fake emails ab message nahi bhej sakte.
+
+Added
+- **Purpose selector** on the contact page — General Inquiry ya Sponsorship.
+- **Sponsorship fields** (dikhte hain sirf jab Sponsorship choose karo): Company / Brand, Phone / WhatsApp, Sponsorship Type (Title, Official Partner, Team, Match, Kit, Venue, Media, Prize Money, Other), Budget Range (Up to 50K to 5 Lac+ / flexible).
+- **reCAPTCHA** on the OTP step (same trusted flow as votes).
+- **Email OTP verification** — message sirf verified email se hi accept hota hai; verified token 30 min valid.
+- **Honeypot field** — bots ke liye hidden trap; bharne par submission silently ignore ho jaata hai.
+- **Per-email rate limit** (5/day) IP limit ke saath.
+
+Changed
+- `/api/contact` POST now requires a verified email token (matching the submitted email) before saving.
+- `Contact` table me 5 naye columns: `purpose`, `phone`, `company`, `sponsorshipType`, `budgetRange`.
+- Admin **Messages** page shows a Sponsorship badge aur sponsorship details chips (company, phone, type, budget).
+
+Unchanged
+- General inquiry flow same hai — sirf email verify ab lazmi hai.
+- No scoring engine changes.
+
 ## v1.3.12-season1
 
 Offline live-scoring fallback. The scorer can keep scoring even when the ground has no internet — no ball is lost, and everything syncs automatically the moment the connection returns.

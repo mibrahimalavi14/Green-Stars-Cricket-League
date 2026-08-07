@@ -112,5 +112,10 @@ export interface ContactData {
   email: string
   subject: string
   message: string
+  purpose: string
+  phone: string
+  company: string
+  sponsorshipType: string
+  budgetRange: string
 }
 

@@ -322,12 +322,17 @@ model News {
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String   @default("")
-  message   String
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  subject         String   @default("")
+  message         String
+  purpose         String   @default("general")
+  phone           String   @default("")
+  company         String   @default("")
+  sponsorshipType String   @default("")
+  budgetRange     String   @default("")
+  createdAt       DateTime @default(now())
 }
 
 model SeasonPrediction {

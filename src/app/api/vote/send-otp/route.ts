@@ -11,6 +11,7 @@ const SUBJECTS: Record<string, { subject: string; label: string }> = {
   quiz: { subject: "Your OTP for Match Quiz - GSCL", label: "Match Quiz" },
   seasonQuiz: { subject: "Your OTP for Season Quiz - GSCL", label: "Season Quiz" },
   prediction: { subject: "Your OTP for Match Predictions - GSCL", label: "Match Predictions" },
+  contact: { subject: "Your OTP to send a message - GSCL", label: "contacting GSCL" },
 }
 
 export async function POST(req: Request) {
