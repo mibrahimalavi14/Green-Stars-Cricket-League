@@ -39,22 +39,41 @@ export async function GET(req: Request) {
     votesMap[v.playerId] = v._count.id
   }
 
-  const players = performances.map(p => ({
-    ...p.player,
-    performance: {
-      battingRuns: p.battingRuns,
-      ballsFaced: p.ballsFaced,
-      fours: p.fours,
-      sixes: p.sixes,
-      bowlingWickets: p.bowlingWickets,
-      bowlingRuns: p.bowlingRuns,
-      ballsBowled: p.ballsBowled,
-      catches: p.catches,
-      stumpings: p.stumpings,
-      runOuts: p.runOuts,
-    },
-    votes: votesMap[p.playerId] || 0,
-  }))
+  const players = performances
+    .map(p => {
+      const performance = {
+        battingRuns: p.battingRuns,
+        ballsFaced: p.ballsFaced,
+        fours: p.fours,
+        sixes: p.sixes,
+        bowlingWickets: p.bowlingWickets,
+        bowlingRuns: p.bowlingRuns,
+        ballsBowled: p.ballsBowled,
+        catches: p.catches,
+        stumpings: p.stumpings,
+        runOuts: p.runOuts,
+      }
+      const srBonus = performance.ballsFaced > 0 ? Math.round((performance.battingRuns / performance.ballsFaced) * 10) : 0
+      const hasStats =
+        performance.battingRuns > 0 ||
+        performance.ballsBowled > 0 ||
+        performance.catches > 0 ||
+        performance.stumpings > 0 ||
+        performance.runOuts > 0
+      const score =
+        performance.battingRuns +
+        performance.bowlingWickets * 20 +
+        (performance.catches + performance.stumpings + performance.runOuts) * 10 +
+        srBonus
+      return {
+        ...p.player,
+        performance,
+        votes: votesMap[p.playerId] || 0,
+        score,
+        hasStats,
+      }
+    })
+    .sort((a, b) => b.score - a.score || b.votes - a.votes)
 
   let userVote = null
   if (email) {

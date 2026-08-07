@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.3.9-season1
+
+Auto-ranked Player of the Match candidates. POTM candidates are still 100% automatic (built from the completed match's real `playerMatch` stats — no manual selection), but now the best performers surface first.
+
+Changed
+- **Performance-ranked candidates** — completed-match players are sorted by a POTM score: `runs + wickets×20 + (catches + stumpings + run-outs)×10 + strike-rate bonus` (bonus ≈ 10 pts per 100 SR).
+- **Top performance badge** — the highest-scoring player gets a "Top performance" badge on their card.
+- **Zero-contribution players hidden** — players with no runs, no balls bowled, and no fielding stats no longer clutter the voting list (e.g., a batter who didn't face a ball).
+- **Strike rate shown** — the batting stat chip now includes `SR n` alongside runs/balls.
+
+Unchanged
+- Player of the Season already auto-ranks by votes + impact and is untouched.
+- No database schema changes, no scoring engine changes, no OTP/voting security changes from v1.3.8.
+
 ## v1.3.8-season1
 
 OTP email verification + reCAPTCHA on all public voting. This release makes the "one email = one vote" rule provable: every public submission (Player of the Match, Player of the Season, Match Quiz, Season Quiz) now requires the voter to prove they own the email address via a 6-digit OTP emailed to them, and OTP requests are guarded by a Google reCAPTCHA v2 challenge.

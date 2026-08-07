@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.8 |
+| **Current Version** | v1.3.9 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.8-season1` (OTP email verification + reCAPTCHA on all public voting)
+| **Current Release Tag** | `v1.3.9-season1` (auto-ranked POTM candidates by performance) |
 
 ## Runtime
 
@@ -44,6 +44,7 @@
 | v1.3.7 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — One-email-one-vote across all public voting. Match Quiz and Season Quiz now require an email; `QuizAttempt` and `SeasonQuizAttempt` are keyed by email (one attempt per email per quiz), matching the already-shipped POTM and Player of the Season rules. Public `/quiz` details card now has a name + email input (persisted to localStorage), season quiz shows "already attempted" state on reload, leaderboards de-dupe by email, and the match-quiz leaderboard no longer leaks emails. DB schema change: `email` column + unique `[quizId, email]` / `[seasonQuizId, email]` on the quiz attempt tables (tables were empty; applied via `prisma db push`). |
 | v1.3.5 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Player of the Season public voting. New `PlayerOfSeasonVote` table (unique `[seasonId, email]`), `GET/POST /api/player-of-season` (nominees = top performers of the season by impact with live vote counts, email-keyed user vote, rate-limited), public `/player-of-season` page (season selector, nominee cards, vote modal), admin `/admin/player-of-season` page (per-season vote breakdowns + announce winner → writes a `player_of_season` `SeasonAward`), header links on public + admin nav, new award category wired through awards pages/certificates. DB schema change: new `PlayerOfSeasonVote` table. |
 | v1.3.8 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — OTP email verification + reCAPTCHA on all public voting. Every vote/quiz submission (POTM, Player of the Season, Match Quiz, Season Quiz) now requires a 6-digit one-time passcode emailed to the voter's address, proven by a short-lived server-signed `verifiedToken` (30-min HMAC) on the submission itself, plus a Google reCAPTCHA v2 challenge on OTP send. New `GET`-less `POST /api/vote/send-otp` + `POST /api/vote/verify-otp`, shared `VoteVerification` component, and a shared `sendOtpEmail` mailer (predictions OTP route refactored onto it). No DB schema or scoring engine changes. |
+| v1.3.9 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Auto-ranked POTM candidates. Completed-match players are now sorted by a performance score (runs + wickets×20 + catches/stumpings/run-outs×10 + strike-rate bonus) so the best performers appear first, the top performer gets a "Top performance" badge, zero-contribution players (no runs, no balls bowled, no fielding) are hidden from the voting list, and the batting chip shows strike rate. POS already auto-ranks by votes + impact and is unchanged. No DB schema or scoring engine changes. |
 
 ## Versioning Policy (Semantic)
 
@@ -66,7 +67,8 @@
 | v1.3.6-season1 | Performance & Mobile optimization (non-feature) |
 | v1.3.7-season1 | Feature — one-email-one-vote across all public voting (quiz now email-keyed) |
 | v1.3.8-season1 | Feature — OTP email verification + reCAPTCHA on all public voting |
-| v1.3.8+ | Future bug/security fixes for v1.3.x |
+| v1.3.9-season1 | Feature — auto-ranked POTM candidates by performance |
+| v1.3.9+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)

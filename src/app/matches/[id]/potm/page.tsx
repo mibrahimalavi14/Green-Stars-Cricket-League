@@ -25,6 +25,8 @@ interface PlayerWithVotes {
     runOuts: number
   }
   votes: number
+  score: number
+  hasStats: boolean
 }
 
 interface MatchInfo {
@@ -151,11 +153,13 @@ export default function PotmVotePage() {
   const team1Players = players.filter(p => p.teamId === match.team1.id)
   const team2Players = players.filter(p => p.teamId === match.team2.id)
   const maxVotes = Math.max(...players.map(p => p.votes), 1)
+  const topPerformerId = players.find(p => p.hasStats)?.id || null
 
   function PlayerCard({ player }: { player: PlayerWithVotes }) {
     const pct = totalVotes > 0 ? (player.votes / maxVotes) * 100 : 0
     const isVoted = userVote?.playerId === player.id
     const isSelected = selectedPlayer === player.id
+    const isTop = player.id === topPerformerId
     const perf = player.performance
     const hasBatting = perf.ballsFaced > 0
     const hasBowling = perf.ballsBowled > 0
@@ -171,6 +175,13 @@ export default function PotmVotePage() {
             : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]/50"
         }`}
       >
+        {isTop && (
+          <div className="absolute left-3 top-3">
+            <span className="flex items-center gap-1 rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
+              <Trophy className="h-3 w-3" /> Top performance
+            </span>
+          </div>
+        )}
         {isVoted && (
           <div className="absolute right-3 top-3">
             <span className="flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-500">
@@ -199,6 +210,7 @@ export default function PotmVotePage() {
           {hasBatting && (
             <span className="rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-500 dark:text-blue-400">
               {perf.battingRuns} runs ({perf.ballsFaced}b)
+              {perf.ballsFaced > 0 && ` · SR ${((perf.battingRuns / perf.ballsFaced) * 100).toFixed(0)}`}
               {perf.fours > 0 && ` · ${perf.fours}×4`}
               {perf.sixes > 0 && ` · ${perf.sixes}×6`}
             </span>
@@ -410,10 +422,10 @@ export default function PotmVotePage() {
           {match.team1.name}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {team1Players.map(p => (
+          {team1Players.filter(p => p.hasStats).map(p => (
             <PlayerCard key={p.id} player={p} />
           ))}
-          {team1Players.length === 0 && (
+          {team1Players.filter(p => p.hasStats).length === 0 && (
             <p className="text-sm text-[var(--muted-foreground)]">No player performances recorded</p>
           )}
         </div>
@@ -425,10 +437,10 @@ export default function PotmVotePage() {
           {match.team2.name}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {team2Players.map(p => (
+          {team2Players.filter(p => p.hasStats).map(p => (
             <PlayerCard key={p.id} player={p} />
           ))}
-          {team2Players.length === 0 && (
+          {team2Players.filter(p => p.hasStats).length === 0 && (
             <p className="text-sm text-[var(--muted-foreground)]">No player performances recorded</p>
           )}
         </div>
