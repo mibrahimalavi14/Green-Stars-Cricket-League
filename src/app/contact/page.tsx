@@ -1,7 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
+import ReCAPTCHA from "react-google-recaptcha"
 import VoteVerification from "@/components/VoteVerification"
+
+const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""
 
 const SPONSORSHIP_TYPES = [
   "Title Sponsor", "Official Partner", "Team Sponsor", "Match Sponsor",
@@ -17,11 +20,22 @@ function ContactPage() {
   })
   const [website, setWebsite] = useState("")
   const [verifiedToken, setVerifiedToken] = useState("")
+  const [captchaToken, setCaptchaToken] = useState("")
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const recaptchaRef = useRef<ReCAPTCHA | null>(null)
 
   const isSponsorship = form.purpose === "sponsorship"
+
+  function changePurpose(value: string) {
+    setForm({ ...form, purpose: value })
+    if (value === "general") setVerifiedToken("")
+    else {
+      setCaptchaToken("")
+      recaptchaRef.current?.reset()
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,10 +43,13 @@ function ContactPage() {
     setError("")
 
     try {
+      const payload = isSponsorship
+        ? { ...form, website, verifiedToken }
+        : { ...form, website, recaptchaToken: captchaToken }
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, website, verifiedToken }),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (res.ok) setSent(true)
@@ -59,7 +76,7 @@ function ContactPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className={labelCls}>Purpose *</label>
-              <select value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })} className={inputCls}>
+              <select value={form.purpose} onChange={e => changePurpose(e.target.value)} className={inputCls}>
                 <option value="general">General Inquiry</option>
                 <option value="sponsorship">Sponsorship</option>
               </select>
@@ -124,21 +141,35 @@ function ContactPage() {
             <input id="website" value={website} onChange={e => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" />
           </div>
 
-          {!verifiedToken && (
-            <VoteVerification
-              email={form.email}
-              name={form.name}
-              purpose="contact"
-              verifiedToken={verifiedToken}
-              onVerified={setVerifiedToken}
-              onReset={() => setVerifiedToken("")}
-              verifiedLabel="Email verified &mdash; you can now send your message"
-              noteLabel="Verified email only — spam nahi bhej paoge"
-            />
+          {isSponsorship ? (
+            !verifiedToken && (
+              <VoteVerification
+                email={form.email}
+                name={form.name}
+                purpose="contact"
+                verifiedToken={verifiedToken}
+                onVerified={setVerifiedToken}
+                onReset={() => setVerifiedToken("")}
+                verifiedLabel="Email verified &mdash; you can now send your message"
+                noteLabel="Verified email only — spam nahi bhej paoge"
+              />
+            )
+          ) : (
+            <div className="overflow-x-auto">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={SITE_KEY}
+                onChange={(token) => {
+                  setCaptchaToken(token || "")
+                  setError("")
+                }}
+                theme="light"
+              />
+            </div>
           )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <button type="submit" disabled={loading || !verifiedToken}
+          <button type="submit" disabled={loading || (isSponsorship ? !verifiedToken : !captchaToken)}
             className="w-full rounded-lg bg-[var(--accent)] px-6 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50">
             {loading ? "Sending..." : "Send Message"}
           </button>

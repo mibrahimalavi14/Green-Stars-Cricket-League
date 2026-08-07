@@ -33,11 +33,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
 
-  const { name, email, subject, message, purpose, phone, company, sponsorshipType, budgetRange, verifiedToken } = parsed.data
+  const { name, email, subject, message, purpose, phone, company, sponsorshipType, budgetRange, verifiedToken, recaptchaToken } = parsed.data
 
-  const verifiedEmail = verifyVerifiedEmailToken(verifiedToken)
-  if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
-    return NextResponse.json({ error: "Email verification required." }, { status: 401 })
+  if (purpose === "sponsorship") {
+    const verifiedEmail = verifyVerifiedEmailToken(verifiedToken || "")
+    if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Email verification required." }, { status: 401 })
+    }
+  } else {
+    const recaptchaOk = await verifyRecaptchaToken(recaptchaToken)
+    if (!recaptchaOk) {
+      return NextResponse.json({ error: "Captcha verification failed. Please try again." }, { status: 400 })
+    }
   }
 
   const emailRl = rateLimit(`contact_email:${email.toLowerCase()}`, RATE_LIMITS.CONTACT)

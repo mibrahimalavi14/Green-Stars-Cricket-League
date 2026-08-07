@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.3.17-season1
+
+Contact form — OTP ab sirf Sponsorship ke liye.
+
+Changed
+- **General Inquiry** messages ab bina OTP ke submit ho jaati hain — sirf reCAPTCHA kaafi hai.
+- **Sponsorship** submissions pehle ki tarah email OTP (verification) maangte hain.
+- `contactSchema`: `verifiedToken` optional hai; sirf `purpose === "sponsorship"` par required (zod `superRefine`).
+- `/api/contact`: sponsorship → `verifiedToken` verify hota hai; general → `recaptchaToken` verify hota hai.
+- Contact page: purpose general ho to reCAPTCHA widget dikhta hai, sponsorship ho to OTP flow.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.16-season1
 
 Fix — admin email notifications ab production par reliably deliver hoti hain.

@@ -111,18 +111,25 @@ export const ballEventSchema = z.object({
   region: z.string().nullable().optional(),
 })
 
-export const contactSchema = z.object({
-  name: z.string().min(1).max(100),
-  email: z.string().email().max(200),
-  subject: z.string().min(1).max(200).optional(),
-  message: z.string().min(1).max(2000),
-  purpose: z.enum(["general", "sponsorship"]).default("general"),
-  phone: z.string().max(30).optional(),
-  company: z.string().max(100).optional(),
-  sponsorshipType: z.string().max(50).optional(),
-  budgetRange: z.string().max(50).optional(),
-  verifiedToken: z.string().min(1),
-})
+export const contactSchema = z
+  .object({
+    name: z.string().min(1).max(100),
+    email: z.string().email().max(200),
+    subject: z.string().min(1).max(200).optional(),
+    message: z.string().min(1).max(2000),
+    purpose: z.enum(["general", "sponsorship"]).default("general"),
+    phone: z.string().max(30).optional(),
+    company: z.string().max(100).optional(),
+    sponsorshipType: z.string().max(50).optional(),
+    budgetRange: z.string().max(50).optional(),
+    verifiedToken: z.string().optional(),
+    recaptchaToken: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.purpose === "sponsorship" && !data.verifiedToken) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Email verification required." })
+    }
+  })
 
 export const reviewSchema = z.object({
   name: z.string().min(1).max(100),

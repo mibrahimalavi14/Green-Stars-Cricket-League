@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.16 |
+| **Current Version** | v1.3.17 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.16-season1` (fix: admin email notifications now reliably delivered) |
+| **Current Release Tag** | `v1.3.17-season1` (contact form: OTP only for sponsorship) |
 
 ## Runtime
 
@@ -52,6 +52,7 @@
 | v1.3.14 | Aug 2026 | **Fix** — Sponsorship budget options now start at 5K (was "Up to 50K"). Options: `5K - 50K`, `50K - 1 Lac`, `1 Lac - 5 Lac`, `5 Lac +`, `Not decided / Flexible`. Verified end-to-end: reCAPTCHA gate, email OTP, honeypot silent-drop, no-token/garbage-token rejection (401), and full sponsorship payload persistence. |
 | v1.3.15 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Admin email alerts. Har user submission par site owner ke email (`ADMIN_NOTIFY_EMAIL`, default `mibrahimalavi14@gmail.com`) par turant notification jaati hai — contact/sponsorship messages, Player of the Match votes, Player of the Season votes, Season Predictions, Match Quiz attempts, Season Quiz attempts, aur Reviews (approval pending). Sab fire-and-forget hain — user response kabhi block nahi hoti. |
 | v1.3.16 | Aug 2026 | **Fix** — v1.3.15 me notifications Vercel serverless par silently drop ho rahi thin: fire-and-forget promise response ke baad function terminate hone par khatam ho jaata tha. Ab sab notifications Next.js `after()` se bheji jaati hain — function email complete hone tak zinda rehta hai. Fix `notifyAdmin()` helper me. |
+| v1.3.17 | Aug 2026 | **Change** — Contact form me OTP ab sirf **Sponsorship** ke liye required hai. General Inquiry messages bina OTP ke turant submit ho jaati hain (sirf reCAPTCHA). OTP flow (email verification) sponsorship submissions ke liye hamesha ki tarah raha. |
 
 ## Versioning Policy (Semantic)
 
@@ -82,6 +83,7 @@
 | v1.3.14-season1 | Fix — sponsorship budget options start at 5K |
 | v1.3.15-season1 | Feature — admin email alerts for all votes & messages |
 | v1.3.16-season1 | Fix — notifications reliably delivered via Next.js after() |
+| v1.3.17-season1 | Change — contact OTP only for sponsorship |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 
