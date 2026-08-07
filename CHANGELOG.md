@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.11-season1
+
+In-site notification permission prompt. First-time visitors no longer have to scroll to the footer to find the enable button — a bottom banner asks for push permission automatically when the site opens.
+
+Added
+- **Auto prompt on first visit** — ~1.5s after the page loads, a bottom banner ("Get notified from GSCL") appears with "Allow notifications" and "Not now" buttons, styled with the site's theme and visible on all pages.
+- **One-step subscribe** — "Allow notifications" requests the browser permission and registers the subscription in a single click; a success/failure message shows briefly, then the banner hides.
+- **Smart re-prompting** — already-subscribed visitors and visitors who blocked notifications at the browser level are never asked again; "Not now" dismisses the banner and re-prompts after 7 days.
+
+Changed
+- Shared client-side push helper (`src/lib/push-client.ts`) — `subscribeToPush` / `unsubscribeFromPush` / `getPushSubscription` now power both the footer toggle and the new prompt, with a shared event so the footer button updates as soon as the prompt subscribes.
+
+Unchanged
+- The footer "Enable Push Notifications" toggle works exactly as before.
+- No database schema changes, no scoring engine changes.
+
 ## v1.3.10-season1
 
 Automatic push notifications. Subscribers now get notified automatically on key events instead of only when an admin manually broadcasts from `/admin/notifications`.

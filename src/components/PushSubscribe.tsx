@@ -2,82 +2,39 @@
 
 import { useState, useEffect } from "react"
 import { BellRing, BellOff, Send } from "lucide-react"
+import {
+  isPushSupported,
+  getPushSubscription,
+  subscribeToPush,
+  unsubscribeFromPush,
+  PUSH_SUBSCRIBED_EVENT,
+  PUSH_UNSUBSCRIBED_EVENT,
+} from "@/lib/push-client"
 
 export function PushSubscribe() {
   const [supported, setSupported] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState("")
-  const [vapidKey, setVapidKey] = useState("")
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return
+    if (!isPushSupported()) return
     setSupported(true)
-    fetch("/api/notifications/vapid-public-key").then(r => r.json()).then(d => {
-      setVapidKey(d.publicKey)
-    }).catch(() => {})
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.pushManager.getSubscription().then((sub) => {
-        setSubscribed(!!sub)
-      })
-    })
+    const refresh = () => getPushSubscription().then((sub) => setSubscribed(!!sub))
+    refresh()
+    window.addEventListener(PUSH_SUBSCRIBED_EVENT, refresh)
+    window.addEventListener(PUSH_UNSUBSCRIBED_EVENT, refresh)
+    return () => {
+      window.removeEventListener(PUSH_SUBSCRIBED_EVENT, refresh)
+      window.removeEventListener(PUSH_UNSUBSCRIBED_EVENT, refresh)
+    }
   }, [])
 
   async function toggle() {
-    if (subscribed) {
-      setLoading(true)
-      try {
-        const reg = await navigator.serviceWorker.ready
-        const sub = await reg.pushManager.getSubscription()
-        if (sub) {
-          await fetch("/api/notifications/unsubscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ endpoint: sub.endpoint }),
-          })
-          await sub.unsubscribe()
-          setSubscribed(false)
-          setMsg("Notifications disabled")
-        }
-      } catch {
-        setMsg("Failed to unsubscribe")
-      }
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
-    try {
-      const permission = await Notification.requestPermission()
-      if (permission !== "granted") {
-        setMsg("Permission denied")
-        setLoading(false)
-        return
-      }
-
-      const reg = await navigator.serviceWorker.ready
-      if (!vapidKey) { setMsg("VAPID key not loaded"); setLoading(false); return }
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: vapidKey,
-      })
-
-      const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } }
-      await fetch("/api/notifications/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          endpoint: json.endpoint,
-          p256dh: json.keys.p256dh,
-          auth: json.keys.auth,
-        }),
-      })
-
-      setSubscribed(true)
-      setMsg("Notifications enabled!")
-    } catch {
-      setMsg("Failed to enable notifications")
-    }
+    const result = subscribed ? await unsubscribeFromPush() : await subscribeToPush()
+    setSubscribed(!!(await getPushSubscription()))
+    setMsg(result.message)
     setLoading(false)
   }
 

@@ -8,6 +8,7 @@ import { ScrollToTop } from "@/components/ScrollToTop"
 import { SearchOverlay } from "@/components/SearchOverlay"
 import { CookieConsent } from "@/components/CookieConsent"
 import { PageTransition } from "@/components/PageTransition"
+import { NotificationPrompt } from "@/components/NotificationPrompt"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ScrollToTop />
             <SearchOverlay />
             <CookieConsent />
+            <NotificationPrompt />
           </div>
         </ThemeProvider>
       </body>
