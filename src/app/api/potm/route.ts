@@ -4,6 +4,7 @@ import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { potmVoteSchema } from "@/lib/validation"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
+import { sendAdminNotification } from "@/lib/email"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -135,6 +136,23 @@ export async function POST(req: Request) {
     })
 
     trackEvent("potm_vote", { matchId, playerId })
+
+    Promise.all([
+      prisma.player.findUnique({ where: { id: playerId }, select: { name: true } }),
+      prisma.match.findUnique({ where: { id: matchId }, select: { matchNo: true } }),
+    ])
+      .then(([player, match]) =>
+        sendAdminNotification({
+          title: "New Player of the Match Vote",
+          rows: [
+            { label: "Name", value: name || "Anonymous" },
+            { label: "Email", value: email },
+            { label: "Player", value: player?.name || playerId },
+            { label: "Match", value: match?.matchNo ? `Match ${match.matchNo}` : matchId },
+          ],
+        })
+      )
+      .catch((err) => console.error("POTM notification failed:", err))
 
     return NextResponse.json({ success: true, vote })
   } catch (e: unknown) {

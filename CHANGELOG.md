@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.3.15-season1
+
+Admin email alerts — har user submission par site owner ke email par turant notification.
+
+Added
+- **Contact / Sponsorship** messages → owner email par full details (type, name, email, company, phone, sponsorship type, budget, subject + message).
+- **Player of the Match vote** → naam, email, player, match.
+- **Player of the Season vote** → naam, email, player, season.
+- **Season Prediction** → naam, email, predicted champion team, season.
+- **Match Quiz attempt** → naam, email, quiz question, correct/incorrect, points.
+- **Season Quiz attempt** → naam, email, score.
+- **Review** → naam, email, city, rating + comment (approval pending ke saath).
+
+Changed
+- `src/lib/email.ts` me generic `sendAdminNotification` helper — saare alerts isi se jaate hain (koi duplicate email helper nahi).
+- Recipient: `ADMIN_NOTIFY_EMAIL` env var; default `mibrahimalavi14@gmail.com`. Local `.env` aur Vercel Production dono me set kiya gaya.
+- Sab notifications **fire-and-forget** hain — SMTP fail ho to sirf log hota hai, user ka submit/response kabhi block nahi hota.
+
+Unchanged
+- OTP emails visitors ko hi jaate hain (owner ko nahi).
+- No scoring engine changes.
+
 ## v1.3.14-season1
 
 Fix

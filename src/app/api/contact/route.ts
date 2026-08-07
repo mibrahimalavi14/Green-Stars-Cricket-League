@@ -4,6 +4,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { contactSchema } from "@/lib/validation"
 import { verifyRecaptchaToken } from "@/lib/recaptcha"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
+import { sendAdminNotification } from "@/lib/email"
 
 export async function GET(req: Request) {
   const cookie = req.headers.get("cookie") || ""
@@ -57,5 +58,22 @@ export async function POST(req: Request) {
       budgetRange: budgetRange?.trim() || "",
     },
   })
+
+  const isSponsorship = purpose === "sponsorship"
+  sendAdminNotification({
+    title: isSponsorship ? "New Sponsorship Message" : "New Contact Message",
+    rows: [
+      { label: "Type", value: isSponsorship ? "Sponsorship" : "General Inquiry" },
+      { label: "Name", value: name.trim() },
+      { label: "Email", value: email.trim() },
+      { label: "Company / Brand", value: company?.trim() || "" },
+      { label: "Phone / WhatsApp", value: phone?.trim() || "" },
+      { label: "Sponsorship Type", value: sponsorshipType?.trim() || "" },
+      { label: "Budget Range", value: budgetRange?.trim() || "" },
+      { label: "Subject", value: subject?.trim() || "" },
+    ],
+    message: message.trim(),
+  }).catch((err) => console.error("Admin contact notification failed:", err))
+
   return NextResponse.json(contact)
 }

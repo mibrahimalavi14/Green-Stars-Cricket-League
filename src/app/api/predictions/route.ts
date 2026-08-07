@@ -4,6 +4,7 @@ import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { predictionSchema } from "@/lib/validation"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
+import { sendAdminNotification } from "@/lib/email"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -92,6 +93,21 @@ export async function POST(req: Request) {
   })
 
   trackEvent("prediction_submitted", { teamId: predictedTeamId })
+
+  prisma.team
+    .findUnique({ where: { id: predictedTeamId }, select: { name: true } })
+    .then((team) =>
+      sendAdminNotification({
+        title: "New Season Prediction",
+        rows: [
+          { label: "Name", value: name || "Anonymous" },
+          { label: "Email", value: email },
+          { label: "Predicted Champion", value: team?.name || predictedTeamId },
+          { label: "Season", value: season.name },
+        ],
+      })
+    )
+    .catch((err) => console.error("Prediction notification failed:", err))
 
   return NextResponse.json(pred)
 }

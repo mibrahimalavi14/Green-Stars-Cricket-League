@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.14 |
+| **Current Version** | v1.3.15 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.14-season1` (contact anti-spam fix: budget from 5K) |
+| **Current Release Tag** | `v1.3.15-season1` (admin email alerts for all votes & messages) |
 
 ## Runtime
 
@@ -50,6 +50,7 @@
 | v1.3.12 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Offline live-scoring fallback. When the admin loses internet at the ground, ball-by-ball entries are saved to an on-device queue (localStorage, survives refresh/restart) and the scoring screen keeps working with an "OFFLINE MODE" badge and a "Pending Sync" count. When internet returns, the queue auto-syncs in exact FIFO order (every 5s + on reconnect) with a live progress counter, then the public live score updates. Every ball gets a unique `ballId`; the submit API stores it on the ball and ignores replays, and the undo API accepts a `ballId` for idempotent undo — so no duplicates, no lost balls, correct order. Offline undo removes the last queued ball locally. No DB schema changes; scoring engine logic unchanged (only idempotency added). |
 | v1.3.13 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Anti-spam contact & sponsorship form. Contact page now has a Purpose selector (General Inquiry / Sponsorship); sponsorship reveals structured fields (Company/Brand, Phone/WhatsApp, Sponsorship Type, Budget Range). Submissions are protected by three layers: reCAPTCHA on the OTP step, email OTP verification (same trusted flow as votes — the message is only accepted for a verified email), and a honeypot field, plus per-IP and per-email rate limits. Admin Messages page now shows the purpose badge and sponsorship details. Contact table gains `purpose`, `phone`, `company`, `sponsorshipType`, `budgetRange` columns. No scoring engine changes. |
 | v1.3.14 | Aug 2026 | **Fix** — Sponsorship budget options now start at 5K (was "Up to 50K"). Options: `5K - 50K`, `50K - 1 Lac`, `1 Lac - 5 Lac`, `5 Lac +`, `Not decided / Flexible`. Verified end-to-end: reCAPTCHA gate, email OTP, honeypot silent-drop, no-token/garbage-token rejection (401), and full sponsorship payload persistence. |
+| v1.3.15 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Admin email alerts. Har user submission par site owner ke email (`ADMIN_NOTIFY_EMAIL`, default `mibrahimalavi14@gmail.com`) par turant notification jaati hai — contact/sponsorship messages, Player of the Match votes, Player of the Season votes, Season Predictions, Match Quiz attempts, Season Quiz attempts, aur Reviews (approval pending). Sab fire-and-forget hain — user response kabhi block nahi hoti. |
 
 ## Versioning Policy (Semantic)
 
@@ -78,6 +79,7 @@
 | v1.3.12-season1 | Feature — offline live-scoring fallback with auto-sync queue |
 | v1.3.13-season1 | Feature — anti-spam contact & sponsorship form |
 | v1.3.14-season1 | Fix — sponsorship budget options start at 5K |
+| v1.3.15-season1 | Feature — admin email alerts for all votes & messages |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 
