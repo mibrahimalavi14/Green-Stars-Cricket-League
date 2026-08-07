@@ -128,12 +128,14 @@ export const potmVoteSchema = z.object({
   matchId: z.string().min(1),
   playerId: z.string().min(1),
   email: z.string().email().max(200),
+  verifiedToken: z.string().min(1),
 })
 
 export const playerOfSeasonVoteSchema = z.object({
   seasonId: z.string().min(1),
   playerId: z.string().min(1),
   email: z.string().email().max(200),
+  verifiedToken: z.string().min(1),
 })
 
 export const predictionSchema = z.object({
@@ -156,6 +158,7 @@ export const quizAttemptSchema = z.object({
   name: z.string().trim().min(1).max(80),
   email: z.string().email().max(200),
   selectedAnswer: z.string().min(1),
+  verifiedToken: z.string().min(1),
 })
 
 export const ratingSchema = z.object({

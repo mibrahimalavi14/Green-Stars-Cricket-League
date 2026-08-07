@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.3.8-season1
+
+OTP email verification + reCAPTCHA on all public voting. This release makes the "one email = one vote" rule provable: every public submission (Player of the Match, Player of the Season, Match Quiz, Season Quiz) now requires the voter to prove they own the email address via a 6-digit OTP emailed to them, and OTP requests are guarded by a Google reCAPTCHA v2 challenge.
+
+Added
+- **`POST /api/vote/send-otp`** — sends a 6-digit OTP (5-minute expiry) for a purpose (`potm` / `pos` / `quiz` / `seasonQuiz`); reCAPTCHA v2 verified server-side against Google's `siteverify`, then IP rate-limited (3 / 5 min). Reuses the existing `EmailOtp` table.
+- **`POST /api/vote/verify-otp`** — marks the OTP used and returns a short-lived (30-minute) server-signed `verifiedToken` (HMAC-SHA256 over `AUTH_SECRET`); IP rate-limited (5 / 15 min).
+- **Shared `VoteVerification` component** — reCAPTCHA widget + "Send OTP" → 6-digit input → "Verify & Continue" flow, with a verified state that persists to `localStorage` (`potm_verified`, `pos_verified`, `quiz_verified`) and a "Change email" reset.
+- **Token-enforced submissions** — POTM, Player of the Season, Match Quiz, and Season Quiz POST routes now reject submissions without a valid `verifiedToken` (401 "Email not verified"), and the token's embedded email must match the submitted email. Stale/expired tokens automatically require re-verification on the UI.
+- **Shared `sendOtpEmail` mailer** — the predictions OTP route was refactored onto it (same Gmail SMTP, same subject/message) so there's a single email implementation.
+
+Changed
+- `potmVoteSchema`, `playerOfSeasonVoteSchema`, and `quizAttemptSchema` now require `verifiedToken`.
+- Vote / quiz modals gate their submit buttons on a completed verification step.
+
+Database schema change: none (reuses the existing `EmailOtp` table).
+
+No scoring engine changes.
+No statistics changes.
+
 ## v1.3.7-season1
 
 One-email-one-vote across all public voting. This release extends the existing one-vote-per-email rule (already enforced for POTM and Player of the Season) to the Match Quiz and the Season Quiz.

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { potmVoteSchema } from "@/lib/validation"
+import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -87,6 +88,11 @@ export async function POST(req: Request) {
 
     const { matchId, playerId, email } = parsed.data
     const { name } = body
+
+    const verifiedEmail = verifyVerifiedEmailToken(parsed.data.verifiedToken)
+    if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
+    }
 
     const match = await prisma.match.findUnique({ where: { id: matchId } })
     if (!match || match.status !== "completed") {

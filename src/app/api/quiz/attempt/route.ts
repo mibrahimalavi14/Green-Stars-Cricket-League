@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { quizAttemptSchema } from "@/lib/validation"
+import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
@@ -18,6 +19,11 @@ export async function POST(req: Request) {
   }
 
   const { quizId, name, email, selectedAnswer } = parsed.data
+
+  const verifiedEmail = verifyVerifiedEmailToken(parsed.data.verifiedToken)
+  if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
+    return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
+  }
 
   const existing = await prisma.quizAttempt.findUnique({
     where: { quizId_email: { quizId, email } },

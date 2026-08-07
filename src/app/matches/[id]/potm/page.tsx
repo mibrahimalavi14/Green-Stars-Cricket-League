@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { Star, Medal, ThumbsUp, Trophy, Users, Vote, Loader2, Check, X } from "lucide-react"
+import VoteVerification from "@/components/VoteVerification"
 
 interface PlayerWithVotes {
   id: string
@@ -51,6 +52,7 @@ export default function PotmVotePage() {
   const [submitting, setSubmitting] = useState(false)
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
+  const [verifiedToken, setVerifiedToken] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [error, setError] = useState("")
@@ -77,13 +79,15 @@ export default function PotmVotePage() {
   useEffect(() => {
     const savedEmail = localStorage.getItem("potm_email")
     const savedName = localStorage.getItem("potm_name")
+    const savedToken = localStorage.getItem("potm_verified")
     if (savedEmail) setEmail(savedEmail)
     if (savedName) setName(savedName)
+    if (savedToken) setVerifiedToken(savedToken)
     fetchData(savedEmail || undefined)
   }, [fetchData])
 
   async function handleVote() {
-    if (!selectedPlayer || !email.trim()) return
+    if (!selectedPlayer || !email.trim() || !verifiedToken) return
     setError("")
     setSubmitting(true)
     try {
@@ -95,10 +99,15 @@ export default function PotmVotePage() {
           playerId: selectedPlayer,
           email: email.trim(),
           name: name.trim() || "Anonymous",
+          verifiedToken,
         }),
       })
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem("potm_verified")
+          setVerifiedToken("")
+        }
         setError(data.error || "Failed to vote")
         return
       }
@@ -334,7 +343,11 @@ export default function PotmVotePage() {
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => {
+                  setEmail(e.target.value)
+                  setVerifiedToken("")
+                  localStorage.removeItem("potm_verified")
+                }}
                 placeholder="Your email (required)"
                 autoFocus
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
@@ -346,10 +359,24 @@ export default function PotmVotePage() {
                 placeholder="Your name (optional)"
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
               />
+              <VoteVerification
+                email={email}
+                name={name}
+                purpose="potm"
+                verifiedToken={verifiedToken}
+                onVerified={token => {
+                  setVerifiedToken(token)
+                  localStorage.setItem("potm_verified", token)
+                }}
+                onReset={() => {
+                  setVerifiedToken("")
+                  localStorage.removeItem("potm_verified")
+                }}
+              />
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleVote}
-                  disabled={!email.trim() || !selectedPlayer || submitting}
+                  disabled={!email.trim() || !verifiedToken || !selectedPlayer || submitting}
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--accent-foreground)] transition-colors hover:opacity-90 disabled:opacity-50"
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}

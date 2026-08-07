@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { Trophy, Vote, Loader2, ThumbsUp, Check, X, Crown, Users, Medal } from "lucide-react"
+import VoteVerification from "@/components/VoteVerification"
 
 interface SeasonInfo {
   id: string
@@ -37,6 +38,7 @@ export default function PlayerOfSeasonPage() {
   const [submitting, setSubmitting] = useState(false)
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
+  const [verifiedToken, setVerifiedToken] = useState("")
   const [selectedPlayer, setSelectedPlayer] = useState<Nominee | null>(null)
   const [error, setError] = useState("")
   const [initialized, setInitialized] = useState(false)
@@ -44,8 +46,10 @@ export default function PlayerOfSeasonPage() {
   useEffect(() => {
     const savedEmail = localStorage.getItem("pos_email")
     const savedName = localStorage.getItem("pos_name")
+    const savedToken = localStorage.getItem("pos_verified")
     if (savedEmail) setEmail(savedEmail)
     if (savedName) setName(savedName)
+    if (savedToken) setVerifiedToken(savedToken)
 
     fetch("/api/seasons")
       .then(r => r.json())
@@ -87,7 +91,7 @@ export default function PlayerOfSeasonPage() {
   }, [seasonId, initialized, fetchData])
 
   async function handleVote() {
-    if (!selectedPlayer || !email.trim() || !seasonId) return
+    if (!selectedPlayer || !email.trim() || !seasonId || !verifiedToken) return
     setError("")
     setSubmitting(true)
     try {
@@ -99,10 +103,15 @@ export default function PlayerOfSeasonPage() {
           playerId: selectedPlayer.id,
           email: email.trim(),
           name: name.trim() || "Anonymous",
+          verifiedToken,
         }),
       })
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem("pos_verified")
+          setVerifiedToken("")
+        }
         setError(data.error || "Failed to vote")
         return
       }
@@ -312,7 +321,11 @@ export default function PlayerOfSeasonPage() {
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => {
+                  setEmail(e.target.value)
+                  setVerifiedToken("")
+                  localStorage.removeItem("pos_verified")
+                }}
                 placeholder="Your email (required)"
                 autoFocus
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
@@ -324,10 +337,24 @@ export default function PlayerOfSeasonPage() {
                 placeholder="Your name (optional)"
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
               />
+              <VoteVerification
+                email={email}
+                name={name}
+                purpose="pos"
+                verifiedToken={verifiedToken}
+                onVerified={token => {
+                  setVerifiedToken(token)
+                  localStorage.setItem("pos_verified", token)
+                }}
+                onReset={() => {
+                  setVerifiedToken("")
+                  localStorage.removeItem("pos_verified")
+                }}
+              />
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleVote}
-                  disabled={!email.trim() || submitting}
+                  disabled={!email.trim() || !verifiedToken || submitting}
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--accent-foreground)] transition-colors hover:opacity-90 disabled:opacity-50"
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}

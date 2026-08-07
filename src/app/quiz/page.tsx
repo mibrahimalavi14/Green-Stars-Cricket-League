@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User, Timer } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
+import VoteVerification from "@/components/VoteVerification"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -33,6 +34,7 @@ export default function QuizPage() {
   const [sqLoading, setSqLoading] = useState(true)
   const [sqName, setSqName] = useState("")
   const [sqEmail, setSqEmail] = useState("")
+  const [sqVerifiedToken, setSqVerifiedToken] = useState("")
   const [sqAnswers, setSqAnswers] = useState<Record<string, string>>({})
   const [sqSubmitting, setSqSubmitting] = useState(false)
   const [sqResult, setSqResult] = useState<any>(null)
@@ -48,8 +50,10 @@ export default function QuizPage() {
   useEffect(() => {
     const savedEmail = localStorage.getItem("quiz_email")
     const savedName = localStorage.getItem("quiz_name")
+    const savedToken = localStorage.getItem("quiz_verified")
     if (savedEmail) setSqEmail(savedEmail)
     if (savedName) setSqName(savedName)
+    if (savedToken) setSqVerifiedToken(savedToken)
     fetchData()
     fetchSeasonQuiz()
   }, [])
@@ -81,7 +85,7 @@ export default function QuizPage() {
   }
 
   async function submitSeasonQuiz() {
-    if (!sqName.trim() || !sqEmail.trim() || !seasonQuiz) return
+    if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || !seasonQuiz) return
     const answers = Object.entries(sqAnswers).map(([questionId, selectedAnswer]) => ({ questionId, selectedAnswer }))
     if (answers.length === 0) {
       setSqError("Please answer at least one question")
@@ -98,13 +102,19 @@ export default function QuizPage() {
         email: sqEmail.trim(),
         answers,
         startedAt: sqStartedAt,
+        verifiedToken: sqVerifiedToken,
       }),
     })
     const data = await res.json()
     setSqSubmitting(false)
     if (!res.ok) {
       setSqError(data.error || "Failed to submit")
-      if (res.status === 409) {
+      if (res.status === 401) {
+        setSqVerifiedToken("")
+        localStorage.removeItem("quiz_verified")
+        setSqStarted(false)
+        setSqExpired(false)
+      } else if (res.status === 409) {
         setSqExpired(false)
         setSqStarted(false)
         fetchSeasonQuiz()
@@ -117,7 +127,7 @@ export default function QuizPage() {
   }
 
   function startSeasonQuiz() {
-    if (!sqName.trim() || !sqEmail.trim() || !seasonQuiz) return
+    if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || !seasonQuiz) return
     setSqStarted(true)
     setSqStartedAt(Date.now())
     setSqTimeLeft(MATCH_CONFIG.seasonQuizTimeLimitSeconds)
@@ -224,7 +234,7 @@ export default function QuizPage() {
   }, [sqEmail, activeQuizId])
 
   async function handleSubmit() {
-    if (!sqName.trim() || !sqEmail.trim() || !selectedAnswer || !activeQuizId) return
+    if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || !selectedAnswer || !activeQuizId) return
     setSubmitting(true)
     setError("")
 
@@ -236,11 +246,16 @@ export default function QuizPage() {
         name: sqName.trim(),
         email: sqEmail.trim(),
         selectedAnswer,
+        verifiedToken: sqVerifiedToken,
       }),
     })
     const data = await res.json()
 
     if (!res.ok) {
+      if (res.status === 401) {
+        setSqVerifiedToken("")
+        localStorage.removeItem("quiz_verified")
+      }
       setError(data.error || "Failed to submit")
     } else {
       setResult(data)
@@ -304,12 +319,30 @@ export default function QuizPage() {
             value={sqEmail}
             onChange={e => {
               setSqEmail(e.target.value)
+              setSqVerifiedToken("")
               localStorage.setItem("quiz_email", e.target.value)
+              localStorage.removeItem("quiz_verified")
             }}
             placeholder="Your email (required)"
             aria-label="Your email"
             required
             className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+          />
+        </div>
+        <div className="mt-3">
+          <VoteVerification
+            email={sqEmail}
+            name={sqName}
+            purpose="quiz"
+            verifiedToken={sqVerifiedToken}
+            onVerified={token => {
+              setSqVerifiedToken(token)
+              localStorage.setItem("quiz_verified", token)
+            }}
+            onReset={() => {
+              setSqVerifiedToken("")
+              localStorage.removeItem("quiz_verified")
+            }}
           />
         </div>
         {sqName.trim() && sqEmail.trim() && (
@@ -405,11 +438,11 @@ export default function QuizPage() {
               </div>
 
               {sqError && <p className="mt-4 text-sm text-red-500">{sqError}</p>}
-              <button
-                onClick={submitSeasonQuiz}
-                disabled={!sqName.trim() || !sqEmail.trim() || sqExpired || sqSubmitting}
-                className="mt-6 w-full rounded-lg bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
+                <button
+                  onClick={submitSeasonQuiz}
+                  disabled={!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || sqExpired || sqSubmitting}
+                  className="mt-6 w-full rounded-lg bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
                 {sqSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : sqExpired ? "Time's up" : "Submit Season Quiz"}
               </button>
             </>
@@ -421,7 +454,7 @@ export default function QuizPage() {
                 </p>
                 <button
                   onClick={startSeasonQuiz}
-                  disabled={!sqName.trim() || !sqEmail.trim() || sqSubmitting}
+                  disabled={!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || sqSubmitting}
                   className="rounded-lg bg-[var(--accent)] px-8 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {sqSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Start Season Quiz"}
@@ -593,7 +626,7 @@ export default function QuizPage() {
           {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
           <button
             onClick={handleSubmit}
-            disabled={!sqName.trim() || !sqEmail.trim() || !selectedAnswer || submitting}
+            disabled={!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || !selectedAnswer || submitting}
             className="mt-4 w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Submit Answer"}

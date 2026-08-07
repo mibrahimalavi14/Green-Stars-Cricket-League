@@ -4,6 +4,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { MATCH_CONFIG } from "@/lib/config"
 import { createHash } from "crypto"
+import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 
 const TIME_LIMIT_MS = MATCH_CONFIG.seasonQuizTimeLimitSeconds * 1000
 const GRACE_MS = MATCH_CONFIG.seasonQuizGraceSeconds * 1000
@@ -23,6 +24,11 @@ export async function POST(req: Request) {
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
     return NextResponse.json({ error: "Please provide a valid email address" }, { status: 400 })
+  }
+
+  const verifiedEmail = verifyVerifiedEmailToken(String(body.verifiedToken || ""))
+  if (!verifiedEmail || verifiedEmail !== cleanEmail) {
+    return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
   }
 
   const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { playerOfSeasonVoteSchema } from "@/lib/validation"
+import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 interface Nominee {
@@ -134,6 +135,11 @@ export async function POST(req: Request) {
 
     const { seasonId, playerId, email } = parsed.data
     const { name } = body
+
+    const verifiedEmail = verifyVerifiedEmailToken(parsed.data.verifiedToken)
+    if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
+    }
 
     const season = await prisma.season.findFirst({
       where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL },
