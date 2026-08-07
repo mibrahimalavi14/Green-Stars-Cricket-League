@@ -143,7 +143,7 @@ export default function GuidePage() {
           {/* Mobile Nav Drawer */}
           {mobileNav && (
             <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileNav(false)}>
-              <div className="absolute right-0 top-0 bottom-0 w-72 bg-[var(--card)] p-4 shadow-xl overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="absolute right-0 top-0 bottom-0 w-72 max-w-[85vw] bg-[var(--card)] p-4 shadow-xl overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Navigation</p>
                 <div className="space-y-1">
                   {sections.map(({ id, label, icon: Icon }) => (

@@ -54,7 +54,7 @@ export function NotificationBell() {
             <span className="text-sm font-semibold">Notifications</span>
             <div className="flex items-center gap-2">
               {unread > 0 && <button onClick={markAllRead} className="text-xs text-[var(--accent)] hover:underline">Mark all read</button>}
-              <button onClick={() => setOpen(false)} className="rounded-full p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] sm:hidden" aria-label="Close"><svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+              <button onClick={() => setOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] sm:hidden" aria-label="Close"><svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
           </div>
 

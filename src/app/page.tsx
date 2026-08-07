@@ -93,7 +93,7 @@ async function HomePage() {
           <section className="relative overflow-hidden border-b border-[var(--border)]">
             {moment.imageUrl && (
               <div className="absolute inset-0">
-                <img src={moment.imageUrl} alt="" className="h-full w-full object-cover" />
+                <img src={moment.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
               </div>
             )}
@@ -119,7 +119,7 @@ async function HomePage() {
                 </div>
                 {moment.imageUrl && (
                   <div className="relative h-48 w-48 flex-shrink-0 overflow-hidden rounded-xl md:h-56 md:w-56">
-                    <img src={moment.imageUrl} alt={moment.title} className="h-full w-full object-cover" />
+                    <img src={moment.imageUrl} alt={moment.title} loading="lazy" className="h-full w-full object-cover" />
                     <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10" />
                   </div>
                 )}

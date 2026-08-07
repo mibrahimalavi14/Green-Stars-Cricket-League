@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Loader2, BarChart3, TrendingUp, Search, Eye, RotateCcw, Trophy, Gamepad2, Vote } from "lucide-react"
+import { Loader2, BarChart3, TrendingUp, Search, Eye, RotateCcw, Vote } from "lucide-react"
 
 interface AnalyticsData {
   totals: {

@@ -1204,7 +1204,7 @@ export default function LiveScoringPage() {
             </div>
 
             {summary && (
-              <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="grid grid-cols-1 gap-2 mb-3 sm:grid-cols-3">
                 <div>
                   <label className="text-xs font-semibold text-[var(--muted-foreground)]">Bowler</label>
                   <select value={superOverBowlerId} onChange={e => setSuperOverBowlerId(e.target.value)}
@@ -1244,7 +1244,7 @@ export default function LiveScoringPage() {
             {superOverWicketType && (
               <div className="mb-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3">
                 <p className="text-xs font-bold text-purple-600 dark:text-purple-400 mb-2">WICKET: {superOverWicketType.toUpperCase()}</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <div>
                     <label className="text-xs text-[var(--muted-foreground)]">Who is out?</label>
                     <select value={superOverWicketBatsman} onChange={e => setSuperOverWicketBatsman(e.target.value)}

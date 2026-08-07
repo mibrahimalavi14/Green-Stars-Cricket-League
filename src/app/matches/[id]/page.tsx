@@ -1,17 +1,34 @@
 import { notFound } from "next/navigation"
+import dynamic from "next/dynamic"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import type { Match, Team, Inning, PlayerMatch, Player, SuperOverInnings } from "@prisma/client"
 import { H2H } from "@/components/H2H"
 import { ShareButtons } from "@/components/ShareButtons"
-import { ShareableScorecard } from "@/components/ShareableScorecard"
 import { Star, Trophy, Users } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import { calculatePartnerships, getHighestPartnership, type BallData, type Partnership } from "@/lib/partnerships"
 import { generateMatchTimeline } from "@/lib/match-timeline"
 import { MatchTimeline } from "@/components/MatchTimeline"
-import { OverByOver } from "@/components/OverByOver"
-import { WormChart } from "@/components/WormChart"
+
+const OverByOver = dynamic(() => import("@/components/OverByOver").then(m => m.OverByOver), {
+  loading: () => <SkeletonBlock />,
+})
+const WormChart = dynamic(() => import("@/components/WormChart").then(m => m.WormChart), {
+  loading: () => <SkeletonBlock />,
+})
+const ShareableScorecard = dynamic(() => import("@/components/ShareableScorecard").then(m => m.ShareableScorecard), {
+  loading: () => <SkeletonBlock />,
+})
+
+function SkeletonBlock() {
+  return (
+    <div className="space-y-3">
+      <div className="h-5 w-2/3 animate-pulse rounded-lg bg-[var(--muted)]" />
+      <div className="h-32 animate-pulse rounded-xl bg-[var(--muted)]" />
+    </div>
+  )
+}
 
 function getYoutubeId(url: string) {
   const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)

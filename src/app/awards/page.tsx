@@ -38,11 +38,27 @@ async function AwardsPage() {
   const playerMap = new Map(awardPlayers.map(p => [p.id, p]))
   const teamMap = new Map(awardTeams.map(t => [t.id, t]))
 
-  const completedMatches = await prisma.match.findMany({
-    where: { status: "completed", season: { workspaceId: WORKSPACE_OFFICIAL } },
-    include: { team1: true, team2: true },
-    orderBy: { date: "desc" },
-  })
+  const [completedMatches, allPlayerMatches] = await Promise.all([
+    prisma.match.findMany({
+      where: { status: "completed", season: { workspaceId: WORKSPACE_OFFICIAL } },
+      select: { id: true, seasonId: true, manOfMatch: true },
+      orderBy: { date: "desc" },
+    }),
+    prisma.playerMatch.findMany({
+      where: { match: { season: { workspaceId: WORKSPACE_OFFICIAL } } },
+      select: {
+        playerId: true,
+        matchId: true,
+        battingRuns: true,
+        ballsFaced: true,
+        sixes: true,
+        bowlingWickets: true,
+        bowlingRuns: true,
+        catches: true,
+        player: { select: { name: true, team: { select: { id: true, name: true, shortName: true, logo: true, color: true } } } },
+      },
+    }),
+  ])
 
   const seasonMatchIds = new Map<string, string[]>()
   for (const m of completedMatches) {
@@ -50,11 +66,6 @@ async function AwardsPage() {
     if (!seasonMatchIds.has(m.seasonId)) seasonMatchIds.set(m.seasonId, [])
     seasonMatchIds.get(m.seasonId)!.push(m.id)
   }
-
-  const allPlayerMatches = await prisma.playerMatch.findMany({
-    where: { match: { season: { workspaceId: WORKSPACE_OFFICIAL } } },
-    include: { player: { include: { team: true } } },
-  })
 
   const seasonsAwards = seasons.map(season => {
     const matchIds = new Set(seasonMatchIds.get(season.id) || [])

@@ -1,5 +1,14 @@
 import { prisma } from "@/lib/prisma"
-import { LiveScoreClient } from "@/components/LiveScoreClient"
+import dynamicImport from "next/dynamic"
+import { Loader2 } from "lucide-react"
+
+const LiveScoreClient = dynamicImport(() => import("@/components/LiveScoreClient").then(m => m.LiveScoreClient), {
+  loading: () => (
+    <div className="flex min-h-[50vh] items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-[var(--accent)]" />
+    </div>
+  ),
+})
 
 export const dynamic = "force-dynamic"
 

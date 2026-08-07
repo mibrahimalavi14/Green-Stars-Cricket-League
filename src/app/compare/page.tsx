@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Search, X, Crosshair, UserCheck, BarChart3, Trophy, Zap, Target, Eye } from "lucide-react"
+import { Search, X, Crosshair, UserCheck, BarChart3, Target, Eye } from "lucide-react"
 
 type TeamInfo = { id: string; name: string; shortName: string; color: string; logo: string }
 type Player = {
@@ -160,11 +160,14 @@ function PlayerSearch({ onSelect, excludeId }: { onSelect: (p: Player) => void; 
 
   useEffect(() => {
     if (query.length < 1) { setResults([]); return }
-    const filtered = allPlayers.filter(p => {
-      if (excludeId && p.id === excludeId) return false
-      return p.name.toLowerCase().includes(query.toLowerCase())
-    }).slice(0, 10)
-    setResults(filtered)
+    const t = setTimeout(() => {
+      const filtered = allPlayers.filter(p => {
+        if (excludeId && p.id === excludeId) return false
+        return p.name.toLowerCase().includes(query.toLowerCase())
+      }).slice(0, 10)
+      setResults(filtered)
+    }, 300)
+    return () => clearTimeout(t)
   }, [query, allPlayers, excludeId])
 
   return (

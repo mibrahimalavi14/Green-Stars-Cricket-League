@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 
 export const dynamic = "force-dynamic"
 
@@ -8,7 +9,7 @@ export async function GET(req: Request) {
   const recent = searchParams.get("recent") === "1"
 
   const match = await prisma.match.findFirst({
-    where: { status: "live" },
+    where: { status: "live", season: { workspaceId: WORKSPACE_OFFICIAL } },
     include: { team1: true, team2: true, innings: true },
   })
 
@@ -16,6 +17,7 @@ export async function GET(req: Request) {
     const recentCompleted = await prisma.match.findFirst({
       where: {
         status: "completed",
+        season: { workspaceId: WORKSPACE_OFFICIAL },
         updatedAt: { gte: new Date(Date.now() - 6 * 60 * 60 * 1000) },
       },
       orderBy: { updatedAt: "desc" },

@@ -37,7 +37,7 @@ export default function GalleryPage() {
           {images.map((img, i) => (
             <button key={img.id} onClick={() => setSelected(i)} className="group mb-4 w-full overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] text-left transition-all hover:shadow-lg">
               <div className="aspect-[4/3] overflow-hidden">
-                <img src={img.imageUrl} alt={img.caption || "Gallery image"} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <img src={img.imageUrl} alt={img.caption || "Gallery image"} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
               </div>
               {img.caption && <p className="p-3 text-sm">{img.caption}</p>}
             </button>
@@ -47,9 +47,9 @@ export default function GalleryPage() {
 
       {selected !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setSelected(null)}>
-          <button onClick={(e) => { e.stopPropagation(); setSelected(null) }} className="absolute right-4 top-4 z-10 rounded-full bg-black/50 p-2 text-white"><X className="h-6 w-6" /></button>
-          {selected > 0 && <button onClick={(e) => { e.stopPropagation(); prev() }} className="absolute left-4 z-10 rounded-full bg-black/50 p-2 text-white"><ChevronLeft className="h-6 w-6" /></button>}
-          {selected < images.length - 1 && <button onClick={(e) => { e.stopPropagation(); next() }} className="absolute right-4 top-1/2 z-10 rounded-full bg-black/50 p-2 text-white"><ChevronRight className="h-6 w-6" /></button>}
+          <button onClick={(e) => { e.stopPropagation(); setSelected(null) }} aria-label="Close" className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white"><X className="h-6 w-6" /></button>
+          {selected > 0 && <button onClick={(e) => { e.stopPropagation(); prev() }} aria-label="Previous" className="absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white"><ChevronLeft className="h-6 w-6" /></button>}
+          {selected < images.length - 1 && <button onClick={(e) => { e.stopPropagation(); next() }} aria-label="Next" className="absolute right-4 top-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white"><ChevronRight className="h-6 w-6" /></button>}
           <div className="max-h-[90vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
             <img src={images[selected].imageUrl} alt={images[selected].caption || ""} className="max-h-[85vh] rounded-lg object-contain" />
             {images[selected].caption && <p className="mt-2 text-center text-sm text-white">{images[selected].caption}</p>}

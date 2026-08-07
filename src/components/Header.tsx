@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Activity, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -95,7 +95,7 @@ export function Header() {
             </div>
           </nav>
           <div className="flex items-center gap-2">
-            <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
+            <button className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-[var(--muted)] md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <ThemeToggle />
@@ -131,7 +131,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/images/logo/gscl-logo.png" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
+          <img src="/images/optimized/gscl-logo.webp" alt="GSCL" className="h-8 w-8 rounded-full object-cover" />
           <span className="hidden text-sm font-medium md:block">Green Stars Cricket League</span>
         </Link>
 
@@ -193,10 +193,10 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           <NotificationBell />
-          <button onClick={() => window.dispatchEvent(new CustomEvent("open-search"))} className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--muted)] transition-colors hover:bg-[var(--accent)]" aria-label="Search">
+          <button onClick={() => window.dispatchEvent(new CustomEvent("open-search"))} className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] transition-colors hover:bg-[var(--accent)]" aria-label="Search">
             <Search className="h-4 w-4" />
           </button>
-          <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
+          <button className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-[var(--muted)] md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <ThemeToggle />

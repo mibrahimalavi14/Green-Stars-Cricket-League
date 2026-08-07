@@ -297,7 +297,8 @@ export default function PlayerOfSeasonPage() {
               </div>
               <button
                 onClick={closeModal}
-                className="rounded-lg p-1 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+                aria-label="Close"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
               >
                 <X className="h-5 w-5" />
               </button>

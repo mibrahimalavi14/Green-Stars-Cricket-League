@@ -39,7 +39,39 @@ function makeMatchLabel(m: { matchNo: number; stage: string; team1: { name: stri
 export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL): Promise<{ teamRecords: TeamRecord[]; playerRecords: PlayerRecord[] }> {
   const matches = await prisma.match.findMany({
     where: { status: "completed", season: { workspaceId } },
-    include: { team1: true, team2: true, season: true, innings: true, performances: { include: { player: true } } },
+    select: {
+      id: true,
+      matchNo: true,
+      stage: true,
+      date: true,
+      venue: true,
+      status: true,
+      result: true,
+      team1Id: true,
+      team2Id: true,
+      winnerTeamId: true,
+      manOfMatch: true,
+      team1: { select: { name: true } },
+      team2: { select: { name: true } },
+      season: { select: { name: true } },
+      innings: { select: { teamId: true, runs: true, wickets: true, balls: true, ballsData: true } },
+      performances: {
+        select: {
+          playerId: true,
+          teamId: true,
+          battingRuns: true,
+          ballsFaced: true,
+          fours: true,
+          sixes: true,
+          bowlingWickets: true,
+          bowlingRuns: true,
+          catches: true,
+          runOuts: true,
+          stumpings: true,
+          player: { select: { name: true } },
+        },
+      },
+    },
     orderBy: { date: "asc" },
   })
 

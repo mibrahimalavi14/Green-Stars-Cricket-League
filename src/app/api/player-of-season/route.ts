@@ -43,16 +43,24 @@ export async function GET(req: Request) {
 
   if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
 
-  const perfs = await prisma.playerMatch.findMany({
-    where: { match: { seasonId: season.id, status: "completed" } },
-    include: { player: { include: { team: true } } },
-  })
-
-  const votes = await prisma.playerOfSeasonVote.groupBy({
-    by: ["playerId"],
-    where: { seasonId: season.id },
-    _count: { id: true },
-  })
+  const [perfs, votes] = await Promise.all([
+    prisma.playerMatch.findMany({
+      where: { match: { seasonId: season.id, status: "completed" } },
+      select: {
+        playerId: true,
+        teamId: true,
+        battingRuns: true,
+        bowlingWickets: true,
+        catches: true,
+        player: { select: { name: true, role: true, photo: true, teamId: true, team: { select: { name: true, shortName: true, logo: true } } } },
+      },
+    }),
+    prisma.playerOfSeasonVote.groupBy({
+      by: ["playerId"],
+      where: { seasonId: season.id },
+      _count: { id: true },
+    }),
+  ])
   const votesMap: Record<string, number> = {}
   for (const v of votes) votesMap[v.playerId] = v._count.id
 

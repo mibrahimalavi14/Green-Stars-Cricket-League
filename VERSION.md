@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.5 |
+| **Current Version** | v1.3.6 |
 | **Release Date** | August 2026 |
 | **Status** | Production �?" Season 1 |
 | **Feature Freeze** | Yes (v1.3.0 exception: quiz timer + email removal, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.5-season1` (Player of the Season public voting + admin winner announcement)
+| **Current Release Tag** | `v1.3.6-season1` (Performance & Mobile optimization)
 
 ## Runtime
 
@@ -40,6 +40,7 @@
 | v1.3.2 | Aug 2026 | **Patch release** — Mobile header menu scroll fix: opening the hamburger menu now locks the page scroll and the menu scrolls independently instead of the background page scrolling first. No DB schema, scoring engine, statistics, or API changes. |
 | v1.3.3 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — `/seasons` page: all-time Titles leaderboard (team → number of titles + which seasons) and a Runner-ups leaderboard, plus a summary line on each season card showing the season date range, season winner, runner-up, and Player of the Tournament (MVP award). No DB schema changes. |
 | v1.3.4 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Admin show/hide control for the all-time Titles/Runner-ups leaderboards: new `titlesLeaderboardVisible` flag on the `Workspace` model (default `true`), admin toggle on `/admin/seasons`, new `GET/PATCH /api/admin/leaderboard-visibility`. DB schema change: new column on `Workspace`. |
+| v1.3.6 | Aug 2026 | **Performance & Mobile optimization release (freeze exception, explicitly requested)** — non-feature-only: lazy-loaded heavy components via `next/dynamic` + skeletons, `loading.tsx` skeletons for major routes, DB query optimization (scoped APIs to official workspace, `Promise.all` batching, `select` projections, removed dead queries), debounced search (300ms), responsive grids/dialogs/touch targets (44px) for mobile, optimized logo/banner WebP assets, unused lucide imports removed, `AGENTS.md` future-proof engineering standards. No DB schema, scoring engine, statistics, feature, or UI behavior changes. |
 | v1.3.5 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Player of the Season public voting. New `PlayerOfSeasonVote` table (unique `[seasonId, email]`), `GET/POST /api/player-of-season` (nominees = top performers of the season by impact with live vote counts, email-keyed user vote, rate-limited), public `/player-of-season` page (season selector, nominee cards, vote modal), admin `/admin/player-of-season` page (per-season vote breakdowns + announce winner → writes a `player_of_season` `SeasonAward`), header links on public + admin nav, new award category wired through awards pages/certificates. DB schema change: new `PlayerOfSeasonVote` table. |
 
 ## Versioning Policy (Semantic)
@@ -60,7 +61,8 @@
 | v1.3.3-season1 | Feature — seasons titles/runner-up leaderboards + season card summary |
 | v1.3.4-season1 | Feature — admin show/hide control for titles leaderboard |
 | v1.3.5-season1 | Feature — Player of the Season public voting + admin winner announcement |
-| v1.3.5+ | Future bug/security fixes for v1.3.x |
+| v1.3.6-season1 | Performance & Mobile optimization (non-feature) |
+| v1.3.6+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)

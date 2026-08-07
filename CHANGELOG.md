@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.3.6-season1
+
+Performance & Mobile optimization. No DB schema, scoring engine, statistics, feature, or UI behavior changes.
+
+Optimized
+- **Lazy-loaded heavy components** with `next/dynamic` + loading skeletons: Over-by-Over scorecard, Worm chart, and Shareable Scorecard on `/matches/[id]`; Live Score widget on `/live` (kept `force-dynamic`).
+- **Route loading skeletons** (`loading.tsx`) added for major public and admin routes.
+- **Database query optimization**: `/api/matches/live` and `/api/matches/count` scoped to the official workspace; `/api/player-of-season`, `/api/records`, and the Awards page now batch independent queries with `Promise.all` and use `select` projections; removed dead hall-of-fame query.
+- **Debounced search** (300ms) on the Compare page.
+- **Mobile responsiveness**: super-over + wicket-entry grids on live-scoring admin stack on small screens (`grid-cols-1 sm:grid-cols-3` / `grid-cols-1 sm:grid-cols-2`); guide drawer width capped for small screens.
+- **Touch targets + accessibility**: modal/overlay close buttons enlarged to 44px with `aria-label`s (gallery lightbox, search overlay, notification bell, POTM, player-of-season); icon-only buttons given accessible labels.
+- **Image optimization**: header logo and guide image now use the optimized WebP asset; large below-the-fold images lazy-load.
+- **Bundle size**: unused lucide-react imports removed (header, compare, admin analytics); dead component deleted.
+- **Engineering standards**: `AGENTS.md` documents the future-proof performance, mobile, DB, caching, and accessibility rules for all new work.
+
+No scoring engine changes.
+No statistics changes.
+No database schema changes.
+
 ## v1.3.5-season1
 
 Added

@@ -55,8 +55,8 @@ export function SearchOverlay() {
             placeholder="Search players, teams, jersey #, match no..."
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--muted-foreground)]"
           />
-          <button onClick={() => setOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--muted)] hover:bg-[var(--accent)]">
-            <X className="h-3.5 w-3.5" />
+          <button onClick={() => setOpen(false)} aria-label="Close search" className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--muted)] hover:bg-[var(--accent)]">
+            <X className="h-4 w-4" />
           </button>
         </div>
         <div className="max-h-80 overflow-y-auto p-2">

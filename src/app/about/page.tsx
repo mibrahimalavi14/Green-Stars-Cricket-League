@@ -12,9 +12,12 @@ function AboutPage() {
       </p>
 
       <div className="mb-12 overflow-hidden rounded-xl border border-[var(--border)]">
-        <img
-          src="/images/teams/Banner.jpg"
+        <Image
+          src="/images/optimized/banner.webp"
           alt="Green Stars Cricket League"
+          width={1024}
+          height={400}
+          priority
           className="h-64 w-full object-cover md:h-80"
         />
       </div>

@@ -9,14 +9,9 @@ export async function GET() {
   })
 
   const data = await Promise.all(seasons.map(async (s) => {
-    let winner = null, runnerUp = null
+    let winner = null
     if (s.winnerId) {
       winner = await prisma.team.findUnique({ where: { id: s.winnerId }, select: { name: true, shortName: true, logo: true, color: true } })
-      const matches = await prisma.match.findMany({
-        where: { seasonId: s.id, status: "completed", result: { not: "" } },
-        orderBy: { date: "desc" },
-        take: 1,
-      })
     }
     const matchCount = await prisma.match.count({ where: { seasonId: s.id } })
     const teamCount = await prisma.team.count({ where: { seasonId: s.id } })
