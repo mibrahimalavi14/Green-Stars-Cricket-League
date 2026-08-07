@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Cloud, Thermometer, MapPin, AlertTriangle, FileText, Save, CheckCircle } from "lucide-react"
+import { Cloud, Thermometer, MapPin, AlertTriangle, FileText, Save, CheckCircle, Trash2 } from "lucide-react"
 
 interface MatchNotes {
   weather: string
@@ -50,6 +50,17 @@ export default function AdminMatchNotesPage() {
     try {
       const res = await fetch("/api/matches/notes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ matchId: selectedMatch, ...notes }) })
       if (res.ok) setSaved(true)
+    } catch {}
+    setSaving(false)
+  }
+
+  async function handleClear() {
+    if (!selectedMatch) return
+    if (!confirm("Clear all notes for this match? This cannot be undone.")) return
+    setSaving(true)
+    try {
+      const res = await fetch("/api/matches/notes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ matchId: selectedMatch }) })
+      if (res.ok) { setNotes(emptyNotes); setSaved(false) }
     } catch {}
     setSaving(false)
   }
@@ -169,6 +180,10 @@ export default function AdminMatchNotesPage() {
             <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-amber-600 text-white font-medium hover:bg-amber-700 disabled:opacity-50 transition">
               <Save className="w-4 h-4" />
               {saving ? "Saving..." : "Save Notes"}
+            </button>
+            <button onClick={handleClear} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50 transition" aria-label="Clear notes for this match">
+              <Trash2 className="w-4 h-4" />
+              Clear Notes
             </button>
             {saved && <span className="text-green-400 flex items-center gap-1 text-sm"><CheckCircle className="w-4 h-4" /> Saved!</span>}
           </div>

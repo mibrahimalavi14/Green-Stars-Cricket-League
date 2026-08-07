@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.3.18-season1
+
+Home sponsors link + admin delete buttons.
+
+Added
+- Home page "Our Partners" section ka **"Contact us"** link ab `/contact?purpose=sponsorship` khulta hai — seedha Sponsorship form (OTP wala).
+- Admin delete buttons (Trash2, confirm ke saath):
+  - **Contact Messages** (`/admin/contact`) → `DELETE /api/contact`
+  - **News** (`/admin/news`) → `DELETE /api/news`
+  - **Seasons** (`/admin/seasons`) → `DELETE /api/seasons`
+  - **Predictions** (`/admin/predictions`) → `DELETE /api/predictions`
+  - **Match Notes** (`/admin/match-notes`) → "Clear Notes" button → `DELETE /api/matches/notes`
+
+Security
+- Saari nayi delete APIs `isAdminAuthenticated()` se protected hain.
+- Seasons delete workspace-scoped hai (official workspace se bahar delete nahi ho sakta).
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.17-season1
 
 Contact form — OTP ab sirf Sponsorship ke liye.

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
 import VoteVerification from "@/components/VoteVerification"
 
@@ -27,6 +27,11 @@ function ContactPage() {
   const recaptchaRef = useRef<ReCAPTCHA | null>(null)
 
   const isSponsorship = form.purpose === "sponsorship"
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("purpose")
+    if (p === "sponsorship") setForm(f => ({ ...f, purpose: "sponsorship" }))
+  }, [])
 
   function changePurpose(value: string) {
     setForm({ ...form, purpose: value })

@@ -5,6 +5,7 @@ import { contactSchema } from "@/lib/validation"
 import { verifyRecaptchaToken } from "@/lib/recaptcha"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { notifyAdmin } from "@/lib/email"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
 
 export async function GET(req: Request) {
   const cookie = req.headers.get("cookie") || ""
@@ -83,4 +84,12 @@ export async function POST(req: Request) {
   })
 
   return NextResponse.json(contact)
+}
+
+export async function DELETE(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+  await prisma.contact.delete({ where: { id } })
+  return NextResponse.json({ success: true })
 }

@@ -50,3 +50,19 @@ export async function PATCH(req: Request) {
   logAudit({ action: "season_updated", entity: "season", entityId: id, details: JSON.stringify({ ...Object.keys(data), workspaceId }), ip })
   return NextResponse.json(season)
 }
+
+export async function DELETE(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const ip = getClientIp(req)
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+
+  const workspaceId = await getCurrentWorkspaceId()
+  const existing = await prisma.season.findFirst({ where: { id, workspaceId }, select: { id: true } })
+  if (!existing) return NextResponse.json({ error: "Season not found in this workspace" }, { status: 404 })
+
+  await prisma.season.delete({ where: { id } })
+  logAudit({ action: "season_deleted", entity: "season", entityId: id, details: JSON.stringify({ workspaceId }), ip })
+  return NextResponse.json({ success: true })
+}

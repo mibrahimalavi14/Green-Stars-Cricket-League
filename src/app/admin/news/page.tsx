@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { AdminNewsForm } from "@/components/AdminNewsForm"
+import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 
 export const dynamic = "force-dynamic"
 
@@ -18,6 +19,7 @@ async function AdminNewsPage() {
                 <p className="font-medium">{n.title}</p>
                 <p className="text-xs text-[var(--muted-foreground)]">{n.published ? "Published" : "Draft"} &middot; {n.author} &middot; {n.type === "schedule" ? "📅 Schedule" : "📰 News"}</p>
               </div>
+              <AdminDeleteButton api="/api/news" id={n.id} label="article" />
             </div>
           </div>
         ))}

@@ -7,6 +7,14 @@ export async function GET() {
   return NextResponse.json(news)
 }
 
+export async function DELETE(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+  await prisma.news.delete({ where: { id } })
+  return NextResponse.json({ success: true })
+}
+
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const body = await req.json()

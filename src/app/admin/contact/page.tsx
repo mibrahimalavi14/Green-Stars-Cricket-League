@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { AdminDeleteButton } from "@/components/AdminDeleteButton"
 
 export const dynamic = "force-dynamic"
 
@@ -36,6 +37,9 @@ async function AdminContactPage() {
               )}
               {msg.subject && <p className="mb-1 text-xs font-semibold">{msg.subject}</p>}
               <p className="text-sm text-[var(--muted-foreground)] whitespace-pre-wrap">{msg.message}</p>
+              <div className="mt-3 flex justify-end">
+                <AdminDeleteButton api="/api/contact" id={msg.id} label="message" />
+              </div>
             </div>
           ))}
         </div>

@@ -41,3 +41,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const auth = await isAdminAuthenticated()
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const body = await req.json()
+    const { matchId } = body
+    if (!matchId) return NextResponse.json({ error: "matchId required" }, { status: 400 })
+
+    await prisma.matchNotes.delete({ where: { matchId } })
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}

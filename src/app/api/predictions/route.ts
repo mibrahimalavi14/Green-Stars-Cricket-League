@@ -5,6 +5,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { predictionSchema } from "@/lib/validation"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { notifyAdmin } from "@/lib/email"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -109,4 +110,12 @@ export async function POST(req: Request) {
     )
 
   return NextResponse.json(pred)
+}
+
+export async function DELETE(req: Request) {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 })
+  await prisma.seasonPrediction.delete({ where: { id } })
+  return NextResponse.json({ success: true })
 }

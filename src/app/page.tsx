@@ -294,7 +294,7 @@ async function HomePage() {
                 <p className="text-sm font-semibold text-[var(--muted-foreground)]">Your Logo Here</p>
               </div>
             </div>
-            <p className="mt-4 text-xs text-[var(--muted-foreground)]">Interested in partnering with GSCL? <Link href="/contact" className="text-[var(--accent)] hover:underline">Contact us</Link></p>
+            <p className="mt-4 text-xs text-[var(--muted-foreground)]">Interested in partnering with GSCL? <Link href="/contact?purpose=sponsorship" className="text-[var(--accent)] hover:underline">Contact us</Link></p>
         </div>
       </section>
       </FadeInView>
