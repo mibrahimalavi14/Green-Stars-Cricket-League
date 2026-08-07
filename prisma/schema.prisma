@@ -457,11 +457,13 @@ model QuizAttempt {
   quizId          String
   quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   name            String
+  email           String
   selectedAnswer  String
   correct         Boolean
   createdAt       DateTime @default(now())
 
-  @@unique([quizId, name])
+  @@unique([quizId, email])
+  @@index([quizId])
 }
 
 model PotmVote {
@@ -737,12 +739,13 @@ model SeasonQuizAttempt {
   seasonQuizId   String
   seasonQuiz     SeasonQuiz @relation(fields: [seasonQuizId], references: [id], onDelete: Cascade)
   name           String
+  email          String
   answers        String     @default("[]")
   score          Int        @default(0)
   total          Int        @default(0)
   createdAt      DateTime   @default(now())
 
-  @@unique([seasonQuizId, name])
+  @@unique([seasonQuizId, email])
   @@index([seasonQuizId])
 }
 

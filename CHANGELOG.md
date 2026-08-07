@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.7-season1
+
+One-email-one-vote across all public voting. This release extends the existing one-vote-per-email rule (already enforced for POTM and Player of the Season) to the Match Quiz and the Season Quiz.
+
+Added
+- **Match Quiz and Season Quiz now require an email** — one attempt per email per quiz. `QuizAttempt` and `SeasonQuizAttempt` are keyed by email (`@@unique([quizId, email])`, `@@unique([seasonQuizId, email])`), mirroring `PotmVote` / `PlayerOfSeasonVote`.
+- Public `/quiz` "Your Details" card now has a **name + email** input (persisted to `localStorage`), shared by the Match Quiz and the Season Quiz.
+- A returning Season Quiz participant is shown an **"already attempted"** state (their score restored via `/api/season-quiz?email=`) instead of being able to re-submit.
+- Season Quiz leaderboard and `uid` are now **de-duplicated and derived by email** (names still displayed), and the match-quiz leaderboard no longer exposes emails in its payload.
+- The season-quiz attempt API rejects duplicate email submissions with a clear "already attempted" message (409).
+
+Database schema change:
+- `QuizAttempt.email` + `@@unique([quizId, email])`; `SeasonQuizAttempt.email` + `@@unique([seasonQuizId, email])`. Tables were empty, so no data backfill was needed (applied via `prisma db push`).
+
+No scoring engine changes.
+No statistics changes.
+
 ## v1.3.6-season1
 
 Performance & Mobile optimization. No DB schema, scoring engine, statistics, feature, or UI behavior changes.

@@ -3,15 +3,15 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const name = searchParams.get("name")
+  const email = searchParams.get("email")?.trim()
   const quizId = searchParams.get("quizId")
 
-  if (!name || !quizId) {
-    return NextResponse.json({ error: "Missing name or quizId" }, { status: 400 })
+  if (!email || !quizId) {
+    return NextResponse.json({ error: "Missing email or quizId" }, { status: 400 })
   }
 
   const attempt = await prisma.quizAttempt.findUnique({
-    where: { quizId_name: { quizId, name } },
+    where: { quizId_email: { quizId, email } },
   })
 
   return NextResponse.json({ attempt })

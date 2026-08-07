@@ -14,11 +14,15 @@ export async function POST(req: Request) {
   if (!rl.allowed) return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 })
 
   const body = await req.json()
-  const { seasonId, name, answers, startedAt } = body
+  const { seasonId, name, email, answers, startedAt } = body
 
   const cleanName = String(name || "").trim().slice(0, 80)
-  if (!seasonId || !cleanName || !Array.isArray(answers) || answers.length === 0) {
-    return NextResponse.json({ error: "Please provide your name and answers" }, { status: 400 })
+  const cleanEmail = String(email || "").trim().toLowerCase().slice(0, 200)
+  if (!seasonId || !cleanName || !cleanEmail || !Array.isArray(answers) || answers.length === 0) {
+    return NextResponse.json({ error: "Please provide your name, email and answers" }, { status: 400 })
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return NextResponse.json({ error: "Please provide a valid email address" }, { status: 400 })
   }
 
   const season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
@@ -33,10 +37,18 @@ export async function POST(req: Request) {
   })
   if (questions.length === 0) return NextResponse.json({ error: "Quiz not found" }, { status: 404 })
 
+  const alreadyAttempted = await prisma.seasonQuizAttempt.findFirst({
+    where: { seasonQuiz: { seasonId }, email: cleanEmail },
+    select: { id: true },
+  })
+  if (alreadyAttempted) {
+    return NextResponse.json({ error: "You have already attempted this season quiz" }, { status: 409 })
+  }
+
   const clientStartedAt = typeof startedAt === "number" && Number.isFinite(startedAt) ? startedAt : Date.now()
 
   const earliestExisting = await prisma.seasonQuizAttempt.findFirst({
-    where: { seasonQuiz: { seasonId }, name: cleanName },
+    where: { seasonQuiz: { seasonId }, email: cleanEmail },
     orderBy: { createdAt: "asc" },
     select: { createdAt: true },
   })
@@ -59,10 +71,11 @@ export async function POST(req: Request) {
     results.map(r => {
       const q = questionById.get(r.questionId)!
       return prisma.seasonQuizAttempt.upsert({
-        where: { seasonQuizId_name: { seasonQuizId: r.questionId, name: cleanName } },
+        where: { seasonQuizId_email: { seasonQuizId: r.questionId, email: cleanEmail } },
         create: {
           seasonQuizId: r.questionId,
           name: cleanName,
+          email: cleanEmail,
           answers: JSON.stringify(r.selectedAnswer),
           score: r.correct ? q.pointValue : 0,
           total: q.pointValue,
@@ -79,6 +92,6 @@ export async function POST(req: Request) {
     score,
     total: questions.reduce((a, q) => a + q.pointValue, 0),
     results,
-    uid: createHash("sha256").update(cleanName).digest("hex").slice(0, 10),
+    uid: createHash("sha256").update(cleanEmail).digest("hex").slice(0, 10),
   })
 }

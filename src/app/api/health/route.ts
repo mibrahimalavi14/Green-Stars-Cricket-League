@@ -16,7 +16,7 @@ export async function GET() {
   return NextResponse.json({
     status: database === "connected" ? "ok" : "degraded",
     database,
-    version: "v1.3.6",
+    version: "v1.3.7",
     commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "03a5856",
     config: {
       oversPerInnings: MATCH_CONFIG.oversPerInnings,

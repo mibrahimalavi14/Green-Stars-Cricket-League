@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   const attempts = await prisma.quizAttempt.findMany({
     where: { quizId },
     orderBy: [{ correct: "desc" }, { createdAt: "asc" }],
+    select: { id: true, name: true, correct: true, createdAt: true },
   })
 
   return NextResponse.json(attempts)

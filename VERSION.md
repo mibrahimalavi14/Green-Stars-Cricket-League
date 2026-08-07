@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.6 |
+| **Current Version** | v1.3.7 |
 | **Release Date** | August 2026 |
 | **Status** | Production �?" Season 1 |
-| **Feature Freeze** | Yes (v1.3.0 exception: quiz timer + email removal, explicitly requested) |
+| **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.6-season1` (Performance & Mobile optimization)
+| **Current Release Tag** | `v1.3.7-season1` (one-email-one-vote across all public voting)
 
 ## Runtime
 
@@ -41,6 +41,7 @@
 | v1.3.3 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — `/seasons` page: all-time Titles leaderboard (team → number of titles + which seasons) and a Runner-ups leaderboard, plus a summary line on each season card showing the season date range, season winner, runner-up, and Player of the Tournament (MVP award). No DB schema changes. |
 | v1.3.4 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Admin show/hide control for the all-time Titles/Runner-ups leaderboards: new `titlesLeaderboardVisible` flag on the `Workspace` model (default `true`), admin toggle on `/admin/seasons`, new `GET/PATCH /api/admin/leaderboard-visibility`. DB schema change: new column on `Workspace`. |
 | v1.3.6 | Aug 2026 | **Performance & Mobile optimization release (freeze exception, explicitly requested)** — non-feature-only: lazy-loaded heavy components via `next/dynamic` + skeletons, `loading.tsx` skeletons for major routes, DB query optimization (scoped APIs to official workspace, `Promise.all` batching, `select` projections, removed dead queries), debounced search (300ms), responsive grids/dialogs/touch targets (44px) for mobile, optimized logo/banner WebP assets, unused lucide imports removed, `AGENTS.md` future-proof engineering standards. No DB schema, scoring engine, statistics, feature, or UI behavior changes. |
+| v1.3.7 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — One-email-one-vote across all public voting. Match Quiz and Season Quiz now require an email; `QuizAttempt` and `SeasonQuizAttempt` are keyed by email (one attempt per email per quiz), matching the already-shipped POTM and Player of the Season rules. Public `/quiz` details card now has a name + email input (persisted to localStorage), season quiz shows "already attempted" state on reload, leaderboards de-dupe by email, and the match-quiz leaderboard no longer leaks emails. DB schema change: `email` column + unique `[quizId, email]` / `[seasonQuizId, email]` on the quiz attempt tables (tables were empty; applied via `prisma db push`). |
 | v1.3.5 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Player of the Season public voting. New `PlayerOfSeasonVote` table (unique `[seasonId, email]`), `GET/POST /api/player-of-season` (nominees = top performers of the season by impact with live vote counts, email-keyed user vote, rate-limited), public `/player-of-season` page (season selector, nominee cards, vote modal), admin `/admin/player-of-season` page (per-season vote breakdowns + announce winner → writes a `player_of_season` `SeasonAward`), header links on public + admin nav, new award category wired through awards pages/certificates. DB schema change: new `PlayerOfSeasonVote` table. |
 
 ## Versioning Policy (Semantic)
@@ -62,7 +63,8 @@
 | v1.3.4-season1 | Feature — admin show/hide control for titles leaderboard |
 | v1.3.5-season1 | Feature — Player of the Season public voting + admin winner announcement |
 | v1.3.6-season1 | Performance & Mobile optimization (non-feature) |
-| v1.3.6+ | Future bug/security fixes for v1.3.x |
+| v1.3.7-season1 | Feature — one-email-one-vote across all public voting (quiz now email-keyed) |
+| v1.3.7+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 
 ## v2.0 Backlog (post-Season 1 feedback)

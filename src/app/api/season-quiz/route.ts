@@ -5,7 +5,7 @@ import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const seasonId = searchParams.get("seasonId")
-  const name = searchParams.get("name")?.trim()
+  const email = searchParams.get("email")?.trim().toLowerCase()
 
   const season = seasonId
     ? await prisma.season.findFirst({ where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL } })
@@ -24,11 +24,11 @@ export async function GET(req: Request) {
   })
 
   let attempt: { score: number; total: number } | null = null
-  if (name && quiz.length > 0) {
+  if (email && quiz.length > 0) {
     const quizIds = quiz.map(q => q.id)
     const scores = await prisma.seasonQuizAttempt.groupBy({
       by: ["seasonQuizId"],
-      where: { seasonQuizId: { in: quizIds }, name },
+      where: { seasonQuizId: { in: quizIds }, email },
       _sum: { score: true },
       _count: { id: true },
     })

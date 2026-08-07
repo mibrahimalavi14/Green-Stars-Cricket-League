@@ -154,6 +154,7 @@ export const otpVerifySchema = z.object({
 export const quizAttemptSchema = z.object({
   quizId: z.string().min(1),
   name: z.string().trim().min(1).max(80),
+  email: z.string().email().max(200),
   selectedAnswer: z.string().min(1),
 })
 

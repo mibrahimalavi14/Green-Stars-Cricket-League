@@ -17,10 +17,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
 
-  const { quizId, name, selectedAnswer } = parsed.data
+  const { quizId, name, email, selectedAnswer } = parsed.data
 
   const existing = await prisma.quizAttempt.findUnique({
-    where: { quizId_name: { quizId, name } },
+    where: { quizId_email: { quizId, email } },
   })
   if (existing) {
     return NextResponse.json({ error: "You have already attempted this quiz" }, { status: 409 })
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
     data: {
       quizId,
       name,
+      email,
       selectedAnswer,
       correct,
     },

@@ -32,6 +32,7 @@ export default function QuizPage() {
   const [seasonQuiz, setSeasonQuiz] = useState<any>(null)
   const [sqLoading, setSqLoading] = useState(true)
   const [sqName, setSqName] = useState("")
+  const [sqEmail, setSqEmail] = useState("")
   const [sqAnswers, setSqAnswers] = useState<Record<string, string>>({})
   const [sqSubmitting, setSqSubmitting] = useState(false)
   const [sqResult, setSqResult] = useState<any>(null)
@@ -45,6 +46,10 @@ export default function QuizPage() {
   const [sqExpired, setSqExpired] = useState(false)
 
   useEffect(() => {
+    const savedEmail = localStorage.getItem("quiz_email")
+    const savedName = localStorage.getItem("quiz_name")
+    if (savedEmail) setSqEmail(savedEmail)
+    if (savedName) setSqName(savedName)
     fetchData()
     fetchSeasonQuiz()
   }, [])
@@ -53,10 +58,20 @@ export default function QuizPage() {
     if (seasonQuiz?.season?.id) fetchSeasonLeaderboard(seasonQuiz.season.id)
   }, [seasonQuiz])
 
+  useEffect(() => {
+    if (sqEmail.trim()) {
+      const timer = setTimeout(() => {
+        if (!sqResult) fetchSeasonQuiz()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [sqEmail])
+
   async function fetchSeasonQuiz() {
     setSqLoading(true)
     try {
-      const res = await fetch("/api/season-quiz")
+      const savedEmail = localStorage.getItem("quiz_email") || ""
+      const res = await fetch(`/api/season-quiz?email=${encodeURIComponent(savedEmail.trim())}`)
       const data = await res.json()
       setSeasonQuiz(data)
       setSqLoading(false)
@@ -66,7 +81,7 @@ export default function QuizPage() {
   }
 
   async function submitSeasonQuiz() {
-    if (!sqName.trim() || !seasonQuiz) return
+    if (!sqName.trim() || !sqEmail.trim() || !seasonQuiz) return
     const answers = Object.entries(sqAnswers).map(([questionId, selectedAnswer]) => ({ questionId, selectedAnswer }))
     if (answers.length === 0) {
       setSqError("Please answer at least one question")
@@ -80,6 +95,7 @@ export default function QuizPage() {
       body: JSON.stringify({
         seasonId: seasonQuiz.season.id,
         name: sqName.trim(),
+        email: sqEmail.trim(),
         answers,
         startedAt: sqStartedAt,
       }),
@@ -88,6 +104,11 @@ export default function QuizPage() {
     setSqSubmitting(false)
     if (!res.ok) {
       setSqError(data.error || "Failed to submit")
+      if (res.status === 409) {
+        setSqExpired(false)
+        setSqStarted(false)
+        fetchSeasonQuiz()
+      }
     } else {
       setSqUid(data.uid || "")
       setSqResult(data)
@@ -96,7 +117,7 @@ export default function QuizPage() {
   }
 
   function startSeasonQuiz() {
-    if (!sqName.trim() || !seasonQuiz) return
+    if (!sqName.trim() || !sqEmail.trim() || !seasonQuiz) return
     setSqStarted(true)
     setSqStartedAt(Date.now())
     setSqTimeLeft(MATCH_CONFIG.seasonQuizTimeLimitSeconds)
@@ -185,8 +206,8 @@ export default function QuizPage() {
   }
 
   async function checkExisting() {
-    if (!sqName.trim() || !activeQuizId) return
-    const res = await fetch(`/api/quiz/my-score?name=${encodeURIComponent(sqName.trim())}&quizId=${activeQuizId}`)
+    if (!sqEmail.trim() || !activeQuizId) return
+    const res = await fetch(`/api/quiz/my-score?email=${encodeURIComponent(sqEmail.trim())}&quizId=${activeQuizId}`)
     const data = await res.json()
     if (data.attempt) {
       setUserAttempt(data.attempt)
@@ -196,14 +217,14 @@ export default function QuizPage() {
   }
 
   useEffect(() => {
-    if (sqName.trim() && activeQuizId) {
+    if (sqEmail.trim() && activeQuizId) {
       const timer = setTimeout(checkExisting, 500)
       return () => clearTimeout(timer)
     }
-  }, [sqName, activeQuizId])
+  }, [sqEmail, activeQuizId])
 
   async function handleSubmit() {
-    if (!sqName.trim() || !selectedAnswer || !activeQuizId) return
+    if (!sqName.trim() || !sqEmail.trim() || !selectedAnswer || !activeQuizId) return
     setSubmitting(true)
     setError("")
 
@@ -213,6 +234,7 @@ export default function QuizPage() {
       body: JSON.stringify({
         quizId: activeQuizId,
         name: sqName.trim(),
+        email: sqEmail.trim(),
         selectedAnswer,
       }),
     })
@@ -263,21 +285,37 @@ export default function QuizPage() {
           Your Details
         </h2>
         <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-          Enter your name to participate &mdash; the Season Quiz gives you {MATCH_CONFIG.seasonQuizTimeLimitSeconds / 60} minutes on the clock
+          One attempt per email &mdash; enter your name &amp; email to participate. The Season Quiz gives you {MATCH_CONFIG.seasonQuizTimeLimitSeconds / 60} minutes on the clock
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
             value={sqName}
-            onChange={e => setSqName(e.target.value)}
+            onChange={e => {
+              setSqName(e.target.value)
+              localStorage.setItem("quiz_name", e.target.value)
+            }}
             placeholder="Your name"
+            aria-label="Your name"
             required
-            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+            className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+          />
+          <input
+            type="email"
+            value={sqEmail}
+            onChange={e => {
+              setSqEmail(e.target.value)
+              localStorage.setItem("quiz_email", e.target.value)
+            }}
+            placeholder="Your email (required)"
+            aria-label="Your email"
+            required
+            className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
           />
         </div>
-        {sqName.trim() && (
+        {sqName.trim() && sqEmail.trim() && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--accent)]/10 px-3 py-2 text-sm">
             <User className="h-4 w-4 text-[var(--accent)]" />
-            Taking quiz as: <strong>{sqName.trim()}</strong>
+            Playing as: <strong>{sqName.trim()}</strong> · one attempt per email
           </div>
         )}
       </div>
@@ -317,7 +355,15 @@ export default function QuizPage() {
           </div>
 
           {!sqResult ? (
-            sqStarted ? (
+            seasonQuiz.attempt ? (
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--muted)]/50 p-6 text-center">
+                <Check className="mx-auto mb-2 h-6 w-6 text-green-500" />
+                <p className="mb-1 font-semibold">You've already attempted this season quiz</p>
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  One attempt per email. You scored <strong className="text-[var(--accent)]">{seasonQuiz.attempt.score}</strong> / {seasonQuiz.attempt.total}
+                </p>
+              </div>
+            ) : sqStarted ? (
             <>
               {sqExpired && (
                 <div className="mb-4 rounded-lg bg-red-500/10 px-4 py-3 text-center text-sm font-medium text-red-500">
@@ -361,7 +407,7 @@ export default function QuizPage() {
               {sqError && <p className="mt-4 text-sm text-red-500">{sqError}</p>}
               <button
                 onClick={submitSeasonQuiz}
-                disabled={!sqName.trim() || sqExpired || sqSubmitting}
+                disabled={!sqName.trim() || !sqEmail.trim() || sqExpired || sqSubmitting}
                 className="mt-6 w-full rounded-lg bg-[var(--accent)] px-4 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {sqSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : sqExpired ? "Time's up" : "Submit Season Quiz"}
@@ -375,13 +421,13 @@ export default function QuizPage() {
                 </p>
                 <button
                   onClick={startSeasonQuiz}
-                  disabled={!sqName.trim() || sqSubmitting}
+                  disabled={!sqName.trim() || !sqEmail.trim() || sqSubmitting}
                   className="rounded-lg bg-[var(--accent)] px-8 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {sqSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Start Season Quiz"}
                 </button>
-                {!sqName.trim() && (
-                  <p className="mt-3 text-sm text-[var(--muted-foreground)]">Enter your name above to start</p>
+                {(!sqName.trim() || !sqEmail.trim()) && (
+                  <p className="mt-3 text-sm text-[var(--muted-foreground)]">Enter your name &amp; email above to start</p>
                 )}
               </div>
             )
@@ -547,7 +593,7 @@ export default function QuizPage() {
           {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
           <button
             onClick={handleSubmit}
-            disabled={!sqName.trim() || !selectedAnswer || submitting}
+            disabled={!sqName.trim() || !sqEmail.trim() || !selectedAnswer || submitting}
             className="mt-4 w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Submit Answer"}
