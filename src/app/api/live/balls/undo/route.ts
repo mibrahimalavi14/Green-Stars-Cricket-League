@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit"
 import { trackEvent } from "@/lib/analytics"
 
 interface BallEvent {
+  id?: string
   runs: number
   extras: string | null
   wicket: string | null
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || ""
 
   const body = await req.json()
-  const { inningsId } = body as { inningsId: string }
+  const { inningsId, ballId } = body as { inningsId: string; ballId?: string }
 
   if (!inningsId) {
     return NextResponse.json({ error: "inningsId required" }, { status: 400 })
@@ -50,12 +51,24 @@ export async function POST(req: Request) {
     const ballsData: BallEvent[] = JSON.parse(innings.ballsData || "[]")
     if (ballsData.length === 0) throw new Error("No balls to undo")
 
-    const lastBall = ballsData[ballsData.length - 1]
-    const remaining = ballsData.slice(0, -1)
+    let targetBall: BallEvent
+    let remaining: BallEvent[]
 
-    const legal = isLegalDelivery(lastBall)
-    const runs = lastBall.runs
-    const extraRuns = (lastBall.isWide ? 1 : 0) + (lastBall.isNoBall ? 1 : 0) + lastBall.byes + lastBall.legByes
+    if (ballId) {
+      const idx = ballsData.findIndex((b) => b.id === ballId)
+      if (idx === -1) {
+        return { updated: innings, lastBall: null as unknown as BallEvent, duplicate: true }
+      }
+      targetBall = ballsData[idx]
+      remaining = ballsData.filter((_, i) => i !== idx)
+    } else {
+      targetBall = ballsData[ballsData.length - 1]
+      remaining = ballsData.slice(0, -1)
+    }
+
+    const legal = isLegalDelivery(targetBall)
+    const runs = targetBall.runs
+    const extraRuns = (targetBall.isWide ? 1 : 0) + (targetBall.isNoBall ? 1 : 0) + targetBall.byes + targetBall.legByes
 
     const updated = await tx.inning.update({
       where: { id: inningsId },
@@ -63,20 +76,23 @@ export async function POST(req: Request) {
         ballsData: JSON.stringify(remaining),
         runs: Math.max(0, innings.runs - runs),
         balls: legal ? Math.max(0, innings.balls - 1) : innings.balls,
-        wickets: lastBall.wicket ? Math.max(0, innings.wickets - 1) : innings.wickets,
+        wickets: targetBall.wicket ? Math.max(0, innings.wickets - 1) : innings.wickets,
         extras: Math.max(0, innings.extras - extraRuns),
       },
     })
 
-    return { updated, lastBall }
+    return { updated, lastBall: targetBall, duplicate: false }
   }, { maxWait: 5000, timeout: 10000 })
 
-  logAudit({ action: "ball_undone", entity: "match", entityId: result.lastBall.bowler, details: JSON.stringify({ inningsId, undone: { runs: result.lastBall.runs, wicket: result.lastBall.wicket } }), ip })
+  if (!result.duplicate) {
+    logAudit({ action: "ball_undone", entity: "match", entityId: result.lastBall.bowler, details: JSON.stringify({ inningsId, undone: { runs: result.lastBall.runs, wicket: result.lastBall.wicket } }), ip })
 
-  trackEvent("undo_used", { inningsId, runsUndone: result.lastBall.runs || 0, wicketUndone: result.lastBall.wicket || "" }, ip)
+    trackEvent("undo_used", { inningsId, runsUndone: result.lastBall.runs || 0, wicketUndone: result.lastBall.wicket || "" }, ip)
+  }
 
   return NextResponse.json({
     success: true,
+    duplicate: result.duplicate,
     innings: {
       ...result.updated,
       ballsData: JSON.parse(result.updated.ballsData),

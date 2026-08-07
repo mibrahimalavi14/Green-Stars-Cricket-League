@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.3.12-season1
+
+Offline live-scoring fallback. The scorer can keep scoring even when the ground has no internet — no ball is lost, and everything syncs automatically the moment the connection returns.
+
+Added
+- **Offline queue** (`src/lib/offline-queue.ts`) — ball-by-ball entries are saved to the device's localStorage when offline; the queue survives page refresh and laptop restart.
+- **Offline live scoring UI** — while offline, the scoring screen keeps updating (scorecard, current over, batting/bowling lists) and shows an "OFFLINE MODE" badge plus a "Pending Sync: N" counter.
+- **Auto-sync** (`src/hooks/useOfflineQueue.ts`) — on reconnect and every 5 seconds, queued balls replay to the server in exact FIFO order with a live "Syncing... X/Y" progress badge and a success flash when done; the public live score updates as soon as the last ball lands.
+- **Offline undo** — undo of the most recent offline ball removes it from the local queue immediately.
+
+Changed
+- `/api/live/balls` now accepts a client-generated `ballId`, stores it on the ball record, and returns success (idempotent) if that ball already exists — replays after a dropped connection or lost response never duplicate a ball.
+- `/api/live/balls/undo` now accepts an optional `ballId` and is idempotent (undoing an already-removed ball is a no-op), keeping the undo/redo balance exact across sync.
+- The live-scoring page derives its displayed innings from server data merged with still-queued offline balls (deduped by `ballId`), so the screen and the final synced state never disagree.
+
+Unchanged
+- Online scoring behaves exactly as before — each ball posts instantly and viewers see it live.
+- No database schema changes, no scoring formula changes.
+
 ## v1.3.11-season1
 
 In-site notification permission prompt. First-time visitors no longer have to scroll to the footer to find the enable button — a bottom banner asks for push permission automatically when the site opens.

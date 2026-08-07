@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.11 |
+| **Current Version** | v1.3.12 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.11-season1` (in-site notification permission prompt) |
+| **Current Release Tag** | `v1.3.12-season1` (offline live scoring fallback) |
 
 ## Runtime
 
@@ -47,6 +47,7 @@
 | v1.3.9 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Auto-ranked POTM candidates. Completed-match players are now sorted by a performance score (runs + wickets×20 + catches/stumpings/run-outs×10 + strike-rate bonus) so the best performers appear first, the top performer gets a "Top performance" badge, zero-contribution players (no runs, no balls bowled, no fielding) are hidden from the voting list, and the batting chip shows strike rate. POS already auto-ranks by votes + impact and is unchanged. No DB schema or scoring engine changes. |
 | v1.3.10 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Automatic push notifications. Notifications now send themselves on key events — match completion (result + link to POTM voting), the auto-generated Season Quiz going live, and news publishing — instead of only via the manual admin broadcast. New shared `sendPushNotification` helper (`src/lib/push.ts`); the admin "Send to All Subscribers" panel was refactored onto it (still admin-only). No DB schema or scoring engine changes. |
 | v1.3.11 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — In-site notification permission prompt. First-time visitors see a bottom banner (after ~1.5s) asking to allow GSCL push notifications, so subscribing no longer requires finding the footer toggle; clicking "Allow notifications" requests the browser permission and subscribes in one step, "Not now" dismisses and re-prompts after 7 days, already-subscribed/denied visitors are never nagged. Shared client-side push helper (`src/lib/push-client.ts`) extracted so the footer toggle and the prompt use one implementation and stay in sync. No DB schema or scoring engine changes. |
+| v1.3.12 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Offline live-scoring fallback. When the admin loses internet at the ground, ball-by-ball entries are saved to an on-device queue (localStorage, survives refresh/restart) and the scoring screen keeps working with an "OFFLINE MODE" badge and a "Pending Sync" count. When internet returns, the queue auto-syncs in exact FIFO order (every 5s + on reconnect) with a live progress counter, then the public live score updates. Every ball gets a unique `ballId`; the submit API stores it on the ball and ignores replays, and the undo API accepts a `ballId` for idempotent undo — so no duplicates, no lost balls, correct order. Offline undo removes the last queued ball locally. No DB schema changes; scoring engine logic unchanged (only idempotency added). |
 
 ## Versioning Policy (Semantic)
 
@@ -72,6 +73,7 @@
 | v1.3.9-season1 | Feature — auto-ranked POTM candidates by performance |
 | v1.3.10-season1 | Feature — automatic push notifications on match/quiz/news events |
 | v1.3.11-season1 | Feature — in-site notification permission prompt on first visit |
+| v1.3.12-season1 | Feature — offline live-scoring fallback with auto-sync queue |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

@@ -7,6 +7,7 @@ import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 
 interface BallEvent {
+  id?: string
   runs: number
   extras: string | null
   wicket: string | null
@@ -33,10 +34,11 @@ export async function POST(req: Request) {
   if (!rl.allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 })
 
   const body = await req.json()
-  const { matchId, battingTeamId, ball } = body as {
+  const { matchId, battingTeamId, ball, ballId } = body as {
     matchId: string
     battingTeamId: string
     ball: BallEvent
+    ballId?: string
   }
 
   if (!matchId || !battingTeamId || !ball) {
@@ -66,6 +68,10 @@ export async function POST(req: Request) {
 
     const ballsData: BallEvent[] = JSON.parse(innings.ballsData || "[]")
 
+    if (ballId && ballsData.some((b) => b.id === ballId)) {
+      return innings
+    }
+
     const batters = new Set<string>()
     const dismissed = new Set<string>()
     for (const b of ballsData) {
@@ -87,7 +93,7 @@ export async function POST(req: Request) {
     const bowlerLegalBalls = ballsData.filter(b => b.bowler === ball.bowler && !b.isWide && !b.isNoBall).length
     if (isLegalDelivery(ball) && bowlerLegalBalls >= MATCH_CONFIG.maxBallsPerBowler) throw new Error(`Bowler cannot bowl more than ${MATCH_CONFIG.maxOversPerBowler} over`)
 
-    ballsData.push(ball)
+    ballsData.push(ballId ? { ...ball, id: ballId } : ball)
     const newBallsData = JSON.stringify(ballsData)
 
     const legal = isLegalDelivery(ball)

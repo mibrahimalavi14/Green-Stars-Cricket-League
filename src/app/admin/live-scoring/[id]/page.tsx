@@ -15,9 +15,13 @@ import {
   Flag,
   Loader2,
   CheckCircle,
+  CloudOff,
+  RefreshCw,
 } from "lucide-react"
 import { FieldDiagram } from "@/components/FieldDiagram"
 import { MATCH_CONFIG, isMatchComplete, formatOvers } from "@/lib/config"
+import { loadOfflineQueue, addToOfflineQueue, removeFromOfflineQueue, createBallId } from "@/lib/offline-queue"
+import { useOfflineQueue } from "@/hooks/useOfflineQueue"
 
 interface Player {
   id: string
@@ -35,6 +39,7 @@ interface Team {
 }
 
 interface BallEvent {
+  id?: string
   runs: number
   extras: string | null
   wicket: string | null
@@ -137,7 +142,6 @@ export default function LiveScoringPage() {
   const [pendingExtraType, setPendingExtraType] = useState<string | null>(null)
   const [ballRegion, setBallRegion] = useState("")
 
-  const [activeInnings, setActiveInnings] = useState<Innings | null>(null)
   const [inningsNum, setInningsNum] = useState(1)
   const [endMatchConfirm, setEndMatchConfirm] = useState(false)
   const [endingMatch, setEndingMatch] = useState(false)
@@ -200,9 +204,62 @@ export default function LiveScoringPage() {
       if (res.ok) {
         const data: SummaryData = await res.json()
         setSummary(data)
+        return data
       }
     } catch {}
+    return undefined
   }, [matchId])
+
+  const { online, pendingCount, syncing, progress, lastSynced, refreshCount } = useOfflineQueue(async () => {
+    const data = await fetchSummary()
+    if (data) checkAndAutoComplete(data)
+  })
+
+  const [syncFlash, setSyncFlash] = useState(false)
+  useEffect(() => {
+    if (lastSynced > 0) {
+      setSyncFlash(true)
+      const t = window.setTimeout(() => setSyncFlash(false), 3000)
+      return () => window.clearTimeout(t)
+    }
+  }, [lastSynced])
+
+  const queuedBalls = useMemo(() => loadOfflineQueue().filter((q) => q.matchId === matchId), [matchId, pendingCount])
+
+  const mergedInnings = useMemo(() => {
+    if (!summary) return []
+    const teamIds = new Set(summary.innings.map((i) => i.teamId))
+    const base = [...summary.innings]
+    for (const q of queuedBalls) {
+      if (!teamIds.has(q.battingTeamId)) {
+        base.push({ id: "", matchId, teamId: q.battingTeamId, runs: 0, wickets: 0, balls: 0, extras: 0, ballsData: [] })
+        teamIds.add(q.battingTeamId)
+      }
+    }
+    return base.map((inn) => {
+      const existingIds = new Set(inn.ballsData.map((b) => b.id).filter((id): id is string => !!id))
+      const queued = queuedBalls.filter((q) => q.battingTeamId === inn.teamId && !existingIds.has(q.id))
+      if (queued.length === 0) return inn
+      const ballsData = [...inn.ballsData, ...queued.map((q) => q.ball as unknown as BallEvent)]
+      let runs = inn.runs
+      let balls = inn.balls
+      let wickets = inn.wickets
+      let extras = inn.extras
+      for (const q of queued) {
+        const b = q.ball as unknown as BallEvent
+        runs += b.runs
+        extras += (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0) + b.byes + b.legByes
+        if (!b.isWide && !b.isNoBall) balls++
+        if (b.wicket) wickets++
+      }
+      return { ...inn, ballsData, runs, balls, wickets, extras }
+    })
+  }, [summary, queuedBalls, matchId])
+
+  const activeInnings = useMemo(
+    () => mergedInnings.find((i) => i.teamId === battingTeamId) || null,
+    [mergedInnings, battingTeamId]
+  )
 
   const checkAndAutoComplete = useCallback(async (summaryData: SummaryData) => {
     if (summaryData.match.status === "completed" || matchCompleted || autoCompletePending) return
@@ -478,12 +535,6 @@ export default function LiveScoringPage() {
   }, [summary, tossWinner, tossDecision])
 
   useEffect(() => {
-    if (!summary) return
-    const inn = summary.innings.find((i) => i.teamId === battingTeamId)
-    setActiveInnings(inn || null)
-  }, [summary, battingTeamId])
-
-  useEffect(() => {
     if (battingTeamId) localStorage.setItem(`ls-${matchId}-bat`, battingTeamId)
     if (bowlingTeamId) localStorage.setItem(`ls-${matchId}-bowl`, bowlingTeamId)
     if (bowlerId) localStorage.setItem(`ls-${matchId}-bowler`, bowlerId)
@@ -572,13 +623,13 @@ export default function LiveScoringPage() {
   }, [activeInnings?.ballsData])
   const MAX_BOWLER_OVERS = 2
 
-  const innings1 = useMemo(() => summary?.innings.find(
+  const innings1 = useMemo(() => mergedInnings.find(
     (i) => i.teamId === (summary?.match.team1.id)
-  ), [summary])
+  ), [mergedInnings, summary])
 
-  const innings2 = useMemo(() => summary?.innings.find(
+  const innings2 = useMemo(() => mergedInnings.find(
     (i) => i.teamId === (summary?.match.team2.id)
-  ), [summary])
+  ), [mergedInnings, summary])
 
   const superOverLiveScore = useMemo(() => {
     if (!summary) return { battingTeamName: "", bowlingTeamName: "", runs: 0, wickets: 0, legalBalls: 0, ballsLeft: MATCH_CONFIG.superOverBalls, target: null as number | null, isSecondBatting: false, firstTeamScore: "" }
@@ -651,19 +702,56 @@ export default function LiveScoringPage() {
       return
     }
     setSubmitting(true)
+
+    const ballId = createBallId()
+    const fullBall = { ...ball, id: ballId }
+
+    const applyLocalState = () => {
+      setWicketType(null)
+      setWicketBatsman("")
+      setWicketFielder("")
+      setPendingExtraRuns(null)
+      setPendingExtraType(null)
+      setBallRegion("")
+      const isLegal = !ball.isWide && !ball.isNoBall
+      const legalBallsAfter = (activeInnings?.balls || 0) + (isLegal ? 1 : 0)
+      const overComplete = isLegal && legalBallsAfter % 6 === 0
+      if (ball.wicket) {
+        if (overComplete) {
+          setStrikerId(nonStrikerId)
+          setNonStrikerId("")
+        } else {
+          setStrikerId("")
+        }
+      } else {
+        const completedRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+        const oddRuns = completedRuns % 2 === 1
+        if (oddRuns !== overComplete) {
+          const tmp = strikerId
+          setStrikerId(nonStrikerId)
+          setNonStrikerId(tmp)
+        }
+      }
+      if (overComplete) {
+        setBowlerId("")
+        localStorage.removeItem(`ls-${matchId}-bowler`)
+      }
+    }
+
     try {
-      const res = await fetch("/api/live/balls", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId, battingTeamId, ball }),
-      })
-      if (res.ok) {
-        setWicketType(null)
-        setWicketBatsman("")
-        setWicketFielder("")
-        setPendingExtraRuns(null)
-        setPendingExtraType(null)
-        setBallRegion("")
+      if (navigator.onLine) {
+        const res = await fetch("/api/live/balls", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchId, battingTeamId, ball: fullBall, ballId }),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => null)
+          if (data?.error) alert(data.error)
+          setSubmitting(false)
+          return
+        }
+        applyLocalState()
         fetch("/api/live/sync-stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -672,31 +760,16 @@ export default function LiveScoringPage() {
         await fetchSummary()
         const updatedSummary = await fetch(`/api/live/summary?matchId=${matchId}`).then(r => r.json()).catch(() => null)
         if (updatedSummary) checkAndAutoComplete(updatedSummary)
-        const isLegal = !ball.isWide && !ball.isNoBall
-        const legalBallsAfter = (activeInnings?.balls || 0) + (isLegal ? 1 : 0)
-        const overComplete = isLegal && legalBallsAfter % 6 === 0
-        if (ball.wicket) {
-          if (overComplete) {
-            setStrikerId(nonStrikerId)
-            setNonStrikerId("")
-          } else {
-            setStrikerId("")
-          }
-        } else {
-          const completedRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
-          const oddRuns = completedRuns % 2 === 1
-          if (oddRuns !== overComplete) {
-            const tmp = strikerId
-            setStrikerId(nonStrikerId)
-            setNonStrikerId(tmp)
-          }
-        }
-        if (overComplete) {
-          setBowlerId("")
-          localStorage.removeItem(`ls-${matchId}-bowler`)
-        }
+      } else {
+        addToOfflineQueue({ id: ballId, matchId, battingTeamId, ball: fullBall })
+        refreshCount()
+        applyLocalState()
       }
-    } catch {}
+    } catch {
+      addToOfflineQueue({ id: ballId, matchId, battingTeamId, ball: fullBall })
+      refreshCount()
+      applyLocalState()
+    }
     setSubmitting(false)
   }
 
@@ -708,11 +781,28 @@ export default function LiveScoringPage() {
     const prevNonStriker = lastBall.nonStriker
     const prevBowler = lastBall.bowler
     setSubmitting(true)
+
+    if (!navigator.onLine) {
+      const lastBallId = lastBall.id
+      if (lastBallId && queuedBalls.some((q) => q.id === lastBallId)) {
+        removeFromOfflineQueue(lastBallId)
+        refreshCount()
+        setStrikerId(prevStriker)
+        setNonStrikerId(prevNonStriker)
+        setBowlerId(prevBowler)
+        localStorage.setItem(`ls-${matchId}-bowler`, prevBowler)
+      } else {
+        alert("Cannot undo offline: this ball is already saved online. Connect to internet to undo it.")
+      }
+      setSubmitting(false)
+      return
+    }
+
     try {
       const res = await fetch("/api/live/balls/undo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inningsId: activeInnings.id }),
+        body: JSON.stringify({ inningsId: activeInnings.id, ballId: lastBall.id || undefined }),
       })
       if (res.ok) {
         setStrikerId(prevStriker)
@@ -726,7 +816,10 @@ export default function LiveScoringPage() {
         })
         await fetchSummary()
       }
-    } catch {}
+    } catch {
+      setSubmitting(false)
+      return
+    }
     setSubmitting(false)
   }
 
@@ -1093,6 +1186,26 @@ export default function LiveScoringPage() {
               <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
               LIVE SCORING
             </span>
+            {!online && (
+              <span className="flex items-center gap-1 rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white">
+                <CloudOff className="h-3.5 w-3.5" /> OFFLINE MODE
+              </span>
+            )}
+            {pendingCount > 0 && !syncing && (
+              <span className="rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-black">
+                Pending Sync: {pendingCount}
+              </span>
+            )}
+            {syncing && progress && (
+              <span className="flex items-center gap-1 rounded-full bg-blue-500 px-3 py-1 text-xs font-bold text-white">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Syncing... {progress.done}/{progress.total}
+              </span>
+            )}
+            {syncFlash && (
+              <span className="flex items-center gap-1 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white">
+                <CheckCircle className="h-3.5 w-3.5" /> Offline data synced
+              </span>
+            )}
           </div>
         </div>
 
@@ -2230,7 +2343,7 @@ export default function LiveScoringPage() {
                 <div className="mb-3 space-y-1.5">
                   {customHighlights.map((h, i) => (
                     <div key={i} className="flex items-center justify-between rounded-lg bg-[var(--muted)] px-3 py-1.5">
-                      <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
                         <span>{h.icon}</span>
                         <div>
                           <p className="text-xs font-bold">{h.text}</p>
