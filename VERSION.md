@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.18 |
+| **Current Version** | v1.3.19 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.18-season1` (home sponsors link + admin delete buttons) |
+| **Current Release Tag** | `v1.3.19-season1` (reviews below form) |
 
 ## Runtime
 
@@ -54,6 +54,7 @@
 | v1.3.16 | Aug 2026 | **Fix** — v1.3.15 me notifications Vercel serverless par silently drop ho rahi thin: fire-and-forget promise response ke baad function terminate hone par khatam ho jaata tha. Ab sab notifications Next.js `after()` se bheji jaati hain — function email complete hone tak zinda rehta hai. Fix `notifyAdmin()` helper me. |
 | v1.3.17 | Aug 2026 | **Change** — Contact form me OTP ab sirf **Sponsorship** ke liye required hai. General Inquiry messages bina OTP ke turant submit ho jaati hain (sirf reCAPTCHA). OTP flow (email verification) sponsorship submissions ke liye hamesha ki tarah raha. |
 | v1.3.18 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Home page "Our Partners" ke "Contact us" link par click karne se seedha **Sponsorship contact form** khulta hai (`/contact?purpose=sponsorship`). Admin me **delete buttons** add: Contact Messages, News, Seasons, Predictions, Match Notes (clear). Saari delete APIs `isAdminAuthenticated()` se protected hain. |
+| v1.3.19 | Aug 2026 | **Change** — Home page Reviews section me ab review cards **form ke neche** dikhte hain (pehle upar the). Review submission par admin ko email me **poora message** (comment) detail ke saath milta hai. |
 
 ## Versioning Policy (Semantic)
 
@@ -86,6 +87,7 @@
 | v1.3.16-season1 | Fix — notifications reliably delivered via Next.js after() |
 | v1.3.17-season1 | Change — contact OTP only for sponsorship |
 | v1.3.18-season1 | Feature — home sponsors link + admin delete buttons |
+| v1.3.19-season1 | Change — reviews shown below the form |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

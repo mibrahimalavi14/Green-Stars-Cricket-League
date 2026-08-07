@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.19-season1
+
+Reviews — cards form ke neche.
+
+Changed
+- Home page `ReviewsSection`: review cards ab **"Leave a Review" form ke neche** dikhte hain (pehle upar the).
+- Review submission par admin email notification (`New Review (Awaiting Approval)`) me **poora comment/message** Details section me aata hai — sirf rating nahi.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.18-season1
 
 Home sponsors link + admin delete buttons.

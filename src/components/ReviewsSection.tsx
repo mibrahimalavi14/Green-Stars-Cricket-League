@@ -71,29 +71,6 @@ export function ReviewsSection() {
           {total > 0 ? `${average}/5 from ${total} review${total !== 1 ? "s" : ""}` : "Be the first to leave a review"}
         </p>
 
-        {reviews.length > 0 && (
-          <div className="mb-10 grid gap-4 md:grid-cols-2">
-            {reviews.map(r => (
-              <div key={r.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)]/50">
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
-                      {r.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{r.name}</p>
-                      {r.city && <p className="text-xs text-[var(--muted-foreground)]">{r.city}</p>}
-                    </div>
-                  </div>
-                  <span className="text-xs text-[var(--muted-foreground)]">{new Date(r.createdAt).toLocaleDateString("en-PK")}</span>
-                </div>
-                {renderStars(r.rating)}
-                <p className="mt-2 text-sm text-[var(--muted-foreground)]">{r.comment}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
         {sent ? (
           <div className="mx-auto max-w-md rounded-xl border border-green-500/50 bg-green-500/10 p-8 text-center">
             <p className="text-xl font-semibold text-green-600 dark:text-green-400">Review submitted!</p>
@@ -139,6 +116,29 @@ export function ReviewsSection() {
               {sending ? "Submitting..." : "Submit Review"}
             </button>
           </form>
+        )}
+
+        {reviews.length > 0 && (
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            {reviews.map(r => (
+              <div key={r.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-all hover:border-[var(--accent)]/50">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)]/10 text-sm font-bold text-[var(--accent)]">
+                      {r.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{r.name}</p>
+                      {r.city && <p className="text-xs text-[var(--muted-foreground)]">{r.city}</p>}
+                    </div>
+                  </div>
+                  <span className="text-xs text-[var(--muted-foreground)]">{new Date(r.createdAt).toLocaleDateString("en-PK")}</span>
+                </div>
+                {renderStars(r.rating)}
+                <p className="mt-2 text-sm text-[var(--muted-foreground)]">{r.comment}</p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </section>
