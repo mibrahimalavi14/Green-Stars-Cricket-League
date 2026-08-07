@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.14-season1
+
+Fix
+- Sponsorship budget options ab 5K se shuru hote hain: `5K - 50K`, `50K - 1 Lac`, `1 Lac - 5 Lac`, `5 Lac +`, `Not decided / Flexible`.
+- Anti-spam flow end-to-end verify kiya gaya (reCAPTCHA gate, email OTP, honeypot silent-drop, no-token/garbage-token 401 rejection, sponsorship payload DB persistence).
+
 ## v1.3.13-season1
 
 Anti-spam contact & sponsorship form. Bots aur fake emails ab message nahi bhej sakte.

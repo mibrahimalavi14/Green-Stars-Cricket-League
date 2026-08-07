@@ -8,7 +8,7 @@ const SPONSORSHIP_TYPES = [
   "Kit & Equipment", "Venue & Ground", "Media & Streaming", "Prize Money", "Other",
 ]
 
-const BUDGET_RANGES = ["Up to 50K", "50K - 1 Lac", "1 Lac - 5 Lac", "5 Lac +", "Not decided / Flexible"]
+const BUDGET_RANGES = ["5K - 50K", "50K - 1 Lac", "1 Lac - 5 Lac", "5 Lac +", "Not decided / Flexible"]
 
 function ContactPage() {
   const [form, setForm] = useState({
