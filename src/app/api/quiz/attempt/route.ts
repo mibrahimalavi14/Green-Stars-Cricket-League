@@ -4,7 +4,7 @@ import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { quizAttemptSchema } from "@/lib/validation"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
-import { sendAdminNotification } from "@/lib/email"
+import { notifyAdmin } from "@/lib/email"
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   prisma.quiz
     .findUnique({ where: { id: quizId }, select: { question: true } })
     .then((q) =>
-      sendAdminNotification({
+      notifyAdmin({
         title: "New Match Quiz Attempt",
         rows: [
           { label: "Name", value: name },
@@ -66,7 +66,6 @@ export async function POST(req: Request) {
         ],
       })
     )
-    .catch((err) => console.error("Quiz notification failed:", err))
 
   return NextResponse.json({
     correct,

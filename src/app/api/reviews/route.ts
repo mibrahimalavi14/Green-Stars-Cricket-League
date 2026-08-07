@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { reviewSchema } from "@/lib/validation"
-import { sendAdminNotification } from "@/lib/email"
+import { notifyAdmin } from "@/lib/email"
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     },
   })
 
-  sendAdminNotification({
+  notifyAdmin({
     title: "New Review (Awaiting Approval)",
     rows: [
       { label: "Name", value: name.trim() },
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       { label: "Rating", value: `${rating}/5` },
     ],
     message: comment.trim(),
-  }).catch((err) => console.error("Review notification failed:", err))
+  })
 
   return NextResponse.json({ success: true, review: { id: review.id, name: review.name, city: review.city, rating: review.rating, comment: review.comment, createdAt: review.createdAt } })
 }

@@ -5,7 +5,7 @@ import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { MATCH_CONFIG } from "@/lib/config"
 import { createHash } from "crypto"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
-import { sendAdminNotification } from "@/lib/email"
+import { notifyAdmin } from "@/lib/email"
 
 const TIME_LIMIT_MS = MATCH_CONFIG.seasonQuizTimeLimitSeconds * 1000
 const GRACE_MS = MATCH_CONFIG.seasonQuizGraceSeconds * 1000
@@ -96,14 +96,14 @@ export async function POST(req: Request) {
   )
 
   const totalPoints = questions.reduce((a, q) => a + q.pointValue, 0)
-  sendAdminNotification({
+  notifyAdmin({
     title: "New Season Quiz Attempt",
     rows: [
       { label: "Name", value: cleanName },
       { label: "Email", value: cleanEmail },
       { label: "Score", value: `${score} / ${totalPoints}` },
     ],
-  }).catch((err) => console.error("Season quiz notification failed:", err))
+  })
 
   return NextResponse.json({
     score,

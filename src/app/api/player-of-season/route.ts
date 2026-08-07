@@ -5,7 +5,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { playerOfSeasonVoteSchema } from "@/lib/validation"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
-import { sendAdminNotification } from "@/lib/email"
+import { notifyAdmin } from "@/lib/email"
 
 interface Nominee {
   id: string
@@ -170,19 +170,17 @@ export async function POST(req: Request) {
     Promise.all([
       prisma.player.findUnique({ where: { id: playerId }, select: { name: true } }),
       prisma.season.findUnique({ where: { id: seasonId }, select: { name: true } }),
-    ])
-      .then(([player, season]) =>
-        sendAdminNotification({
-          title: "New Player of the Season Vote",
-          rows: [
-            { label: "Name", value: name || "Anonymous" },
-            { label: "Email", value: email },
-            { label: "Player", value: player?.name || playerId },
-            { label: "Season", value: season?.name || seasonId },
-          ],
-        })
-      )
-      .catch((err) => console.error("POS notification failed:", err))
+    ]).then(([player, season]) =>
+      notifyAdmin({
+        title: "New Player of the Season Vote",
+        rows: [
+          { label: "Name", value: name || "Anonymous" },
+          { label: "Email", value: email },
+          { label: "Player", value: player?.name || playerId },
+          { label: "Season", value: season?.name || seasonId },
+        ],
+      })
+    )
 
     return NextResponse.json({ success: true, vote })
   } catch (e: unknown) {

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer"
+import { after } from "next/server"
 
 interface SendOtpEmailArgs {
   email: string
@@ -63,5 +64,15 @@ export async function sendAdminNotification({ title, rows, message }: AdminNotif
       ${message ? `<p style="color:#6b7280;font-size:13px;margin:12px 0 4px">Details:</p><div style="white-space:pre-wrap;padding:12px;background:#f3f4f6;border-radius:8px;font-size:14px">${message}</div>` : ""}
       <p style="color:#6b7280;font-size:12px;margin-top:16px">This is an automated notification from the GSCL website.</p>
     </div>`,
+  })
+}
+
+export function notifyAdmin(data: AdminNotificationData) {
+  after(async () => {
+    try {
+      await sendAdminNotification(data)
+    } catch (err) {
+      console.error("Admin notification failed:", err)
+    }
   })
 }

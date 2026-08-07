@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.16-season1
+
+Fix — admin email notifications ab production par reliably deliver hoti hain.
+
+Problem
+- v1.3.15 me notifications fire-and-forget (promise bina await) bheji gayi thin. Vercel serverless function response return hote hi terminate ho jaata hai, isliye SMTP email ka kaam adhoora reh kar notification **silently drop** ho jaati thin.
+- OTP emails theek jaati thin kyunki unhe response se pehle await kiya jaata hai.
+
+Fix
+- `src/lib/email.ts` me naya `notifyAdmin()` helper — Next.js **`after()`** use karta hai, jo function ko email complete hone tak alive rakhta hai (aur error sirf log karta hai).
+- Saare API routes (`/api/contact`, `/api/potm`, `/api/player-of-season`, `/api/predictions`, `/api/quiz/attempt`, `/api/season-quiz/attempt`, `/api/reviews`) ab `notifyAdmin()` use karte hain.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+- Production E2E: OTP send → verify → contact submit → admin email deliver.
+
 ## v1.3.15-season1
 
 Admin email alerts — har user submission par site owner ke email par turant notification.
