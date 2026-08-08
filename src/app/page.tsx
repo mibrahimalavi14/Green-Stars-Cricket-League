@@ -249,7 +249,7 @@ async function HomePage() {
                 <p className="text-sm font-bold">Hafiz Muhammad Ibrahim Alavi</p>
                 <p className="text-xs text-[var(--muted-foreground)]">Chairman, Green Stars Cricket League</p>
                 {hasSignature ? (
-                  <img src="/images/optimized/signature.png" alt="Signature of Hafiz Muhammad Ibrahim Alavi" className="mt-3 ml-auto h-16 w-auto object-contain opacity-90" loading="lazy" />
+                  <img src="/images/optimized/signature.png" alt="Signature of Hafiz Muhammad Ibrahim Alavi" className="mt-3 ml-auto h-16 w-auto rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)]" loading="lazy" />
                 ) : (
                   <p className="mt-4 font-serif text-xl italic text-gscl-gold" style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive" }}>
                     Hafiz Muhammad Ibrahim Alavi

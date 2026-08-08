@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.3.24-season1
+
+Professional white-background signature.
+
+Changed
+- `signature.png` ab **clean white background** par hai (pehle transparent thi) — 548x159, ~35 KB.
+- Blue ink ko contrast-enhance karke **crisp** banaya gaya.
+- Home page par signature ab **rounded corners + subtle shadow** ke saath professional presentation me dikhti hai.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.23-season1
 
 Chairman signature image added.
