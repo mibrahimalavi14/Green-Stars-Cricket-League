@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.3.31-season1
+
+Home stats show latest season.
+
+Changed
+- Home page ke **Teams / Players / Matches / Season Runs** cards ab **latest season** ka data dikhate hain (`orderBy year desc`) — pehle sirf `isActive: true` season dikhta tha. Agar koi season active mark na bhi ho, latest season ke numbers dikhenge.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.30-season1
 
 Auto-popup in-app notification toast.

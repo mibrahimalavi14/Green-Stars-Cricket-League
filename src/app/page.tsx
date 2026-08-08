@@ -18,7 +18,9 @@ import { Youtube, Trophy, Users, Calendar, MapPin, Award, Timer } from "lucide-r
 export const dynamic = "force-dynamic"
 
 async function HomePage() {
-  const season = await prisma.season.findFirst({ where: { isActive: true } })
+  const season = await prisma.season.findFirst({
+    orderBy: [{ year: "desc" }, { createdAt: "desc" }],
+  })
   const [allTeamsData, matches, news, winners, matchCount, players] = await Promise.all([
     prisma.team.findMany({
       where: { seasonId: season?.id },
