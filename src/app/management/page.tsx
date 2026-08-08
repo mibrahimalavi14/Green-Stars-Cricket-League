@@ -1,6 +1,7 @@
 import Image from "next/image"
 import type { Metadata } from "next"
 import { Crown, User } from "lucide-react"
+import { prisma } from "@/lib/prisma"
 
 export const metadata: Metadata = {
   title: "Management | Green Stars Cricket League",
@@ -9,13 +10,14 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic"
 
 type Member = {
+  id?: string
   name: string
   role: string
   photo?: string
   quote?: string
 }
 
-const management: Member[] = [
+const fallbackMembers: Member[] = [
   {
     name: "Muhammad Ibrahim Alavi",
     role: "Chairman",
@@ -25,7 +27,18 @@ const management: Member[] = [
   },
 ]
 
-export default function ManagementPage() {
+export default async function ManagementPage() {
+  const dbMembers = await prisma.managementMember.findMany({
+    where: { active: true },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true, name: true, role: true, photo: true, quote: true },
+  })
+
+  const members: Member[] =
+    dbMembers.length > 0
+      ? dbMembers.map((m) => ({ id: m.id, name: m.name, role: m.role, photo: m.photo || undefined, quote: m.quote || undefined }))
+      : fallbackMembers
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-10">
@@ -36,20 +49,14 @@ export default function ManagementPage() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {management.map((m) => (
+        {members.map((m) => (
           <div
-            key={m.name}
+            key={m.id || m.name}
             className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-colors hover:bg-[var(--muted)]"
           >
             {m.photo ? (
-              <div className="mx-auto mb-4 w-44">
-                <Image
-                  src={m.photo}
-                  alt={m.name}
-                  width={1044}
-                  height={1507}
-                  className="h-auto w-full rounded-xl object-cover shadow-md"
-                />
+              <div className="relative mx-auto mb-4 aspect-[3/4] w-full max-w-44 overflow-hidden rounded-xl shadow-md">
+                <Image src={m.photo} alt={m.name} fill sizes="176px" className="object-cover" />
               </div>
             ) : (
               <div className="mx-auto mb-4 flex h-44 w-44 items-center justify-center rounded-2xl bg-[var(--muted)] ring-2 ring-[var(--accent)]/30">

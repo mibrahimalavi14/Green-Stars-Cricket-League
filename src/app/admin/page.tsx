@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { getCurrentWorkspaceId } from "@/lib/workspace"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical, PenLine, Users2 } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -154,6 +154,18 @@ async function AdminPage() {
           <h3 className="text-lg font-semibold">Contact Messages</h3>
           <p className="text-2xl font-bold">{counts.contacts}</p>
           <p className="text-sm text-[var(--muted-foreground)]">View messages from visitors</p>
+        </Link>
+
+        <Link href="/admin/chairman-message" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <PenLine className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Chairman's Message</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Edit the home page message, name & signature</p>
+        </Link>
+
+        <Link href="/admin/management" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Users2 className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Management</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Add, edit & remove management members</p>
         </Link>
       </div>
     </div>

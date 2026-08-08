@@ -46,6 +46,20 @@ async function HomePage() {
   const seasonRuns = players.reduce((a, p) => a + p.runs, 0)
   const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.png"))
 
+  const chairmanRow = await prisma.chairmanMessage.findFirst({
+    where: { active: true },
+    orderBy: { updatedAt: "desc" },
+  })
+  const chairman = chairmanRow ?? {
+    name: "Hafiz Muhammad Ibrahim Alavi",
+    title: "Chairman, Green Stars Cricket League",
+    message:
+      "Assalam-o-Alaikum, cricket fans.\n\nWhen I look at the young cricketers of Haripur, I see the future of Pakistan cricket. Green Stars Cricket League was born from a simple belief — that every talented young player, no matter where they come from, deserves a fair chance to shine.\n\nThe energy, the passion and the discipline you bring to every match fills me with pride. This league is not just about winning matches or lifting trophies; it is about building character, learning teamwork, and chasing dreams with heart. Every run you score and every wicket you take writes a new chapter in the story of GSCL.\n\nI want to thank every player, coach, official, sponsor and supporter who makes this dream possible. This is your league, and together we will take it to new heights.\n\nMay Allah bless our league and our community. Let us keep playing with passion, sportsmanship and respect.",
+    photo: "/images/optimized/chairman.webp",
+    showSignature: true,
+  }
+  const chairmanParagraphs = chairman.message.split(/\n+/).map((p) => p.trim()).filter(Boolean)
+
   const latestNews = news.length > 0 ? news[0] : null
 
   let moment = await prisma.momentOfTheDay.findFirst({
@@ -214,47 +228,26 @@ async function HomePage() {
           </div>
           <div className="grid items-start gap-8 md:grid-cols-5">
             <div className="flex justify-center md:col-span-2">
-              <Image
-                src="/images/optimized/chairman.webp"
-                alt="Chairman Hafiz Muhammad Ibrahim Alavi"
-                width={1044}
-                height={1507}
-                className="h-auto w-56 rounded-xl shadow-lg md:w-64"
-              />
+              <div className="relative aspect-[3/4] w-56 md:w-64">
+                <Image src={chairman.photo} alt={`Chairman ${chairman.name}`} fill sizes="256px" className="rounded-xl object-cover shadow-lg" />
+              </div>
             </div>
             <div className="md:col-span-3">
-              <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Assalam-o-Alaikum, cricket fans.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                When I look at the young cricketers of Haripur, I see the future of Pakistan cricket.
-                Green Stars Cricket League was born from a simple belief — that every talented young
-                player, no matter where they come from, deserves a fair chance to shine.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                The energy, the passion and the discipline you bring to every match fills me with pride.
-                This league is not just about winning matches or lifting trophies; it is about building
-                character, learning teamwork, and chasing dreams with heart. Every run you score and every
-                wicket you take writes a new chapter in the story of GSCL.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                I want to thank every player, coach, official, sponsor and supporter who makes this dream
-                possible. This is your league, and together we will take it to new heights.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                May Allah bless our league and our community. Let us keep playing with passion,
-                sportsmanship and respect.
-              </p>
+              {chairmanParagraphs.map((paragraph, i) => (
+                <p key={i} className={`text-sm leading-relaxed text-[var(--muted-foreground)]${i > 0 ? " mt-3" : ""}`}>
+                  {paragraph}
+                </p>
+              ))}
               <div className="mt-8 border-t border-[var(--border)] pt-5 text-right">
-                <p className="text-sm font-bold">Hafiz Muhammad Ibrahim Alavi</p>
-                <p className="text-xs text-[var(--muted-foreground)]">Chairman, Green Stars Cricket League</p>
-                {hasSignature ? (
-                  <img src="/images/optimized/signature.png" alt="Signature of Hafiz Muhammad Ibrahim Alavi" className="mt-3 ml-auto h-16 w-auto rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)]" loading="lazy" />
+                <p className="text-sm font-bold">{chairman.name}</p>
+                <p className="text-xs text-[var(--muted-foreground)]">{chairman.title}</p>
+                {chairman.showSignature && (hasSignature ? (
+                  <img src="/images/optimized/signature.png" alt={`Signature of ${chairman.name}`} className="mt-3 ml-auto h-16 w-auto rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)]" loading="lazy" />
                 ) : (
                   <p className="mt-4 font-serif text-xl italic text-gscl-gold" style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive" }}>
-                    Hafiz Muhammad Ibrahim Alavi
+                    {chairman.name}
                   </p>
-                )}
+                ))}
               </div>
             </div>
           </div>

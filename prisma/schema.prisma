@@ -767,3 +767,27 @@ model SeasonQuizStanding {
   @@unique([seasonId, name])
   @@index([seasonId])
 }
+
+
+model ChairmanMessage {
+  id            String   @id @default(cuid())
+  name          String   @default("Hafiz Muhammad Ibrahim Alavi")
+  title         String   @default("Chairman, Green Stars Cricket League")
+  message       String
+  photo         String   @default("/images/optimized/chairman.webp")
+  showSignature Boolean  @default(true)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ManagementMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  photo     String   @default("")
+  quote     String   @default("")
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

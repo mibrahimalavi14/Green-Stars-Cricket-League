@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.27-season1
+
+Admin management for Chairman's Message + Management members.
+
+Added
+- **Chairman's Message** admin page (`/admin/chairman-message`): name, title, photo, full message, signature on/off, active on/off, and delete.
+- **Management** admin page (`/admin/management`): add, edit (name/role/photo/quote/sort order/active), and delete management members.
+- New DB tables: `ChairmanMessage` + `ManagementMember` (seeded with the chairman row).
+- Home page **Chairman's Message** section + **Management** page (`/management`) are now DB-driven (with fallbacks so they never break).
+- Admin nav links (Content → Chairman's Message, Manage → Management) + dashboard cards.
+- Content seed script `scripts/seed-content.ts` (upserts the default chairman rows).
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+- Seed rows confirmed in production DB.
+
 ## v1.3.26-season1
 
 Realistic AI-style smooth pen signature.
