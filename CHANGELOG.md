@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.3.29-season1
+
+Push subscriber list + cleanup.
+
+Added
+- Admin **Notifications** page par ab **har subscriber ki list** dikhti hai — device info (browser · OS · Mobile/Desktop), subscribe date, aur **Remove** button.
+- Subscribe hone par ab `userAgent` save hota hai (new column) taake device ka pata chale.
+- Naya admin-only `DELETE /api/notifications/subscribe/[id]` endpoint.
+- Subscriber list API sirf admin (cookie) ko list deti hai; public ko sirf count milta hai.
+- Purane 4 test subscriptions DB se delete kar diye — count ab **0** se naya shuru hoga.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.28-season1
 
 Redesigned admin header More dropdown.

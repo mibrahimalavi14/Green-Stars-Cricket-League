@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.28 |
+| **Current Version** | v1.3.29 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.28-season1` (redesigned admin header More dropdown) |
+| **Current Release Tag** | `v1.3.29-season1` (push subscriber list + cleanup, device info) |
 
 ## Runtime
 
@@ -104,6 +104,7 @@
 | v1.3.26-season1 | Change — realistic AI-style smooth pen-brush signature |
 | v1.3.27-season1 | Feature — admin management for chairman message + management members |
 | v1.3.28-season1 | Change — redesigned admin header More dropdown (icons + grouped sections, ~half-page panel) + added missing admin pages |
+| v1.3.29-season1 | Feature — push subscriber list in admin (device + date + remove button) + test subscriptions cleaned, device info tracked on subscribe |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

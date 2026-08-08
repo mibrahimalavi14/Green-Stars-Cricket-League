@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 export async function POST(req: Request) {
   try {
     const { endpoint, p256dh, auth, email } = await req.json()
+    const userAgent = req.headers.get("user-agent") || ""
 
     if (!endpoint || !p256dh || !auth) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -11,8 +12,8 @@ export async function POST(req: Request) {
 
     await prisma.pushSubscription.upsert({
       where: { endpoint },
-      update: { p256dh, auth, email: email || "" },
-      create: { endpoint, p256dh, auth, email: email || "" },
+      update: { p256dh, auth, email: email || "", userAgent },
+      create: { endpoint, p256dh, auth, email: email || "", userAgent },
     })
 
     return NextResponse.json({ success: true })
