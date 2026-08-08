@@ -26,6 +26,8 @@ export default function PredictionsPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState("")
+  const [alreadyVotedAt, setAlreadyVotedAt] = useState<string | null>(null)
+  const [votedAt, setVotedAt] = useState<string | null>(null)
   const [otp, setOtp] = useState("")
   const [step, setStep] = useState<"signin" | "otp" | "pick">("signin")
   const [loading, setLoading] = useState(false)
@@ -56,7 +58,12 @@ export default function PredictionsPage() {
     emailTimer.current = setTimeout(async () => {
       const res = await fetch(`/api/predictions?email=${encodeURIComponent(val.trim())}`)
       const data = await res.json()
-      if (data.prediction) setEmailError("This email has already voted")
+      if (data.prediction) {
+        setEmailError("This email has already voted")
+        setAlreadyVotedAt(data.prediction.createdAt ? new Date(data.prediction.createdAt).toISOString() : null)
+      } else {
+        setAlreadyVotedAt(null)
+      }
     }, 600)
   }
 
@@ -99,6 +106,7 @@ export default function PredictionsPage() {
     const predData = await predRes.json()
     if (predData.prediction) {
       setError("This email has already voted")
+      setAlreadyVotedAt(predData.prediction.createdAt ? new Date(predData.prediction.createdAt).toISOString() : null)
       setStep("signin")
       setLoading(false)
       return
@@ -114,6 +122,7 @@ export default function PredictionsPage() {
     setName("")
     setEmail("")
     setEmailError("")
+    setAlreadyVotedAt(null)
     setOtp("")
     setStep("signin")
     setError("")
@@ -134,6 +143,7 @@ export default function PredictionsPage() {
       const t = teams.find(t => t.id === teamId)
       setPredictedTeamId(teamId)
       setPredictedTeamName(t?.name || "")
+      setVotedAt(data.createdAt ? new Date(data.createdAt).toISOString() : null)
       setSuccess(true)
       fetchData()
     }
@@ -154,7 +164,10 @@ export default function PredictionsPage() {
           <p className="mb-1 text-sm text-[var(--muted-foreground)]">
             You predicted <strong>{predictedTeamName}</strong> will win {season?.name}.
           </p>
-          <p className="mb-6 text-xs text-[var(--muted-foreground)]">{name}</p>
+          <p className="mb-6 text-xs text-[var(--muted-foreground)]">
+            {name}
+            {votedAt && <span className="ml-1">· {timeAgo(votedAt)}</span>}
+          </p>
           <div className="rounded-lg bg-[var(--muted)] p-4 text-sm text-[var(--muted-foreground)]">
             <Check className="mr-1 inline h-4 w-4 text-green-500" />
             Vote recorded successfully. Share this page with friends to vote too!
@@ -193,6 +206,11 @@ export default function PredictionsPage() {
                   emailError ? "border-red-500" : "border-[var(--border)]"
                 }`} />
               {emailError && <p className="mt-1 text-left text-xs text-red-500">{emailError}</p>}
+              {alreadyVotedAt && (
+                <p className="mt-1 text-left text-xs text-[var(--muted-foreground)]">
+                  Voted {timeAgo(alreadyVotedAt)}
+                </p>
+              )}
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
             <button onClick={sendOtp} disabled={!name.trim() || !email.trim() || !!emailError || loading}

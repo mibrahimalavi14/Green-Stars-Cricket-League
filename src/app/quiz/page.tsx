@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User, Timer } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import VoteVerification from "@/components/VoteVerification"
+import { formatDateTime } from "@/lib/utils"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -394,6 +395,9 @@ export default function QuizPage() {
                 <p className="mb-1 font-semibold">You've already attempted this season quiz</p>
                 <p className="text-sm text-[var(--muted-foreground)]">
                   One attempt per email. You scored <strong className="text-[var(--accent)]">{seasonQuiz.attempt.score}</strong> / {seasonQuiz.attempt.total}
+                  {seasonQuiz.attempt.createdAt && (
+                    <span className="block text-xs opacity-80">Attempted on {formatDateTime(seasonQuiz.attempt.createdAt)}</span>
+                  )}
                 </p>
               </div>
             ) : sqStarted ? (
@@ -585,6 +589,9 @@ export default function QuizPage() {
             <div className="rounded-lg bg-[var(--muted)] p-4">
               <p className="text-sm text-[var(--muted-foreground)]">
                 You already attempted this quiz. {userAttempt.correct ? "You got it right!" : "Your answer was incorrect."}
+                {userAttempt.createdAt && (
+                  <span className="mt-0.5 block text-xs opacity-80">Voted on {formatDateTime(userAttempt.createdAt)}</span>
+                )}
               </p>
             </div>
           )}

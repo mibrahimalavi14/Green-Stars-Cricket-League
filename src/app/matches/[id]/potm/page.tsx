@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import { Star, Medal, ThumbsUp, Trophy, Users, Vote, Loader2, Check, X } from "lucide-react"
 import VoteVerification from "@/components/VoteVerification"
+import { formatDateTime } from "@/lib/utils"
 
 interface PlayerWithVotes {
   id: string
@@ -49,7 +50,7 @@ export default function PotmVotePage() {
   const [match, setMatch] = useState<MatchInfo | null>(null)
   const [players, setPlayers] = useState<PlayerWithVotes[]>([])
   const [totalVotes, setTotalVotes] = useState(0)
-  const [userVote, setUserVote] = useState<{ playerId: string; playerName: string } | null>(null)
+  const [userVote, setUserVote] = useState<{ playerId: string; playerName: string; createdAt?: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [email, setEmail] = useState("")
@@ -319,6 +320,9 @@ export default function PotmVotePage() {
         {userVote && (
           <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-500">
             You voted for {userVote.playerName}
+            {userVote.createdAt && (
+              <span className="ml-1 text-xs opacity-80">· {formatDateTime(userVote.createdAt)}</span>
+            )}
           </span>
         )}
       </div>

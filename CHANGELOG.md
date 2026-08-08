@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.3.32-season1
+
+Vote timestamps shown everywhere.
+
+Changed
+- **POTM** (`/matches/[id]/potm`): `You voted for X` ab saath me date + time dikhata hai (`· 8 Aug 2026, 5:12 PM`).
+- **Player of the Season** (`/player-of-season`): wahi fix — vote ke sath date + time.
+- **Match Quiz** (`/quiz`): already-attempted state ab `Voted on date/time` dikhata hai.
+- **Season Quiz** (`/quiz`): already-attempted state ab `Attempted on date/time` dikhata hai.
+- **Predictions** (`/predictions`): vote hone ke baad success screen par relative time (`· 2m ago`); agar email already voted ho to error ke neche `Voted 3h ago` bhi dikhta hai.
+
+Internal
+- Naya shared `formatDateTime()` util (`src/lib/utils.ts`).
+- POTM + Player of the Season APIs ab `userVote` me `createdAt` return karte hain.
+- Season Quiz API ab attempt me `createdAt` (`_max`) return karta hai.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.31-season1
 
 Home stats show latest season.

@@ -83,7 +83,7 @@ export async function GET(req: Request) {
       include: { player: true },
     })
     if (existing) {
-      userVote = { playerId: existing.playerId, playerName: existing.player.name }
+      userVote = { playerId: existing.playerId, playerName: existing.player.name, createdAt: existing.createdAt.toISOString() }
     }
   }
 

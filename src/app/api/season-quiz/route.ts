@@ -23,7 +23,7 @@ export async function GET(req: Request) {
     select: { id: true, question: true, options: true, position: true, pointValue: true },
   })
 
-  let attempt: { score: number; total: number } | null = null
+  let attempt: { score: number; total: number; createdAt?: string } | null = null
   if (email && quiz.length > 0) {
     const quizIds = quiz.map(q => q.id)
     const scores = await prisma.seasonQuizAttempt.groupBy({
@@ -31,11 +31,13 @@ export async function GET(req: Request) {
       where: { seasonQuizId: { in: quizIds }, email },
       _sum: { score: true },
       _count: { id: true },
+      _max: { createdAt: true },
     })
     if (scores.length > 0) {
       attempt = {
         score: scores.reduce((a, s) => a + (s._sum.score || 0), 0),
         total: scores.reduce((a, s) => a + (s._count.id || 0), 0) * 10,
+        createdAt: scores.reduce((a, s) => (s._max.createdAt && (!a || s._max.createdAt > a) ? s._max.createdAt : a), null as Date | null)?.toISOString(),
       }
     }
   }

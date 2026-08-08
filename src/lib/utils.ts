@@ -64,3 +64,7 @@ export function formatTime(date: string | Date) {
     minute: "2-digit",
   })
 }
+
+export function formatDateTime(date: string | Date) {
+  return `${formatDate(date)} · ${formatTime(date)}`
+}

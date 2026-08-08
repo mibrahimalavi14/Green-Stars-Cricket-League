@@ -109,7 +109,7 @@ export async function GET(req: Request) {
       where: { seasonId_email: { seasonId: season.id, email } },
       include: { player: true },
     })
-    if (existing) userVote = { playerId: existing.playerId, playerName: existing.player.name }
+    if (existing) userVote = { playerId: existing.playerId, playerName: existing.player.name, createdAt: existing.createdAt.toISOString() }
   }
 
   return NextResponse.json({

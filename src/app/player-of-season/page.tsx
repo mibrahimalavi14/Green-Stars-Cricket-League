@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { Trophy, Vote, Loader2, ThumbsUp, Check, X, Crown, Users, Medal } from "lucide-react"
 import VoteVerification from "@/components/VoteVerification"
+import { formatDateTime } from "@/lib/utils"
 
 interface SeasonInfo {
   id: string
@@ -33,7 +34,7 @@ export default function PlayerOfSeasonPage() {
   const [seasonId, setSeasonId] = useState("")
   const [nominees, setNominees] = useState<Nominee[]>([])
   const [totalVotes, setTotalVotes] = useState(0)
-  const [userVote, setUserVote] = useState<{ playerId: string; playerName: string } | null>(null)
+  const [userVote, setUserVote] = useState<{ playerId: string; playerName: string; createdAt?: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [email, setEmail] = useState("")
@@ -171,6 +172,9 @@ export default function PlayerOfSeasonPage() {
         {userVote && (
           <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-500">
             You voted for {userVote.playerName}
+            {userVote.createdAt && (
+              <span className="ml-1 text-xs opacity-80">· {formatDateTime(userVote.createdAt)}</span>
+            )}
           </span>
         )}
       </div>
