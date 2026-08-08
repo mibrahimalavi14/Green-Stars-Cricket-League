@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.25 |
+| **Current Version** | v1.3.26 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.25-season1` (signature crop fix — full "I" + white bg) |
+| **Current Release Tag** | `v1.3.26-season1` (realistic AI-style smooth pen signature) |
 
 ## Runtime
 
@@ -61,6 +61,7 @@
 | v1.3.23 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Chairman ki **asli signature image** dhoond kar website par lagayi gayi. Photo (`Chairman's Signature.jpg`) me se sirf signature crop karke transparent background wali `public/images/optimized/signature.png` (500x111) banayi gayi — Chairman's Message section me naam ke neche ab asli signature dikhta hai. |
 | v1.3.24 | Aug 2026 | **Change (freeze exception, explicitly requested)** — Signature ab **clean white background** par hai, crisp blue ink ke saath (professional look). Image se transparent ki jagah white bg banayi gayi, contrast enhance kiya, aur page par rounded corners + subtle shadow se display hoti hai. |
 | v1.3.25 | Aug 2026 | **Fix** — Signature crop me **pehla "I" (Ibrahim) kata** hua tha — crop left margin se zyada tight tha (ink `x=322` se start hoti thi lekin crop `x=379` se). Ab signature **poori** li gayi hai (full "I" + zaroori breathing margin), white background pure hai, ink crisp navy blue me hai, aur speckle noise hataya gaya. `signature.png` (560x136, ~14 KB). |
+| v1.3.26 | Aug 2026 | **Change (freeze exception, explicitly requested)** — Signature ko **AI-style realistic pen signature** banaya gaya. Original photo ke strokes se **skeleton (centerline)** extract hua (Zhang-Suen thinning), phir us par **smooth anti-aliased pen-brush strokes** render kiye — thin, elegant, continuous strokes with natural pen-pressure variation. Result: bilkul clean, professional signature jo kisi bhi document par sign ki hui jaisi lagti hai. Pure white background, crisp navy ink. `signature.png` (620x150, ~13 KB). |
 
 ## Versioning Policy (Semantic)
 
@@ -100,6 +101,7 @@
 | v1.3.23-season1 | Feature — chairman signature image (transparent) added under the message |
 | v1.3.24-season1 | Change — signature now on clean white background, crisp + professional |
 | v1.3.25-season1 | Fix — signature crop fixed (first "I" no longer cut off) |
+| v1.3.26-season1 | Change — realistic AI-style smooth pen-brush signature |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

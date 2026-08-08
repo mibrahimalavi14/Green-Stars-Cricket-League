@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.26-season1
+
+Realistic AI-style smooth pen signature.
+
+Changed
+- Signature ab **bilkul real pen signature** jaisi lagti hai — photo ke strokes se **skeleton (centerline)** extract karke (Zhang-Suen thinning) us par **smooth anti-aliased pen-brush strokes** render kiye.
+- Thin, elegant, **continuous strokes** with **natural pen-pressure variation** (flourish mota, letter detail patla).
+- Pure white background, crisp navy ink, full "I" intact.
+- `signature.png` (620x150, ~13 KB) — pehle photo-crop blotchy lagti thi, ab clean professional.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.25-season1
 
 Signature crop fix — full "I".
