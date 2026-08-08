@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.3.30-season1
+
+Auto-popup in-app notification toast.
+
+Added
+- Admin se nayi in-app notification banate he wo **forun website par ek toast/banner** ke roop me dikhti hai — visitor ko **bell kholne ki zaroorat nahi**. Header ke neche slide-down hota hai, bell icon + title + body ke saath.
+- Toast par **X (cross)** button — close karne par notification **notifications history (bell) me saved** rehti hai.
+- Agar notification me link hai to toast par click karne se page khulta hai (aur read mark hoti hai).
+- Har user apni device par dismissed notifications yaad rakhta hai (localStorage) — wo again nahi dikhti. 7 din tak purani nayi notifications toast hoti hain.
+- Toast **60s me refresh** hota hai + tab focus par — jo visitor pehle se site par hai uske samne bhi forun aa jaati hai. Admin pages par toast nahi dikhta.
+- Notification bell me bhi pehle ki tarah unread + history dikhti hai.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.29-season1
 
 Push subscriber list + cleanup.

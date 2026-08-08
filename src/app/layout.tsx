@@ -9,6 +9,7 @@ import { SearchOverlay } from "@/components/SearchOverlay"
 import { CookieConsent } from "@/components/CookieConsent"
 import { PageTransition } from "@/components/PageTransition"
 import { NotificationPrompt } from "@/components/NotificationPrompt"
+import { NotificationToast } from "@/components/NotificationToast"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SearchOverlay />
             <CookieConsent />
             <NotificationPrompt />
+            <NotificationToast />
           </div>
         </ThemeProvider>
       </body>
