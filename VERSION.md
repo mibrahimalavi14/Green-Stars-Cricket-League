@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.27 |
+| **Current Version** | v1.3.28 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.27-season1` (admin management for chairman message + management members) |
+| **Current Release Tag** | `v1.3.28-season1` (redesigned admin header More dropdown) |
 
 ## Runtime
 
@@ -103,6 +103,7 @@
 | v1.3.25-season1 | Fix — signature crop fixed (first "I" no longer cut off) |
 | v1.3.26-season1 | Change — realistic AI-style smooth pen-brush signature |
 | v1.3.27-season1 | Feature — admin management for chairman message + management members |
+| v1.3.28-season1 | Change — redesigned admin header More dropdown (icons + grouped sections, ~half-page panel) + added missing admin pages |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.3.28-season1
+
+Redesigned admin header More dropdown.
+
+Changed
+- Admin header ka **More** dropdown ab website ke More jaisa design hai: **grouped sections** (Content / Manage / League / Tools / System) har link ke **icons** ke saath, aur **~aadhi page width** ka panel (`w-[min(92vw,42rem)]`) — full page nahi, chevron hover par rotate hota hai, `max-h-[70vh]` ke andar scroll.
+- Missing admin pages ab More me hain: **Match Notes** (Manage me), aur naya **Tools** group — **Practice Center, Analytics, System Monitor, Restore**.
+- Mobile admin menu me bhi same groups + icons aur missing links add kiye.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.27-season1
 
 Admin management for Chairman's Message + Management members.

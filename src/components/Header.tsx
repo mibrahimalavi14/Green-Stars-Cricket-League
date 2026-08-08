@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake, BarChart3, PenLine, Users2 } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake, BarChart3, PenLine, Users2, Activity, FlaskConical, Database, FileText } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -52,6 +52,7 @@ export function Header() {
         { href: "/admin/player-of-season", label: "Player of Season", icon: Crown },
         { href: "/admin/predictions", label: "Predictions", icon: Trophy },
         { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
+        { href: "/admin/match-notes", label: "Match Notes", icon: FileText },
       ],
       league: [
         { href: "/admin/transfers", label: "Transfers", icon: ArrowLeftRight },
@@ -61,11 +62,24 @@ export function Header() {
         { href: "/admin/awards", label: "Season Awards", icon: Award },
         { href: "/admin/fair-play", label: "Fair Play", icon: Handshake },
       ],
+      tools: [
+        { href: "/admin/practice", label: "Practice Center", icon: FlaskConical },
+        { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+        { href: "/admin/system", label: "System Monitor", icon: Activity },
+        { href: "/admin/restore", label: "Restore", icon: Database },
+      ],
       system: [
         { href: "/admin/notifications", label: "Notifications", icon: Bell },
         { href: "/admin/contact", label: "Messages", icon: MessageSquare },
       ],
     }
+    const adminGroups = [
+      { title: "Content", items: adminLinks.content },
+      { title: "Manage", items: adminLinks.manage },
+      { title: "League", items: adminLinks.league },
+      { title: "Tools", items: adminLinks.tools },
+      { title: "System", items: adminLinks.system },
+    ]
     return (
       <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -75,24 +89,31 @@ export function Header() {
           </Link>
           <nav className="hidden items-center gap-5 md:flex">
             {adminLinks.main.map(l => <Link key={l.href} href={l.href} className="text-sm transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
-            <div className="group relative">
-              <button className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]">
-                More <ChevronDown className="h-3 w-3" />
+            <div className="group/more relative">
+              <button className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--accent)]" aria-label="More">
+                More <ChevronDown className="h-3 w-3 transition-transform group-hover/more:rotate-180" />
               </button>
-              <div className="invisible absolute right-0 top-full z-50 mt-1 w-56 origin-top-right scale-95 rounded-xl border border-[var(--border)] bg-[var(--background)] p-2 opacity-0 shadow-2xl transition-all group-hover:visible group-hover:scale-100 group-hover:opacity-100">
-                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Content</p>
-                {adminLinks.content.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
-                <div className="my-1 border-t border-[var(--border)]" />
-                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Manage</p>
-                {adminLinks.manage.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
-                <div className="my-1 border-t border-[var(--border)]" />
-                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">League</p>
-                {adminLinks.league.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
-                <div className="my-1 border-t border-[var(--border)]" />
-                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">System</p>
-                {adminLinks.system.map(l => <Link key={l.href} href={l.href} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]">{l.label}</Link>)}
-                <div className="my-1 border-t border-[var(--border)]" />
-                <Link href="/" className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[var(--accent)] transition-colors hover:bg-[var(--muted)]">View Site</Link>
+              <div className="invisible absolute right-0 top-full z-50 origin-top-right scale-95 pt-2 opacity-0 transition-all group-hover/more:visible group-hover/more:scale-100 group-hover/more:opacity-100">
+                <div className="max-h-[70vh] w-[min(92vw,42rem)] overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--background)] p-3 shadow-2xl" onWheel={(e) => e.stopPropagation()}>
+                  {adminGroups.map((g, gi) => (
+                    <div key={g.title}>
+                      {gi > 0 && <div className="my-1.5 border-t border-[var(--border)]" />}
+                      <p className="px-2 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">{g.title}</p>
+                      <div className="grid gap-0.5 sm:grid-cols-2">
+                        {g.items.map(l => (
+                          <Link key={l.href} href={l.href} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]">
+                            <l.icon className="h-4 w-4 shrink-0 text-[var(--muted-foreground)]" />
+                            {l.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="my-1.5 border-t border-[var(--border)]" />
+                  <Link href="/" className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--accent)] transition-colors hover:bg-[var(--muted)]">
+                    View Site
+                  </Link>
+                </div>
               </div>
             </div>
           </nav>
@@ -108,18 +129,13 @@ export function Header() {
             <div className="flex flex-col gap-3 text-sm font-medium">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Main</p>
               {adminLinks.main.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
-              <div className="border-t border-[var(--border)]" />
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Content</p>
-              {adminLinks.content.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
-              <div className="border-t border-[var(--border)]" />
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Manage</p>
-              {adminLinks.manage.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
-              <div className="border-t border-[var(--border)]" />
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">League</p>
-              {adminLinks.league.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
-              <div className="border-t border-[var(--border)]" />
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">System</p>
-              {adminLinks.system.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">{l.label}</Link>)}
+              {adminGroups.map(g => (
+                <div key={g.title}>
+                  <div className="border-t border-[var(--border)]" />
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">{g.title}</p>
+                  {g.items.map(l => <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="flex items-center gap-2 transition-colors hover:text-[var(--accent)]"><l.icon className="h-3.5 w-3.5 text-[var(--muted-foreground)]" />{l.label}</Link>)}
+                </div>
+              ))}
               <div className="border-t border-[var(--border)]" />
               <Link href="/" onClick={() => setOpen(false)} className="text-[var(--accent)] transition-colors hover:text-[var(--accent)]">View Site</Link>
             </div>
