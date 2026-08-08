@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ThemeToggle } from "./ThemeToggle"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake } from "lucide-react"
+import { Menu, X, Search, ChevronDown, Sword, Crosshair, Star, Bell, Trophy, Brain, Award, MapPin, Image, History, Info, Mail, HelpCircle, Users, TrendingUp, Gamepad2, Calendar, Shield, Newspaper, MessageSquare, Sparkles, Map, ArrowLeftRight, Crown, Handshake, BarChart3 } from "lucide-react"
 import { NotificationBell } from "./NotificationBell"
 
 export function Header() {
@@ -172,6 +172,7 @@ export function Header() {
                 <Link href="/field-analysis" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Map className="h-3.5 w-3.5" /> Field Analysis</Link>
                 <Link href="/toss-analysis" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Gamepad2 className="h-3.5 w-3.5" /> Toss Analysis</Link>
                 <Link href="/teams/stats" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><TrendingUp className="h-3.5 w-3.5" /> Team Stats</Link>
+                <Link href="/stats" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><BarChart3 className="h-3.5 w-3.5" /> All-Time Stats</Link>
                 <Link href="/performers" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Top Performers</Link>
                 <Link href="/records" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Records</Link>
 
@@ -228,6 +229,7 @@ export function Header() {
             <Link href="/field-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Field Analysis</Link>
             <Link href="/toss-analysis" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
             <Link href="/teams/stats" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Team Stats</Link>
+            <Link href="/stats" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">All-Time Stats</Link>
             <Link href="/performers" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Top Performers</Link>
             <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Explore</p>
             <Link href="/seasons" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Seasons</Link>

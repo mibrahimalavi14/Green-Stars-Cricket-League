@@ -33,6 +33,7 @@ export function Footer() {
             <div className="flex flex-col gap-2 text-sm text-[var(--muted-foreground)]">
               <Link href="/teams" className="transition-colors hover:text-[var(--accent)]">Teams</Link>
               <Link href="/teams/stats" className="transition-colors hover:text-[var(--accent)]">Team Stats</Link>
+              <Link href="/stats" className="transition-colors hover:text-[var(--accent)]">All-Time Stats</Link>
               <Link href="/fixtures" className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
               <Link href="/points-table" className="transition-colors hover:text-[var(--accent)]">Standings</Link>
               <Link href="/field-analysis" className="transition-colors hover:text-[var(--accent)]">Field Analysis</Link>

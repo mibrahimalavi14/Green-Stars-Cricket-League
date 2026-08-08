@@ -19,11 +19,12 @@ async function HomePage() {
   const season = await prisma.season.findFirst({ where: { isActive: true } })
   const [allTeamsData, matches, news, winners, matchCount, players] = await Promise.all([
     prisma.team.findMany({
+      where: { seasonId: season?.id },
       include: { players: true, _count: { select: { players: true } } },
     }),
     prisma.match.findMany({
       take: 6,
-      where: { status: { not: "completed" } },
+      where: { status: { not: "completed" }, seasonId: season?.id },
       orderBy: { date: "asc" },
       include: { team1: true, team2: true },
     }),
@@ -33,13 +34,14 @@ async function HomePage() {
       include: { teams: true },
       orderBy: { year: "desc" },
     }),
-    prisma.match.count(),
+    prisma.match.count({ where: { seasonId: season?.id } }),
     season ? prisma.player.findMany({ where: { team: { seasonId: season.id } }, include: { team: true } }) : Promise.resolve([]),
   ])
 
   const teams = allTeamsData.slice(0, 8)
   const teamCount = allTeamsData.length
   const playerCount = allTeamsData.reduce((a, b) => a + b._count.players, 0)
+  const seasonRuns = players.reduce((a, p) => a + p.runs, 0)
 
   const latestNews = news.length > 0 ? news[0] : null
 
@@ -132,11 +134,12 @@ async function HomePage() {
       <FadeInView>
       <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {[
               { label: "Teams", value: teamCount, icon: Users },
               { label: "Players", value: playerCount, icon: Trophy },
               { label: "Matches", value: matchCount, icon: Calendar },
+              { label: "Season Runs", value: seasonRuns, icon: Award },
               { label: "Season", value: season?.year || 2026, icon: Trophy },
               { label: "Founded", value: "Haripur", icon: MapPin },
             ].map((s) => (
@@ -204,7 +207,7 @@ async function HomePage() {
         <section className="py-12">
           <div className="mx-auto max-w-7xl px-4">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Upcoming Matches</h2>
+              <h2 className="text-2xl font-bold">Upcoming Matches{season ? ` — ${season.name}` : ""}</h2>
               <Link href="/fixtures" className="text-sm text-[var(--accent)] hover:underline">View All</Link>
             </div>
             {matches[0] && (
@@ -228,7 +231,7 @@ async function HomePage() {
       <section className="content-visibility-auto border-t border-[var(--border)] bg-[var(--card)] py-12">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Teams</h2>
+            <h2 className="text-2xl font-bold">Teams{season ? ` — ${season.name}` : ""}</h2>
             <Link href="/teams" className="text-sm text-[var(--accent)] hover:underline">View All</Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">

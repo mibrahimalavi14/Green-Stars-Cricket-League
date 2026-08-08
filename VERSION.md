@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.19 |
+| **Current Version** | v1.3.20 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.19-season1` (reviews below form) |
+| **Current Release Tag** | `v1.3.20-season1` (all-time & season-wise stats + latest-season home) |
 
 ## Runtime
 
@@ -55,6 +55,7 @@
 | v1.3.17 | Aug 2026 | **Change** — Contact form me OTP ab sirf **Sponsorship** ke liye required hai. General Inquiry messages bina OTP ke turant submit ho jaati hain (sirf reCAPTCHA). OTP flow (email verification) sponsorship submissions ke liye hamesha ki tarah raha. |
 | v1.3.18 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Home page "Our Partners" ke "Contact us" link par click karne se seedha **Sponsorship contact form** khulta hai (`/contact?purpose=sponsorship`). Admin me **delete buttons** add: Contact Messages, News, Seasons, Predictions, Match Notes (clear). Saari delete APIs `isAdminAuthenticated()` se protected hain. |
 | v1.3.19 | Aug 2026 | **Change** — Home page Reviews section me ab review cards **form ke neche** dikhte hain (pehle upar the). Review submission par admin ko email me **poora message** (comment) detail ke saath milta hai. |
+| v1.3.20 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Naya **All-Time Stats** page (`/stats`): saare seasons mila kar total runs, balls faced, fours, sixes, fifties, hundreds, wickets, balls bowled, runs conceded, catches, stumpings, run outs, wides, no balls, averages/rates — aur **har season ka alag alag** wahi totals (season-wise table). Home page par Teams/Players/Matches counts aur Upcoming Matches/Teams sections ab **latest (running) season** ki cheezein dikhaate hain, aur stats row me naya **Season Runs** card. |
 
 ## Versioning Policy (Semantic)
 
@@ -88,6 +89,7 @@
 | v1.3.17-season1 | Change — contact OTP only for sponsorship |
 | v1.3.18-season1 | Feature — home sponsors link + admin delete buttons |
 | v1.3.19-season1 | Change — reviews shown below the form |
+| v1.3.20-season1 | Feature — all-time & season-wise totals page + latest-season home sections |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

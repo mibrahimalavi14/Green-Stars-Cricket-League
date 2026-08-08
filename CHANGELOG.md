@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.3.20-season1
+
+All-Time Stats page + latest-season home sections.
+
+Added
+- Naya **All-Time Stats** page (`/stats`, header "More → Stats & Analysis" + footer me link):
+  - **All-Time Totals** — saare seasons combined: player appearances, runs, balls faced, fours, sixes, fifties, hundreds, average, strike rate, balls per boundary, not outs, ducks, dismissals, wickets, balls bowled, runs conceded, maidens, economy, 5w/4w hauls, hattricks, catches, stumpings, run outs, wides, no balls, boundaries.
+  - **Season-Wise Totals** — har season ka alag table (runs, balls, fours, sixes, 50s/100s, avg, SR, wickets, BB, RC, econ, catches, stumpings, run outs); ACTIVE season highlighted.
+  - Aggregate `Player` stats se banti hain (official workspace only), 60s revalidate.
+
+Changed
+- Home page stats row (`Teams / Players / Matches / Season / Founded`) ab **latest season** ka data dikhaati hai (teams/players/matches counts season-specific) + naya **Season Runs** card.
+- Home **Upcoming Matches** ab sirf **latest season** ke matches dikhaata hai (`where: { status, seasonId }`).
+- Home **Teams** section ab sirf **latest season** ke teams dikhaata hai; dono sections ke headings me season ka naam.
+- Page `revalidate = 60` (records page jaisa pattern).
+
+Unchanged
+- No DB schema, scoring engine, statistics formula changes.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.19-season1
 
 Reviews — cards form ke neche.
