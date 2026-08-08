@@ -182,6 +182,7 @@ export function Header() {
                 <Link href="/venues" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><MapPin className="h-3.5 w-3.5" /> Venues</Link>
                 <Link href="/gallery" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Image className="h-3.5 w-3.5" /> Gallery</Link>
                 <Link href="/hall-of-fame" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Trophy className="h-3.5 w-3.5" /> Hall of Fame</Link>
+                <Link href="/management" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crown className="h-3.5 w-3.5" /> Management</Link>
 
                 <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Info</p>
                 <Link href="/about" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Info className="h-3.5 w-3.5" /> About</Link>
@@ -237,6 +238,7 @@ export function Header() {
             <Link href="/venues" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Venues</Link>
             <Link href="/gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Gallery</Link>
             <Link href="/hall-of-fame" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Hall of Fame</Link>
+            <Link href="/management" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Management</Link>
             <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Info</p>
             <Link href="/about" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">About</Link>
             <Link href="/contact" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Contact</Link>

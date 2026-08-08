@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.21-season1
+
+Management page + smaller chairman image.
+
+Added
+- Naya **Management** page (`/management`): GSCL management members ke naam, roles aur pictures wale cards (abhi Chairman included; mazeed members jald add honge).
+- Header "More → Explore" me **Management** link (desktop + mobile) aur Footer Quick Links me bhi.
+
+Changed
+- About page par chairman ki picture **choti** kar di gayi — pehle poori width bari (600px square) thi, ab medium circular avatar (~192px) `ring` ke saath.
+
+Unchanged
+- No DB schema, scoring engine, statistics formula changes.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.20-season1
 
 All-Time Stats page + latest-season home sections.
