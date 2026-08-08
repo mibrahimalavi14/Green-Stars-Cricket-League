@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.21 |
+| **Current Version** | v1.3.22 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.21-season1` (management section + smaller chairman image) |
+| **Current Release Tag** | `v1.3.22-season1` (chairman full photo + chairman message) |
 
 ## Runtime
 
@@ -57,6 +57,7 @@
 | v1.3.19 | Aug 2026 | **Change** — Home page Reviews section me ab review cards **form ke neche** dikhte hain (pehle upar the). Review submission par admin ko email me **poora message** (comment) detail ke saath milta hai. |
 | v1.3.20 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Naya **All-Time Stats** page (`/stats`): saare seasons mila kar total runs, balls faced, fours, sixes, fifties, hundreds, wickets, balls bowled, runs conceded, catches, stumpings, run outs, wides, no balls, averages/rates — aur **har season ka alag alag** wahi totals (season-wise table). Home page par Teams/Players/Matches counts aur Upcoming Matches/Teams sections ab **latest (running) season** ki cheezein dikhaate hain, aur stats row me naya **Season Runs** card. |
 | v1.3.21 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Naya **Management** page (`/management`): GSCL ke management members ke naam, roles aur pictures wale cards (abhi Chairman included; mazeed members jald add honge). Header "More → Explore" + Footer me links. About page par chairman ki picture **choti (medium circular)** kar di gayi — pehle poori width bari thi. |
+| v1.3.22 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Chairman ki **poori picture** ab har jagah dikhti hai (Management page, About page — pehle circular crop me kat rahi thi). Home page par naya **Chairman's Message** section: lamba message + neche naam **Hafiz Muhammad Ibrahim Alavi** + signature (abhi cursive naam; asli signature image `/images/optimized/signature.webp` daalte hi khud lag jayega). FAQ me "Chairman Muhammad Ibrahim Alavi" → **"Muhammad Ibrahim Alavi"** kar diya (Chairman remove). |
 
 ## Versioning Policy (Semantic)
 
@@ -92,6 +93,7 @@
 | v1.3.19-season1 | Change — reviews shown below the form |
 | v1.3.20-season1 | Feature — all-time & season-wise totals page + latest-season home sections |
 | v1.3.21-season1 | Feature — Management page (members + photos) + smaller chairman image on About |
+| v1.3.22-season1 | Feature — chairman full photo everywhere + Chairman's Message on home + FAQ fix |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

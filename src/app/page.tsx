@@ -1,5 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
+import fs from "fs"
+import path from "path"
 import { prisma } from "@/lib/prisma"
 
 import { MatchCard } from "@/components/MatchCard"
@@ -42,6 +44,7 @@ async function HomePage() {
   const teamCount = allTeamsData.length
   const playerCount = allTeamsData.reduce((a, b) => a + b._count.players, 0)
   const seasonRuns = players.reduce((a, p) => a + p.runs, 0)
+  const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.webp"))
 
   const latestNews = news.length > 0 ? news[0] : null
 
@@ -201,6 +204,63 @@ async function HomePage() {
         </section>
         </FadeInView>
       )}
+
+      <FadeInView>
+      <section className="content-visibility-auto border-t border-[var(--border)] bg-[var(--card)] py-12">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold sm:text-3xl">Chairman&apos;s Message</h2>
+            <p className="mt-1 text-sm text-[var(--muted-foreground)]">A word from the heart of GSCL</p>
+          </div>
+          <div className="grid items-start gap-8 md:grid-cols-5">
+            <div className="flex justify-center md:col-span-2">
+              <Image
+                src="/images/optimized/chairman.webp"
+                alt="Chairman Hafiz Muhammad Ibrahim Alavi"
+                width={1044}
+                height={1507}
+                className="h-auto w-56 rounded-xl shadow-lg md:w-64"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
+                Assalam-o-Alaikum, cricket fans.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                When I look at the young cricketers of Haripur, I see the future of Pakistan cricket.
+                Green Stars Cricket League was born from a simple belief — that every talented young
+                player, no matter where they come from, deserves a fair chance to shine.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                The energy, the passion and the discipline you bring to every match fills me with pride.
+                This league is not just about winning matches or lifting trophies; it is about building
+                character, learning teamwork, and chasing dreams with heart. Every run you score and every
+                wicket you take writes a new chapter in the story of GSCL.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                I want to thank every player, coach, official, sponsor and supporter who makes this dream
+                possible. This is your league, and together we will take it to new heights.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                May Allah bless our league and our community. Let us keep playing with passion,
+                sportsmanship and respect.
+              </p>
+              <div className="mt-8 border-t border-[var(--border)] pt-5 text-right">
+                <p className="text-sm font-bold">Hafiz Muhammad Ibrahim Alavi</p>
+                <p className="text-xs text-[var(--muted-foreground)]">Chairman, Green Stars Cricket League</p>
+                {hasSignature ? (
+                  <img src="/images/optimized/signature.webp" alt="Signature of Hafiz Muhammad Ibrahim Alavi" className="mt-3 ml-auto h-14 w-auto object-contain opacity-90" />
+                ) : (
+                  <p className="mt-4 font-serif text-xl italic text-gscl-gold" style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive" }}>
+                    Hafiz Muhammad Ibrahim Alavi
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </FadeInView>
 
       {matches.length > 0 && (
         <FadeInView>

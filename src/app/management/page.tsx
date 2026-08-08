@@ -42,17 +42,17 @@ export default function ManagementPage() {
             className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-colors hover:bg-[var(--muted)]"
           >
             {m.photo ? (
-              <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-[var(--muted)] ring-2 ring-gscl-gold/40">
+              <div className="mx-auto mb-4 w-44">
                 <Image
                   src={m.photo}
                   alt={m.name}
-                  width={128}
-                  height={128}
-                  className="h-full w-full object-cover"
+                  width={1044}
+                  height={1507}
+                  className="h-auto w-full rounded-xl object-cover shadow-md"
                 />
               </div>
             ) : (
-              <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-[var(--muted)] ring-2 ring-[var(--accent)]/30">
+              <div className="mx-auto mb-4 flex h-44 w-44 items-center justify-center rounded-2xl bg-[var(--muted)] ring-2 ring-[var(--accent)]/30">
                 <User className="h-12 w-12 text-[var(--muted-foreground)]" />
               </div>
             )}

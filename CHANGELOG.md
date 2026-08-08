@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.3.22-season1
+
+Chairman full photo + Chairman's Message + FAQ fix.
+
+Changed
+- Chairman ki **poori picture** ab har jagah dikhti hai — Management page aur About page (pehle circular crop me photo kat rahi thi). Photo portrait hai, ab bina crop ke full dikhta hai.
+- FAQ: "Who manages the league?" me **"Chairman Muhammad Ibrahim Alavi"** → **"Muhammad Ibrahim Alavi"** (Chairman word remove).
+
+Added
+- Home page par naya **Chairman's Message** section: chairman ki full photo + lamba message + neche naam **Hafiz Muhammad Ibrahim Alavi** + signature.
+- Signature: abhi cursive italic naam placeholder hai; asli signature image `/images/optimized/signature.webp` par rakhne se khud automatically aajayegi.
+
+Unchanged
+- No DB schema, scoring engine, statistics formula changes.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.21-season1
 
 Management page + smaller chairman image.

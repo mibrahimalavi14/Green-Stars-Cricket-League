@@ -29,10 +29,10 @@ function AboutPage() {
             <Image
               src="/images/optimized/chairman.webp"
               alt="Chairman Muhammad Ibrahim Alavi"
-              width={240}
-              height={240}
+              width={1044}
+              height={1507}
               priority
-              className="relative mx-auto h-48 w-48 rounded-full object-cover shadow-lg ring-4 ring-gscl-gold/50 md:h-56 md:w-56"
+              className="relative mx-auto h-auto w-52 rounded-xl shadow-lg md:w-60"
             />
           </div>
           <div className="p-6">

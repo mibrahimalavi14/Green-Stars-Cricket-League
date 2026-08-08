@@ -13,7 +13,7 @@ const faqs = [
   { q: "Can I contact the league management?", a: "Yes, use the Contact page to send us a message. You can also reach us via email or social media." },
   { q: "How do I leave a review?", a: "Scroll to the Reviews section on the home page, rate us out of 5 stars, and leave your comment. Reviews are moderated before being published." },
   { q: "Is the website available offline?", a: "Yes! GSCL is a Progressive Web App (PWA). You can install it on your device and access cached pages even without internet." },
-  { q: "Who manages the league?", a: "GSCL is founded and managed by Chairman Muhammad Ibrahim Alavi and a dedicated team of cricket enthusiasts." },
+  { q: "Who manages the league?", a: "GSCL is founded and managed by Muhammad Ibrahim Alavi and a dedicated team of cricket enthusiasts." },
 ]
 
 export default function FAQPage() {
