@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.23-season1
+
+Chairman signature image added.
+
+Added
+- Chairman ki **asli signature** ab Chairman's Message section me naam ke neche dikhti hai.
+- Source photo (`Chairman's Signature.jpg` — OneDrive/Documents) me se sirf signature crop kar ke **transparent background wali** `public/images/optimized/signature.png` (500x111, ~50 KB) banayi gayi — pehle cursive italic naam placeholder tha.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.22-season1
 
 Chairman full photo + Chairman's Message + FAQ fix.

@@ -44,7 +44,7 @@ async function HomePage() {
   const teamCount = allTeamsData.length
   const playerCount = allTeamsData.reduce((a, b) => a + b._count.players, 0)
   const seasonRuns = players.reduce((a, p) => a + p.runs, 0)
-  const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.webp"))
+  const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.png"))
 
   const latestNews = news.length > 0 ? news[0] : null
 
@@ -249,7 +249,7 @@ async function HomePage() {
                 <p className="text-sm font-bold">Hafiz Muhammad Ibrahim Alavi</p>
                 <p className="text-xs text-[var(--muted-foreground)]">Chairman, Green Stars Cricket League</p>
                 {hasSignature ? (
-                  <img src="/images/optimized/signature.webp" alt="Signature of Hafiz Muhammad Ibrahim Alavi" className="mt-3 ml-auto h-14 w-auto object-contain opacity-90" />
+                  <img src="/images/optimized/signature.png" alt="Signature of Hafiz Muhammad Ibrahim Alavi" className="mt-3 ml-auto h-16 w-auto object-contain opacity-90" loading="lazy" />
                 ) : (
                   <p className="mt-4 font-serif text-xl italic text-gscl-gold" style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive" }}>
                     Hafiz Muhammad Ibrahim Alavi
