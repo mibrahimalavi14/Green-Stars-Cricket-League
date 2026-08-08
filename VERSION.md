@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.24 |
+| **Current Version** | v1.3.25 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.24-season1` (professional white-bg signature) |
+| **Current Release Tag** | `v1.3.25-season1` (signature crop fix — full "I" + white bg) |
 
 ## Runtime
 
@@ -60,6 +60,7 @@
 | v1.3.22 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Chairman ki **poori picture** ab har jagah dikhti hai (Management page, About page — pehle circular crop me kat rahi thi). Home page par naya **Chairman's Message** section: lamba message + neche naam **Hafiz Muhammad Ibrahim Alavi** + signature (abhi cursive naam; asli signature image `/images/optimized/signature.webp` daalte hi khud lag jayega). FAQ me "Chairman Muhammad Ibrahim Alavi" → **"Muhammad Ibrahim Alavi"** kar diya (Chairman remove). |
 | v1.3.23 | Aug 2026 | **Feature release (freeze exception, explicitly requested)** — Chairman ki **asli signature image** dhoond kar website par lagayi gayi. Photo (`Chairman's Signature.jpg`) me se sirf signature crop karke transparent background wali `public/images/optimized/signature.png` (500x111) banayi gayi — Chairman's Message section me naam ke neche ab asli signature dikhta hai. |
 | v1.3.24 | Aug 2026 | **Change (freeze exception, explicitly requested)** — Signature ab **clean white background** par hai, crisp blue ink ke saath (professional look). Image se transparent ki jagah white bg banayi gayi, contrast enhance kiya, aur page par rounded corners + subtle shadow se display hoti hai. |
+| v1.3.25 | Aug 2026 | **Fix** — Signature crop me **pehla "I" (Ibrahim) kata** hua tha — crop left margin se zyada tight tha (ink `x=322` se start hoti thi lekin crop `x=379` se). Ab signature **poori** li gayi hai (full "I" + zaroori breathing margin), white background pure hai, ink crisp navy blue me hai, aur speckle noise hataya gaya. `signature.png` (560x136, ~14 KB). |
 
 ## Versioning Policy (Semantic)
 
@@ -98,6 +99,7 @@
 | v1.3.22-season1 | Feature — chairman full photo everywhere + Chairman's Message on home + FAQ fix |
 | v1.3.23-season1 | Feature — chairman signature image (transparent) added under the message |
 | v1.3.24-season1 | Change — signature now on clean white background, crisp + professional |
+| v1.3.25-season1 | Fix — signature crop fixed (first "I" no longer cut off) |
 | v1.3.10+ | Future bug/security fixes for v1.3.x |
 | v2.0.0 | Major Season 2 features |
 

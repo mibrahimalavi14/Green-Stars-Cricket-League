@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.3.25-season1
+
+Signature crop fix — full "I".
+
+Fixed
+- Signature ke **pehle "I" (Ibrahim) ka hissa crop me kat** gaya tha — signature ki ink `x=322` (original px) se start hoti hai lekin purani crop `x=379` se, isliye first letter ka start missing tha. Ab signature **poori** width se crop hoti hai (full "I" + proper breathing margin).
+- Background ab **pure white** (corners 255,255,255), ink **crisp navy blue**, aur speckle noise removed.
+- `signature.png` (560x136, ~14 KB).
+
+Changed
+- Home page display unchanged (rounded corners + subtle shadow).
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.24-season1
 
 Professional white-background signature.
