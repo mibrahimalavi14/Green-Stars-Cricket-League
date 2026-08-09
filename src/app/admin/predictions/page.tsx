@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { Trophy, Users, Mail, Calendar } from "lucide-react"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
+import { formatDateTimePKT } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -66,7 +67,7 @@ export default async function AdminPredictionsPage() {
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Predicted Team</th>
-                <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Voted on</th>
                 <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -76,7 +77,7 @@ export default async function AdminPredictionsPage() {
                   <td className="px-4 py-3">{p.name}</td>
                   <td className="px-4 py-3 text-[var(--muted-foreground)]">{p.email}</td>
                   <td className="px-4 py-3 font-medium text-[var(--accent)]">{teamNames[p.predictedTeamId]}</td>
-                  <td className="px-4 py-3 text-[var(--muted-foreground)]">{new Date(p.createdAt).toLocaleDateString("en-GB")}</td>
+                  <td className="px-4 py-3 text-[var(--muted-foreground)] whitespace-nowrap">{formatDateTimePKT(p.createdAt)}</td>
                   <td className="px-4 py-3"><AdminDeleteButton api="/api/predictions" id={p.id} label="prediction" /></td>
                 </tr>
               ))}

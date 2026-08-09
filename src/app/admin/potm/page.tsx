@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Star, Trophy, Loader2, Medal, Vote, Check } from "lucide-react"
+import { Star, Trophy, Loader2, Medal, Vote, Check, Clock } from "lucide-react"
+import { formatDateTimePKT } from "@/lib/utils"
 
 interface MatchData {
   id: string
@@ -24,10 +25,17 @@ interface PlayerVote {
   votes: number
 }
 
+interface RecentVote {
+  name: string
+  playerName: string
+  createdAt: string
+}
+
 interface MatchVotes {
   match: MatchData
   players: PlayerVote[]
   totalVotes: number
+  recentVotes: RecentVote[]
 }
 
 export default function AdminPotmPage() {
@@ -60,6 +68,7 @@ export default function AdminPotmPage() {
         match: data.match,
         players: data.players,
         totalVotes: data.totalVotes,
+        recentVotes: data.recentVotes || [],
       },
     }))
   }
@@ -226,6 +235,25 @@ export default function AdminPotmPage() {
                             </>
                           )}
                         </div>
+
+                        {mv.recentVotes.length > 0 && (
+                          <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 p-3">
+                            <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
+                              <Clock className="h-3 w-3" /> Recent votes ({mv.recentVotes.length})
+                            </p>
+                            <div className="flex max-h-40 flex-col gap-1.5 overflow-y-auto">
+                              {mv.recentVotes.map((v, i) => (
+                                <div key={i} className="flex items-center justify-between gap-2 text-xs">
+                                  <span className="truncate min-w-0">
+                                    <strong>{v.name}</strong>
+                                    <span className="text-[var(--muted-foreground)]"> voted for {v.playerName}</span>
+                                  </span>
+                                  <span className="shrink-0 text-[var(--muted-foreground)]">{formatDateTimePKT(v.createdAt)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>

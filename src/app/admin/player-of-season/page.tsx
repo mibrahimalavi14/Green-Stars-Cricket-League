@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Trophy, Loader2, Vote, Crown, Check } from "lucide-react"
+import { Trophy, Loader2, Vote, Crown, Check, Clock } from "lucide-react"
+import { formatDateTimePKT } from "@/lib/utils"
 
 interface SeasonData {
   id: string
@@ -29,6 +30,7 @@ interface Nominee {
 interface SeasonVotes {
   nominees: Nominee[]
   totalVotes: number
+  recentVotes: { name: string; playerName: string; createdAt: string }[]
 }
 
 interface AwardInfo {
@@ -66,7 +68,7 @@ export default function AdminPlayerOfSeasonPage() {
     const votes = await votesRes.json()
     setSeasonVotes(prev => ({
       ...prev,
-      [seasonId]: { nominees: votes.nominees, totalVotes: votes.totalVotes },
+      [seasonId]: { nominees: votes.nominees, totalVotes: votes.totalVotes, recentVotes: votes.recentVotes || [] },
     }))
     if (awardsRes.ok) {
       const awards = await awardsRes.json()
@@ -233,6 +235,25 @@ export default function AdminPlayerOfSeasonPage() {
                             </>
                           )}
                         </div>
+
+                        {sv.recentVotes.length > 0 && (
+                          <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 p-3">
+                            <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
+                              <Clock className="h-3 w-3" /> Recent votes ({sv.recentVotes.length})
+                            </p>
+                            <div className="flex max-h-40 flex-col gap-1.5 overflow-y-auto">
+                              {sv.recentVotes.map((v, i) => (
+                                <div key={i} className="flex items-center justify-between gap-2 text-xs">
+                                  <span className="truncate min-w-0">
+                                    <strong>{v.name}</strong>
+                                    <span className="text-[var(--muted-foreground)]"> voted for {v.playerName}</span>
+                                  </span>
+                                  <span className="shrink-0 text-[var(--muted-foreground)]">{formatDateTimePKT(v.createdAt)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>

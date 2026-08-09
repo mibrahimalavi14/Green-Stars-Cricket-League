@@ -6,6 +6,7 @@ import { MATCH_CONFIG } from "@/lib/config"
 import { createHash } from "crypto"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { notifyAdmin } from "@/lib/email"
+import { formatDateTimePKT } from "@/lib/utils"
 
 const TIME_LIMIT_MS = MATCH_CONFIG.seasonQuizTimeLimitSeconds * 1000
 const GRACE_MS = MATCH_CONFIG.seasonQuizGraceSeconds * 1000
@@ -102,6 +103,7 @@ export async function POST(req: Request) {
       { label: "Name", value: cleanName },
       { label: "Email", value: cleanEmail },
       { label: "Score", value: `${score} / ${totalPoints}` },
+      { label: "Time", value: formatDateTimePKT(new Date()) },
     ],
   })
 

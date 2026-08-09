@@ -2,7 +2,7 @@
 
 ## v1.3.32-season1
 
-Vote timestamps shown everywhere.
+Vote timestamps shown everywhere (public + admin + email).
 
 Changed
 - **POTM** (`/matches/[id]/potm`): `You voted for X` ab saath me date + time dikhata hai (`· 8 Aug 2026, 5:12 PM`).
@@ -10,11 +10,14 @@ Changed
 - **Match Quiz** (`/quiz`): already-attempted state ab `Voted on date/time` dikhata hai.
 - **Season Quiz** (`/quiz`): already-attempted state ab `Attempted on date/time` dikhata hai.
 - **Predictions** (`/predictions`): vote hone ke baad success screen par relative time (`· 2m ago`); agar email already voted ho to error ke neche `Voted 3h ago` bhi dikhta hai.
+- **Admin**: POTM + Player of the Season admin panels me har match/season ka **Recent votes** list (kis ne, kis ko, kab vote kiya — name + date + time). Predictions admin table ab date ke saath **time** bhi dikhata hai.
+- **Email alerts**: har vote/quiz/prediction notification me ab **Time** row hota hai (PKT).
 
 Internal
-- Naya shared `formatDateTime()` util (`src/lib/utils.ts`).
-- POTM + Player of the Season APIs ab `userVote` me `createdAt` return karte hain.
+- Naya shared `formatDateTime()` / `formatDateTimePKT()` util (`src/lib/utils.ts`).
+- POTM + Player of the Season APIs ab `userVote` me `createdAt` return karte hain, aur `recentVotes` (name + player + time, bina email ke).
 - Season Quiz API ab attempt me `createdAt` (`_max`) return karta hai.
+- Saari vote notification emails me Time row (`formatDateTimePKT`).
 
 Verified
 - `npx tsc --noEmit` + `npm run build` pass.

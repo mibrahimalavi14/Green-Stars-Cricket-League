@@ -5,6 +5,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { potmVoteSchema } from "@/lib/validation"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { notifyAdmin } from "@/lib/email"
+import { formatDateTimePKT } from "@/lib/utils"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -89,7 +90,20 @@ export async function GET(req: Request) {
 
   const totalVotes = Object.values(votesMap).reduce((a, b) => a + b, 0)
 
-  return NextResponse.json({ match, players, totalVotes, userVote })
+  const recentVotes = await prisma.potmVote.findMany({
+    where: { matchId },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    include: { player: { select: { name: true } } },
+  })
+
+  return NextResponse.json({
+    match,
+    players,
+    totalVotes,
+    userVote,
+    recentVotes: recentVotes.map(v => ({ name: v.name, playerName: v.player.name, createdAt: v.createdAt.toISOString() })),
+  })
 }
 
 export async function POST(req: Request) {
@@ -148,6 +162,7 @@ export async function POST(req: Request) {
           { label: "Email", value: email },
           { label: "Player", value: player?.name || playerId },
           { label: "Match", value: match?.matchNo ? `Match ${match.matchNo}` : matchId },
+          { label: "Time", value: formatDateTimePKT(vote.createdAt) },
         ],
       })
     )

@@ -6,6 +6,7 @@ import { predictionSchema } from "@/lib/validation"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { notifyAdmin } from "@/lib/email"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { formatDateTimePKT } from "@/lib/utils"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -105,6 +106,7 @@ export async function POST(req: Request) {
           { label: "Email", value: email },
           { label: "Predicted Champion", value: team?.name || predictedTeamId },
           { label: "Season", value: season.name },
+          { label: "Time", value: formatDateTimePKT(pred.createdAt) },
         ],
       })
     )

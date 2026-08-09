@@ -5,6 +5,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { quizAttemptSchema } from "@/lib/validation"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { notifyAdmin } from "@/lib/email"
+import { formatDateTimePKT } from "@/lib/utils"
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
 
   const correct = selectedAnswer === quiz.correctAnswer
 
-  await prisma.quizAttempt.create({
+  const attempt = await prisma.quizAttempt.create({
     data: {
       quizId,
       name,
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
           { label: "Quiz", value: q?.question.slice(0, 60) || quizId },
           { label: "Result", value: correct ? "Correct" : "Incorrect" },
           { label: "Points", value: String(correct ? quiz.pointValue : 0) },
+          { label: "Time", value: formatDateTimePKT(attempt.createdAt) },
         ],
       })
     )

@@ -6,6 +6,7 @@ import { playerOfSeasonVoteSchema } from "@/lib/validation"
 import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { notifyAdmin } from "@/lib/email"
+import { formatDateTimePKT } from "@/lib/utils"
 
 interface Nominee {
   id: string
@@ -112,11 +113,19 @@ export async function GET(req: Request) {
     if (existing) userVote = { playerId: existing.playerId, playerName: existing.player.name, createdAt: existing.createdAt.toISOString() }
   }
 
+  const recentVotes = await prisma.playerOfSeasonVote.findMany({
+    where: { seasonId: season.id },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    include: { player: { select: { name: true } } },
+  })
+
   return NextResponse.json({
     season: { id: season.id, name: season.name, year: season.year },
     nominees,
     totalVotes,
     userVote,
+    recentVotes: recentVotes.map(v => ({ name: v.name, playerName: v.player.name, createdAt: v.createdAt.toISOString() })),
   })
 }
 
@@ -178,6 +187,7 @@ export async function POST(req: Request) {
           { label: "Email", value: email },
           { label: "Player", value: player?.name || playerId },
           { label: "Season", value: season?.name || seasonId },
+          { label: "Time", value: formatDateTimePKT(vote.createdAt) },
         ],
       })
     )
