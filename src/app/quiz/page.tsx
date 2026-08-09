@@ -87,7 +87,13 @@ export default function QuizPage() {
         applyLoggedIn(data.user)
       } else if (localStorage.getItem("quiz_verified") === "session") {
         localStorage.removeItem("quiz_verified")
+        localStorage.removeItem("quiz_name")
+        localStorage.removeItem("quiz_email")
         setSqVerifiedToken("")
+        setSqName("")
+        setSqEmail("")
+        setProgress(null)
+        setChallenges(null)
       }
     } catch {}
   }
