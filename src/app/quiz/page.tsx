@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User, Timer, Sun, CalendarDays, Flame } from "lucide-react"
+import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User, Timer, Sun, CalendarDays, Flame, LogIn, UserPlus, LogOut, KeyRound } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import VoteVerification from "@/components/VoteVerification"
 import { formatDateTime } from "@/lib/utils"
@@ -54,6 +54,18 @@ export default function QuizPage() {
   const [challengeError, setChallengeError] = useState("")
   const [challengeAnswers, setChallengeAnswers] = useState<Record<string, string>>({})
 
+  const [authUser, setAuthUser] = useState<any>(null)
+  const [authMode, setAuthMode] = useState<"login" | "signup" | "otp">("login")
+  const [authName, setAuthName] = useState("")
+  const [authEmail, setAuthEmail] = useState("")
+  const [authPassword, setAuthPassword] = useState("")
+  const [authSubmitting, setAuthSubmitting] = useState(false)
+  const [authError, setAuthError] = useState("")
+
+  const [chLb, setChLb] = useState<any[]>([])
+  const [chLbPeriod, setChLbPeriod] = useState<"daily" | "weekly" | "overall">("daily")
+  const [chLbLoading, setChLbLoading] = useState(false)
+
   useEffect(() => {
     const savedEmail = localStorage.getItem("quiz_email")
     const savedName = localStorage.getItem("quiz_name")
@@ -63,7 +75,75 @@ export default function QuizPage() {
     if (savedToken) setSqVerifiedToken(savedToken)
     fetchData()
     fetchSeasonQuiz()
+    fetchChallengeLb("daily")
+    checkSession()
   }, [])
+
+  async function checkSession() {
+    try {
+      const res = await fetch("/api/auth/me")
+      const data = await res.json()
+      if (data?.user) {
+        applyLoggedIn(data.user)
+      } else if (localStorage.getItem("quiz_verified") === "session") {
+        localStorage.removeItem("quiz_verified")
+        setSqVerifiedToken("")
+      }
+    } catch {}
+  }
+
+  function applyLoggedIn(user: { name: string; email: string }) {
+    setAuthUser(user)
+    setSqName(user.name)
+    setSqEmail(user.email)
+    localStorage.setItem("quiz_name", user.name)
+    localStorage.setItem("quiz_email", user.email)
+    const token = "session"
+    setSqVerifiedToken(token)
+    localStorage.setItem("quiz_verified", token)
+  }
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    setAuthUser(null)
+    setSqVerifiedToken("")
+    localStorage.removeItem("quiz_verified")
+    setSqResult(null)
+    setSqStarted(false)
+    setSqExpired(false)
+    setSqAnswers({})
+    setSqUid("")
+    setAuthMode("login")
+    fetchSeasonQuiz()
+    fetchChallengeLb(chLbPeriod)
+  }
+
+  async function handleAuthSubmit() {
+    if (authSubmitting) return
+    setAuthSubmitting(true)
+    setAuthError("")
+    const endpoint = authMode === "signup" ? "/api/auth/signup" : "/api/auth/login"
+    const body = authMode === "signup"
+      ? { name: authName.trim(), email: authEmail.trim(), password: authPassword }
+      : { email: authEmail.trim(), password: authPassword }
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    const data = await res.json()
+    setAuthSubmitting(false)
+    if (!res.ok) {
+      setAuthError(data.error || "Something went wrong")
+      return
+    }
+    applyLoggedIn(data.user)
+    setAuthName("")
+    setAuthEmail("")
+    setAuthPassword("")
+    await Promise.all([fetchSeasonQuiz(), fetchProgress(), fetchChallenges()])
+    fetchChallengeLb(chLbPeriod)
+  }
 
   useEffect(() => {
     if (seasonQuiz?.season?.id) fetchSeasonLeaderboard(seasonQuiz.season.id)
@@ -117,6 +197,19 @@ export default function QuizPage() {
     setChallenges(data)
   }
 
+  async function fetchChallengeLb(period: string) {
+    setChLbLoading(true)
+    try {
+      const email = localStorage.getItem("quiz_email") || ""
+      const res = await fetch(`/api/challenges/leaderboard?period=${period}&email=${encodeURIComponent(email.trim())}`)
+      const data = await res.json()
+      setChLb(Array.isArray(data?.entries) ? data.entries : [])
+    } catch {
+      setChLb([])
+    }
+    setChLbLoading(false)
+  }
+
   async function submitChallenge(challengeId: string, answer: string) {
     if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken) return
     setChallengeSubmitting(true)
@@ -146,6 +239,7 @@ export default function QuizPage() {
     setChallengeError("")
     setChallengeAnswers({})
     await Promise.all([fetchChallenges(), fetchProgress()])
+    fetchChallengeLb(chLbPeriod)
   }
 
   async function submitSeasonQuiz() {
@@ -360,60 +454,190 @@ export default function QuizPage() {
 
       <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
         <h2 className="mb-1 flex items-center gap-2 font-semibold">
-          <User className="h-4 w-4 text-[var(--accent)]" />
-          Your Details
+          <KeyRound className="h-4 w-4 text-[var(--accent)]" />
+          Your Account
         </h2>
         <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-          One attempt per email &mdash; enter your name &amp; email to participate. The Season Quiz gives you {MATCH_CONFIG.seasonQuizTimeLimitSeconds / 60} minutes on the clock
+          Sign in or create a free account to play quizzes &amp; challenges and climb the leaderboard
         </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            value={sqName}
-            onChange={e => {
-              setSqName(e.target.value)
-              localStorage.setItem("quiz_name", e.target.value)
-            }}
-            placeholder="Your name"
-            aria-label="Your name"
-            required
-            className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-          />
-          <input
-            type="email"
-            value={sqEmail}
-            onChange={e => {
-              setSqEmail(e.target.value)
-              setSqVerifiedToken("")
-              localStorage.setItem("quiz_email", e.target.value)
-              localStorage.removeItem("quiz_verified")
-            }}
-            placeholder="Your email (required)"
-            aria-label="Your email"
-            required
-            className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
-          />
-        </div>
-        <div className="mt-3">
-          <VoteVerification
-            email={sqEmail}
-            name={sqName}
-            purpose="quiz"
-            verifiedToken={sqVerifiedToken}
-            onVerified={token => {
-              setSqVerifiedToken(token)
-              localStorage.setItem("quiz_verified", token)
-            }}
-            onReset={() => {
-              setSqVerifiedToken("")
-              localStorage.removeItem("quiz_verified")
-            }}
-          />
-        </div>
-        {sqName.trim() && sqEmail.trim() && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--accent)]/10 px-3 py-2 text-sm">
-            <User className="h-4 w-4 text-[var(--accent)]" />
-            Playing as: <strong>{sqName.trim()}</strong> · one attempt per email
+
+        {authUser ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[var(--accent)]/10 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-2 text-sm">
+              <User className="h-4 w-4 shrink-0 text-[var(--accent)]" />
+              <span className="min-w-0">
+                Logged in as <strong>{authUser.name}</strong> · <span className="break-all text-[var(--muted-foreground)]">{authUser.email}</span>
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex h-10 items-center gap-2 rounded-lg border border-[var(--border)] px-3 text-sm font-medium transition-colors hover:border-[var(--muted-foreground)]"
+            >
+              <LogOut className="h-4 w-4" /> Logout
+            </button>
           </div>
+        ) : (
+          <>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {(["login", "signup", "otp"] as const).map(mode => (
+                <button
+                  key={mode}
+                  onClick={() => {
+                    setAuthMode(mode)
+                    setAuthError("")
+                  }}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    authMode === mode ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "bg-[var(--muted)] hover:bg-[var(--muted)]/70"
+                  }`}
+                >
+                  {mode === "login" ? "Sign In" : mode === "signup" ? "Create Account" : "Email OTP"}
+                </button>
+              ))}
+            </div>
+
+            {authMode === "login" && (
+              <form onSubmit={e => { e.preventDefault(); handleAuthSubmit() }} className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  value={authEmail}
+                  onChange={e => setAuthEmail(e.target.value)}
+                  placeholder="Email"
+                  aria-label="Email"
+                  autoComplete="email"
+                  required
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+                <input
+                  type="password"
+                  value={authPassword}
+                  onChange={e => setAuthPassword(e.target.value)}
+                  placeholder="Password"
+                  aria-label="Password"
+                  autoComplete="current-password"
+                  required
+                  minLength={8}
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+                {authError && <p className="text-sm text-red-500">{authError}</p>}
+                <button
+                  type="submit"
+                  disabled={authSubmitting}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {authSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><LogIn className="h-4 w-4" /> Sign In</>}
+                </button>
+                <p className="text-center text-sm text-[var(--muted-foreground)]">
+                  New here?{" "}
+                  <button type="button" onClick={() => setAuthMode("signup")} className="text-[var(--accent)] hover:underline">
+                    Create an account
+                  </button>
+                </p>
+              </form>
+            )}
+
+            {authMode === "signup" && (
+              <form onSubmit={e => { e.preventDefault(); handleAuthSubmit() }} className="flex flex-col gap-3">
+                <input
+                  value={authName}
+                  onChange={e => setAuthName(e.target.value)}
+                  placeholder="Your name"
+                  aria-label="Your name"
+                  autoComplete="name"
+                  required
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+                <input
+                  type="email"
+                  value={authEmail}
+                  onChange={e => setAuthEmail(e.target.value)}
+                  placeholder="Email"
+                  aria-label="Email"
+                  autoComplete="email"
+                  required
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+                <input
+                  type="password"
+                  value={authPassword}
+                  onChange={e => setAuthPassword(e.target.value)}
+                  placeholder="Password (min 8 characters)"
+                  aria-label="Password"
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                />
+                {authError && <p className="text-sm text-red-500">{authError}</p>}
+                <button
+                  type="submit"
+                  disabled={authSubmitting}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {authSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><UserPlus className="h-4 w-4" /> Create Account</>}
+                </button>
+                <p className="text-center text-sm text-[var(--muted-foreground)]">
+                  Already have an account?{" "}
+                  <button type="button" onClick={() => setAuthMode("login")} className="text-[var(--accent)] hover:underline">
+                    Sign in
+                  </button>
+                </p>
+              </form>
+            )}
+
+            {authMode === "otp" && (
+              <>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <input
+                    value={sqName}
+                    onChange={e => {
+                      setSqName(e.target.value)
+                      localStorage.setItem("quiz_name", e.target.value)
+                    }}
+                    placeholder="Your name"
+                    aria-label="Your name"
+                    required
+                    className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                  />
+                  <input
+                    type="email"
+                    value={sqEmail}
+                    onChange={e => {
+                      setSqEmail(e.target.value)
+                      setSqVerifiedToken("")
+                      localStorage.setItem("quiz_email", e.target.value)
+                      localStorage.removeItem("quiz_verified")
+                    }}
+                    placeholder="Your email (required)"
+                    aria-label="Your email"
+                    required
+                    className="w-full flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm"
+                  />
+                </div>
+                <div className="mt-3">
+                  <VoteVerification
+                    email={sqEmail}
+                    name={sqName}
+                    purpose="quiz"
+                    verifiedToken={sqVerifiedToken}
+                    onVerified={token => {
+                      setSqVerifiedToken(token)
+                      localStorage.setItem("quiz_verified", token)
+                    }}
+                    onReset={() => {
+                      setSqVerifiedToken("")
+                      localStorage.removeItem("quiz_verified")
+                    }}
+                  />
+                </div>
+                {sqName.trim() && sqEmail.trim() && (
+                  <div className="mt-3 flex items-center gap-2 rounded-lg bg-[var(--accent)]/10 px-3 py-2 text-sm">
+                    <User className="h-4 w-4 text-[var(--accent)]" />
+                    Playing as: <strong>{sqName.trim()}</strong> · one attempt per email
+                  </div>
+                )}
+              </>
+            )}
+          </>
         )}
       </div>
 
@@ -502,7 +726,7 @@ export default function QuizPage() {
                   <p className="mb-3 text-sm font-medium">{challenges.daily.question}</p>
                   {!sqVerifiedToken ? (
                     <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
-                      Verify your email above to play the daily challenge.
+                      Sign in or verify your email to play the daily challenge.
                     </p>
                   ) : (
                     <div className="grid gap-2 sm:grid-cols-2">
@@ -548,7 +772,7 @@ export default function QuizPage() {
                       </p>
                     ) : !sqVerifiedToken ? (
                       <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
-                        Verify your email above to play.
+                        Sign in or verify your email to play.
                       </p>
                     ) : (
                       <div className="grid gap-2 sm:grid-cols-2">
@@ -573,6 +797,68 @@ export default function QuizPage() {
           {challengeError && <p className="text-sm text-red-500">{challengeError}</p>}
         </div>
       )}
+
+      <div className="mb-10 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
+          <Trophy className="h-5 w-5 text-[var(--accent)]" /> Challenge Leaderboard
+        </h2>
+        <p className="mb-4 text-sm text-[var(--muted-foreground)]">Top 20 players for today, this week, and overall</p>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {(["daily", "weekly", "overall"] as const).map(p => (
+            <button
+              key={p}
+              onClick={() => {
+                setChLbPeriod(p)
+                fetchChallengeLb(p)
+              }}
+              className={`rounded-full px-4 py-2 text-sm font-medium capitalize transition-colors ${
+                chLbPeriod === p ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "bg-[var(--muted)] hover:bg-[var(--muted)]/70"
+              }`}
+            >
+              {p === "daily" ? "Today" : p === "weekly" ? "This Week" : "Overall"}
+            </button>
+          ))}
+        </div>
+        {chLbLoading ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" />
+          </div>
+        ) : chLb.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--muted-foreground)]">
+            No entries yet — be the first to play!
+          </p>
+        ) : (
+          <div className="space-y-1.5">
+            {chLb.map((a: any) => (
+              <div
+                key={a.uid}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
+                  a.isMe ? "bg-[var(--accent)]/10 ring-1 ring-[var(--accent)]" : "bg-[var(--muted)]"
+                }`}
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center">
+                  {a.rank === 1 ? (
+                    <Medal className="h-5 w-5 text-yellow-500" />
+                  ) : a.rank === 2 ? (
+                    <Medal className="h-5 w-5 text-gray-400" />
+                  ) : a.rank === 3 ? (
+                    <Medal className="h-5 w-5 text-amber-600" />
+                  ) : (
+                    <span className="text-xs font-bold text-[var(--muted-foreground)]">{a.rank}</span>
+                  )}
+                </div>
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {a.name}
+                  {a.isMe && (
+                    <span className="ml-2 rounded-full bg-[var(--accent)]/20 px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]">You</span>
+                  )}
+                </span>
+                <span className="shrink-0 font-semibold text-[var(--accent)]">{a.points} pts</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {sqLoading ? (
         <div className="mb-8 flex justify-center py-8">
@@ -684,7 +970,7 @@ export default function QuizPage() {
                   {sqSubmitting ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Start Season Quiz"}
                 </button>
                 {(!sqName.trim() || !sqEmail.trim()) && (
-                  <p className="mt-3 text-sm text-[var(--muted-foreground)]">Enter your name &amp; email above to start</p>
+                  <p className="mt-3 text-sm text-[var(--muted-foreground)]">Sign in or enter your details above to start</p>
                 )}
               </div>
             )

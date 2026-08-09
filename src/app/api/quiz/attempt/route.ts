@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { quizAttemptSchema } from "@/lib/validation"
-import { verifyVerifiedEmailToken } from "@/lib/verified-email"
+import { isEmailAuthorized } from "@/lib/session"
 import { notifyAdmin } from "@/lib/email"
 import { formatDateTimePKT } from "@/lib/utils"
 
@@ -22,8 +22,7 @@ export async function POST(req: Request) {
 
   const { quizId, name, email, selectedAnswer } = parsed.data
 
-  const verifiedEmail = verifyVerifiedEmailToken(parsed.data.verifiedToken)
-  if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
+  if (!isEmailAuthorized(req, parsed.data.verifiedToken, email)) {
     return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
   }
 

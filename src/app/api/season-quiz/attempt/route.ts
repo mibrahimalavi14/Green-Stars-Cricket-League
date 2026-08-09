@@ -4,7 +4,7 @@ import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { MATCH_CONFIG } from "@/lib/config"
 import { createHash } from "crypto"
-import { verifyVerifiedEmailToken } from "@/lib/verified-email"
+import { isEmailAuthorized } from "@/lib/session"
 import { notifyAdmin } from "@/lib/email"
 import { formatDateTimePKT } from "@/lib/utils"
 
@@ -28,8 +28,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please provide a valid email address" }, { status: 400 })
   }
 
-  const verifiedEmail = verifyVerifiedEmailToken(String(body.verifiedToken || ""))
-  if (!verifiedEmail || verifiedEmail !== cleanEmail) {
+  if (!isEmailAuthorized(req, String(body.verifiedToken || ""), cleanEmail)) {
     return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
   }
 

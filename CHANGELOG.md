@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.3.34-season1
+
+User accounts (sign up / login) + challenge leaderboards.
+
+Changed
+- **Your Account** (`/quiz`): ab email OTP ke bjay **Sign In / Create Account** tabs hain — email + password. Email OTP ab fallback option hai.
+- **Account system**: email + password (min 8 chars), session cookie (30 din), logout. Email hi identity hai — purani quiz/vote history apne aap connect rehti hai.
+- **Logged in**: name/email auto-filled, koi OTP nahi chahiye — quizzes, daily/weekly challenges aur season quiz seedha play ho sakte hain.
+- **Challenge Leaderboard** (`/quiz`): 3 public boards — **Today** (daily), **This Week** (weekly), **Overall** (challenge points). Top 20, apni row highlight ("You").
+- Quizzes/challenges submit karte waqt session bhi valid identity hai (email verified hone ka proof).
+
+Internal
+- Prisma: `QuizAccount` model (name, email unique, passwordHash) — DB pushed.
+- Naya `src/lib/session.ts` (scrypt password hashing + HMAC-signed httpOnly session cookie, AUTH_SECRET reused).
+- Naye routes: `/api/auth/signup`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/challenges/leaderboard`.
+- Quiz/Season Quiz/Challenges attempt APIs ab OTP token YA session dono accept karte hain (`isEmailAuthorized`).
+- Rate limit: `AUTH_ATTEMPT` (10 per 15 min per IP) login/signup par.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.33-season1
 
 Quiz progression system: points, levels, badges, daily & weekly challenges.

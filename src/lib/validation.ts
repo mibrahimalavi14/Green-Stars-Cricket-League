@@ -192,6 +192,17 @@ export const challengeSchema = z.object({
   active: z.boolean().optional().default(true),
 })
 
+export const signupSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  email: z.string().email().max(200),
+  password: z.string().min(8).max(200),
+})
+
+export const loginSchema = z.object({
+  email: z.string().email().max(200),
+  password: z.string().min(1).max(200),
+})
+
 export const ratingSchema = z.object({
   rating: z.number().int().min(1).max(5),
   feedback: z.string().max(1000).optional(),

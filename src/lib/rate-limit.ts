@@ -49,4 +49,5 @@ export const RATE_LIMITS = {
   RATING: { windowMs: 24 * 60 * 60 * 1000, max: 5 },
   SQUAD: { windowMs: 60 * 1000, max: 30 },
   GENERAL_WRITE: { windowMs: 60 * 1000, max: 60 },
+  AUTH_ATTEMPT: { windowMs: 15 * 60 * 1000, max: 10 },
 } as const
