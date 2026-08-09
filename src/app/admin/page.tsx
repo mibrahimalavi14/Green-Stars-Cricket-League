@@ -88,6 +88,12 @@ async function AdminPage() {
           <p className="text-sm text-[var(--muted-foreground)]">Create & manage match quizzes</p>
         </Link>
 
+        <Link href="/admin/challenges" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <Trophy className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Challenges</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Daily & weekly quiz challenges</p>
+        </Link>
+
         <Link href="/admin/squad" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Users className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Squad</h3>

@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.32 |
+| **Current Version** | v1.3.33 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.32-season1` (vote timestamps shown everywhere — POTM, Player of the Season, Match Quiz, Season Quiz, Predictions) |
+| **Current Release Tag** | `v1.3.33-season1` (quiz progression: levels, badges, daily & weekly challenges) |
 
 ## Runtime
 

@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.3.33-season1
+
+Quiz progression system: points, levels, badges, daily & weekly challenges.
+
+Changed
+- **Quiz Progress** (`/quiz`): email ke sath ab **My Progress & Rewards** card dikhta hai — total points (Match Quiz + Season Quiz + Challenges combined), current level (8 levels: Rookie → Legend), progress-to-next bar, daily streak, correct count, aur badges.
+- **Daily Challenge** (`/quiz`): roz naya sawal (PKT midnight reset), 1 attempt per email.
+- **Weekly Challenge** (`/quiz`): har Monday se naya set, multiple questions, points har sawal par.
+- **Admin** (`/admin/challenges`): naya panel — daily/weekly challenges create, active toggle, delete, attempts count.
+- **Admin Dashboard + Guide**: Challenges card/link add.
+- **Email**: har challenge attempt par admin ko alert (name, email, correct/incorrect, points, time PKT).
+- **Verified email reuse**: challenges ke liye wahi OTP flow (`Verify Your Email`) jo quiz/votes me hai.
+
+Internal
+- Prisma: `Challenge` + `ChallengeAttempt` models (DB pushed).
+- Naya `src/lib/quiz-levels.ts` (levels, badges, PKT helpers), `src/app/api/quiz/progress/route.ts`, `src/app/api/challenges/route.ts`, `src/app/api/admin/challenges/route.ts`.
+- `AnalyticsEventType` me `challenge_attempted` add.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.32-season1
 
 Vote timestamps shown everywhere (public + admin + email).

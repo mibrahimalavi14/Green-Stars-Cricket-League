@@ -276,6 +276,7 @@ export default function GuidePage() {
                   { name: "Gallery", url: "/admin/gallery", desc: "Upload photos", icon: Image, hot: false },
                   { name: "Sponsors", url: "/admin/sponsors", desc: "Manage sponsors", icon: Star, hot: false },
                   { name: "Quiz", url: "/admin/quiz", desc: "Create match quizzes", icon: Brain, hot: false },
+                  { name: "Challenges", url: "/admin/challenges", desc: "Daily & weekly quiz challenges", icon: Trophy, hot: true },
                   { name: "POTM", url: "/admin/potm", desc: "Man of the Match voting", icon: Award, hot: false },
                   { name: "Predictions", url: "/admin/predictions", desc: "View/lock predictions", icon: Target, hot: false },
                   { name: "Moments", url: "/admin/moments", desc: "Moment of the Day", icon: Star, hot: false },

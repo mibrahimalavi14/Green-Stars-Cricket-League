@@ -35,7 +35,7 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
   email         String?
   emailVerified DateTime?
@@ -54,41 +54,41 @@ model VerificationToken {
 }
 
 model Workspace {
-  id        String   @id
-  name      String
-  type      String   @default("OFFICIAL") // OFFICIAL | PRACTICE
-  isActive  Boolean  @default(true)
-  titlesLeaderboardVisible Boolean @default(true)
-  createdAt DateTime @default(now())
-  seasons   Season[]
+  id                       String   @id
+  name                     String
+  type                     String   @default("OFFICIAL") // OFFICIAL | PRACTICE
+  isActive                 Boolean  @default(true)
+  titlesLeaderboardVisible Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  seasons                  Season[]
 }
 
 model Season {
-  id                String   @id @default(cuid())
-  name              String
-  year              Int
-  logo              String   @default("/gscl-logo.png")
-  isActive          Boolean  @default(true)
-  scheduleAnnounced Boolean  @default(false)
-  winnerId          String?  @default("")
-  runnerUpId        String   @default("")
-  seasonQuizLocked  Boolean  @default(false)
-  isLocked          Boolean  @default(false)
-  lockedAt          DateTime?
-  lockedReason      String   @default("")
-  workspaceId       String   @default("official")
-  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
-  createdAt         DateTime @default(now())
-  teams             Team[]
-  matches           Match[]
-  snapshots         SeasonSnapshot[]
-  transfers         PlayerTransfer[]
-  captaincies       TeamCaptaincy[]
-  penalties         LeaguePenalty[]
-  fairPlayRecords   FairPlayRecord[]
-  awards            SeasonAward[]
-  honors            TeamHonor[]
-  seasonQuizzes     SeasonQuiz[]
+  id                  String               @id @default(cuid())
+  name                String
+  year                Int
+  logo                String               @default("/gscl-logo.png")
+  isActive            Boolean              @default(true)
+  scheduleAnnounced   Boolean              @default(false)
+  winnerId            String?              @default("")
+  runnerUpId          String               @default("")
+  seasonQuizLocked    Boolean              @default(false)
+  isLocked            Boolean              @default(false)
+  lockedAt            DateTime?
+  lockedReason        String               @default("")
+  workspaceId         String               @default("official")
+  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  createdAt           DateTime             @default(now())
+  teams               Team[]
+  matches             Match[]
+  snapshots           SeasonSnapshot[]
+  transfers           PlayerTransfer[]
+  captaincies         TeamCaptaincy[]
+  penalties           LeaguePenalty[]
+  fairPlayRecords     FairPlayRecord[]
+  awards              SeasonAward[]
+  honors              TeamHonor[]
+  seasonQuizzes       SeasonQuiz[]
   seasonQuizStandings SeasonQuizStanding[]
   playerOfSeasonVotes PlayerOfSeasonVote[]
 
@@ -96,81 +96,80 @@ model Season {
 }
 
 model Team {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
   shortName   String
-  logo        String   @default("/placeholder-team.png")
-  color       String   @default("#1e3a5f")
-  captainName String   @default("")
-  headCoach   String   @default("")
-  location    String   @default("")
+  logo        String           @default("/placeholder-team.png")
+  color       String           @default("#1e3a5f")
+  captainName String           @default("")
+  headCoach   String           @default("")
+  location    String           @default("")
   seasonId    String
-  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  season      Season           @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   players     Player[]
-  matches1    Match[]  @relation("Team1Matches")
-  matches2    Match[]  @relation("Team2Matches")
+  matches1    Match[]          @relation("Team1Matches")
+  matches2    Match[]          @relation("Team2Matches")
   captaincies TeamCaptaincy[]
   penalties   LeaguePenalty[]
   fairPlay    FairPlayRecord[]
   honors      TeamHonor[]
-  createdAt   DateTime @default(now())
+  createdAt   DateTime         @default(now())
 }
 
 model Player {
-  id            String  @id @default(cuid())
-  name          String
-  role          String  @default("Batsman")
-  battingStyle  String  @default("Right-handed")
-  bowlingStyle  String  @default("Right-arm fast")
-  photo         String  @default("/placeholder-player.svg")
-  isCaptain     Boolean @default(false)
-  jerseyNumber  Int?
-  status        String  @default("available")
-  teamId        String
-  team          Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id           String  @id @default(cuid())
+  name         String
+  role         String  @default("Batsman")
+  battingStyle String  @default("Right-handed")
+  bowlingStyle String  @default("Right-arm fast")
+  photo        String  @default("/placeholder-player.svg")
+  isCaptain    Boolean @default(false)
+  jerseyNumber Int?
+  status       String  @default("available")
+  teamId       String
+  team         Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
-  runs            Int     @default(0)
-  ballsFaced      Int     @default(0)
-  fours           Int     @default(0)
-  sixes           Int     @default(0)
-  threes          Int     @default(0)
-  dotBalls        Int     @default(0)
-  ones            Int     @default(0)
-  twos            Int     @default(0)
-  fifties         Int     @default(0)
-  hundreds        Int     @default(0)
-  highestScore    Int     @default(0)
+  runs               Int     @default(0)
+  ballsFaced         Int     @default(0)
+  fours              Int     @default(0)
+  sixes              Int     @default(0)
+  threes             Int     @default(0)
+  dotBalls           Int     @default(0)
+  ones               Int     @default(0)
+  twos               Int     @default(0)
+  fifties            Int     @default(0)
+  hundreds           Int     @default(0)
+  highestScore       Int     @default(0)
   highestScoreNotOut Boolean @default(false)
-  notOuts         Int     @default(0)
-  dismissals      Int     @default(0)
-  ducks           Int     @default(0)
-  matchesPlayed   Int     @default(0)
-  wickets         Int     @default(0)
-  ballsBowled     Int     @default(0)
-  runsConceded    Int     @default(0)
-  maidens         Int     @default(0)
-  wides           Int     @default(0)
-  noBalls         Int     @default(0)
-  fiveWickets     Int     @default(0)
-  fourWickets     Int     @default(0)
-  hattricks       Int     @default(0)
-  bestBowlingWickets Int  @default(0)
-  bestBowlingRuns    Int  @default(0)
-  bestBowlingBalls   Int  @default(0)
-  catches         Int     @default(0)
-  stumpings       Int     @default(0)
-  runOuts         Int     @default(0)
-  timesBowled     Int     @default(0)
-  timesCaught     Int     @default(0)
-  timesLbw        Int     @default(0)
-  timesStumped    Int     @default(0)
-  timesRunOut     Int     @default(0)
+  notOuts            Int     @default(0)
+  dismissals         Int     @default(0)
+  ducks              Int     @default(0)
+  matchesPlayed      Int     @default(0)
+  wickets            Int     @default(0)
+  ballsBowled        Int     @default(0)
+  runsConceded       Int     @default(0)
+  maidens            Int     @default(0)
+  wides              Int     @default(0)
+  noBalls            Int     @default(0)
+  fiveWickets        Int     @default(0)
+  fourWickets        Int     @default(0)
+  hattricks          Int     @default(0)
+  bestBowlingWickets Int     @default(0)
+  bestBowlingRuns    Int     @default(0)
+  bestBowlingBalls   Int     @default(0)
+  catches            Int     @default(0)
+  stumpings          Int     @default(0)
+  runOuts            Int     @default(0)
+  timesBowled        Int     @default(0)
+  timesCaught        Int     @default(0)
+  timesLbw           Int     @default(0)
+  timesStumped       Int     @default(0)
+  timesRunOut        Int     @default(0)
 
-
-  performances PlayerMatch[]
-  squadMembers SquadMember[]
-  potmVotes     PotmVote[]
-  transfers     PlayerTransfer[]
+  performances        PlayerMatch[]
+  squadMembers        SquadMember[]
+  potmVotes           PotmVote[]
+  transfers           PlayerTransfer[]
   playerOfSeasonVotes PlayerOfSeasonVote[]
 
   createdAt DateTime @default(now())
@@ -179,56 +178,56 @@ model Player {
 }
 
 model Match {
-  id            String   @id @default(cuid())
-  seasonId      String
-  season        Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  team1Id       String
-  team1         Team     @relation("Team1Matches", fields: [team1Id], references: [id])
-  team2Id       String
-  team2         Team     @relation("Team2Matches", fields: [team2Id], references: [id])
-  matchNo       Int      @default(0)
-  stage         String   @default("league")
-  date          DateTime
-  venue         String   @default("Main Stadium")
-  status        String   @default("upcoming")
-  result        String   @default("")
-  team1Score    String   @default("")
-  team2Score    String   @default("")
-  tossWinner    String   @default("")
-  tossDecision  String   @default("")
-  manOfMatch    String   @default("")
-  winnerTeamId  String?
-  youtubeUrl    String   @default("")
-  customHighlights String   @default("")
-  superOverT1Runs Int    @default(0)
-  superOverT1Wkts Int    @default(0)
-  superOverT2Runs Int    @default(0)
-  superOverT2Wkts Int    @default(0)
-  inningsBreak    Boolean @default(false)
-  umpire1        String   @default("")
-  umpire2        String   @default("")
-  thirdUmpire    String   @default("")
-  matchReferee   String   @default("")
-  officialScorer String   @default("")
-  tossTime       String   @default("")
-  matchStartTime String   @default("")
-  matchEndTime   String   @default("")
-  delayReason    String   @default("")
-  abandonReason   String @default("")
-  abandonDescription String @default("")
-  attendance     Int     @default(0)
-  dls            Boolean @default(false)
-  isSquadLocked  Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
-  predictions   Prediction[]
-  innings       Inning[]
-  performances  PlayerMatch[]
-  quizzes       Quiz[]
-  potmVotes     PotmVote[]
-  ballEvents    BallEvent[]
-  superOvers    SuperOverInnings[]
-  notes         MatchNotes?
+  id                 String             @id @default(cuid())
+  seasonId           String
+  season             Season             @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  team1Id            String
+  team1              Team               @relation("Team1Matches", fields: [team1Id], references: [id])
+  team2Id            String
+  team2              Team               @relation("Team2Matches", fields: [team2Id], references: [id])
+  matchNo            Int                @default(0)
+  stage              String             @default("league")
+  date               DateTime
+  venue              String             @default("Main Stadium")
+  status             String             @default("upcoming")
+  result             String             @default("")
+  team1Score         String             @default("")
+  team2Score         String             @default("")
+  tossWinner         String             @default("")
+  tossDecision       String             @default("")
+  manOfMatch         String             @default("")
+  winnerTeamId       String?
+  youtubeUrl         String             @default("")
+  customHighlights   String             @default("")
+  superOverT1Runs    Int                @default(0)
+  superOverT1Wkts    Int                @default(0)
+  superOverT2Runs    Int                @default(0)
+  superOverT2Wkts    Int                @default(0)
+  inningsBreak       Boolean            @default(false)
+  umpire1            String             @default("")
+  umpire2            String             @default("")
+  thirdUmpire        String             @default("")
+  matchReferee       String             @default("")
+  officialScorer     String             @default("")
+  tossTime           String             @default("")
+  matchStartTime     String             @default("")
+  matchEndTime       String             @default("")
+  delayReason        String             @default("")
+  abandonReason      String             @default("")
+  abandonDescription String             @default("")
+  attendance         Int                @default(0)
+  dls                Boolean            @default(false)
+  isSquadLocked      Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @default(now()) @updatedAt
+  predictions        Prediction[]
+  innings            Inning[]
+  performances       PlayerMatch[]
+  quizzes            Quiz[]
+  potmVotes          PotmVote[]
+  ballEvents         BallEvent[]
+  superOvers         SuperOverInnings[]
+  notes              MatchNotes?
 
   @@index([status])
   @@index([seasonId])
@@ -238,57 +237,57 @@ model Match {
 }
 
 model Inning {
-  id       String @id @default(cuid())
-  matchId  String
-  match    Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  teamId   String
-  runs     Int    @default(0)
-  wickets  Int    @default(0)
-  balls    Int    @default(0)
-  extras   Int    @default(0)
-  ballsData String @default("[]")
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId    String
+  runs      Int      @default(0)
+  wickets   Int      @default(0)
+  balls     Int      @default(0)
+  extras    Int      @default(0)
+  ballsData String   @default("[]")
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([matchId, teamId])
 }
 
 model PlayerMatch {
-  id         String @id @default(cuid())
-  playerId   String
-  player     Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  matchId    String
-  match      Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  teamId     String
+  id       String @id @default(cuid())
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  matchId  String
+  match    Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId   String
 
-  battingRuns    Int @default(0)
-  ballsFaced     Int @default(0)
-  fours          Int @default(0)
-  sixes          Int @default(0)
-  ones           Int @default(0)
-  twos           Int @default(0)
-  isOut          Boolean @default(false)
-  wicketsLost    Int     @default(0)
-  dismissalType  String @default("")
-  dismissedByBowlerId  String @default("")
-  dismissedByFielderId String @default("")
-  secondDismissalType  String @default("")
-  secondDismissedByBowlerId String @default("")
-  secondDismissedByFielderId String @default("")
+  battingRuns                Int     @default(0)
+  ballsFaced                 Int     @default(0)
+  fours                      Int     @default(0)
+  sixes                      Int     @default(0)
+  ones                       Int     @default(0)
+  twos                       Int     @default(0)
+  isOut                      Boolean @default(false)
+  wicketsLost                Int     @default(0)
+  dismissalType              String  @default("")
+  dismissedByBowlerId        String  @default("")
+  dismissedByFielderId       String  @default("")
+  secondDismissalType        String  @default("")
+  secondDismissedByBowlerId  String  @default("")
+  secondDismissedByFielderId String  @default("")
 
-  bowlingWickets    Int @default(0)
-  bowlingRuns       Int @default(0)
-  ballsBowled       Int @default(0)
-  maidens           Int @default(0)
-  isBowled          Boolean @default(false)
-  wides             Int @default(0)
-  noBalls           Int @default(0)
-  threes            Int @default(0)
-  dotBalls          Int @default(0)
-  hattricks         Int @default(0)
+  bowlingWickets Int     @default(0)
+  bowlingRuns    Int     @default(0)
+  ballsBowled    Int     @default(0)
+  maidens        Int     @default(0)
+  isBowled       Boolean @default(false)
+  wides          Int     @default(0)
+  noBalls        Int     @default(0)
+  threes         Int     @default(0)
+  dotBalls       Int     @default(0)
+  hattricks      Int     @default(0)
 
-  catches     Int @default(0)
-  stumpings   Int @default(0)
-  runOuts     Int @default(0)
+  catches   Int @default(0)
+  stumpings Int @default(0)
+  runOuts   Int @default(0)
 
   createdAt DateTime @default(now())
 
@@ -458,17 +457,50 @@ model Quiz {
 }
 
 model QuizAttempt {
-  id              String   @id @default(cuid())
-  quizId          String
-  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  name            String
-  email           String
-  selectedAnswer  String
-  correct         Boolean
-  createdAt       DateTime @default(now())
+  id             String   @id @default(cuid())
+  quizId         String
+  quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  name           String
+  email          String
+  selectedAnswer String
+  correct        Boolean
+  createdAt      DateTime @default(now())
 
   @@unique([quizId, email])
   @@index([quizId])
+}
+
+model Challenge {
+  id            String             @id @default(cuid())
+  type          String
+  title         String             @default("")
+  question      String
+  options       String             @default("[]")
+  correctAnswer String
+  pointValue    Int                @default(20)
+  active        Boolean            @default(true)
+  date          DateTime?
+  weekStart     DateTime?
+  attempts      ChallengeAttempt[]
+  createdAt     DateTime           @default(now())
+
+  @@unique([type, date])
+  @@index([type, active, weekStart])
+}
+
+model ChallengeAttempt {
+  id             String    @id @default(cuid())
+  challengeId    String
+  challenge      Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  name           String
+  email          String
+  selectedAnswer String
+  correct        Boolean
+  pointsEarned   Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  @@unique([challengeId, email])
+  @@index([challengeId])
 }
 
 model PotmVote {
@@ -570,22 +602,22 @@ model AnalyticsEvent {
 }
 
 model SuperOverInnings {
-  id               String  @id @default(cuid())
-  matchId          String
-  match            Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  superOverNumber  Int
-  teamId           String
-  battingTeamId    String
-  bowlingTeamId    String
-  runs             Int     @default(0)
-  wickets          Int     @default(0)
-  balls            Int     @default(0)
-  extras           Int     @default(0)
-  ballsData        String  @default("[]")
-  isCompleted      Boolean @default(false)
-  isWinner         Boolean @default(false)
-  result           String  @default("")
-  createdAt        DateTime @default(now())
+  id              String   @id @default(cuid())
+  matchId         String
+  match           Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  superOverNumber Int
+  teamId          String
+  battingTeamId   String
+  bowlingTeamId   String
+  runs            Int      @default(0)
+  wickets         Int      @default(0)
+  balls           Int      @default(0)
+  extras          Int      @default(0)
+  ballsData       String   @default("[]")
+  isCompleted     Boolean  @default(false)
+  isWinner        Boolean  @default(false)
+  result          String   @default("")
+  createdAt       DateTime @default(now())
 
   @@unique([matchId, superOverNumber, teamId])
   @@index([matchId])
@@ -593,16 +625,16 @@ model SuperOverInnings {
 }
 
 model SeasonSnapshot {
-  id              String   @id @default(cuid())
-  seasonId        String
-  season          Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  matchId         String
-  matchNo         Int      @default(0)
-  pointsTable     Json     @default("[]")
-  orangeCap       Json     @default("[]")
-  purpleCap       Json     @default("[]")
-  records         Json     @default("{}")
-  createdAt       DateTime @default(now())
+  id          String   @id @default(cuid())
+  seasonId    String
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  matchId     String
+  matchNo     Int      @default(0)
+  pointsTable Json     @default("[]")
+  orangeCap   Json     @default("[]")
+  purpleCap   Json     @default("[]")
+  records     Json     @default("{}")
+  createdAt   DateTime @default(now())
 
   @@unique([seasonId, matchId])
   @@index([seasonId])
@@ -741,15 +773,15 @@ model SeasonQuiz {
 }
 
 model SeasonQuizAttempt {
-  id             String     @id @default(cuid())
-  seasonQuizId   String
-  seasonQuiz     SeasonQuiz @relation(fields: [seasonQuizId], references: [id], onDelete: Cascade)
-  name           String
-  email          String
-  answers        String     @default("[]")
-  score          Int        @default(0)
-  total          Int        @default(0)
-  createdAt      DateTime   @default(now())
+  id           String     @id @default(cuid())
+  seasonQuizId String
+  seasonQuiz   SeasonQuiz @relation(fields: [seasonQuizId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  answers      String     @default("[]")
+  score        Int        @default(0)
+  total        Int        @default(0)
+  createdAt    DateTime   @default(now())
 
   @@unique([seasonQuizId, email])
   @@index([seasonQuizId])
@@ -768,7 +800,6 @@ model SeasonQuizStanding {
   @@unique([seasonId, name])
   @@index([seasonId])
 }
-
 
 model ChairmanMessage {
   id            String   @id @default(cuid())

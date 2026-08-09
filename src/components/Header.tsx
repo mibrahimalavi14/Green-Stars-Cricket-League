@@ -39,6 +39,7 @@ export function Header() {
       content: [
         { href: "/admin/news", label: "News", icon: Newspaper },
         { href: "/admin/quiz", label: "Quiz", icon: Brain },
+        { href: "/admin/challenges", label: "Challenges", icon: Trophy },
         { href: "/admin/moments", label: "Moments", icon: Sparkles },
         { href: "/admin/gallery", label: "Gallery", icon: Image },
         { href: "/admin/sponsors", label: "Sponsors", icon: Award },

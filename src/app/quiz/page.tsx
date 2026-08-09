@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User, Timer } from "lucide-react"
+import { Brain, Trophy, Medal, Check, X, Loader2, Sparkles, RotateCcw, Lock, User, Timer, Sun, CalendarDays, Flame } from "lucide-react"
 import { MATCH_CONFIG } from "@/lib/config"
 import VoteVerification from "@/components/VoteVerification"
 import { formatDateTime } from "@/lib/utils"
@@ -48,6 +48,12 @@ export default function QuizPage() {
   const [sqTimeLeft, setSqTimeLeft] = useState<number>(MATCH_CONFIG.seasonQuizTimeLimitSeconds)
   const [sqExpired, setSqExpired] = useState(false)
 
+  const [progress, setProgress] = useState<any>(null)
+  const [challenges, setChallenges] = useState<any>(null)
+  const [challengeSubmitting, setChallengeSubmitting] = useState(false)
+  const [challengeError, setChallengeError] = useState("")
+  const [challengeAnswers, setChallengeAnswers] = useState<Record<string, string>>({})
+
   useEffect(() => {
     const savedEmail = localStorage.getItem("quiz_email")
     const savedName = localStorage.getItem("quiz_name")
@@ -67,6 +73,8 @@ export default function QuizPage() {
     if (sqEmail.trim()) {
       const timer = setTimeout(() => {
         if (!sqResult) fetchSeasonQuiz()
+        fetchProgress()
+        fetchChallenges()
       }, 500)
       return () => clearTimeout(timer)
     }
@@ -83,6 +91,61 @@ export default function QuizPage() {
     } catch {
       setSqLoading(false)
     }
+  }
+
+  async function fetchProgress() {
+    const email = localStorage.getItem("quiz_email") || ""
+    if (!email.trim()) {
+      setProgress(null)
+      return
+    }
+    const res = await fetch(`/api/quiz/progress?email=${encodeURIComponent(email.trim())}`)
+    if (!res.ok) return
+    const data = await res.json()
+    setProgress(data)
+  }
+
+  async function fetchChallenges() {
+    const email = localStorage.getItem("quiz_email") || ""
+    if (!email.trim()) {
+      setChallenges(null)
+      return
+    }
+    const res = await fetch(`/api/challenges?email=${encodeURIComponent(email.trim())}`)
+    if (!res.ok) return
+    const data = await res.json()
+    setChallenges(data)
+  }
+
+  async function submitChallenge(challengeId: string, answer: string) {
+    if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken) return
+    setChallengeSubmitting(true)
+    setChallengeError("")
+    setChallengeAnswers(prev => ({ ...prev, [challengeId]: answer }))
+    const res = await fetch("/api/challenges", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        challengeId,
+        name: sqName.trim(),
+        email: sqEmail.trim(),
+        selectedAnswer: answer,
+        verifiedToken: sqVerifiedToken,
+      }),
+    })
+    const data = await res.json()
+    setChallengeSubmitting(false)
+    if (!res.ok) {
+      if (res.status === 401) {
+        setSqVerifiedToken("")
+        localStorage.removeItem("quiz_verified")
+      }
+      setChallengeError(data.error || "Failed to submit")
+      return
+    }
+    setChallengeError("")
+    setChallengeAnswers({})
+    await Promise.all([fetchChallenges(), fetchProgress()])
   }
 
   async function submitSeasonQuiz() {
@@ -353,6 +416,163 @@ export default function QuizPage() {
           </div>
         )}
       </div>
+
+      {progress && (
+        <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <Medal className="h-5 w-5 text-[var(--accent)]" />
+              My Progress &amp; Rewards
+            </h2>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--muted-foreground)]">
+              <span className="flex items-center gap-1"><Flame className="h-3.5 w-3.5 text-orange-500" /> {progress.dailyStreak}-day streak</span>
+              <span>{progress.correct}/{progress.totalAttempts} correct</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)] bg-[var(--accent)]/5 text-3xl" aria-label={`Level ${progress.level.current.level}: ${progress.level.current.title}`}>
+              {progress.level.current.icon}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                <p className="font-bold">
+                  Level {progress.level.current.level}: <span className={progress.level.current.color}>{progress.level.current.title}</span>
+                </p>
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  <strong className="text-[var(--accent)]">{progress.totalPoints}</strong> total points
+                  {progress.level.next && (
+                    <span> · {progress.level.next.minPoints - progress.totalPoints} pts to <strong>{progress.level.next.title}</strong></span>
+                  )}
+                </p>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--accent)] to-yellow-500 transition-all"
+                  style={{ width: `${progress.level.progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {progress.badges.map((b: any) => (
+              <div
+                key={b.id}
+                title={b.desc}
+                className={`flex items-center gap-2 rounded-lg border p-2.5 text-xs ${b.unlocked ? "border-[var(--accent)]/40 bg-[var(--accent)]/5" : "border-[var(--border)] opacity-40"}`}
+              >
+                <span className="text-xl" aria-hidden="true">{b.icon}</span>
+                <div className="min-w-0">
+                  <p className="font-medium">{b.title}</p>
+                  <p className="truncate text-[10px] text-[var(--muted-foreground)]">{b.unlocked ? b.desc : "Locked"}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {challenges && (challenges.daily || (challenges.weekly && challenges.weekly.length > 0)) && (
+        <div className="mb-10 space-y-6">
+          {challenges.daily && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-lg font-semibold">
+                  <Sun className="h-5 w-5 text-orange-500" />
+                  Daily Challenge
+                </h2>
+                <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
+                  +{challenges.daily.pointValue} pts
+                </span>
+              </div>
+              {challenges.daily.attempt ? (
+                <div className="rounded-lg bg-[var(--muted)] p-4 text-sm">
+                  {challenges.daily.attempt.correct ? (
+                    <p className="text-green-500">
+                      <Check className="mr-1 inline h-4 w-4" />
+                      Correct! +{challenges.daily.attempt.pointsEarned} pts today
+                    </p>
+                  ) : (
+                    <p className="text-[var(--muted-foreground)]">Already attempted. Try again tomorrow!</p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <p className="mb-3 text-sm font-medium">{challenges.daily.question}</p>
+                  {!sqVerifiedToken ? (
+                    <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
+                      Verify your email above to play the daily challenge.
+                    </p>
+                  ) : (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {challenges.daily.options.map((opt: string, i: number) => (
+                        <button
+                          key={i}
+                          onClick={() => submitChallenge(challenges.daily.id, opt)}
+                          disabled={challengeSubmitting}
+                          className="flex items-center gap-2 rounded-lg border border-[var(--border)] p-3 text-left text-sm transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                        >
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-xs">{i + 1}</span>
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {challenges.weekly && challenges.weekly.length > 0 && (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-lg font-semibold">
+                  <CalendarDays className="h-5 w-5 text-[var(--accent)]" />
+                  Weekly Challenge
+                </h2>
+                <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
+                  {challenges.weekly.reduce((s: number, q: any) => s + q.pointValue, 0)} pts total
+                </span>
+              </div>
+              <div className="space-y-4">
+                {challenges.weekly.map((q: any, qi: number) => (
+                  <div key={q.id} className="rounded-lg border border-[var(--border)] p-4">
+                    <p className="mb-2 text-sm font-medium">
+                      <span className="mr-2 text-[var(--muted-foreground)]">Q{qi + 1}.</span>
+                      {q.question}
+                    </p>
+                    {q.attempt ? (
+                      <p className="text-sm text-green-500">
+                        {q.attempt.correct ? <><Check className="mr-1 inline h-4 w-4" />Correct! +{q.attempt.pointsEarned} pts</> : "Already attempted"}
+                      </p>
+                    ) : !sqVerifiedToken ? (
+                      <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
+                        Verify your email above to play.
+                      </p>
+                    ) : (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {q.options.map((opt: string, i: number) => (
+                          <button
+                            key={i}
+                            onClick={() => submitChallenge(q.id, opt)}
+                            disabled={challengeSubmitting}
+                            className="flex items-center gap-2 rounded-lg border border-[var(--border)] p-2.5 text-left text-sm transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {challengeError && <p className="text-sm text-red-500">{challengeError}</p>}
+        </div>
+      )}
 
       {sqLoading ? (
         <div className="mb-8 flex justify-center py-8">

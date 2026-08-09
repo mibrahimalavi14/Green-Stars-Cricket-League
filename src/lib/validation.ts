@@ -174,6 +174,24 @@ export const quizAttemptSchema = z.object({
   verifiedToken: z.string().min(1),
 })
 
+export const challengeAttemptSchema = z.object({
+  challengeId: z.string().min(1),
+  name: z.string().trim().min(1).max(80),
+  email: z.string().email().max(200),
+  selectedAnswer: z.string().min(1),
+  verifiedToken: z.string().min(1),
+})
+
+export const challengeSchema = z.object({
+  type: z.enum(["DAILY", "WEEKLY"]),
+  title: z.string().max(120).optional().default(""),
+  question: z.string().min(1).max(300),
+  options: z.array(z.string().min(1)).min(2).max(6),
+  correctAnswer: z.string().min(1),
+  pointValue: z.number().int().min(5).max(200),
+  active: z.boolean().optional().default(true),
+})
+
 export const ratingSchema = z.object({
   rating: z.number().int().min(1).max(5),
   feedback: z.string().max(1000).optional(),
