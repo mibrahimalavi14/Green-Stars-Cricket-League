@@ -29,6 +29,7 @@ export async function GET() {
       highestScoreNotOut: p.highestScoreNotOut,
       ducks: p.ducks,
       strikeRate: p.ballsFaced > 0 ? Math.round((p.runs / p.ballsFaced) * 100) : 0,
+      rpb: p.ballsFaced > 0 ? (p.runs / p.ballsFaced).toFixed(2) : "-",
       average: p.dismissals > 0 ? (p.runs / p.dismissals).toFixed(1) : "-",
       dotBallPct: p.ballsFaced === 0 ? "0" : ((p.dotBalls / p.ballsFaced) * 100).toFixed(1),
       boundaryPct: p.runs === 0 ? "0" : (((p.fours * 4 + p.sixes * 6) / p.runs) * 100).toFixed(1),
@@ -54,6 +55,7 @@ export async function GET() {
       overs: Math.floor(p.ballsBowled / 6) + "." + (p.ballsBowled % 6),
       average: p.wickets > 0 ? (p.runsConceded / p.wickets).toFixed(1) : "-",
       economy: p.ballsBowled > 0 ? ((p.runsConceded / p.ballsBowled) * 6).toFixed(1) : "-",
+      rpb: p.ballsBowled > 0 ? (p.runsConceded / p.ballsBowled).toFixed(2) : "-",
       bestBowling: `${p.bestBowlingWickets}/${p.bestBowlingRuns}${p.bestBowlingBalls > 0 ? ` (${Math.floor(p.bestBowlingBalls / 6)}.${p.bestBowlingBalls % 6})` : ""}`,
     }))
     .sort((a, b) => b.wickets - a.wickets)

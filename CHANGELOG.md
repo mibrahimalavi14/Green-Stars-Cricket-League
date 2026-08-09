@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.35-season1
+
+RPB (Runs Per Ball) stat added across the site.
+
+Changed
+- **RPB** = har ball par average runs. Batting: `runs / balls faced` (higher better). Bowling: `runs conceded / ball bowled` (lower better).
+- **Top Performers** (`/performers`): batting + bowling tables me RPB column.
+- **Player Stats** (`/players/stats`): Most Runs aur Most Wickets tables me RPB column + CSV export me bhi.
+- **Player Profile** (`/players/[id]`): batting cards me RPB (Runs per Ball), bowling cards me RPB (Runs Conceded per Ball).
+- **Compare** (`/compare`): batting me "Runs Per Ball", bowling me "RPB (Conceded)" comparison rows.
+
+Internal
+- `/api/performers` ab batsmen/bowlers me `rpb` return karta hai.
+
+Verified
+- `npx tsc --noEmit` + `npm run build` pass.
+
 ## v1.3.34-season1
 
 User accounts (sign up / login) + challenge leaderboards.

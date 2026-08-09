@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Version** | v1.3.34 |
+| **Current Version** | v1.3.35 |
 | **Release Date** | August 2026 |
 | **Status** | Production — Season 1 |
 | **Feature Freeze** | Yes (v1.3.0+ exceptions, explicitly requested) |
 | **Stable Production Tag** | `v1.1.0-season1` (initial production release) |
-| **Current Release Tag** | `v1.3.34-season1` (user accounts: sign up/login + challenge leaderboards) |
+| **Current Release Tag** | `v1.3.35-season1` (RPB stat added to performers, player stats, player profiles & compare) |
 
 ## Runtime
 

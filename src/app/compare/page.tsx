@@ -274,6 +274,10 @@ const BATTING_STATS: StatDef[] = [
     format: (v: number) => v.toFixed(2),
   },
   {
+    label: "Runs Per Ball", key: "_rpb",
+    format: (v: number) => v.toFixed(2),
+  },
+  {
     label: "Boundary%", key: "_bdry",
     format: (_v: number, p?: Player) => p && p.runs > 0 ? (((p.fours * 4 + p.sixes * 6) / p.runs) * 100).toFixed(1) : "0",
   },
@@ -290,6 +294,7 @@ const BOWLING_STATS: StatDef[] = [
   { label: "Hattricks", key: "hattricks" },
   { label: "Best Bowling", key: "_bb", format: (_: number, p?: Player) => p ? `${p.bestBowlingWickets}/${p.bestBowlingRuns}` : "-" },
   { label: "Economy", key: "_econ", format: (v: number) => v.toFixed(2) },
+  { label: "RPB (Conceded)", key: "_bowlrpb", format: (v: number) => v.toFixed(2), higherBetter: false },
   {
     label: "Bowling Avg", key: "_bowlavg",
     format: (v: number) => v.toFixed(2),
@@ -315,7 +320,9 @@ function getStatValue(player: Player, key: string): number {
   switch (key) {
     case "_avg": return calcAverage(p.runs, p.matchesPlayed)
     case "_sr": return calcStrikeRate(p.runs, p.ballsFaced)
+    case "_rpb": return p.ballsFaced > 0 ? p.runs / p.ballsFaced : 0
     case "_econ": return calcEconomy(p.runsConceded, p.ballsBowled)
+    case "_bowlrpb": return p.ballsBowled > 0 ? p.runsConceded / p.ballsBowled : 0
     case "_bowlavg": return p.wickets > 0 ? p.runsConceded / p.wickets : 0
     case "_bowlsr": return p.wickets > 0 ? p.ballsBowled / p.wickets : 0
     default: return p[key] ?? 0

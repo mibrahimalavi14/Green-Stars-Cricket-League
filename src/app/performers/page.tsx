@@ -20,8 +20,8 @@ export default function PerformersPage() {
   }
 
   const tabs = [
-    { key: "batting", label: "Batting", icon: Award, list: data.batsmen, cols: ["Mat", "Runs", "HS", "Avg", "SR", "4s", "6s", "Ducks", "Dot%", "Bdy%"] },
-    { key: "bowling", label: "Bowling", icon: Target, list: data.bowlers, cols: ["Mat", "Wkts", "Ov", "Mdns", "Avg", "Econ", "5w", "4w", "Wd", "Nb", "HT"] },
+    { key: "batting", label: "Batting", icon: Award, list: data.batsmen, cols: ["Mat", "Runs", "HS", "Avg", "SR", "RPB", "4s", "6s", "Ducks", "Dot%", "Bdy%"] },
+    { key: "bowling", label: "Bowling", icon: Target, list: data.bowlers, cols: ["Mat", "Wkts", "Ov", "Mdns", "Avg", "Econ", "RPB", "5w", "4w", "Wd", "Nb", "HT"] },
     { key: "fielding", label: "Fielding", icon: Trophy, list: data.fielders, cols: ["Ct", "St", "RO", "Bwd", "LBW", "Total"] },
   ]
 
@@ -66,6 +66,7 @@ export default function PerformersPage() {
                     <td className="px-4 py-3 text-right">{p.highestScore}</td>
                     <td className="px-4 py-3 text-right">{p.average}</td>
                     <td className="px-4 py-3 text-right">{p.strikeRate}</td>
+                    <td className="px-4 py-3 text-right font-mono">{p.rpb}</td>
                     <td className="px-4 py-3 text-right">{p.fours}</td>
                     <td className="px-4 py-3 text-right">{p.sixes}</td>
                     <td className="px-4 py-3 text-right">{p.ducks}</td>
@@ -81,6 +82,7 @@ export default function PerformersPage() {
                     <td className="px-4 py-3 text-right">{p.maidens}</td>
                     <td className="px-4 py-3 text-right">{p.average}</td>
                     <td className="px-4 py-3 text-right">{p.economy}</td>
+                    <td className="px-4 py-3 text-right font-mono">{p.rpb}</td>
                     <td className="px-4 py-3 text-right">{p.fiveWickets}</td>
                     <td className="px-4 py-3 text-right">{p.fourWickets}</td>
                     <td className="px-4 py-3 text-right">{p.wides}</td>

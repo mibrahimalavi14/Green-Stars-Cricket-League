@@ -92,7 +92,9 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
 
   const battingAvg = dismissals > 0 ? (runs / dismissals).toFixed(2) : "-" 
   const sr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
+  const rpb = ballsFaced > 0 ? (runs / ballsFaced).toFixed(2) : "-"
   const econ = ballsBowled > 0 ? (runsConceded / (ballsBowled / 6)).toFixed(2) : "-"
+  const bowlingRpb = ballsBowled > 0 ? (runsConceded / ballsBowled).toFixed(2) : "-"
   const bowlingAvg = wickets > 0 ? (runsConceded / wickets).toFixed(2) : "-"
   const battingSr = ballsFaced > 0 ? ((runs / ballsFaced) * 100).toFixed(2) : "-"
   const overs = Math.floor(ballsBowled / 6) + "." + (ballsBowled % 6)
@@ -182,6 +184,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="HS" value={hsDisplay} />
             <StatCard label="Avg" value={battingAvg} />
             <StatCard label="SR" value={sr} />
+            <StatCard label="RPB" value={rpb} title="Runs per Ball" />
             <StatCard label="4s" value={fours} />
             <StatCard label="6s" value={sixes} />
             <StatCard label="3s" value={threes} />
@@ -211,6 +214,7 @@ export function PlayerStatsClient({ player, performances, seasonStats, activePer
             <StatCard label="SR" value={bowlingSr} />
             <StatCard label="Avg" value={bowlingAvg} />
             <StatCard label="Econ" value={econ} />
+            <StatCard label="RPB" value={bowlingRpb} title="Runs Conceded per Ball" />
             <StatCard label="5w" value={fiveWickets} />
             <StatCard label="4w" value={fourWickets} />
             <StatCard label="Hattricks" value={hattricks} />
