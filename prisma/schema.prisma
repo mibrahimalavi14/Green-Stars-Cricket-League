@@ -480,33 +480,48 @@ model QuizAttempt {
 }
 
 model Challenge {
-  id            String             @id @default(cuid())
-  type          String
-  title         String             @default("")
-  question      String
-  options       String             @default("[]")
-  correctAnswer String
-  pointValue    Int                @default(20)
-  active        Boolean            @default(true)
-  date          DateTime?
-  weekStart     DateTime?
-  attempts      ChallengeAttempt[]
-  createdAt     DateTime           @default(now())
+  id               String             @id @default(cuid())
+  type             String
+  title            String             @default("")
+  pointValue       Int                @default(5)
+  timeLimitSeconds Int                @default(10)
+  active           Boolean            @default(true)
+  date             DateTime?
+  weekStart        DateTime?
+  questions        ChallengeQuestion[]
+  attempts         ChallengeAttempt[]
+  createdAt        DateTime           @default(now())
 
   @@unique([type, date])
   @@index([type, active, weekStart])
 }
 
+model ChallengeQuestion {
+  id            String    @id @default(cuid())
+  challengeId   String
+  challenge     Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  question      String
+  options       String    @default("[]")
+  correctAnswer String
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  @@index([challengeId])
+}
+
 model ChallengeAttempt {
-  id             String    @id @default(cuid())
-  challengeId    String
-  challenge      Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  name           String
-  email          String
-  selectedAnswer String
-  correct        Boolean
-  pointsEarned   Int       @default(0)
-  createdAt      DateTime  @default(now())
+  id           String    @id @default(cuid())
+  challengeId  String
+  challenge    Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  questionIds  String    @default("[]")
+  score        Int       @default(0)
+  total        Int       @default(0)
+  pointsEarned Int       @default(0)
+  answers      String    @default("[]")
+  submittedAt  DateTime?
+  createdAt    DateTime  @default(now())
 
   @@unique([challengeId, email])
   @@index([challengeId])

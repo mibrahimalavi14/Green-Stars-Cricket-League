@@ -8,6 +8,15 @@ function pktMidnight(dateStr: string) {
   return new Date(Date.UTC(y, m - 1, d, 0, 0, 0) + 5 * 60 * 60 * 1000)
 }
 
+function serialize(c: any) {
+  return {
+    ...c,
+    questions: Array.isArray(c.questions)
+      ? c.questions.map((q: any) => ({ ...q, options: JSON.parse(q.options || "[]") as string[] }))
+      : [],
+  }
+}
+
 export async function GET(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { searchParams } = new URL(req.url)
@@ -19,16 +28,16 @@ export async function GET(req: Request) {
       where: { ...where, type: "DAILY" },
       orderBy: { date: "desc" },
       take: 60,
-      include: { _count: { select: { attempts: true } } },
+      include: { questions: true, _count: { select: { attempts: true } } },
     }),
     prisma.challenge.findMany({
       where: { ...where, type: "WEEKLY" },
       orderBy: { weekStart: "desc" },
       take: 60,
-      include: { _count: { select: { attempts: true } } },
+      include: { questions: true, _count: { select: { attempts: true } } },
     }),
   ])
-  return NextResponse.json({ daily, weekly })
+  return NextResponse.json({ daily: daily.map(serialize), weekly: weekly.map(serialize) })
 }
 
 export async function POST(req: Request) {
@@ -40,7 +49,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
 
-  const { type, title, question, options, correctAnswer, pointValue, active } = parsed.data
+  const { type, title, questions, pointValue, timeLimitSeconds, active } = parsed.data
 
   if (type === "DAILY") {
     if (!body.date || typeof body.date !== "string") {
@@ -52,9 +61,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "A daily challenge already exists for this date" }, { status: 409 })
     }
     const challenge = await prisma.challenge.create({
-      data: { type, title, question, options: JSON.stringify(options), correctAnswer, pointValue, active, date },
+      data: {
+        type,
+        title,
+        pointValue,
+        timeLimitSeconds,
+        active,
+        date,
+        questions: {
+          create: questions.map((q, i) => ({
+            question: q.question,
+            options: JSON.stringify(q.options),
+            correctAnswer: q.correctAnswer,
+            order: i,
+          })),
+        },
+      },
+      include: { questions: true },
     })
-    return NextResponse.json({ challenge })
+    return NextResponse.json({ challenge: serialize(challenge) })
   }
 
   if (type === "WEEKLY") {
@@ -63,9 +88,25 @@ export async function POST(req: Request) {
     }
     const weekStart = pktMidnight(body.weekStart)
     const challenge = await prisma.challenge.create({
-      data: { type, title, question, options: JSON.stringify(options), correctAnswer, pointValue, active, weekStart },
+      data: {
+        type,
+        title,
+        pointValue,
+        timeLimitSeconds,
+        active,
+        weekStart,
+        questions: {
+          create: questions.map((q, i) => ({
+            question: q.question,
+            options: JSON.stringify(q.options),
+            correctAnswer: q.correctAnswer,
+            order: i,
+          })),
+        },
+      },
+      include: { questions: true },
     })
-    return NextResponse.json({ challenge })
+    return NextResponse.json({ challenge: serialize(challenge) })
   }
 
   return NextResponse.json({ error: "Invalid type" }, { status: 400 })
@@ -80,10 +121,8 @@ export async function PATCH(req: Request) {
 
   const data: Record<string, unknown> = {}
   if (typeof body.title === "string") data.title = body.title
-  if (typeof body.question === "string") data.question = body.question
-  if (Array.isArray(body.options)) data.options = JSON.stringify(body.options)
-  if (typeof body.correctAnswer === "string") data.correctAnswer = body.correctAnswer
   if (typeof body.pointValue === "number") data.pointValue = body.pointValue
+  if (typeof body.timeLimitSeconds === "number") data.timeLimitSeconds = body.timeLimitSeconds
   if (typeof body.active === "boolean") data.active = body.active
 
   if (Object.keys(data).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 })

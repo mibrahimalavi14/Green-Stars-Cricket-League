@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   const [quizAttempts, seasonAttempts, challengeAttempts] = await Promise.all([
     prisma.quizAttempt.findMany({ where: { email }, select: { correct: true, quiz: { select: { pointValue: true } } } }),
     prisma.seasonQuizAttempt.findMany({ where: { email }, select: { seasonQuizId: true, score: true, total: true } }),
-    prisma.challengeAttempt.findMany({ where: { email }, select: { correct: true, pointsEarned: true, challenge: { select: { type: true, date: true } } } }),
+    prisma.challengeAttempt.findMany({ where: { email }, select: { score: true, submittedAt: true, pointsEarned: true, challenge: { select: { type: true, date: true } } } }),
   ])
 
   const matchPoints = quizAttempts.reduce((s, a) => s + (a.correct ? a.quiz.pointValue : 0), 0)
@@ -35,12 +35,12 @@ export async function GET(req: Request) {
   const correct =
     quizAttempts.filter(a => a.correct).length +
     seasonAttempts.filter(a => a.score > 0).length +
-    challengeAttempts.filter(a => a.correct).length
-  const totalAttempts = quizAttempts.length + seasonAttempts.length + challengeAttempts.length
+    challengeAttempts.filter(a => a.submittedAt && a.score > 0).length
+  const totalAttempts = quizAttempts.length + seasonAttempts.length + challengeAttempts.filter(a => a.submittedAt).length
 
   const daySet = new Set(
     challengeAttempts
-      .filter(a => a.challenge.type === "DAILY" && a.correct && a.challenge.date)
+      .filter(a => a.challenge.type === "DAILY" && a.submittedAt && a.score > 0 && a.challenge.date)
       .map(a => pktDateKey(a.challenge.date!).toDateString())
   )
   let dailyStreak = 0

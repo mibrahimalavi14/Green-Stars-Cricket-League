@@ -52,7 +52,12 @@ export default function QuizPage() {
   const [challenges, setChallenges] = useState<any>(null)
   const [challengeSubmitting, setChallengeSubmitting] = useState(false)
   const [challengeError, setChallengeError] = useState("")
-  const [challengeAnswers, setChallengeAnswers] = useState<Record<string, string>>({})
+  const [challengeStarting, setChallengeStarting] = useState(false)
+  const [activeChallenge, setActiveChallenge] = useState<any>(null)
+  const [activeChallengeIndex, setActiveChallengeIndex] = useState(0)
+  const [activeChallengeTimeLeft, setActiveChallengeTimeLeft] = useState(0)
+  const [activeChallengeAnswers, setActiveChallengeAnswers] = useState<Record<string, string>>({})
+  const [activeChallengeResult, setActiveChallengeResult] = useState<any>(null)
 
   const [authUser, setAuthUser] = useState<any>(null)
   const [authMode, setAuthMode] = useState<"login" | "signup" | "otp">("login")
@@ -120,6 +125,10 @@ export default function QuizPage() {
     setSqAnswers({})
     setSqUid("")
     setAuthMode("login")
+    setActiveChallenge(null)
+    setActiveChallengeResult(null)
+    setActiveChallengeAnswers({})
+    setChallengeError("")
     fetchSeasonQuiz()
     fetchChallengeLb(chLbPeriod)
   }
@@ -216,19 +225,66 @@ export default function QuizPage() {
     setChLbLoading(false)
   }
 
-  async function submitChallenge(challengeId: string, answer: string) {
+  async function startChallenge(challengeId: string) {
     if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken) return
-    setChallengeSubmitting(true)
+    setChallengeStarting(true)
     setChallengeError("")
-    setChallengeAnswers(prev => ({ ...prev, [challengeId]: answer }))
-    const res = await fetch("/api/challenges", {
+    const res = await fetch("/api/challenges/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         challengeId,
         name: sqName.trim(),
         email: sqEmail.trim(),
-        selectedAnswer: answer,
+        verifiedToken: sqVerifiedToken,
+      }),
+    })
+    const data = await res.json()
+    setChallengeStarting(false)
+    if (!res.ok) {
+      if (res.status === 401) {
+        setSqVerifiedToken("")
+        localStorage.removeItem("quiz_verified")
+      }
+      setChallengeError(data.error || "Failed to start challenge")
+      return
+    }
+    setActiveChallenge(data)
+    setActiveChallengeIndex(0)
+    setActiveChallengeTimeLeft(data.timeLimitSeconds)
+    setActiveChallengeAnswers({})
+    setActiveChallengeResult(null)
+  }
+
+  function advanceChallenge() {
+    if (!activeChallenge) return
+    if (activeChallengeIndex + 1 >= activeChallenge.questionCount) {
+      submitChallengeQuiz()
+    } else {
+      setActiveChallengeIndex(prev => prev + 1)
+      setActiveChallengeTimeLeft(activeChallenge.timeLimitSeconds)
+    }
+  }
+
+  function selectChallengeAnswer(qid: string, opt: string) {
+    if (!activeChallenge || activeChallengeResult || challengeSubmitting) return
+    setActiveChallengeAnswers(prev => ({ ...prev, [qid]: opt }))
+    setTimeout(() => advanceChallenge(), 250)
+  }
+
+  async function submitChallengeQuiz() {
+    if (!activeChallenge || challengeSubmitting) return
+    setChallengeSubmitting(true)
+    setChallengeError("")
+    const answers = Object.entries(activeChallengeAnswers).map(([questionId, selectedAnswer]) => ({ questionId, selectedAnswer }))
+    const res = await fetch("/api/challenges", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        challengeId: activeChallenge.id,
+        name: sqName.trim(),
+        email: sqEmail.trim(),
+        answers,
         verifiedToken: sqVerifiedToken,
       }),
     })
@@ -242,11 +298,26 @@ export default function QuizPage() {
       setChallengeError(data.error || "Failed to submit")
       return
     }
-    setChallengeError("")
-    setChallengeAnswers({})
+    setActiveChallengeResult(data)
     await Promise.all([fetchChallenges(), fetchProgress()])
     fetchChallengeLb(chLbPeriod)
   }
+
+  useEffect(() => {
+    if (!activeChallenge || activeChallengeResult || challengeSubmitting) return
+    const interval = setInterval(() => {
+      setActiveChallengeTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          advanceChallenge()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChallenge, activeChallengeIndex, activeChallengeResult, challengeSubmitting])
 
   async function submitSeasonQuiz() {
     if (!sqName.trim() || !sqEmail.trim() || !sqVerifiedToken || !seasonQuiz) return
@@ -705,102 +776,185 @@ export default function QuizPage() {
 
       {challenges && (challenges.daily || (challenges.weekly && challenges.weekly.length > 0)) && (
         <div className="mb-10 space-y-6">
-          {challenges.daily && (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-              <div className="mb-3 flex items-center justify-between">
+          {activeChallenge && !activeChallengeResult && (
+            <div className="rounded-xl border-2 border-[var(--accent)] bg-[var(--card)] p-6">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-lg font-semibold">
-                  <Sun className="h-5 w-5 text-orange-500" />
-                  Daily Challenge
+                  <Timer className="h-5 w-5 text-[var(--accent)]" />
+                  {activeChallenge.title || (activeChallenge.type === "DAILY" ? "Daily Challenge" : "Weekly Challenge")}
                 </h2>
-                <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
-                  +{challenges.daily.pointValue} pts
+                <span className="flex items-center gap-1.5 rounded-full bg-[var(--accent)]/10 px-3 py-1.5 text-sm font-bold text-[var(--accent)]">
+                  <Timer className="h-4 w-4" /> {activeChallengeTimeLeft}s
                 </span>
               </div>
-              {challenges.daily.attempt ? (
-                <div className="rounded-lg bg-[var(--muted)] p-4 text-sm">
-                  {challenges.daily.attempt.correct ? (
-                    <p className="text-green-500">
-                      <Check className="mr-1 inline h-4 w-4" />
-                      Correct! +{challenges.daily.attempt.pointsEarned} pts today
-                    </p>
-                  ) : (
-                    <p className="text-[var(--muted-foreground)]">Already attempted. Try again tomorrow!</p>
-                  )}
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">
+                Question {activeChallengeIndex + 1} / {activeChallenge.questionCount} · +{activeChallenge.pointValue} XP per correct answer
+              </p>
+              <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-[var(--muted)]">
+                <div className="h-full rounded-full bg-[var(--accent)] transition-all" style={{ width: `${((activeChallengeIndex + 1) / activeChallenge.questionCount) * 100}%` }} />
+              </div>
+              {activeChallenge.questions && activeChallenge.questions[activeChallengeIndex] && (
+                <div className="rounded-lg border border-[var(--border)] p-4">
+                  <p className="mb-3 text-sm font-medium">
+                    <span className="mr-2 text-[var(--muted-foreground)]">{activeChallengeIndex + 1}.</span>
+                    {activeChallenge.questions[activeChallengeIndex].question}
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {activeChallenge.questions[activeChallengeIndex].options.map((opt: string) => (
+                      <button
+                        key={opt}
+                        onClick={() => selectChallengeAnswer(activeChallenge.questions[activeChallengeIndex].id, opt)}
+                        disabled={challengeSubmitting || !!activeChallengeAnswers[activeChallenge.questions[activeChallengeIndex].id]}
+                        className={`flex items-center gap-2 rounded-lg border p-3 text-left text-sm transition-colors disabled:opacity-50 ${
+                          activeChallengeAnswers[activeChallenge.questions[activeChallengeIndex].id] === opt
+                            ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                            : "border-[var(--border)] hover:border-[var(--accent)]"
+                        }`}
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-xs">
+                          {String.fromCharCode(65 + activeChallenge.questions[activeChallengeIndex].options.indexOf(opt))}
+                        </span>
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <p className="mb-3 text-sm font-medium">{challenges.daily.question}</p>
-                  {!sqVerifiedToken ? (
-                    <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
-                      Sign in or verify your email to play the daily challenge.
-                    </p>
-                  ) : (
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {challenges.daily.options.map((opt: string, i: number) => (
-                        <button
-                          key={i}
-                          onClick={() => submitChallenge(challenges.daily.id, opt)}
-                          disabled={challengeSubmitting}
-                          className="flex items-center gap-2 rounded-lg border border-[var(--border)] p-3 text-left text-sm transition-colors hover:border-[var(--accent)] disabled:opacity-50"
-                        >
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-xs">{i + 1}</span>
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </>
               )}
+              {challengeError && <p className="mt-3 text-sm text-red-500">{challengeError}</p>}
             </div>
           )}
 
-          {challenges.weekly && challenges.weekly.length > 0 && (
+          {activeChallengeResult && (
             <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-lg font-semibold">
-                  <CalendarDays className="h-5 w-5 text-[var(--accent)]" />
-                  Weekly Challenge
-                </h2>
-                <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--accent)]">
-                  {challenges.weekly.reduce((s: number, q: any) => s + q.pointValue, 0)} pts total
-                </span>
+              <div className="rounded-lg bg-[var(--muted)] p-4 text-center">
+                <p className="text-3xl font-bold text-[var(--accent)]">
+                  {activeChallengeResult.score} / {activeChallengeResult.total}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                  {activeChallengeResult.score === activeChallengeResult.total
+                    ? "Perfect score — incredible!"
+                    : activeChallengeResult.score >= 7
+                      ? "Great cricket knowledge!"
+                      : activeChallengeResult.score >= 5
+                        ? "Not bad — keep playing!"
+                        : "Time to watch more matches!"}
+                </p>
+                <p className="mt-2 text-sm font-semibold text-[var(--accent)]">+{activeChallengeResult.pointsEarned} XP earned</p>
               </div>
-              <div className="space-y-4">
-                {challenges.weekly.map((q: any, qi: number) => (
-                  <div key={q.id} className="rounded-lg border border-[var(--border)] p-4">
-                    <p className="mb-2 text-sm font-medium">
-                      <span className="mr-2 text-[var(--muted-foreground)]">Q{qi + 1}.</span>
-                      {q.question}
-                    </p>
-                    {q.attempt ? (
-                      <p className="text-sm text-green-500">
-                        {q.attempt.correct ? <><Check className="mr-1 inline h-4 w-4" />Correct! +{q.attempt.pointsEarned} pts</> : "Already attempted"}
-                      </p>
+              <div className="mt-4 space-y-2">
+                {activeChallenge.questions.map((q: any, qi: number) => {
+                  const result = activeChallengeResult.results?.find((r: any) => r.questionId === q.id)
+                  return (
+                    <div key={q.id} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${result?.correct ? "border-green-500/30 bg-green-500/5" : "border-[var(--border)]"}`}>
+                      {result?.correct ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" /> : <X className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />}
+                      <div>
+                        <p className="font-medium">{qi + 1}. {q.question}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          Your answer: <strong>{activeChallengeAnswers[q.id] || "Skipped"}</strong>
+                          {!result?.correct && <> · Correct: <strong className="text-green-500">{result?.correctAnswer}</strong></>}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <button
+                onClick={() => { setActiveChallenge(null); setActiveChallengeResult(null); setActiveChallengeAnswers({}) }}
+                className="mt-4 min-h-11 rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:border-[var(--muted-foreground)]"
+              >
+                Done
+              </button>
+            </div>
+          )}
+
+          {!activeChallenge && !activeChallengeResult && (
+            <>
+              {challenges.daily && (() => {
+                const c = challenges.daily
+                return (
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <h2 className="flex items-center gap-2 text-lg font-semibold">
+                        <Sun className="h-5 w-5 text-orange-500" />
+                        Daily Challenge
+                      </h2>
+                      <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                        {c.questionCount} Q · +{c.pointValue} XP/correct · {c.timeLimitSeconds}s each
+                      </span>
+                    </div>
+                    {c.attempt && c.attempt.submittedAt ? (
+                      <div className="rounded-lg bg-[var(--muted)] p-4 text-sm">
+                        <p className="text-green-500">
+                          <Check className="mr-1 inline h-4 w-4" />
+                          You scored {c.attempt.score}/{c.attempt.total} · +{c.attempt.pointsEarned} XP
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--muted-foreground)]">Try again tomorrow!</p>
+                      </div>
                     ) : !sqVerifiedToken ? (
                       <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
-                        Sign in or verify your email to play.
+                        Sign in or verify your email to play the daily challenge.
                       </p>
                     ) : (
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {q.options.map((opt: string, i: number) => (
-                          <button
-                            key={i}
-                            onClick={() => submitChallenge(q.id, opt)}
-                            disabled={challengeSubmitting}
-                            className="flex items-center gap-2 rounded-lg border border-[var(--border)] p-2.5 text-left text-sm transition-colors hover:border-[var(--accent)] disabled:opacity-50"
-                          >
-                            {opt}
-                          </button>
-                        ))}
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={() => startChallenge(c.id)}
+                          disabled={challengeStarting}
+                          className="flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
+                        >
+                          {challengeStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Timer className="h-4 w-4" />}
+                          Start Daily Challenge
+                        </button>
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {c.serving} random questions from a pool of {c.questionCount} — everyone gets different questions &amp; order.
+                        </p>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
+                )
+              })()}
+
+              {challenges.weekly && challenges.weekly.length > 0 && (
+                <div className="space-y-3">
+                  {challenges.weekly.map((c: any) => (
+                    <div key={c.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <h2 className="flex items-center gap-2 text-lg font-semibold">
+                          <CalendarDays className="h-5 w-5 text-[var(--accent)]" />
+                          {c.title || "Weekly Challenge"}
+                        </h2>
+                        <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                          {c.questionCount} Q · +{c.pointValue} XP/correct · {c.timeLimitSeconds}s each
+                        </span>
+                      </div>
+                      {c.attempt && c.attempt.submittedAt ? (
+                        <div className="rounded-lg bg-[var(--muted)] p-4 text-sm">
+                          <p className="text-green-500">
+                            <Check className="mr-1 inline h-4 w-4" />
+                            You scored {c.attempt.score}/{c.attempt.total} · +{c.attempt.pointsEarned} XP
+                          </p>
+                        </div>
+                      ) : !sqVerifiedToken ? (
+                        <p className="rounded-lg bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">
+                          Sign in or verify your email to play.
+                        </p>
+                      ) : (
+                        <button
+                          onClick={() => startChallenge(c.id)}
+                          disabled={challengeStarting}
+                          className="flex min-h-11 items-center gap-2 rounded-lg bg-[var(--accent)] px-5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50"
+                        >
+                          {challengeStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Timer className="h-4 w-4" />}
+                          Start Weekly Challenge
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
-          {challengeError && <p className="text-sm text-red-500">{challengeError}</p>}
+          {challengeError && !activeChallenge && !activeChallengeResult && <p className="text-sm text-red-500">{challengeError}</p>}
         </div>
       )}
 

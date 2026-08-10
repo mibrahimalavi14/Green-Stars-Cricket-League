@@ -174,22 +174,39 @@ export const quizAttemptSchema = z.object({
   verifiedToken: z.string().min(1),
 })
 
+export const challengeStartSchema = z.object({
+  challengeId: z.string().min(1),
+  name: z.string().trim().min(1).max(80),
+  email: z.string().email().max(200),
+  verifiedToken: z.string().min(1),
+})
+
 export const challengeAttemptSchema = z.object({
   challengeId: z.string().min(1),
   name: z.string().trim().min(1).max(80),
   email: z.string().email().max(200),
-  selectedAnswer: z.string().min(1),
   verifiedToken: z.string().min(1),
+  answers: z.array(
+    z.object({
+      questionId: z.string().min(1),
+      selectedAnswer: z.string().min(1),
+    })
+  ).max(10),
 })
 
 export const challengeSchema = z.object({
   type: z.enum(["DAILY", "WEEKLY"]),
   title: z.string().max(120).optional().default(""),
-  question: z.string().min(1).max(300),
-  options: z.array(z.string().min(1)).min(2).max(6),
-  correctAnswer: z.string().min(1),
-  pointValue: z.number().int().min(5).max(200),
+  pointValue: z.number().int().min(1).max(50).optional().default(5),
+  timeLimitSeconds: z.number().int().min(5).max(60).optional().default(10),
   active: z.boolean().optional().default(true),
+  questions: z.array(
+    z.object({
+      question: z.string().min(1).max(300),
+      options: z.array(z.string().min(1)).min(2).max(6),
+      correctAnswer: z.string().min(1),
+    })
+  ).min(12).max(20),
 })
 
 export const signupSchema = z.object({

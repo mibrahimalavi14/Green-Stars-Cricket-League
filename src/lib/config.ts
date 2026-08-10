@@ -71,6 +71,9 @@ const _config = {
   fairPlaySportsmanshipBonus: 2,
   seasonQuizTimeLimitSeconds: 180,
   seasonQuizGraceSeconds: 10,
+  challengeQuestionCount: 10,
+  challengeTimeLimitSeconds: 10,
+  challengeGraceSeconds: 5,
 } as const
 
 export const MATCH_CONFIG = {
