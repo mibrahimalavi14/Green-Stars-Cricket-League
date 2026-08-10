@@ -146,7 +146,10 @@ async function PlayerStatsPage() {
 
       {allrounders.length > 0 && (
         <div>
-          <h2 className="mb-4 text-xl font-semibold">All-Rounders</h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-xl font-semibold">All-Rounders</h2>
+            <DownloadCSVButton data={allrounders.map(p => ({ name: p.name, team: p.team?.shortName, matches: p.matchesPlayed, runs: p.runs, wickets: p.wickets }))} filename="gscl-all-rounders.csv" columns={[{ key: "name", label: "Player" }, { key: "team", label: "Team" }, { key: "matches", label: "M" }, { key: "runs", label: "Runs" }, { key: "wickets", label: "Wkts" }]} />
+          </div>
           <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
           <table className="min-w-[700px] w-full text-sm">
               <thead>
