@@ -43,6 +43,8 @@ export const RATE_LIMITS = {
   PLAYER_OF_SEASON_VOTE: { windowMs: 60 * 60 * 1000, max: 3 },
   PREDICTION: { windowMs: 60 * 60 * 1000, max: 1 },
   QUIZ_ATTEMPT: { windowMs: 60 * 60 * 1000, max: 1 },
+  CHALLENGE_START: { windowMs: 60 * 60 * 1000, max: 20 },
+  CHALLENGE_SUBMIT: { windowMs: 60 * 60 * 1000, max: 20 },
   CONTACT: { windowMs: 24 * 60 * 60 * 1000, max: 5 },
   REVIEW: { windowMs: 24 * 60 * 60 * 1000, max: 3 },
   BALL_SUBMIT: { windowMs: 60 * 1000, max: 120 },

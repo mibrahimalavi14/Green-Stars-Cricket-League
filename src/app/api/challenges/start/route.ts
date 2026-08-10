@@ -17,7 +17,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
-  const rl = rateLimit(`challenge-start:${ip}`, RATE_LIMITS.QUIZ_ATTEMPT)
+  const rl = rateLimit(`challenge-start:${ip}`, RATE_LIMITS.CHALLENGE_START)
   if (!rl.allowed) {
     return NextResponse.json({ error: "Too many requests. Try again later." }, { status: 429 })
   }

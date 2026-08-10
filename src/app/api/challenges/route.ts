@@ -83,7 +83,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req)
-  const rl = rateLimit(`challenge:${ip}`, RATE_LIMITS.QUIZ_ATTEMPT)
+  const rl = rateLimit(`challenge:${ip}`, RATE_LIMITS.CHALLENGE_SUBMIT)
   if (!rl.allowed) {
     return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 })
   }
