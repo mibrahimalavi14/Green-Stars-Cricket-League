@@ -7,6 +7,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   trustHost: true,
+  debug: true,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -24,14 +25,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return false
     },
-    session({ session, user }) {
-      if (session.user) session.user.id = user.id
+    session({ session, token }) {
+      if (session.user && token.sub) session.user.id = token.sub
       return session
     },
   },
   logger: {
-    error(error) {
-      console.error("NextAuth Error:", error?.message || error, error?.stack || "")
+    error(error: Error) {
+      const cause = (error as Error & { cause?: unknown })?.cause
+      console.error(
+        "NextAuth Error:",
+        error?.message,
+        error?.stack || "",
+        cause instanceof Error ? `CAUSE: ${cause.message}\n${cause.stack}` : cause ? `CAUSE: ${JSON.stringify(cause)}` : ""
+      )
     },
   },
 })
