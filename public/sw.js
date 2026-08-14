@@ -1,4 +1,4 @@
-const CACHE = "gscl-v3"
+const CACHE = "gscl-v4"
 const staticUrls = ["/manifest.json"]
 
 self.addEventListener("install", (event) => {

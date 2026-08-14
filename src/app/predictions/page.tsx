@@ -31,8 +31,24 @@ export default function PredictionsPage() {
   const [votedAt, setVotedAt] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [signInError, setSignInError] = useState("")
   const [success, setSuccess] = useState(false)
   const checkedRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const err = params.get("error")
+    if (err) {
+      setSignInError(
+        err === "Configuration"
+          ? "Something went wrong while signing in. Please try again."
+          : `Sign in failed (${err}). Please try again.`
+      )
+      params.delete("error")
+      const clean = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`
+      window.history.replaceState({}, "", clean)
+    }
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -140,6 +156,11 @@ export default function PredictionsPage() {
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
           <Trophy className="mx-auto mb-3 h-10 w-10 text-[var(--accent)]" />
           <h2 className="mb-2 text-lg font-semibold">Sign in to vote</h2>
+          {signInError && (
+            <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-400">
+              {signInError}
+            </div>
+          )}
           <p className="mb-6 text-sm text-[var(--muted-foreground)]">
             One vote per Google account &mdash; sign in to make your prediction
           </p>
