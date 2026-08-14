@@ -10,6 +10,7 @@ import { CookieConsent } from "@/components/CookieConsent"
 import { PageTransition } from "@/components/PageTransition"
 import { NotificationPrompt } from "@/components/NotificationPrompt"
 import { NotificationToast } from "@/components/NotificationToast"
+import { AuthProvider } from "@/components/AuthProvider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.className} antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js')` }} />
         <ThemeProvider>
+        <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-1"><PageTransition>{children}</PageTransition></main>
@@ -66,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NotificationPrompt />
             <NotificationToast />
           </div>
+        </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

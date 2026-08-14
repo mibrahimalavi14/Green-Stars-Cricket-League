@@ -7,6 +7,7 @@ import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
 import { notifyAdmin } from "@/lib/email"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { formatDateTimePKT } from "@/lib/utils"
+import { auth } from "@/lib/auth"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -56,6 +57,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const session = await auth()
+  const userEmail = session?.user?.email
+  if (!userEmail) {
+    return NextResponse.json({ error: "Please sign in with Google first" }, { status: 401 })
+  }
+
   const ip = getClientIp(req)
   const rl = rateLimit(`prediction:${ip}`, RATE_LIMITS.PREDICTION)
   if (!rl.allowed) {
@@ -68,8 +75,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
 
-  const { email, predictedTeamId } = parsed.data
-  const { name } = body
+  const { predictedTeamId } = parsed.data
+  const email = userEmail.toLowerCase()
+  const name = session?.user?.name || email.split("@")[0] || "Google User"
 
   const season = await prisma.season.findFirst({ where: { isActive: true, workspaceId: WORKSPACE_OFFICIAL } })
   if (!season) return NextResponse.json({ error: "No active season" }, { status: 404 })

@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Loader2, Mail, KeyRound, Check, Lock, Clock, Trophy } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import { Loader2, Check, Lock, Clock, Trophy } from "lucide-react"
 import { Confetti } from "@/components/CoolEffects"
+import { GoogleSignIn } from "@/components/GoogleSignIn"
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -17,24 +19,20 @@ function timeAgo(dateStr: string) {
 }
 
 export default function PredictionsPage() {
+  const { data: session, status } = useSession()
+  const email = session?.user?.email?.toLowerCase()
   const [teams, setTeams] = useState<any[]>([])
   const [season, setSeason] = useState<any>(null)
   const [teamVotes, setTeamVotes] = useState<any[]>([])
   const [predictions, setPredictions] = useState<any[]>([])
   const [predictedTeamId, setPredictedTeamId] = useState<string | null>(null)
-  const [predictedTeamName, setPredictedTeamName] = useState("")
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [emailError, setEmailError] = useState("")
+  const [alreadyVoted, setAlreadyVoted] = useState(false)
   const [alreadyVotedAt, setAlreadyVotedAt] = useState<string | null>(null)
   const [votedAt, setVotedAt] = useState<string | null>(null)
-  const [otp, setOtp] = useState("")
-  const [step, setStep] = useState<"signin" | "otp" | "pick">("signin")
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
-  const emailTimer = useRef<NodeJS.Timeout | null>(null)
+  const checkedRef = useRef<string | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -49,84 +47,20 @@ export default function PredictionsPage() {
     if (data.predictions) setPredictions(data.predictions)
   }
 
-  function handleEmailChange(val: string) {
-    setEmail(val)
-    setEmailError("")
-    setError("")
-    if (emailTimer.current) clearTimeout(emailTimer.current)
-    if (!val.trim()) return
-    emailTimer.current = setTimeout(async () => {
-      const res = await fetch(`/api/predictions?email=${encodeURIComponent(val.trim())}`)
-      const data = await res.json()
-      if (data.prediction) {
-        setEmailError("This email has already voted")
-        setAlreadyVotedAt(data.prediction.createdAt ? new Date(data.prediction.createdAt).toISOString() : null)
-      } else {
-        setAlreadyVotedAt(null)
-      }
-    }, 600)
-  }
-
-  async function sendOtp() {
-    if (!name.trim() || !email.trim()) return
-    if (emailError) return
-    setLoading(true)
-    setError("")
-    const res = await fetch("/api/predictions/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), name: name.trim() }),
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || "Failed to send OTP")
-    } else {
-      setStep("otp")
-    }
-    setLoading(false)
-  }
-
-  async function verifyOtp() {
-    if (!otp.trim()) return
-    setLoading(true)
-    setError("")
-    const res = await fetch("/api/predictions/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), otp: otp.trim(), name: name.trim() }),
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || "Invalid OTP")
-      setLoading(false)
-      return
-    }
-
-    const predRes = await fetch(`/api/predictions?email=${encodeURIComponent(email.trim())}`)
-    const predData = await predRes.json()
-    if (predData.prediction) {
-      setError("This email has already voted")
-      setAlreadyVotedAt(predData.prediction.createdAt ? new Date(predData.prediction.createdAt).toISOString() : null)
-      setStep("signin")
-      setLoading(false)
-      return
-    }
-
-    if (predData.teamVotes) setTeamVotes(predData.teamVotes)
-    if (predData.predictions) setPredictions(predData.predictions)
-    setStep("pick")
-    setLoading(false)
-  }
-
-  function reset() {
-    setName("")
-    setEmail("")
-    setEmailError("")
-    setAlreadyVotedAt(null)
-    setOtp("")
-    setStep("signin")
-    setError("")
-  }
+  useEffect(() => {
+    if (status !== "authenticated" || !email || checkedRef.current === email) return
+    checkedRef.current = email
+    fetch(`/api/predictions?email=${encodeURIComponent(email)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.prediction) {
+          setAlreadyVoted(true)
+          setAlreadyVotedAt(data.prediction.createdAt ? new Date(data.prediction.createdAt).toISOString() : null)
+          setPredictedTeamId(data.prediction.predictedTeamId)
+        }
+      })
+      .catch(() => {})
+  }, [status, email, teams])
 
   async function submitPrediction(teamId: string) {
     setSaving(true)
@@ -134,7 +68,7 @@ export default function PredictionsPage() {
     const res = await fetch("/api/predictions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), name: name.trim(), predictedTeamId: teamId }),
+      body: JSON.stringify({ predictedTeamId: teamId }),
     })
     const data = await res.json()
     if (!res.ok) {
@@ -142,7 +76,6 @@ export default function PredictionsPage() {
     } else {
       const t = teams.find(t => t.id === teamId)
       setPredictedTeamId(teamId)
-      setPredictedTeamName(t?.name || "")
       setVotedAt(data.createdAt ? new Date(data.createdAt).toISOString() : null)
       setSuccess(true)
       fetchData()
@@ -152,34 +85,45 @@ export default function PredictionsPage() {
 
   const sortedVotes = [...teamVotes].sort((a, b) => b.count - a.count)
   const totalVotes = teamVotes.reduce((s, v) => s + v.count, 0)
+  const displayName = session?.user?.name || (email ? email.split("@")[0] : "")
+  const predictedTeamName = teams.find(t => t.id === predictedTeamId)?.name || ""
 
   if (success) {
     return (
       <>
-      <Confetti trigger={success} />
-      <div className="mx-auto max-w-4xl px-4 py-12">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
-          <Lock className="mx-auto mb-3 h-10 w-10 text-green-500" />
-          <h2 className="mb-2 text-lg font-bold">Your vote is locked!</h2>
-          <p className="mb-1 text-sm text-[var(--muted-foreground)]">
-            You predicted <strong>{predictedTeamName}</strong> will win {season?.name}.
-          </p>
-          <p className="mb-6 text-xs text-[var(--muted-foreground)]">
-            {name}
-            {votedAt && <span className="ml-1">· {timeAgo(votedAt)}</span>}
-          </p>
-          <div className="rounded-lg bg-[var(--muted)] p-4 text-sm text-[var(--muted-foreground)]">
-            <Check className="mr-1 inline h-4 w-4 text-green-500" />
-            Vote recorded successfully. Share this page with friends to vote too!
+        <Confetti trigger={success} />
+        <div className="mx-auto max-w-4xl px-4 py-12">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
+            <Lock className="mx-auto mb-3 h-10 w-10 text-green-500" />
+            <h2 className="mb-2 text-lg font-bold">Your vote is locked!</h2>
+            <p className="mb-1 text-sm text-[var(--muted-foreground)]">
+              You predicted <strong>{predictedTeamName}</strong> will win {season?.name}.
+            </p>
+            <p className="mb-6 text-xs text-[var(--muted-foreground)]">
+              {displayName}
+              {votedAt && <span className="ml-1">· {timeAgo(votedAt)}</span>}
+            </p>
+            <div className="rounded-lg bg-[var(--muted)] p-4 text-sm text-[var(--muted-foreground)]">
+              <Check className="mr-1 inline h-4 w-4 text-green-500" />
+              Vote recorded successfully. Share this page with friends to vote too!
+            </div>
+          </div>
+
+          <div className="mt-10">
+            <VoteResults sortedVotes={sortedVotes} totalVotes={totalVotes} />
+            <PredictionsList predictions={predictions} />
           </div>
         </div>
-
-        <div className="mt-10">
-          <VoteResults sortedVotes={sortedVotes} totalVotes={totalVotes} />
-          <PredictionsList predictions={predictions} />
-        </div>
-      </div>
       </>
+    )
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="mx-auto flex max-w-4xl flex-col items-center px-4 py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--accent)]" />
+        <p className="mt-3 text-sm text-[var(--muted-foreground)]">Loading&hellip;</p>
+      </div>
     )
   }
 
@@ -192,56 +136,50 @@ export default function PredictionsPage() {
         </p>
       </div>
 
-      {step === "signin" ? (
+      {status === "unauthenticated" ? (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
-          <Mail className="mx-auto mb-3 h-10 w-10 text-[var(--muted-foreground)]" />
-          <h2 className="mb-2 text-lg font-semibold">Verify your email</h2>
-          <p className="mb-6 text-sm text-[var(--muted-foreground)]">One vote per email &mdash; enter your details to get started</p>
-          <div className="mx-auto max-w-sm space-y-3">
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-            <div>
-              <input value={email} onChange={e => handleEmailChange(e.target.value)} placeholder="Your email" type="email" required
-                className={`w-full rounded-lg border bg-[var(--background)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] ${
-                  emailError ? "border-red-500" : "border-[var(--border)]"
-                }`} />
-              {emailError && <p className="mt-1 text-left text-xs text-red-500">{emailError}</p>}
-              {alreadyVotedAt && (
-                <p className="mt-1 text-left text-xs text-[var(--muted-foreground)]">
-                  Voted {timeAgo(alreadyVotedAt)}
-                </p>
-              )}
-            </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <button onClick={sendOtp} disabled={!name.trim() || !email.trim() || !!emailError || loading}
-              className="w-full rounded-lg bg-[var(--accent)] px-5 py-2.5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50">
-              {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Send OTP"}
-            </button>
+          <Trophy className="mx-auto mb-3 h-10 w-10 text-[var(--accent)]" />
+          <h2 className="mb-2 text-lg font-semibold">Sign in to vote</h2>
+          <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+            One vote per Google account &mdash; sign in to make your prediction
+          </p>
+          <div className="mx-auto max-w-sm">
+            <GoogleSignIn callbackUrl="/predictions" />
           </div>
         </div>
-      ) : step === "otp" ? (
+      ) : alreadyVoted ? (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center">
-          <KeyRound className="mx-auto mb-3 h-10 w-10 text-[var(--accent)]" />
-          <h2 className="mb-2 text-lg font-semibold">Check your email</h2>
-          <p className="mb-1 text-sm text-[var(--muted-foreground)]">We sent a 6-digit code to <strong>{email}</strong></p>
-          <p className="mb-6 text-xs text-[var(--muted-foreground)]">Expires in 5 minutes</p>
-          <div className="mx-auto max-w-xs space-y-3">
-            <input value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="Enter OTP" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required
-              className="w-full text-center text-2xl tracking-[8px] rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3 font-mono focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <button onClick={verifyOtp} disabled={otp.length !== 6 || loading}
-              className="w-full rounded-lg bg-[var(--accent)] px-5 py-2.5 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50">
-              {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Verify & Vote"}
+          <Lock className="mx-auto mb-3 h-10 w-10 text-[var(--muted-foreground)]" />
+          <h2 className="mb-2 text-lg font-semibold">You&apos;ve already voted</h2>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            You predicted <strong>{predictedTeamName}</strong> will win {season?.name}.
+          </p>
+          {alreadyVotedAt && (
+            <p className="mb-6 mt-1 text-xs text-[var(--muted-foreground)]">Voted {timeAgo(alreadyVotedAt)}</p>
+          )}
+          <div className="mx-auto max-w-sm">
+            <button
+              onClick={() => signOut({ callbackUrl: "/predictions" })}
+              className="w-full rounded-lg border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              Use a different account
             </button>
-            <button onClick={reset} className="text-sm text-[var(--accent)] hover:underline">Use a different email</button>
           </div>
         </div>
       ) : (
         <div>
           {error && <div className="mb-4 text-center text-sm text-red-500">{error}</div>}
-          <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-            Logged in as <strong>{name}</strong>. Pick the team you think will win:
-          </p>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Logged in as <strong>{displayName}</strong>. Pick the team you think will win:
+            </p>
+            <button
+              onClick={() => signOut({ callbackUrl: "/predictions" })}
+              className="text-sm text-[var(--accent)] hover:underline"
+            >
+              Sign out
+            </button>
+          </div>
           {teams.length === 0 ? (
             <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-8 text-center text-[var(--muted-foreground)]">
               No teams found for the current season.
@@ -267,12 +205,12 @@ export default function PredictionsPage() {
         </div>
       )}
 
-      {step !== "pick" && (
+      {status !== "authenticated" || alreadyVoted ? (
         <div className="mt-10">
           <VoteResults sortedVotes={sortedVotes} totalVotes={totalVotes} />
           <PredictionsList predictions={predictions} />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
