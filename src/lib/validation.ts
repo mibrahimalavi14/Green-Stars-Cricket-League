@@ -153,6 +153,7 @@ export const playerOfSeasonVoteSchema = z.object({
 
 export const predictionSchema = z.object({
   predictedTeamId: z.string().min(1),
+  timeZone: z.string().optional(),
 })
 
 export const otpRequestSchema = z.object({

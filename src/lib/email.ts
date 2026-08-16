@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer"
-import { after } from "next/server"
 
 interface SendOtpEmailArgs {
   email: string
@@ -68,11 +67,7 @@ export async function sendAdminNotification({ title, rows, message }: AdminNotif
 }
 
 export function notifyAdmin(data: AdminNotificationData) {
-  after(async () => {
-    try {
-      await sendAdminNotification(data)
-    } catch (err) {
-      console.error("Admin notification failed:", err)
-    }
+  sendAdminNotification(data).catch((err) => {
+    console.error("Admin notification failed:", err)
   })
 }

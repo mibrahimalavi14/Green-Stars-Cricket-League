@@ -350,6 +350,7 @@ model SeasonPrediction {
   name            String
   email           String
   googleUserId    String?
+  timeZone        String?
   createdAt       DateTime @default(now())
 
   @@unique([email, seasonId])

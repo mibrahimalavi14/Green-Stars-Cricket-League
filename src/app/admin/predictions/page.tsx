@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { Trophy, Users, Mail, Calendar } from "lucide-react"
 import { AdminDeleteButton } from "@/components/AdminDeleteButton"
-import { formatDateTimePKT } from "@/lib/utils"
+import { formatDateTimeInZone } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -22,6 +22,7 @@ export default async function AdminPredictionsPage() {
   const teamMap = new Map(teams.map(t => [t.id, t]))
 
   const teamNames: Record<string, string> = {}
+  const totalCount = predictions.length
   for (const p of predictions) {
     const team = teamMap.get(p.predictedTeamId)
     teamNames[p.predictedTeamId] = team ? `${team.name} (${team.shortName})` : "Unknown"
@@ -49,7 +50,7 @@ export default async function AdminPredictionsPage() {
           <div key={teamId} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
             <div className="flex items-center justify-between">
               <span className="font-medium">{data.teamName}</span>
-              <span className="text-2xl font-bold text-[var(--accent)]">{data.count}</span>
+              <span className="text-2xl font-bold text-[var(--accent)]">{data.count}<span className="text-sm font-normal text-[var(--muted-foreground)]"> · {totalCount > 0 ? ((data.count / totalCount) * 100).toFixed(1) : 0}%</span></span>
             </div>
             <p className="text-xs text-[var(--muted-foreground)]">predictions</p>
           </div>
@@ -77,7 +78,7 @@ export default async function AdminPredictionsPage() {
                   <td className="px-4 py-3">{p.name}</td>
                   <td className="px-4 py-3 text-[var(--muted-foreground)]">{p.email}</td>
                   <td className="px-4 py-3 font-medium text-[var(--accent)]">{teamNames[p.predictedTeamId]}</td>
-                  <td className="px-4 py-3 text-[var(--muted-foreground)] whitespace-nowrap">{formatDateTimePKT(p.createdAt)}</td>
+                  <td className="px-4 py-3 text-[var(--muted-foreground)] whitespace-nowrap">{formatDateTimeInZone(p.createdAt, p.timeZone)}</td>
                   <td className="px-4 py-3"><AdminDeleteButton api="/api/predictions" id={p.id} label="prediction" /></td>
                 </tr>
               ))}

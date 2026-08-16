@@ -4,9 +4,9 @@ import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { predictionSchema } from "@/lib/validation"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
-import { notifyAdmin } from "@/lib/email"
+import { sendAdminNotification } from "@/lib/email"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
-import { formatDateTimePKT } from "@/lib/utils"
+import { formatDateTimeInZone } from "@/lib/utils"
 import { auth } from "@/lib/auth"
 
 export async function GET(req: Request) {
@@ -45,6 +45,7 @@ export async function GET(req: Request) {
     name: p.name,
     teamName: teams.find(t => t.id === p.predictedTeamId)?.name || "Unknown",
     createdAt: p.createdAt.toISOString(),
+    timeZone: p.timeZone || null,
   }))
 
   return NextResponse.json({
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
 
-  const { predictedTeamId } = parsed.data
+  const { predictedTeamId, timeZone } = parsed.data
   const email = userEmail.toLowerCase()
   const name = session?.user?.name || email.split("@")[0] || "Google User"
 
@@ -99,25 +100,25 @@ export async function POST(req: Request) {
   }
 
   const pred = await prisma.seasonPrediction.create({
-    data: { email, name, seasonId: season.id, predictedTeamId },
+    data: { email, name, seasonId: season.id, predictedTeamId, timeZone },
   })
 
   trackEvent("prediction_submitted", { teamId: predictedTeamId })
 
-  prisma.team
-    .findUnique({ where: { id: predictedTeamId }, select: { name: true } })
-    .then((team) =>
-      notifyAdmin({
-        title: "New Season Prediction",
-        rows: [
-          { label: "Name", value: name || "Anonymous" },
-          { label: "Email", value: email },
-          { label: "Predicted Champion", value: team?.name || predictedTeamId },
-          { label: "Season", value: season.name },
-          { label: "Time", value: formatDateTimePKT(pred.createdAt) },
-        ],
-      })
-    )
+  try {
+    await sendAdminNotification({
+      title: "New Season Prediction",
+      rows: [
+        { label: "Name", value: name || "Anonymous" },
+        { label: "Email", value: email },
+        { label: "Predicted Champion", value: team?.name || predictedTeamId },
+        { label: "Season", value: season.name },
+        { label: "Time", value: formatDateTimeInZone(pred.createdAt, timeZone) },
+      ],
+    })
+  } catch (err) {
+    console.error("Admin notification failed:", err)
+  }
 
   return NextResponse.json(pred)
 }

@@ -2,20 +2,22 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useSession, signOut } from "next-auth/react"
-import { Loader2, Check, Lock, Clock, Trophy } from "lucide-react"
+import { Loader2, Check, Lock, Clock, Trophy, Share2 } from "lucide-react"
 import { Confetti } from "@/components/CoolEffects"
 import { GoogleSignIn } from "@/components/GoogleSignIn"
+import { timeZoneAbbreviation } from "@/lib/utils"
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return "Just now"
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  if (days < 30) return `${days}d ago`
-  return new Date(dateStr).toLocaleDateString("en-GB")
+function formatLocalTime(dateStr: string, timeZone?: string | null) {
+  const tz = timeZone || undefined
+  const base = new Date(dateStr).toLocaleString([], {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    ...(tz ? { timeZone: tz } : {}),
+  })
+  const region = tz ? timeZoneAbbreviation(tz) : undefined
+  return region ? `${base} ${region}` : base
 }
 
 export default function PredictionsPage() {
@@ -29,6 +31,8 @@ export default function PredictionsPage() {
   const [alreadyVoted, setAlreadyVoted] = useState(false)
   const [alreadyVotedAt, setAlreadyVotedAt] = useState<string | null>(null)
   const [votedAt, setVotedAt] = useState<string | null>(null)
+  const [votedTimeZone, setVotedTimeZone] = useState<string | null>(null)
+  const [alreadyVotedTimeZone, setAlreadyVotedTimeZone] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [signInError, setSignInError] = useState("")
@@ -72,6 +76,7 @@ export default function PredictionsPage() {
         if (data.prediction) {
           setAlreadyVoted(true)
           setAlreadyVotedAt(data.prediction.createdAt ? new Date(data.prediction.createdAt).toISOString() : null)
+          setAlreadyVotedTimeZone(data.prediction.timeZone || null)
           setPredictedTeamId(data.prediction.predictedTeamId)
         }
       })
@@ -84,7 +89,10 @@ export default function PredictionsPage() {
     const res = await fetch("/api/predictions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ predictedTeamId: teamId }),
+      body: JSON.stringify({
+        predictedTeamId: teamId,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }),
     })
     const data = await res.json()
     if (!res.ok) {
@@ -93,6 +101,7 @@ export default function PredictionsPage() {
       const t = teams.find(t => t.id === teamId)
       setPredictedTeamId(teamId)
       setVotedAt(data.createdAt ? new Date(data.createdAt).toISOString() : null)
+      setVotedTimeZone(data.timeZone || null)
       setSuccess(true)
       fetchData()
     }
@@ -117,7 +126,7 @@ export default function PredictionsPage() {
             </p>
             <p className="mb-6 text-xs text-[var(--muted-foreground)]">
               {displayName}
-              {votedAt && <span className="ml-1">· {timeAgo(votedAt)}</span>}
+              {votedAt && <span className="ml-1">· {formatLocalTime(votedAt, votedTimeZone)}</span>}
             </p>
             <div className="rounded-lg bg-[var(--muted)] p-4 text-sm text-[var(--muted-foreground)]">
               <Check className="mr-1 inline h-4 w-4 text-green-500" />
@@ -176,7 +185,7 @@ export default function PredictionsPage() {
             You predicted <strong>{predictedTeamName}</strong> will win {season?.name}.
           </p>
           {alreadyVotedAt && (
-            <p className="mb-6 mt-1 text-xs text-[var(--muted-foreground)]">Voted {timeAgo(alreadyVotedAt)}</p>
+            <p className="mb-6 mt-1 text-xs text-[var(--muted-foreground)]">Voted {formatLocalTime(alreadyVotedAt, alreadyVotedTimeZone)}</p>
           )}
           <div className="mx-auto max-w-sm">
             <button
@@ -237,19 +246,50 @@ export default function PredictionsPage() {
 }
 
 function VoteResults({ sortedVotes, totalVotes }: { sortedVotes: any[]; totalVotes: number }) {
+  const [copied, setCopied] = useState(false)
   if (totalVotes === 0) return null
+
+  const shareText = () => {
+    const lines = sortedVotes.map(v => `• ${v.teamName}: ${v.count} vote${v.count !== 1 ? "s" : ""} (${((v.count / totalVotes) * 100).toFixed(1)}%)`)
+    return `🏏 GSCL Champion Prediction — Vote Breakdown (${totalVotes} total):\n${lines.join("\n")}\n\nVote now: ${typeof window !== "undefined" ? window.location.origin : ""}/predictions`
+  }
+
+  const handleShare = async () => {
+    const text = shareText()
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "GSCL Champion Prediction — Vote Breakdown", text })
+      } catch {
+        // user cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <div className="mb-8">
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-        <Trophy className="h-5 w-5 text-[var(--accent)]" />
-        Vote Breakdown ({totalVotes} total)
-      </h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <Trophy className="h-5 w-5 text-[var(--accent)]" />
+          Vote Breakdown ({totalVotes} total)
+        </h2>
+        <button
+          onClick={handleShare}
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-medium transition-colors hover:bg-[var(--muted)]"
+        >
+          {copied ? <Check className="h-4 w-4 text-green-600" /> : <Share2 className="h-4 w-4 text-[var(--accent)]" />}
+          {copied ? "Copied!" : "Share"}
+        </button>
+      </div>
       <div className="space-y-2">
         {sortedVotes.map(v => (
           <div key={v.teamId} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
             <div className="mb-1 flex items-center justify-between text-sm">
               <span className="font-medium">{v.teamName}</span>
-              <span className="font-bold text-[var(--accent)]">{v.count}</span>
+              <span className="font-bold text-[var(--accent)]">{v.count} <span className="text-xs font-normal text-[var(--muted-foreground)]">({((v.count / totalVotes) * 100).toFixed(1)}%)</span></span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-[var(--muted)]">
               <div
@@ -276,7 +316,7 @@ function PredictionsList({ predictions }: { predictions: any[] }) {
         {predictions.slice(0, 20).map((p, i) => (
           <div key={i} className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-sm min-w-0">
             <span className="truncate min-w-0"><strong>{p.name}</strong> predicted <span className="font-medium text-[var(--accent)]">{p.teamName}</span></span>
-            <span className="text-xs text-[var(--muted-foreground)] shrink-0">{timeAgo(p.createdAt)}</span>
+            <span className="text-xs text-[var(--muted-foreground)] shrink-0">{formatLocalTime(p.createdAt, p.timeZone)}</span>
           </div>
         ))}
       </div>
