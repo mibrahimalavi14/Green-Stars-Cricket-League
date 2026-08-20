@@ -52,7 +52,7 @@ export default async function SchedulePage() {
       )}
 
       {season.formatText && (
-        <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div id="format" className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 scroll-mt-20">
           <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
             <Trophy className="h-5 w-5 text-[var(--accent)]" />
             Tournament Format

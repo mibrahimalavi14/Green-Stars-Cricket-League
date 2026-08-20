@@ -161,6 +161,7 @@ export function Header() {
           <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
           <Link href="/schedule" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Schedule</Link>
+          <Link href="/schedule#format" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Format</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/records" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Records</Link>
           {hasLive && (
@@ -233,6 +234,7 @@ export function Header() {
             <Link href="/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
             <Link href="/fixtures" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
             <Link href="/schedule" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Schedule</Link>
+            <Link href="/schedule#format" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Format</Link>
             <Link href="/points-table" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Standings</Link>
             <Link href="/records" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Records</Link>
             {hasLive && <Link href="/live" onClick={() => setOpen(false)} className="flex items-center gap-1 text-red-500"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live</Link>}
