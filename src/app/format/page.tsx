@@ -37,13 +37,15 @@ export default async function FormatPage({ searchParams }: { searchParams: Promi
         <p className="text-[var(--muted-foreground)]">{season.name} ({season.year})</p>
       </div>
 
-      {season.formatImage ? (
-        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
-          <img
-            src={season.formatImage}
-            alt={`${season.name} format`}
-            className="w-full object-contain"
-          />
+      {season.formatText ? (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+          <div className="mb-4 flex items-center gap-2">
+            <Trophy className="h-6 w-6 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Rules & Format</h2>
+          </div>
+          <div className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--foreground)]">
+            {season.formatText}
+          </div>
         </div>
       ) : (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-12 text-center">

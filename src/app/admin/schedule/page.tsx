@@ -1,15 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Loader2, Save, Image, Trash2 } from "lucide-react"
+import { Loader2, Save, Image, Trash2, FileText, Check } from "lucide-react"
 
 export default function AdminSchedulePage() {
   const [seasonName, setSeasonName] = useState("")
   const [scheduleAnnounced, setScheduleAnnounced] = useState(false)
-  const [scheduleImage, setScheduleImage] = useState("")
-  const [formatImage, setFormatImage] = useState("")
+  const [scheduleText, setScheduleText] = useState("")
+  const [formatText, setFormatText] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [ocrLoading, setOcrLoading] = useState<"" | "schedule" | "format">("")
+  const [ocrDone, setOcrDone] = useState<"" | "schedule" | "format">("")
 
   useEffect(() => { fetchData() }, [])
 
@@ -19,19 +21,29 @@ export default function AdminSchedulePage() {
     const data = await res.json()
     setSeasonName(data.season?.name || "")
     setScheduleAnnounced(data.season?.scheduleAnnounced || false)
-    setScheduleImage(data.scheduleImage || "")
-    setFormatImage(data.formatImage || "")
+    setScheduleText(data.scheduleText || "")
+    setFormatText(data.formatText || "")
     setLoading(false)
   }
 
-  function handleImageUpload(setter: (v: string) => void) {
+  async function extractText(file: File, target: "schedule" | "format") {
+    setOcrLoading(target)
+    setOcrDone("")
+    const Tesseract = (await import("tesseract.js")).default
+    const { data: { text } } = await Tesseract.recognize(file, "eng", {})
+    if (target === "schedule") setScheduleText(text.trim())
+    else setFormatText(text.trim())
+    setOcrLoading("")
+    setOcrDone(target)
+    setTimeout(() => setOcrDone(""), 2000)
+  }
+
+  function handleImageChange(target: "schedule" | "format") {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
       if (file.size > 2 * 1024 * 1024) { alert("Image must be under 2 MB"); return }
-      const reader = new FileReader()
-      reader.onload = () => setter(reader.result as string)
-      reader.readAsDataURL(file)
+      extractText(file, target)
     }
   }
 
@@ -40,7 +52,7 @@ export default function AdminSchedulePage() {
     await fetch("/api/admin/schedule", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "format", scheduleImage, formatImage }),
+      body: JSON.stringify({ scheduleText, formatText }),
     })
     setSaving(false)
   }
@@ -59,40 +71,50 @@ export default function AdminSchedulePage() {
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
 
+        {/* Schedule */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-            <Image className="h-5 w-5 text-[var(--accent)]" /> Schedule Poster
+          <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold">
+            <Image className="h-5 w-5 text-[var(--accent)]" /> Schedule
           </h2>
-          <p className="mb-3 text-xs text-[var(--muted-foreground)]">Upload the match schedule image (poster/flyer)</p>
+          <p className="mb-3 text-xs text-[var(--muted-foreground)]">Upload schedule image — text will be extracted automatically</p>
           <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 text-sm font-medium transition-colors hover:bg-[var(--muted)]">
-            <Image className="h-4 w-4 text-[var(--accent)]" />
-            {scheduleImage ? "Change Image" : "Choose Image"}
-            <input type="file" accept="image/*" onChange={handleImageUpload(setScheduleImage)} className="hidden" />
+            {ocrLoading === "schedule" ? <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" /> : ocrDone === "schedule" ? <Check className="h-4 w-4 text-green-600" /> : <Image className="h-4 w-4 text-[var(--accent)]" />}
+            {ocrLoading === "schedule" ? "Extracting text..." : "Upload Schedule Image"}
+            <input type="file" accept="image/*" onChange={handleImageChange("schedule")} className="hidden" disabled={!!ocrLoading} />
           </label>
-          {scheduleImage && (
-            <div className="mt-3 relative">
-              <img src={scheduleImage} alt="Schedule preview" className="w-full rounded-lg border border-[var(--border)] object-contain" />
-              <button onClick={() => setScheduleImage("")} className="absolute top-2 right-2 h-7 w-7 rounded-full bg-red-500 text-xs text-white flex items-center justify-center hover:bg-red-600"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
-          )}
+          <div className="mt-3">
+            <label className="mb-1 block text-xs font-medium">Extracted Text (editable)</label>
+            <textarea
+              rows={10}
+              value={scheduleText}
+              onChange={e => setScheduleText(e.target.value)}
+              placeholder="Schedule text will appear here after image upload..."
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm font-mono"
+            />
+          </div>
         </div>
 
+        {/* Format */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-            <Image className="h-5 w-5 text-[var(--accent)]" /> Match Format Poster
+          <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold">
+            <FileText className="h-5 w-5 text-[var(--accent)]" /> Tournament Format
           </h2>
-          <p className="mb-3 text-xs text-[var(--muted-foreground)]">Upload the tournament format/rules image</p>
+          <p className="mb-3 text-xs text-[var(--muted-foreground)]">Upload format/rules image — text will be extracted automatically</p>
           <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 text-sm font-medium transition-colors hover:bg-[var(--muted)]">
-            <Image className="h-4 w-4 text-[var(--accent)]" />
-            {formatImage ? "Change Image" : "Choose Image"}
-            <input type="file" accept="image/*" onChange={handleImageUpload(setFormatImage)} className="hidden" />
+            {ocrLoading === "format" ? <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" /> : ocrDone === "format" ? <Check className="h-4 w-4 text-green-600" /> : <FileText className="h-4 w-4 text-[var(--accent)]" />}
+            {ocrLoading === "format" ? "Extracting text..." : "Upload Format Image"}
+            <input type="file" accept="image/*" onChange={handleImageChange("format")} className="hidden" disabled={!!ocrLoading} />
           </label>
-          {formatImage && (
-            <div className="mt-3 relative">
-              <img src={formatImage} alt="Format preview" className="w-full rounded-lg border border-[var(--border)] object-contain" />
-              <button onClick={() => setFormatImage("")} className="absolute top-2 right-2 h-7 w-7 rounded-full bg-red-500 text-xs text-white flex items-center justify-center hover:bg-red-600"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
-          )}
+          <div className="mt-3">
+            <label className="mb-1 block text-xs font-medium">Extracted Text (editable)</label>
+            <textarea
+              rows={10}
+              value={formatText}
+              onChange={e => setFormatText(e.target.value)}
+              placeholder="Format text will appear here after image upload..."
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm font-mono"
+            />
+          </div>
         </div>
 
       </div>

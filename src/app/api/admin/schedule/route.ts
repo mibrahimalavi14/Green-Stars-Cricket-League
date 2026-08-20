@@ -13,8 +13,8 @@ export async function GET() {
 
   return NextResponse.json({
     season: { id: season.id, name: season.name, scheduleAnnounced: season.scheduleAnnounced },
-    scheduleImage: season.scheduleImage || "",
-    formatImage: season.formatImage || "",
+    scheduleText: season.scheduleText || "",
+    formatText: season.formatText || "",
   })
 }
 
@@ -29,8 +29,8 @@ export async function POST(req: Request) {
   await prisma.season.update({
     where: { id: season.id },
     data: {
-      scheduleImage: body.scheduleImage ?? undefined,
-      formatImage: body.formatImage ?? undefined,
+      scheduleText: body.scheduleText ?? undefined,
+      formatText: body.formatText ?? undefined,
     },
   })
 

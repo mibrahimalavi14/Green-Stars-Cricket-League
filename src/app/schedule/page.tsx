@@ -37,13 +37,11 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
         <p className="text-[var(--muted-foreground)]">{season.name} ({season.year})</p>
       </div>
 
-      {season.scheduleImage ? (
-        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
-          <img
-            src={season.scheduleImage}
-            alt={`${season.name} schedule`}
-            className="w-full object-contain"
-          />
+      {season.scheduleText ? (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+          <div className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--foreground)]">
+            {season.scheduleText}
+          </div>
         </div>
       ) : (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-12 text-center">
