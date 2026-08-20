@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { getCurrentWorkspaceId } from "@/lib/workspace"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical, PenLine, Users2 } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical, PenLine, Users2, List } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -42,6 +42,12 @@ async function AdminPage() {
           <h3 className="text-lg font-semibold">Matches</h3>
           <p className="text-2xl font-bold">{counts.matches}</p>
           <p className="text-sm text-[var(--muted-foreground)]">Manage fixtures & scores</p>
+        </Link>
+
+        <Link href="/admin/schedule" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
+          <List className="mb-3 h-8 w-8 text-[var(--accent)]" />
+          <h3 className="text-lg font-semibold">Schedule & Format</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">Match schedule, format & poster</p>
         </Link>
 
 

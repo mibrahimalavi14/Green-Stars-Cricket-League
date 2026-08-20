@@ -100,6 +100,9 @@ model Season {
   seasonQuizzes       SeasonQuiz[]
   seasonQuizStandings SeasonQuizStanding[]
   playerOfSeasonVotes PlayerOfSeasonVote[]
+  formatText          String?
+  scheduleImage       String?
+  fixtures            SeasonFixture[]
 
   @@unique([name, year, workspaceId])
 }
@@ -823,6 +826,23 @@ model SeasonQuizStanding {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([seasonId, name])
+  @@index([seasonId])
+}
+
+model SeasonFixture {
+  id          String   @id @default(cuid())
+  seasonId    String
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  matchNumber Int
+  team1Name   String
+  team2Name   String
+  dateTime    DateTime?
+  venue       String?
+  result      String?
+  status      String   @default("upcoming")
+  createdAt   DateTime @default(now())
+
+  @@unique([seasonId, matchNumber])
   @@index([seasonId])
 }
 
