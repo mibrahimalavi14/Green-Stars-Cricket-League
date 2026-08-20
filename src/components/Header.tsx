@@ -160,8 +160,6 @@ export function Header() {
           <Link href="/teams" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Teams</Link>
           <Link href="/players" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Players</Link>
           <Link href="/fixtures" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Fixtures</Link>
-          <Link href="/schedule" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Schedule</Link>
-          <Link href="/schedule#format" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Format</Link>
           <Link href="/points-table" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Standings</Link>
           <Link href="/records" className="text-sm font-medium transition-colors hover:text-[var(--accent)]">Records</Link>
           {hasLive && (
@@ -186,6 +184,8 @@ export function Header() {
                 <Link href="/dream-team" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Users className="h-3.5 w-3.5" /> Dream Team</Link>
                 <Link href="/potm-gallery" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Award className="h-3.5 w-3.5" /> POTM Gallery</Link>
                 <Link href="/player-of-season" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crown className="h-3.5 w-3.5" /> Player of the Season</Link>
+                <Link href="/schedule" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Calendar className="h-3.5 w-3.5" /> Schedule</Link>
+                <Link href="/schedule#format" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><FileText className="h-3.5 w-3.5" /> Format</Link>
 
                 <p className="mt-1 border-t border-[var(--border)] px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
                 <Link href="/compare" className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-[var(--muted)] hover:text-[var(--accent)]"><Crosshair className="h-3.5 w-3.5" /> Player Comparison</Link>
@@ -233,8 +233,6 @@ export function Header() {
             <Link href="/teams" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Teams</Link>
             <Link href="/players" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Players</Link>
             <Link href="/fixtures" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
-            <Link href="/schedule" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Schedule</Link>
-            <Link href="/schedule#format" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Format</Link>
             <Link href="/points-table" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Standings</Link>
             <Link href="/records" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Records</Link>
             {hasLive && <Link href="/live" onClick={() => setOpen(false)} className="flex items-center gap-1 text-red-500"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live</Link>}
@@ -247,6 +245,8 @@ export function Header() {
             <Link href="/dream-team" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Dream Team</Link>
             <Link href="/potm-gallery" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">POTM Gallery</Link>
             <Link href="/player-of-season" onClick={() => setOpen(false)} className="transition-colors hover:text-[var(--accent)]">Player of the Season</Link>
+            <Link href="/schedule" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Calendar className="h-3 w-3" /> Schedule</Link>
+            <Link href="/schedule#format" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><FileText className="h-3 w-3" /> Format</Link>
             <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Stats & Analysis</p>
             <Link href="/compare" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Crosshair className="h-3 w-3" /> Player Comparison</Link>
             <Link href="/head-to-head" onClick={() => setOpen(false)} className="flex items-center gap-1 transition-colors hover:text-[var(--accent)]"><Sword className="h-3 w-3" /> Head to Head</Link>
