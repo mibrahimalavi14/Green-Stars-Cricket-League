@@ -102,6 +102,7 @@ model Season {
   playerOfSeasonVotes PlayerOfSeasonVote[]
   formatText          String?
   scheduleImage       String?
+  formatImage         String?
   fixtures            SeasonFixture[]
 
   @@unique([name, year, workspaceId])
