@@ -36,7 +36,7 @@ export function Footer() {
               <Link href="/stats" className="transition-colors hover:text-[var(--accent)]">All-Time Stats</Link>
               <Link href="/fixtures" className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
               <Link href="/schedule" className="transition-colors hover:text-[var(--accent)]">Schedule</Link>
-              <Link href="/schedule#format" className="transition-colors hover:text-[var(--accent)]">Format</Link>
+              <Link href="/format" className="transition-colors hover:text-[var(--accent)]">Format</Link>
               <Link href="/points-table" className="transition-colors hover:text-[var(--accent)]">Standings</Link>
               <Link href="/field-analysis" className="transition-colors hover:text-[var(--accent)]">Field Analysis</Link>
               <Link href="/toss-analysis" className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>

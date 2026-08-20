@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { getCurrentWorkspaceId } from "@/lib/workspace"
 import { formatDateTimeInZone } from "@/lib/utils"
-import { Calendar, Trophy, Clock, ArrowLeft, MapPin } from "lucide-react"
+import { Calendar, Clock, ArrowLeft, MapPin } from "lucide-react"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -48,18 +48,6 @@ export default async function SchedulePage() {
             className="w-full object-contain"
             loading="lazy"
           />
-        </div>
-      )}
-
-      {season.formatText && (
-        <div id="format" className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 scroll-mt-20">
-          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-            <Trophy className="h-5 w-5 text-[var(--accent)]" />
-            Tournament Format
-          </h2>
-          <div className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--foreground)]">
-            {season.formatText}
-          </div>
         </div>
       )}
 
