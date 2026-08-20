@@ -21,7 +21,7 @@ export async function GET() {
   ])
 
   return NextResponse.json({
-    season: { id: season.id, name: season.name },
+    season: { id: season.id, name: season.name, scheduleAnnounced: season.scheduleAnnounced },
     formatText: season.formatText || "",
     scheduleImage: season.scheduleImage || "",
     teamNames: teams.map(t => t.name),

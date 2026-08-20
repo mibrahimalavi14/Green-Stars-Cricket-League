@@ -12,15 +12,35 @@ const STATUS_STYLE: Record<string, string> = {
   completed: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
 }
 
-export default async function SchedulePage() {
+export default async function SchedulePage({ searchParams }: { searchParams: Promise<{ season?: string }> }) {
+  const { season: seasonId } = await searchParams
   const workspaceId = await getCurrentWorkspaceId()
-  const season = await prisma.season.findFirst({ where: { isActive: true, workspaceId } })
+
+  let season
+  if (seasonId) {
+    season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId } })
+  } else {
+    season = await prisma.season.findFirst({ where: { isActive: true, workspaceId } })
+  }
 
   if (!season) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 text-center">
         <h1 className="text-3xl font-bold">Match Schedule</h1>
         <p className="mt-4 text-[var(--muted-foreground)]">No active season. Schedule will appear here once available.</p>
+        <Link href="/" className="mt-6 inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--accent)] px-6 text-sm font-medium text-white hover:opacity-90">
+          <ArrowLeft className="h-4 w-4" /> Back to Home
+        </Link>
+      </div>
+    )
+  }
+
+  if (!season.scheduleAnnounced) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold">Match Schedule</h1>
+        <p className="mt-2 text-[var(--muted-foreground)]">{season.name} ({season.year})</p>
+        <p className="mt-4 text-[var(--muted-foreground)]">Schedule will be announced soon. Stay tuned!</p>
         <Link href="/" className="mt-6 inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--accent)] px-6 text-sm font-medium text-white hover:opacity-90">
           <ArrowLeft className="h-4 w-4" /> Back to Home
         </Link>
