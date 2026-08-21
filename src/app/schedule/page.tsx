@@ -11,9 +11,9 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
 
   let season
   if (seasonId) {
-    season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId } })
+    season = await prisma.season.findFirst({ where: { id: seasonId, workspaceId }, include: { teams: { select: { id: true, name: true, logo: true } } } })
   } else {
-    season = await prisma.season.findFirst({ where: { isActive: true, workspaceId } })
+    season = await prisma.season.findFirst({ where: { isActive: true, workspaceId }, include: { teams: { select: { id: true, name: true, logo: true } } } })
   }
 
   if (!season || !season.scheduleAnnounced) {
@@ -36,6 +36,21 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
         <h1 className="text-3xl font-bold">Match Schedule</h1>
         <p className="text-[var(--muted-foreground)]">{season.name} ({season.year})</p>
       </div>
+
+      {(() => {
+        const teams = (season as any).teams || []
+        if (teams.length === 0) return null
+        return (
+          <div className="mb-8 flex flex-wrap items-center justify-center gap-4">
+            {teams.map((t: any) => (
+              <div key={t.id} className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2">
+                <img src={t.logo} alt={t.name} className="h-8 w-8 rounded-full object-cover" loading="lazy" />
+                <span className="text-sm font-semibold">{t.name}</span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
 
       {season.scheduleText ? (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
