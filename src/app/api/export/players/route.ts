@@ -9,11 +9,11 @@ export async function GET() {
     orderBy: { runs: "desc" },
   })
 
-  const headers = ["Name", "Team", "Role", "Batting Style", "Bowling Style", "Matches", "Runs", "Balls Faced", "Fours", "Sixes", "50s", "100s", "Wickets", "Balls Bowled", "Runs Conceded", "Catches", "Stumpings", "Run Outs"]
+  const headers = ["Name", "Team", "Role", "Batting Style", "Bowling Style", "Matches", "Runs", "Balls Faced", "Fours", "Sixes", "50s", "100s", "Wickets", "Balls Bowled", "Runs Conceded", "Maidens", "Catches", "Stumpings", "Run Outs"]
   const rows = players.map(p => [
     p.name, p.team?.name || "", p.role, p.battingStyle, p.bowlingStyle,
     p.matchesPlayed, p.runs, p.ballsFaced, p.fours, p.sixes,
-    p.fifties, p.hundreds, p.wickets, p.ballsBowled, p.runsConceded,
+    p.fifties, p.hundreds, p.wickets, p.ballsBowled, p.runsConceded, p.maidens,
     p.catches, p.stumpings, p.runOuts,
   ])
 

@@ -9,7 +9,7 @@ async function TeamStatsPage() {
     prisma.team.findMany({
       select: {
         id: true, name: true, shortName: true, logo: true, color: true,
-        players: { select: { runs: true, wickets: true, runsConceded: true, matchesPlayed: true, name: true } },
+        players: { select: { runs: true, wickets: true, runsConceded: true, matchesPlayed: true, name: true, maidens: true } },
         _count: { select: { players: true } },
       },
     }),
@@ -26,11 +26,12 @@ async function TeamStatsPage() {
     const tied = teamMatches.filter((m) => m.result?.includes("Tied")).length
     const totalRuns = team.players.reduce((a, p) => a + p.runs, 0)
     const totalWickets = team.players.reduce((a, p) => a + p.wickets, 0)
+    const totalMaidens = team.players.reduce((a, p) => a + p.maidens, 0)
     const topBatter = [...team.players].sort((a, b) => b.runs - a.runs)[0]
     const topBowler = [...team.players].sort((a, b) => b.wickets - a.wickets || a.runsConceded - b.runsConceded)[0]
     const winRate = teamMatches.length > 0 ? ((won / teamMatches.length) * 100).toFixed(0) : "0"
 
-    return { team, matches: teamMatches.length, won, lost, tied, totalRuns, totalWickets, topBatter, topBowler, winRate }
+    return { team, matches: teamMatches.length, won, lost, tied, totalRuns, totalWickets, totalMaidens, topBatter, topBowler, winRate }
   })
 
   teamStats.sort((a, b) => Number(b.winRate) - Number(a.winRate) || b.won - a.won)
@@ -93,6 +94,10 @@ async function TeamStatsPage() {
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-[var(--accent)]" /> Total Wickets</span>
                 <span className="font-semibold text-[var(--foreground)]">{s.totalWickets}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-violet-500" /> Maidens</span>
+                <span className="font-semibold text-[var(--foreground)]">{s.totalMaidens}</span>
               </div>
               {s.topBatter && (
                 <div className="flex items-center justify-between min-w-0">

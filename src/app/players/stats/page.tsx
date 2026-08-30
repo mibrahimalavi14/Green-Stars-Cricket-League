@@ -22,7 +22,7 @@ async function PlayerStatsPage() {
         </div>
         <div className="flex gap-2">
           <DownloadCSVButton data={batting.map(p => ({ name: p.name, team: p.team?.shortName, runs: p.runs, balls: p.ballsFaced, fours: p.fours, sixes: p.sixes, fifties: p.fifties, hundreds: p.hundreds, sr: p.ballsFaced > 0 ? ((p.runs / p.ballsFaced) * 100).toFixed(1) : "-", rpb: p.ballsFaced > 0 ? (p.runs / p.ballsFaced).toFixed(2) : "-" }))} filename="gscl-batting-stats.csv" columns={[{ key: "name", label: "Player" }, { key: "team", label: "Team" }, { key: "runs", label: "Runs" }, { key: "balls", label: "Balls" }, { key: "fours", label: "4s" }, { key: "sixes", label: "6s" }, { key: "fifties", label: "50s" }, { key: "hundreds", label: "100s" }, { key: "sr", label: "SR" }, { key: "rpb", label: "RPB" }]} />
-          <DownloadCSVButton data={bowling.map(p => ({ name: p.name, team: p.team?.shortName, wickets: p.wickets, runs: p.runsConceded, balls: p.ballsBowled, sr: p.wickets > 0 ? (p.ballsBowled / p.wickets).toFixed(1) : "-", econ: p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-", rpb: p.ballsBowled > 0 ? (p.runsConceded / p.ballsBowled).toFixed(2) : "-" }))} filename="gscl-bowling-stats.csv" columns={[{ key: "name", label: "Player" }, { key: "team", label: "Team" }, { key: "wickets", label: "Wkts" }, { key: "runs", label: "Runs" }, { key: "balls", label: "Balls" }, { key: "sr", label: "SR" }, { key: "econ", label: "Econ" }, { key: "rpb", label: "RPB" }]} />
+          <DownloadCSVButton data={bowling.map(p => ({ name: p.name, team: p.team?.shortName, wickets: p.wickets, runs: p.runsConceded, balls: p.ballsBowled, maidens: p.maidens, sr: p.wickets > 0 ? (p.ballsBowled / p.wickets).toFixed(1) : "-", econ: p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-", rpb: p.ballsBowled > 0 ? (p.runsConceded / p.ballsBowled).toFixed(2) : "-" }))} filename="gscl-bowling-stats.csv" columns={[{ key: "name", label: "Player" }, { key: "team", label: "Team" }, { key: "wickets", label: "Wkts" }, { key: "runs", label: "Runs" }, { key: "balls", label: "Balls" }, { key: "maidens", label: "Mdns" }, { key: "sr", label: "SR" }, { key: "econ", label: "Econ" }, { key: "rpb", label: "RPB" }]} />
         </div>
       </div>
 
@@ -103,6 +103,7 @@ async function PlayerStatsPage() {
                 <th className="p-3 text-center" title="Wickets">Wkts</th>
                 <th className="p-3 text-center">Runs</th>
                 <th className="p-3 text-center">Balls</th>
+                <th className="p-3 text-center" title="Maidens">Mdns</th>
                 <th className="p-3 text-center" title="Strike Rate">SR</th>
                 <th className="p-3 text-center" title="Economy Rate">Econ</th>
                 <th className="p-3 text-center" title="Runs Conceded per Ball">RPB</th>
@@ -110,7 +111,7 @@ async function PlayerStatsPage() {
             </thead>
             <tbody>
               {bowling.length === 0 ? (
-                <tr><td colSpan={10} className="p-6 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
+                <tr><td colSpan={11} className="p-6 text-center text-[var(--muted-foreground)]">No bowling data yet.</td></tr>
               ) : bowling.map((p, i) => (
                 <tr key={p.id} className="border-b border-[var(--border)] transition-colors hover:bg-[var(--muted)]">
                   <td className="p-3 font-medium">{i + 1}</td>
@@ -134,6 +135,7 @@ async function PlayerStatsPage() {
                   <td className="p-3 text-center font-bold text-green-600 dark:text-green-400">{p.wickets}</td>
                   <td className="p-3 text-center">{p.runsConceded}</td>
                   <td className="p-3 text-center">{p.ballsBowled}</td>
+                  <td className="p-3 text-center">{p.maidens}</td>
                   <td className="p-3 text-center font-mono">{p.wickets > 0 ? (p.ballsBowled / p.wickets).toFixed(1) : "-"}</td>
                   <td className="p-3 text-center font-mono">{p.ballsBowled > 0 ? (p.runsConceded / (p.ballsBowled / 6)).toFixed(2) : "-"}</td>
                   <td className="p-3 text-center font-mono">{p.ballsBowled > 0 ? (p.runsConceded / p.ballsBowled).toFixed(2) : "-"}</td>

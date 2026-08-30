@@ -207,12 +207,14 @@ async function HomePage() {
                 const m6 = players.filter(p => p.sixes > 0).sort((a, b) => b.sixes - a.sixes)[0]
                 const sR = players.filter(p => p.ballsFaced >= 10).sort((a, b) => (b.runs / b.ballsFaced) - (a.runs / a.ballsFaced))[0]
                 const aR = players.filter(p => p.runs >= 20 && p.wickets >= 2).sort((a, b) => (b.runs + b.wickets * 20) - (a.runs + a.wickets * 20))[0]
+                const mM = players.filter(p => p.maidens > 0).sort((a, b) => b.maidens - a.maidens)[0]
                 return (<>
                   <LeaderCard label="Orange Cap" value={tR ? String(tR.runs) : "-"} stat="Runs" name={tR?.name || "Yet to be decided"} team={tR?.team?.shortName} color="orange" />
                   <LeaderCard label="Purple Cap" value={tW ? String(tW.wickets) : "-"} stat="Wickets" name={tW?.name || "Yet to be decided"} team={tW?.team?.shortName} color="violet" />
                   <LeaderCard label="Most Sixes" value={m6 ? String(m6.sixes) : "-"} stat="Sixes" name={m6?.name || "Yet to be decided"} team={m6?.team?.shortName} color="purple" />
                   <LeaderCard label="Best Strike Rate" value={sR ? ((sR.runs / sR.ballsFaced) * 100).toFixed(1) : "-"} stat="SR (min 10 balls)" name={sR?.name || "Yet to be decided"} team={sR?.team?.shortName} color="cyan" />
                   <LeaderCard label="Best All-Rounder" value={aR ? String(aR.runs + aR.wickets * 20) : "-"} stat="Pts" name={aR?.name || "Yet to be decided"} team={aR?.team?.shortName} color="amber" />
+                  <LeaderCard label="Most Maidens" value={mM ? String(mM.maidens) : "-"} stat="Maidens" name={mM?.name || "Yet to be decided"} team={mM?.team?.shortName} color="emerald" />
                 </>)
               })()}
             </div>
@@ -372,6 +374,7 @@ function LeaderCard({ label, stat, value, name, team, color }: { label: string; 
     purple: "bg-purple-100 text-purple-600 dark:text-purple-400 dark:bg-purple-900/30",
     cyan: "bg-cyan-100 text-cyan-600 dark:text-cyan-400 dark:bg-cyan-900/30",
     amber: "bg-amber-100 text-amber-600 dark:text-amber-400 dark:bg-amber-900/30",
+    emerald: "bg-emerald-100 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-900/30",
   }
   const labelMap: Record<string, string> = {
     orange: "text-orange-600 dark:text-orange-400",
@@ -379,6 +382,7 @@ function LeaderCard({ label, stat, value, name, team, color }: { label: string; 
     purple: "text-purple-600 dark:text-purple-400",
     cyan: "text-cyan-600 dark:text-cyan-400",
     amber: "text-amber-600 dark:text-amber-400",
+    emerald: "text-emerald-600 dark:text-emerald-400",
   }
   return (
     <div className="group relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg">

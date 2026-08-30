@@ -128,11 +128,14 @@ function computeInningsStats(
   bowlingPlayers: { id: string; name: string }[]
 ) {
   const batting: Record<string, { runs: number; balls: number; fours: number; sixes: number; isOut: boolean; dismissal: string }> = {}
-  const bowling: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }> = {}
+  const bowling: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number; maidens: number }> = {}
 
   for (const p of battingPlayers) {
     batting[p.id] = { runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false, dismissal: "" }
   }
+
+  const overRuns: Record<string, number> = {}
+  const overBalls: Record<string, number> = {}
 
   for (const ball of balls) {
     const sid = ball.striker || ""
@@ -146,10 +149,22 @@ function computeInningsStats(
 
     const bid = ball.bowler || ""
     if (bid) {
-      if (!bowling[bid]) bowling[bid] = { runs: 0, balls: 0, wickets: 0, wides: 0, noBalls: 0 }
+      if (!bowling[bid]) bowling[bid] = { runs: 0, balls: 0, wickets: 0, wides: 0, noBalls: 0, maidens: 0 }
       const bws = bowling[bid]
-      bws.runs += (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+      const conceded = (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+      bws.runs += conceded
       if (!ball.isWide && !ball.isNoBall) bws.balls++
+
+      const perOverRuns = overRuns[bid] || 0
+      const perOverBalls = overBalls[bid] || 0
+      overRuns[bid] = perOverRuns + conceded
+      overBalls[bid] = perOverBalls + (ball.isWide || ball.isNoBall ? 0 : 1)
+      if (overBalls[bid] >= 6) {
+        if (overRuns[bid] === 0) bws.maidens++
+        overRuns[bid] = 0
+        overBalls[bid] = 0
+      }
+
       if (ball.isWide) bws.wides++
       if (ball.isNoBall) bws.noBalls++
       if (ball.wicket) bws.wickets++
@@ -444,7 +459,7 @@ function BowlingScorecard({
   bowlingTeam,
   currentBowlerId,
 }: {
-  stats: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number }>
+  stats: Record<string, { runs: number; balls: number; wickets: number; wides: number; noBalls: number; maidens: number }>
   players: { id: string; name: string }[]
   bowlingTeam: { name: string; shortName: string; logo: string }
   currentBowlerId?: string
@@ -473,6 +488,7 @@ function BowlingScorecard({
             <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
               <th className="pb-1.5 text-left font-medium">Bowler</th>
               <th className="pb-1.5 text-center font-medium">O</th>
+              <th className="pb-1.5 text-center font-medium">M</th>
               <th className="pb-1.5 text-center font-medium">R</th>
               <th className="pb-1.5 text-center font-medium">W</th>
               <th className="pb-1.5 text-center font-medium">Econ</th>
@@ -488,6 +504,7 @@ function BowlingScorecard({
                 <tr key={p.id} className={`border-b border-[var(--border)]/50 ${isCurrent ? "bg-[var(--accent)]/10" : ""}`}>
                   <td className="py-1.5 font-medium">{p.name} {isCurrent ? " *" : ""}</td>
                   <td className="py-1.5 text-center">{formatOvers(s.balls)}</td>
+                  <td className="py-1.5 text-center text-[var(--muted-foreground)]">{s.maidens}</td>
                   <td className="py-1.5 text-center">{s.runs}</td>
                   <td className="py-1.5 text-center font-bold text-purple-500">{s.wickets}</td>
                   <td className="py-1.5 text-center text-[var(--muted-foreground)]">{econ}</td>
