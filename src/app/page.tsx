@@ -255,9 +255,7 @@ async function HomePage() {
           </div>
           <div className="grid items-start gap-8 md:grid-cols-5">
             <div className="flex justify-center md:col-span-2">
-              <div className="relative aspect-[3/4] w-56 md:w-64">
-                <Image src={chairman.photo} alt={`Chairman ${chairman.name}`} fill sizes="256px" className="rounded-xl object-cover shadow-lg" />
-              </div>
+              <Image src={chairman.photo} alt={`Chairman ${chairman.name}`} width={600} height={797} sizes="(max-width:768px) 240px, 256px" className="h-auto w-56 rounded-xl object-contain shadow-lg md:w-64" />
             </div>
             <div className="md:col-span-3">
               {chairmanParagraphs.map((paragraph, i) => (
