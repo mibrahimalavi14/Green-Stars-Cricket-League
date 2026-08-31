@@ -8,7 +8,7 @@ const faqs = [
   { q: "How many teams are there?", a: "GSCL currently has 8 teams: Alpha Warriors, Dragon Knights, Elite Rangers, Falcon Strikers, Green Gladiators, Legends XI, Power Panthers, and Thunder Hawks." },
   { q: "What format does GSCL follow?", a: "The league follows a 4-over per side format. Each season consists of a round-robin league stage followed by playoffs, culminating in a grand final." },
   { q: "Where are matches played?", a: "All matches are played in Haripur, Pakistan. Specific venue details are announced along with the match schedule." },
-  { q: "How can I watch matches?", a: "Matches are live-streamed on our YouTube channel. You can also follow live scores and updates on our website." },
+  { q: "How can I watch matches?", a: "Follow live scores and updates on our website during every match." },
   { q: "How are points awarded?", a: "Win = 2 points, Tie/No Result = 1 point, Loss = 0 points. Net Run Rate (NRR) is used as a tiebreaker." },
   { q: "Can I contact the league management?", a: "Yes, use the Contact page to send us a message. You can also reach us via email or social media." },
   { q: "How do I leave a review?", a: "Scroll to the Reviews section on the home page, rate us out of 5 stars, and leave your comment. Reviews are moderated before being published." },

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Instagram, Youtube, Mail, MapPin, Phone, Users, Trophy, Calendar } from "lucide-react"
+import { Instagram, Mail, MapPin, Users, Trophy, Calendar } from "lucide-react"
 import { PushSubscribe } from "./PushSubscribe"
 
 export function Footer() {
@@ -27,6 +27,10 @@ export function Footer() {
             <p className="text-sm text-[var(--muted-foreground)]">
               Green Stars Cricket League - Where champions are made. Follow us for live scores, updates, and more.
             </p>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[var(--muted)] px-3 py-1.5 text-sm">
+              <MapPin className="h-4 w-4 text-gscl-gold" />
+              <span className="text-[var(--muted-foreground)]">Founded &middot; Haripur, Pakistan</span>
+            </div>
           </div>
           <div>
             <h4 className="mb-3 font-semibold">Quick Links</h4>
@@ -34,44 +38,37 @@ export function Footer() {
               <Link href="/teams" className="transition-colors hover:text-[var(--accent)]">Teams</Link>
               <Link href="/teams/stats" className="transition-colors hover:text-[var(--accent)]">Team Stats</Link>
               <Link href="/stats" className="transition-colors hover:text-[var(--accent)]">All-Time Stats</Link>
-              <Link href="/fixtures" className="transition-colors hover:text-[var(--accent)]">Fixtures</Link>
+              <Link href="/matches" className="transition-colors hover:text-[var(--accent)]">Matches</Link>
+              <Link href="/points-table" className="transition-colors hover:text-[var(--accent)]">Standings</Link>
               <Link href="/schedule" className="transition-colors hover:text-[var(--accent)]">Schedule</Link>
               <Link href="/format" className="transition-colors hover:text-[var(--accent)]">Format</Link>
-              <Link href="/points-table" className="transition-colors hover:text-[var(--accent)]">Standings</Link>
-              <Link href="/field-analysis" className="transition-colors hover:text-[var(--accent)]">Field Analysis</Link>
-              <Link href="/toss-analysis" className="transition-colors hover:text-[var(--accent)]">Toss Analysis</Link>
-              <Link href="/management" className="transition-colors hover:text-[var(--accent)]">Management</Link>
-              <Link href="/about" className="transition-colors hover:text-[var(--accent)]">About</Link>
-              <Link href="/contact" className="transition-colors hover:text-[var(--accent)]">Contact</Link>
             </div>
           </div>
           <div>
             <h4 className="mb-3 font-semibold">More</h4>
             <div className="flex flex-col gap-2 text-sm text-[var(--muted-foreground)]">
               <Link href="/news" className="transition-colors hover:text-[var(--accent)]">News</Link>
-              <Link href="/players/stats" className="transition-colors hover:text-[var(--accent)]">Stats</Link>
+              <Link href="/players/stats" className="transition-colors hover:text-[var(--accent)]">Player Stats</Link>
               <Link href="/seasons" className="transition-colors hover:text-[var(--accent)]">Seasons</Link>
-              <Link href="/predictions" className="transition-colors hover:text-[var(--accent)]">Predictions</Link>
               <Link href="/dream-team" className="transition-colors hover:text-[var(--accent)]">Dream Team</Link>
+              <Link href="/records" className="transition-colors hover:text-[var(--accent)]">Records</Link>
+              <Link href="/about" className="transition-colors hover:text-[var(--accent)]">About</Link>
+              <Link href="/contact" className="transition-colors hover:text-[var(--accent)]">Contact</Link>
+              <Link href="/management" className="transition-colors hover:text-[var(--accent)]">Management</Link>
             </div>
           </div>
           <div>
             <h4 className="mb-3 font-semibold">Contact</h4>
             <div className="flex flex-col gap-2 text-sm text-[var(--muted-foreground)]">
-              <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Haripur, Pakistan</span>
-              <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> greenstarscricketleague@gmail.com</span>
-              <span className="flex items-center gap-2"><Phone className="h-4 w-4" /> +92 325 7682420</span>
+              <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-gscl-gold" /> Haripur, Pakistan</span>
+              <span className="flex items-center gap-2"><Mail className="h-4 w-4 text-gscl-gold" /> greenstarscricketleague@gmail.com</span>
             </div>
           </div>
           <div>
             <h4 className="mb-3 font-semibold">Follow Us</h4>
             <div className="flex gap-3">
-
-              <a href="https://www.instagram.com/green_stars_cricket_league" target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
+              <a href="https://www.instagram.com/green_stars_cricket_league" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
                 <Instagram className="h-4 w-4" />
-              </a>
-              <a href="https://www.youtube.com/@GreenStarsCricketLeague" target="_blank" rel="noopener noreferrer" className="rounded-full bg-[var(--muted)] p-2 transition-colors hover:bg-[var(--accent)]">
-                <Youtube className="h-4 w-4" />
               </a>
             </div>
           </div>

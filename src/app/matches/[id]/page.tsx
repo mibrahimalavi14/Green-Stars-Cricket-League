@@ -30,11 +30,6 @@ function SkeletonBlock() {
   )
 }
 
-function getYoutubeId(url: string) {
-  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
-  return match ? match[1] : url
-}
-
 type Perf = PlayerMatch & { player: Player }
 
 type MatchNotes = {
@@ -778,23 +773,6 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
               </div>
             )
           })()}
-
-          {m.youtubeUrl && (
-            <div className="mt-6">
-              <h3 className="mb-3 text-lg font-semibold">Match Highlights</h3>
-              <div className="overflow-hidden rounded-xl aspect-video">
-                <iframe
-                  src={`https://www.youtube.com/embed/${getYoutubeId(m.youtubeUrl)}`}
-                  className="h-full w-full"
-                  allowFullScreen
-                  title="Match Highlights"
-                />
-              </div>
-              <a href={m.youtubeUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700">
-                Watch on YouTube &rarr;
-              </a>
-            </div>
-          )}
         </>
       )}
     </div>

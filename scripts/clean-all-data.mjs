@@ -4,12 +4,6 @@ const prisma = new PrismaClient()
 console.log("Clearing all data except teams, players, season...")
 
 // Delete in order (respect FK constraints)
-const delPred = await prisma.prediction.deleteMany()
-console.log(`  Predictions: ${delPred.count} deleted`)
-
-const delSP = await prisma.seasonPrediction.deleteMany()
-console.log(`  Season predictions: ${delSP.count} deleted`)
-
 const delPM = await prisma.playerMatch.deleteMany()
 console.log(`  PlayerMatch: ${delPM.count} deleted`)
 

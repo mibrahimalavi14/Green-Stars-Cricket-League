@@ -24,7 +24,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { url: `${baseUrl}/players/stats`, lastModified: new Date() },
       { url: `${baseUrl}/fixtures`, lastModified: new Date() },
       { url: `${baseUrl}/points-table`, lastModified: new Date() },
-      { url: `${baseUrl}/predictions`, lastModified: new Date() },
       { url: `${baseUrl}/standings`, lastModified: new Date() },
       { url: `${baseUrl}/live`, lastModified: new Date() },
       { url: `${baseUrl}/news`, lastModified: new Date() },

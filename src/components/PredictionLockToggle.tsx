@@ -19,7 +19,7 @@ export function PredictionLockToggle({ seasonId, locked }: { seasonId: string; l
       className={`rounded px-4 py-2 text-sm font-medium transition-colors ${
         locked ? "bg-red-500/20 text-red-500 hover:bg-red-500/30" : "bg-green-500/20 text-green-500 hover:bg-green-500/30"
       }`}>
-      {locked ? "Unlock Predictions" : "Lock Predictions (Announce Schedule)"}
+      {locked ? "Hide Schedule" : "Announce Schedule"}
     </button>
   )
 }

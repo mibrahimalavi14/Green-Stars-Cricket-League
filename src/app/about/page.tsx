@@ -111,9 +111,6 @@ function AboutPage() {
           <a href="https://www.instagram.com/green_stars_cricket_league" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
             Instagram
           </a>
-          <a href="https://www.youtube.com/@GreenStarsCricketLeague" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
-            YouTube
-          </a>
           <a href="/contact" className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
             Contact Us
           </a>

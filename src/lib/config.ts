@@ -69,8 +69,6 @@ const _config = {
   fairPlayOverRateDeduction: 10,
   fairPlayBehaviorDeduction: 15,
   fairPlaySportsmanshipBonus: 2,
-  seasonQuizTimeLimitSeconds: 180,
-  seasonQuizGraceSeconds: 10,
   challengeQuestionCount: 10,
   challengeTimeLimitSeconds: 10,
   challengeGraceSeconds: 5,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import {
   Shield, LayoutDashboard, Users, Trophy, Calendar, Newspaper, Image, Star,
-  Brain, UserCheck, Award, Bell, MessageSquare, BarChart3, Target, Zap,
+  UserCheck, Award, Bell, MessageSquare, BarChart3, Target, Zap,
   Server, Lock, Database, Rocket, AlertTriangle, ChevronRight, ExternalLink,
   Menu, X, Play, CircleDot, SkipForward, RotateCcw, Monitor, Globe, Heart,
   ChevronDown, ChevronUp, Info, Flag, Handshake
@@ -251,11 +251,6 @@ export default function GuidePage() {
                     <li><strong>Wicket-keeper</strong> — Keeper + batsman</li>
                   </Roles>
                 </Step>
-                <Step n={4} title="Lock Predictions (When Schedule is Ready)">
-                  <p>Go to <Code>/admin/seasons</Code></p>
-                  <p>Click <strong>Lock Predictions (Announce Schedule)</strong> button</p>
-                  <p>After this, users can only view predictions, not submit new ones</p>
-                </Step>
               </Card>
             </section>
 
@@ -267,7 +262,7 @@ export default function GuidePage() {
                   { name: "Dashboard", url: "/admin", desc: "Overview — all counts, quick links", icon: LayoutDashboard, hot: false },
                   { name: "Teams", url: "/admin/teams", desc: "Add/edit/delete teams with colors", icon: Users, hot: false },
                   { name: "Players", url: "/admin/players", desc: "Add/edit/delete players per team", icon: UserCheck, hot: false },
-                  { name: "Seasons", url: "/admin/seasons", desc: "Create seasons, lock predictions", icon: Trophy, hot: false },
+                  { name: "Seasons", url: "/admin/seasons", desc: "Create & manage seasons", icon: Trophy, hot: false },
                   { name: "Matches", url: "/admin/matches", desc: "Create/schedule matches", icon: Calendar, hot: true },
                   { name: "Live Scoring", url: "/admin/live-scoring/{ID}", desc: "Ball-by-ball scoring panel", icon: Play, hot: true },
                   { name: "Performances", url: "/admin/performances", desc: "View scorecards, generate stats", icon: Award, hot: false },
@@ -275,13 +270,10 @@ export default function GuidePage() {
                   { name: "News", url: "/admin/news", desc: "Publish articles", icon: Newspaper, hot: false },
                   { name: "Gallery", url: "/admin/gallery", desc: "Upload photos", icon: Image, hot: false },
                   { name: "Sponsors", url: "/admin/sponsors", desc: "Manage sponsors", icon: Star, hot: false },
-                  { name: "Quiz", url: "/admin/quiz", desc: "Create match quizzes", icon: Brain, hot: false },
                   { name: "Challenges", url: "/admin/challenges", desc: "Daily & weekly quiz challenges", icon: Trophy, hot: true },
-                  { name: "POTM", url: "/admin/potm", desc: "Man of the Match voting", icon: Award, hot: false },
-                  { name: "Predictions", url: "/admin/predictions", desc: "View/lock predictions", icon: Target, hot: false },
+                  { name: "POTM", url: "/admin/potm", desc: "Man of the Match selection", icon: Award, hot: false },
                   { name: "Moments", url: "/admin/moments", desc: "Moment of the Day", icon: Star, hot: false },
                   { name: "Notifications", url: "/admin/notifications", desc: "Push notifications", icon: Bell, hot: false },
-                  { name: "Reviews", url: "/admin/reviews", desc: "Approve/reject reviews", icon: MessageSquare, hot: false },
                   { name: "Penalties", url: "/admin/penalties", desc: "Team penalties & deductions", icon: Shield, hot: false },
                   { name: "Season Awards", url: "/admin/awards", desc: "Awards + auto-generate ceremony", icon: Trophy, hot: false },
                   { name: "Fair Play", url: "/admin/fair-play", desc: "Warnings, sportsmanship, FP points", icon: Handshake, hot: false },
@@ -324,7 +316,6 @@ export default function GuidePage() {
                     <li><strong>Match Number</strong> → 1 (or leave empty for auto)</li>
                     <li><strong>Stage</strong> → League (or Qualifier 1, Eliminator, Final)</li>
                     <li><strong>Venue</strong> → Main Stadium (default)</li>
-                    <li><strong>YouTube URL</strong> → (optional live stream link)</li>
                     <li><strong>Status</strong> → Upcoming</li>
                   </div>
                   <p className="mt-2">Click <strong>Add Match</strong>. Match appears in the list.</p>
@@ -408,16 +399,6 @@ export default function GuidePage() {
                   </Example>
                 </Step>
 
-                <Step n={4} title="Mark Shot Region (Optional)">
-                  <p>Before or after scoring runs, you can mark where the shot went by clicking the <strong>FIELD</strong> diagram.</p>
-                  <p>Click any position on the SVG field diagram, or use the region buttons below it:</p>
-                  <div className="flex flex-wrap gap-1.5 my-2">
-                    {["Off","Cover","Mid Off","Mid On","Leg","Fine Leg","Square Leg","Mid Wkt","Long On","Long Off","Third","Point","Gully","Slip","Straight"].map(r => (
-                      <span key={r} className="inline-block rounded bg-[var(--muted)] px-2 py-1 text-xs text-[var(--muted-foreground)]">{r}</span>
-                    ))}
-                  </div>
-                  <p className="text-xs text-[var(--muted-foreground)]">This is optional — ball is saved even without a region.</p>
-                </Step>
               </Card>
             </section>
 
@@ -623,10 +604,8 @@ export default function GuidePage() {
                 <Step n={3} title="Set Man of the Match (POTM)">
                   <p>Go to <Code>/admin/potm</Code></p>
                   <p>Find the match and expand it</p>
-                  <p>See vote breakdown with progress bars</p>
                   <p>Click <strong>Set Official MOTM</strong> next to the chosen player</p>
                   <Example>
-                    Votes: Ahmed Raza (12 votes, 40%) → Bilal Khan (8 votes, 27%) → Usman A. (5 votes, 17%)<br/>
                     Click Ahmed Raza → MOTM set → shown as Trophy icon on match card
                   </Example>
                 </Step>
@@ -660,9 +639,6 @@ export default function GuidePage() {
                   <li><strong>Undo Used</strong> — How many times undo was clicked</li>
                   <li><strong>Page Views</strong> — Total page views this month</li>
                   <li><strong>Searches</strong> — Search queries this month</li>
-                  <li><strong>Predictions</strong> — Total predictions submitted</li>
-                  <li><strong>Quiz Attempts</strong> — Total quiz submissions</li>
-                  <li><strong>POTM Votes</strong> — Total POTM votes</li>
                 </div>
 
                 <h4 className="font-semibold text-[var(--foreground)] mb-2">Trend Charts (Last 30 Days)</h4>

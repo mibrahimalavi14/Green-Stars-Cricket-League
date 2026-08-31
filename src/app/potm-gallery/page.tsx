@@ -7,21 +7,30 @@ export const dynamic = "force-dynamic"
 async function PotmGalleryPage() {
   const all = await prisma.match.findMany({
     where: { status: "completed" },
-    include: { team1: true, team2: true, season: true },
+    include: { team1: true, team2: true, season: true, performances: { include: { player: true } } },
     orderBy: { date: "desc" },
   })
-  const matches = all.filter(m => m.manOfMatch)
+  const matches = all.filter(m => m.manOfMatch && m.performances.some(p => p.playerId === m.manOfMatch))
 
-  const potmCount: Record<string, { count: number; lastMatch: typeof matches[0] }> = {}
+  const potmCount: Record<string, { playerId: string; lastMatch: typeof matches[0] }> = {}
   for (const m of matches) {
-    const name = m.manOfMatch!
-    if (!potmCount[name]) potmCount[name] = { count: 0, lastMatch: m }
-    potmCount[name].count++
-    if (m.date > potmCount[name].lastMatch.date) potmCount[name].lastMatch = m
+    const motmPerf = m.performances.find(p => p.playerId === m.manOfMatch)
+    if (!motmPerf) continue
+    const pid = m.manOfMatch!
+    if (!potmCount[pid]) potmCount[pid] = { playerId: pid, lastMatch: m }
+    if (m.date > potmCount[pid].lastMatch.date) potmCount[pid].lastMatch = m
   }
 
   const leaders = Object.entries(potmCount)
-    .map(([name, data]) => ({ name, count: data.count, lastMatch: data.lastMatch }))
+    .map(([playerId, data]) => {
+      const perf = data.lastMatch.performances.find(p => p.playerId === playerId)
+      return {
+        playerId,
+        name: perf?.player.name || playerId,
+        count: matches.filter(p => p.manOfMatch === playerId).length,
+        lastMatch: data.lastMatch,
+      }
+    })
     .sort((a, b) => b.count - a.count)
 
   return (
@@ -36,7 +45,7 @@ async function PotmGalleryPage() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {leaders.map((p, i) => (
-            <div key={p.name} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+            <div key={p.playerId} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gscl-gold/20 text-lg font-bold text-gscl-dark">
                 {i + 1}
               </div>
@@ -58,7 +67,9 @@ async function PotmGalleryPage() {
       </h2>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {matches.map((m) => (
+        {matches.map((m) => {
+          const motmName = m.performances.find(p => p.playerId === m.manOfMatch)?.player.name || m.manOfMatch
+          return (
           <Link
             key={m.id}
             href={`/matches/${m.id}`}
@@ -69,7 +80,7 @@ async function PotmGalleryPage() {
                 <Trophy className="h-5 w-5 text-gscl-gold" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold truncate">{m.manOfMatch}</p>
+                <p className="font-semibold truncate">{motmName}</p>
                 <p className="text-xs text-[var(--muted-foreground)]">
                   {new Date(m.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                 </p>
@@ -84,7 +95,8 @@ async function PotmGalleryPage() {
             </div>
             {m.result && <p className="mt-1 text-xs text-green-600 dark:text-green-400 truncate">{m.result}</p>}
           </Link>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

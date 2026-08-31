@@ -8,9 +8,6 @@ import { sendOtpEmail } from "@/lib/email"
 const SUBJECTS: Record<string, { subject: string; label: string }> = {
   potm: { subject: "Your OTP for Player of the Match vote - GSCL", label: "Player of the Match voting" },
   pos: { subject: "Your OTP for Player of the Season vote - GSCL", label: "Player of the Season voting" },
-  quiz: { subject: "Your OTP for Match Quiz - GSCL", label: "Match Quiz" },
-  seasonQuiz: { subject: "Your OTP for Season Quiz - GSCL", label: "Season Quiz" },
-  prediction: { subject: "Your OTP for Match Predictions - GSCL", label: "Match Predictions" },
   contact: { subject: "Your OTP to send a message - GSCL", label: "contacting GSCL" },
 }
 

@@ -12,7 +12,7 @@ export function AdminMatchForm() {
   const [seasons, setSeasons] = useState<Season[]>([])
   const [form, setForm] = useState({
     seasonId: "", team1Id: "", team2Id: "", date: "", venue: "Main Stadium",
-    status: "upcoming", youtubeUrl: "", matchNo: "", stage: "league",
+    status: "upcoming", matchNo: "", stage: "league",
     tossWinner: "", tossDecision: "", tossTime: "", matchStartTime: "",
     umpire1: "", umpire2: "", thirdUmpire: "", matchReferee: "", officialScorer: "",
     delayReason: "",
@@ -31,7 +31,7 @@ export function AdminMatchForm() {
     const payload: Record<string, unknown> = {
       seasonId: form.seasonId, team1Id: form.team1Id, team2Id: form.team2Id,
       date: form.date, venue: form.venue, status: form.status,
-      youtubeUrl: form.youtubeUrl, stage: form.stage,
+      stage: form.stage,
       tossWinner: form.tossWinner, tossDecision: form.tossDecision,
       tossTime: form.tossTime, matchStartTime: form.matchStartTime,
       umpire1: form.umpire1, umpire2: form.umpire2,
@@ -180,13 +180,6 @@ export function AdminMatchForm() {
             </div>
           </div>
         )}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className={labelCls}>YouTube URL</label>
-          <input value={form.youtubeUrl} onChange={e => setForm({...form, youtubeUrl: e.target.value})} className={inputCls} />
-        </div>
       </div>
 
       <button type="submit" disabled={loading}

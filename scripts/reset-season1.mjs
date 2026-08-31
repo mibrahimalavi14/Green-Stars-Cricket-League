@@ -15,14 +15,6 @@ console.log(`Using season: ${season.name} (${season.id})`)
 // Delete all related data for this season
 console.log("Deleting existing data...")
 
-// Delete ratings (they're global, but fine)
-// Delete contacts (global)
-// Delete season predictions
-await p.seasonPrediction.deleteMany({ where: { seasonId: season.id } })
-// Delete prediction locks
-await p.predictionLock.deleteMany({ where: { seasonId: season.id } })
-// Delete predictions
-await p.prediction.deleteMany({ where: { match: { seasonId: season.id } } })
 // Delete innings
 await p.inning.deleteMany({ where: { match: { seasonId: season.id } } })
 // Delete player matches

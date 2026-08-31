@@ -111,49 +111,23 @@ export const ballEventSchema = z.object({
   region: z.string().nullable().optional(),
 })
 
-export const contactSchema = z
-  .object({
-    name: z.string().min(1).max(100),
-    email: z.string().email().max(200),
-    subject: z.string().min(1).max(200).optional(),
-    message: z.string().min(1).max(2000),
-    purpose: z.enum(["general", "sponsorship"]).default("general"),
-    phone: z.string().max(30).optional(),
-    company: z.string().max(100).optional(),
-    sponsorshipType: z.string().max(50).optional(),
-    budgetRange: z.string().max(50).optional(),
-    verifiedToken: z.string().optional(),
-    recaptchaToken: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.purpose === "sponsorship" && !data.verifiedToken) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Email verification required." })
-    }
-  })
+export const contactSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email().max(200),
+  subject: z.string().min(1).max(200).optional(),
+  message: z.string().min(1).max(2000),
+  purpose: z.enum(["general", "sponsorship"]).default("general"),
+  phone: z.string().max(30).optional(),
+  company: z.string().max(100).optional(),
+  sponsorshipType: z.string().max(50).optional(),
+  budgetRange: z.string().max(50).optional(),
+  recaptchaToken: z.string().optional(),
+})
 
 export const reviewSchema = z.object({
   name: z.string().min(1).max(100),
   rating: z.number().int().min(1).max(5),
   comment: z.string().min(1).max(1000),
-})
-
-export const potmVoteSchema = z.object({
-  matchId: z.string().min(1),
-  playerId: z.string().min(1),
-  email: z.string().email().max(200),
-  verifiedToken: z.string().min(1),
-})
-
-export const playerOfSeasonVoteSchema = z.object({
-  seasonId: z.string().min(1),
-  playerId: z.string().min(1),
-  email: z.string().email().max(200),
-  verifiedToken: z.string().min(1),
-})
-
-export const predictionSchema = z.object({
-  predictedTeamId: z.string().min(1),
-  timeZone: z.string().optional(),
 })
 
 export const otpRequestSchema = z.object({
@@ -163,14 +137,6 @@ export const otpRequestSchema = z.object({
 export const otpVerifySchema = z.object({
   email: z.string().email().max(200),
   otp: z.string().length(6),
-})
-
-export const quizAttemptSchema = z.object({
-  quizId: z.string().min(1),
-  name: z.string().trim().min(1).max(80),
-  email: z.string().email().max(200),
-  selectedAnswer: z.string().min(1),
-  verifiedToken: z.string().min(1),
 })
 
 export const challengeStartSchema = z.object({

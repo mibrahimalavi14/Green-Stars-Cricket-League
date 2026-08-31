@@ -672,10 +672,6 @@ async function cleanupRehearsalData(seasonId?: string) {
       await prisma.playerMatch.deleteMany({ where: { matchId: { in: ids } } })
       await prisma.squadMember.deleteMany({ where: { matchId: { in: ids } } })
       await prisma.matchNotes.deleteMany({ where: { matchId: { in: ids } } })
-      await prisma.potmVote.deleteMany({ where: { matchId: { in: ids } } })
-      await prisma.prediction.deleteMany({ where: { matchId: { in: ids } } })
-      await prisma.quizAttempt.deleteMany({ where: { quiz: { matchId: { in: ids } } } })
-      await prisma.quiz.deleteMany({ where: { matchId: { in: ids } } })
       await prisma.inning.deleteMany({ where: { matchId: { in: ids } } })
       await prisma.match.deleteMany({ where: { id: { in: ids } } })
     }

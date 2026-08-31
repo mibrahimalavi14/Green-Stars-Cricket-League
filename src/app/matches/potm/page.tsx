@@ -4,7 +4,7 @@ import { Star } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
-async function PotmVoteIndexPage() {
+async function PotmIndexPage() {
   const matches = await prisma.match.findMany({
     where: { status: "completed" },
     include: { team1: true, team2: true },
@@ -16,9 +16,9 @@ async function PotmVoteIndexPage() {
     <div className="mx-auto max-w-4xl px-4 py-12">
       <div className="mb-2 flex items-center gap-2">
         <Star className="h-6 w-6 text-[var(--accent)]" />
-        <h1 className="text-3xl font-bold">POTM Voting</h1>
+        <h1 className="text-3xl font-bold">Man of the Match</h1>
       </div>
-      <p className="mb-8 text-[var(--muted-foreground)]">Vote for Player of the Match in completed matches</p>
+      <p className="mb-8 text-[var(--muted-foreground)]">View the Man of the Match from completed matches</p>
 
       {matches.length === 0 ? (
         <p className="py-12 text-center text-[var(--muted-foreground)]">No completed matches yet.</p>
@@ -46,7 +46,7 @@ async function PotmVoteIndexPage() {
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <p className="text-[10px] sm:text-xs text-[var(--muted-foreground)]">{new Date(m.date).toLocaleDateString("en-PK")}</p>
                 <span className="rounded-lg bg-[var(--accent)]/10 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold text-[var(--accent)]">
-                  Vote <Star className="ml-1 inline h-3 w-3" />
+                  View <Star className="ml-1 inline h-3 w-3" />
                 </span>
               </div>
             </Link>
@@ -57,4 +57,4 @@ async function PotmVoteIndexPage() {
   )
 }
 
-export default PotmVoteIndexPage
+export default PotmIndexPage

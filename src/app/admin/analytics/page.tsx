@@ -10,9 +10,7 @@ interface AnalyticsData {
     undoUsed: number
     pageViews: number
     searches: number
-    predictions: number
-    quizAttempts: number
-    potmVotes: number
+
   }
   last30d: {
     matchScored: number
@@ -38,9 +36,7 @@ const EVENT_ICONS: Record<string, string> = {
   undo_used: "↩️",
   page_view: "👁️",
   search_query: "🔍",
-  prediction_submitted: "🔮",
   quiz_attempted: "❓",
-  potm_vote: "⭐",
   notification_sent: "🔔",
   feature_feedback: "💬",
 }
@@ -51,9 +47,7 @@ const EVENT_LABELS: Record<string, string> = {
   undo_used: "Undo Used",
   page_view: "Page View",
   search_query: "Search Query",
-  prediction_submitted: "Prediction",
   quiz_attempted: "Quiz Attempt",
-  potm_vote: "POTM Vote",
   notification_sent: "Notification",
   feature_feedback: "Feedback",
 }
@@ -123,9 +117,6 @@ export default function AdminAnalyticsPage() {
           { label: "Undo Used", value: t.undoUsed, icon: "↩️", sub: `${m.undoUsed} this month` },
           { label: "Page Views", value: t.pageViews, icon: "👁️", sub: `${m.pageViews} this month` },
           { label: "Searches", value: t.searches, icon: "🔍", sub: `${m.searches} this month` },
-          { label: "Predictions", value: t.predictions, icon: "🔮", sub: "All time" },
-          { label: "Quiz Attempts", value: t.quizAttempts, icon: "❓", sub: "All time" },
-          { label: "POTM Votes", value: t.potmVotes, icon: "⭐", sub: "All time" },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3">
             <div className="flex items-center gap-2">

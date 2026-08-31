@@ -11,7 +11,6 @@ const playoffMatches = await prisma.match.findMany({
 })
 for (const m of playoffMatches) {
   await prisma.playerMatch.deleteMany({ where: { matchId: m.id } })
-  await prisma.prediction.deleteMany({ where: { matchId: m.id } })
   await prisma.inning.deleteMany({ where: { matchId: m.id } })
   console.log(`Deleted M${m.matchNo}`)
 }

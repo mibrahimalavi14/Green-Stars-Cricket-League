@@ -39,9 +39,6 @@ export function getClientIp(request: Request): string {
 export const RATE_LIMITS = {
   OTP_SEND: { windowMs: 5 * 60 * 1000, max: 3 },
   OTP_VERIFY: { windowMs: 15 * 60 * 1000, max: 5 },
-  POTM_VOTE: { windowMs: 60 * 60 * 1000, max: 3 },
-  PLAYER_OF_SEASON_VOTE: { windowMs: 60 * 60 * 1000, max: 3 },
-  PREDICTION: { windowMs: 60 * 60 * 1000, max: 1 },
   QUIZ_ATTEMPT: { windowMs: 60 * 60 * 1000, max: 1 },
   CHALLENGE_START: { windowMs: 60 * 60 * 1000, max: 20 },
   CHALLENGE_SUBMIT: { windowMs: 60 * 60 * 1000, max: 20 },

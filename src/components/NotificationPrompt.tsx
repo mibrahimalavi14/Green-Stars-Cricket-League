@@ -69,7 +69,7 @@ export function NotificationPrompt() {
                   ? "Notifications enabled. You're all set!"
                   : status === "failed"
                     ? "Couldn't enable notifications. Use the footer toggle."
-                    : "Match results, quiz alerts & news — right on this device."}
+                    : "Match results & news — right on this device."}
               </p>
             </div>
           </div>

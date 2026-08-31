@@ -8,12 +8,11 @@ import { MatchCard } from "@/components/MatchCard"
 import { NewsNotification } from "@/components/NewsNotification"
 import { TeamCard } from "@/components/TeamCard"
 import { NewsCard } from "@/components/NewsCard"
-import { ReviewsSection } from "@/components/ReviewsSection"
 import { SponsorsSection } from "@/components/SponsorsSection"
 import { CountdownTimer } from "@/components/CountdownTimer"
 import { AnimatedCounter } from "@/components/AnimatedCounter"
 import { FadeInView } from "@/components/FadeInView"
-import { Youtube, Trophy, Users, Calendar, MapPin, Award, Timer } from "lucide-react"
+import { Trophy, Users, Calendar, Award, Timer, Zap, Target } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -46,6 +45,10 @@ async function HomePage() {
   const teamCount = allTeamsData.length
   const playerCount = allTeamsData.reduce((a, b) => a + b._count.players, 0)
   const seasonRuns = players.reduce((a, p) => a + p.runs, 0)
+  const seasonWickets = players.reduce((a, p) => a + p.wickets, 0)
+  const seasonSixes = players.reduce((a, p) => a + p.sixes, 0)
+  const seasonFours = players.reduce((a, p) => a + p.fours, 0)
+  const latestSeasonName = season?.name || (season ? `Season ${season.year}` : "—")
   const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.png"))
 
   const chairmanRow = await prisma.chairmanMessage.findFirst({
@@ -56,7 +59,7 @@ async function HomePage() {
     name: "Hafiz Muhammad Ibrahim Alavi",
     title: "Chairman, Green Stars Cricket League",
     message:
-      "Assalam-o-Alaikum, cricket fans.\n\nWhen I look at the young cricketers of Haripur, I see the future of Pakistan cricket. Green Stars Cricket League was born from a simple belief — that every talented young player, no matter where they come from, deserves a fair chance to shine.\n\nThe energy, the passion and the discipline you bring to every match fills me with pride. This league is not just about winning matches or lifting trophies; it is about building character, learning teamwork, and chasing dreams with heart. Every run you score and every wicket you take writes a new chapter in the story of GSCL.\n\nI want to thank every player, coach, official, sponsor and supporter who makes this dream possible. This is your league, and together we will take it to new heights.\n\nMay Allah bless our league and our community. Let us keep playing with passion, sportsmanship and respect.",
+      "Welcome to Green Stars Cricket League.\n\nWhen I look at the young cricketers of Haripur, I see the future of Pakistan cricket. Green Stars Cricket League was born from a simple belief — that every talented young player, no matter where they come from, deserves a fair chance to shine.\n\nThe energy, the passion and the discipline you bring to every match fills me with pride. This league is not just about winning matches or lifting trophies; it is about building character, learning teamwork, and chasing dreams with heart. Every run you score and every wicket you take writes a new chapter in the story of GSCL.\n\nI want to thank every player, coach, official, sponsor and supporter who makes this dream possible. This is your league, and together we will take it to new heights.\n\nMay our league and our community continue to grow. Let us keep playing with passion, sportsmanship and respect.",
     photo: "/images/optimized/chairman.webp",
     showSignature: true,
   }
@@ -153,36 +156,56 @@ async function HomePage() {
       <FadeInView>
       <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="flex flex-wrap items-stretch justify-center gap-3">
             {[
               { label: "Teams", value: teamCount, icon: Users },
               { label: "Players", value: playerCount, icon: Trophy },
               { label: "Matches", value: matchCount, icon: Calendar },
-              { label: "Season Runs", value: seasonRuns, icon: Award },
-              { label: "Season", value: season?.year || 2026, icon: Trophy },
-              { label: "Founded", value: "Haripur", icon: MapPin },
+              { label: "Runs", value: seasonRuns, icon: Award },
+              { label: "Wickets", value: seasonWickets, icon: Target },
+              { label: "Sixes", value: seasonSixes, icon: Zap },
+              { label: "Fours", value: seasonFours, icon: Zap },
+              { label: "Latest Season", value: latestSeasonName, icon: Trophy },
             ].map((s) => (
-              <div key={s.label} className="rounded-lg bg-[var(--muted)] p-4 text-center">
+              <div key={s.label} className="min-w-[88px] flex-1 basis-[88px] rounded-lg bg-[var(--muted)] px-3 py-3 text-center">
                 <s.icon className="mx-auto mb-1 h-5 w-5 text-[var(--accent)]" />
-                <div className="text-2xl font-bold">{typeof s.value === "number" ? <AnimatedCounter value={s.value} /> : s.value}</div>
+                <div className="text-2xl font-bold leading-tight">{typeof s.value === "number" ? <AnimatedCounter value={s.value} /> : s.value}</div>
                 <div className="text-xs text-[var(--muted-foreground)]">{s.label}</div>
               </div>
             ))}
           </div>
 
           {winners.length > 0 && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-6 rounded-lg bg-[var(--muted)] p-4">
-              <Award className="h-5 w-5 text-gscl-gold" />
-              {winners.map((w) => {
-                const winnerTeam = w.teams.find(t => t.id === w.winnerId)
-                return (
-                  <span key={w.id} className="flex items-center gap-1.5 text-sm">
-                    <span className="font-semibold">{w.name}</span>: 
-                    {winnerTeam?.logo && <img src={winnerTeam.logo} alt="" className="h-5 w-5 rounded-full object-cover" />}
-                    {winnerTeam?.name || w.winnerId}
-                  </span>
-                )
-              })}
+            <div className="relative mt-6 overflow-hidden rounded-2xl border border-gscl-gold/40 bg-gradient-to-r from-gscl-gold/15 via-gscl-gold/5 to-gscl-gold/15 p-6 text-center">
+              <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute left-[8%] top-[15%] h-2 w-2 animate-ping rounded-full bg-gscl-gold/70" style={{ animationDuration: "1.2s" }} />
+                <div className="absolute right-[12%] top-[20%] h-1.5 w-1.5 animate-ping rounded-full bg-gscl-gold/70" style={{ animationDuration: "1.5s", animationDelay: "0.3s" }} />
+                <div className="absolute left-[20%] bottom-[20%] h-1.5 w-1.5 animate-ping rounded-full bg-gscl-gold/60" style={{ animationDuration: "1.8s", animationDelay: "0.6s" }} />
+                <div className="absolute right-[22%] bottom-[25%] h-2 w-2 animate-ping rounded-full bg-gscl-gold/60" style={{ animationDuration: "1.1s", animationDelay: "0.9s" }} />
+                <div className="absolute left-[45%] top-[10%] h-1 w-1 animate-ping rounded-full bg-yellow-300/80" style={{ animationDuration: "1.4s", animationDelay: "0.4s" }} />
+                <div className="absolute right-[40%] top-[12%] h-1.5 w-1.5 animate-ping rounded-full bg-gscl-gold/70" style={{ animationDuration: "1.6s", animationDelay: "0.7s" }} />
+              </div>
+              <a href="/hall-of-fame" className="relative inline-flex items-center gap-2 rounded-full bg-gscl-gold px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-gscl-dark transition-transform hover:scale-105">
+                <Trophy className="h-4 w-4" /> Champions
+              </a>
+              <div className="relative mt-4 flex flex-wrap items-center justify-center gap-6">
+                {winners.map((w) => {
+                  const winnerTeam = w.teams.find(t => t.id === w.winnerId)
+                  return (
+                    <div key={w.id} className="flex items-center gap-3">
+                      {winnerTeam?.logo && (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-gscl-gold bg-[var(--card)] p-0.5">
+                          <img src={winnerTeam.logo} alt={winnerTeam.name || "Champion"} className="h-full w-full rounded-full object-cover" />
+                        </div>
+                      )}
+                      <div className="text-left">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-gscl-gold">{w.name}</p>
+                        <p className="text-xl font-bold">{winnerTeam?.name || w.winnerId}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -321,24 +344,6 @@ async function HomePage() {
       </FadeInView>
 
       <FadeInView>
-      <section className="content-visibility-auto py-12">
-        <div className="mx-auto max-w-7xl px-4 text-center">
-          <Youtube className="mx-auto mb-4 h-12 w-12 text-red-500" />
-          <h2 className="mb-2 text-2xl font-bold">Live on YouTube</h2>
-          <p className="mb-6 text-[var(--muted-foreground)]">Watch all matches live on our YouTube channel</p>
-          <a
-            href="https://www.youtube.com/@GreenStarsCricketLeague"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
-          >
-            <Youtube className="h-5 w-5" /> Subscribe to GSCL
-          </a>
-        </div>
-      </section>
-      </FadeInView>
-
-      <FadeInView>
       <section className="content-visibility-auto border-t border-[var(--border)] py-10">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <h2 className="mb-6 text-xl font-bold">Our Partners</h2>
@@ -360,7 +365,6 @@ async function HomePage() {
       </FadeInView>
 
       <SponsorsSection />
-      <ReviewsSection />
     </>
   )
 }

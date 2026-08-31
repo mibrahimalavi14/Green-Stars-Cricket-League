@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react"
 import ReCAPTCHA from "react-google-recaptcha"
-import VoteVerification from "@/components/VoteVerification"
 
 const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""
 
@@ -19,7 +18,6 @@ function ContactPage() {
     purpose: "general", phone: "", company: "", sponsorshipType: "", budgetRange: "",
   })
   const [website, setWebsite] = useState("")
-  const [verifiedToken, setVerifiedToken] = useState("")
   const [captchaToken, setCaptchaToken] = useState("")
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -35,11 +33,8 @@ function ContactPage() {
 
   function changePurpose(value: string) {
     setForm({ ...form, purpose: value })
-    if (value === "general") setVerifiedToken("")
-    else {
-      setCaptchaToken("")
-      recaptchaRef.current?.reset()
-    }
+    setCaptchaToken("")
+    recaptchaRef.current?.reset()
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -48,9 +43,7 @@ function ContactPage() {
     setError("")
 
     try {
-      const payload = isSponsorship
-        ? { ...form, website, verifiedToken }
-        : { ...form, website, recaptchaToken: captchaToken }
+      const payload = { ...form, website, recaptchaToken: captchaToken }
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,14 +92,13 @@ function ContactPage() {
             <label className={labelCls}>Email *</label>
             <input
               required type="email" value={form.email}
-              onChange={(e) => { setForm({ ...form, email: e.target.value }); setVerifiedToken("") }}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               className={inputCls}
             />
           </div>
 
           {isSponsorship && (
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
+            <div className="grid gap-4 md:grid-cols-2">              <div>
                 <label className={labelCls}>Company / Brand</label>
                 <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Company name" className={inputCls} />
               </div>
@@ -146,35 +138,20 @@ function ContactPage() {
             <input id="website" value={website} onChange={e => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" />
           </div>
 
-          {isSponsorship ? (
-            !verifiedToken && (
-              <VoteVerification
-                email={form.email}
-                name={form.name}
-                purpose="contact"
-                verifiedToken={verifiedToken}
-                onVerified={setVerifiedToken}
-                onReset={() => setVerifiedToken("")}
-                verifiedLabel="Email verified &mdash; you can now send your message"
-                noteLabel="Verified email only — spam nahi bhej paoge"
-              />
-            )
-          ) : (
-            <div className="overflow-x-auto">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={SITE_KEY}
-                onChange={(token) => {
-                  setCaptchaToken(token || "")
-                  setError("")
-                }}
-                theme="light"
-              />
-            </div>
-          )}
+          <div className="overflow-x-auto">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={SITE_KEY}
+              onChange={(token) => {
+                setCaptchaToken(token || "")
+                setError("")
+              }}
+              theme="light"
+            />
+          </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <button type="submit" disabled={loading || (isSponsorship ? !verifiedToken : !captchaToken)}
+          <button type="submit" disabled={loading || !captchaToken}
             className="w-full rounded-lg bg-[var(--accent)] px-6 py-3 font-semibold text-[var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:opacity-50">
             {loading ? "Sending..." : "Send Message"}
           </button>

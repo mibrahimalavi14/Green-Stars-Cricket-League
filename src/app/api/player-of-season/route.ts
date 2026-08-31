@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { trackEvent } from "@/lib/analytics"
-import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
-import { playerOfSeasonVoteSchema } from "@/lib/validation"
-import { verifyVerifiedEmailToken } from "@/lib/verified-email"
 import { WORKSPACE_OFFICIAL } from "@/lib/workspace"
-import { notifyAdmin } from "@/lib/email"
-import { formatDateTimePKT } from "@/lib/utils"
 
 interface Nominee {
   id: string
@@ -20,15 +14,17 @@ interface Nominee {
   runs: number
   wickets: number
   catches: number
+  runOuts: number
+  stumpings: number
   innings: number
   impact: number
-  votes: number
 }
+
+const MIN_INNINGS = 3
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const seasonId = searchParams.get("seasonId")
-  const email = searchParams.get("email")
 
   let season
   if (seasonId) {
@@ -46,33 +42,28 @@ export async function GET(req: Request) {
 
   if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
 
-  const [perfs, votes] = await Promise.all([
-    prisma.playerMatch.findMany({
-      where: { match: { seasonId: season.id, status: "completed" } },
-      select: {
-        playerId: true,
-        teamId: true,
-        battingRuns: true,
-        bowlingWickets: true,
-        catches: true,
-        player: { select: { name: true, role: true, photo: true, teamId: true, team: { select: { name: true, shortName: true, logo: true } } } },
-      },
-    }),
-    prisma.playerOfSeasonVote.groupBy({
-      by: ["playerId"],
-      where: { seasonId: season.id },
-      _count: { id: true },
-    }),
-  ])
-  const votesMap: Record<string, number> = {}
-  for (const v of votes) votesMap[v.playerId] = v._count.id
+  const perfs = await prisma.playerMatch.findMany({
+    where: { match: { seasonId: season.id, status: "completed" } },
+    select: {
+      playerId: true,
+      teamId: true,
+      battingRuns: true,
+      bowlingWickets: true,
+      catches: true,
+      runOuts: true,
+      stumpings: true,
+      player: { select: { name: true, role: true, photo: true, teamId: true, team: { select: { name: true, shortName: true, logo: true } } } },
+    },
+  })
 
-  const aggMap = new Map<string, { runs: number; wickets: number; catches: number; innings: number }>()
+  const aggMap = new Map<string, { runs: number; wickets: number; catches: number; runOuts: number; stumpings: number; innings: number }>()
   for (const p of perfs) {
-    const a = aggMap.get(p.playerId) || { runs: 0, wickets: 0, catches: 0, innings: 0 }
+    const a = aggMap.get(p.playerId) || { runs: 0, wickets: 0, catches: 0, runOuts: 0, stumpings: 0, innings: 0 }
     a.runs += p.battingRuns
     a.wickets += p.bowlingWickets
     a.catches += p.catches
+    a.runOuts += p.runOuts
+    a.stumpings += p.stumpings
     a.innings++
     aggMap.set(p.playerId, a)
   }
@@ -95,108 +86,21 @@ export async function GET(req: Request) {
       runs: a.runs,
       wickets: a.wickets,
       catches: a.catches,
+      runOuts: a.runOuts,
+      stumpings: a.stumpings,
       innings: a.innings,
-      impact: a.runs + a.wickets * 20 + a.catches * 10,
-      votes: votesMap[p.playerId] || 0,
+      impact: a.runs + a.wickets * 20 + a.catches * 10 + a.runOuts * 10 + a.stumpings * 10,
     })
   }
 
-  nominees.sort((a, b) => b.votes - a.votes || b.impact - a.impact)
-  const totalVotes = Object.values(votesMap).reduce((a, b) => a + b, 0)
+  nominees.sort((a, b) => b.impact - a.impact)
 
-  let userVote = null
-  if (email) {
-    const existing = await prisma.playerOfSeasonVote.findUnique({
-      where: { seasonId_email: { seasonId: season.id, email } },
-      include: { player: true },
-    })
-    if (existing) userVote = { playerId: existing.playerId, playerName: existing.player.name, createdAt: existing.createdAt.toISOString() }
-  }
-
-  const recentVotes = await prisma.playerOfSeasonVote.findMany({
-    where: { seasonId: season.id },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-    include: { player: { select: { name: true } } },
-  })
+  const winners = nominees.filter(n => n.innings >= MIN_INNINGS)
 
   return NextResponse.json({
     season: { id: season.id, name: season.name, year: season.year },
     nominees,
-    totalVotes,
-    userVote,
-    recentVotes: recentVotes.map(v => ({ name: v.name, playerName: v.player.name, createdAt: v.createdAt.toISOString() })),
+    winners,
+    minInnings: MIN_INNINGS,
   })
-}
-
-export async function POST(req: Request) {
-  try {
-    const ip = getClientIp(req)
-    const rl = rateLimit(`player_of_season:${ip}`, RATE_LIMITS.PLAYER_OF_SEASON_VOTE)
-    if (!rl.allowed) {
-      return NextResponse.json({ error: "Too many votes. Try again later." }, { status: 429 })
-    }
-
-    const body = await req.json()
-    const parsed = playerOfSeasonVoteSchema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
-    }
-
-    const { seasonId, playerId, email } = parsed.data
-    const { name } = body
-
-    const verifiedEmail = verifyVerifiedEmailToken(parsed.data.verifiedToken)
-    if (!verifiedEmail || verifiedEmail !== email.toLowerCase()) {
-      return NextResponse.json({ error: "Email not verified. Please verify your email first." }, { status: 401 })
-    }
-
-    const season = await prisma.season.findFirst({
-      where: { id: seasonId, workspaceId: WORKSPACE_OFFICIAL },
-      include: { teams: true },
-    })
-    if (!season) return NextResponse.json({ error: "Season not found" }, { status: 404 })
-
-    const player = await prisma.player.findFirst({
-      where: { id: playerId, team: { seasonId } },
-      select: { id: true },
-    })
-    if (!player) return NextResponse.json({ error: "Player not found in this season" }, { status: 404 })
-
-    const existing = await prisma.playerOfSeasonVote.findUnique({
-      where: { seasonId_email: { seasonId, email } },
-    })
-    if (existing) {
-      return NextResponse.json({ error: "You have already voted for this season" }, { status: 409 })
-    }
-
-    const vote = await prisma.playerOfSeasonVote.create({
-      data: { seasonId, playerId, email, name: name || "Anonymous" },
-    })
-
-    trackEvent("player_of_season_vote", { seasonId, playerId })
-
-    Promise.all([
-      prisma.player.findUnique({ where: { id: playerId }, select: { name: true } }),
-      prisma.season.findUnique({ where: { id: seasonId }, select: { name: true } }),
-    ]).then(([player, season]) =>
-      notifyAdmin({
-        title: "New Player of the Season Vote",
-        rows: [
-          { label: "Name", value: name || "Anonymous" },
-          { label: "Email", value: email },
-          { label: "Player", value: player?.name || playerId },
-          { label: "Season", value: season?.name || seasonId },
-          { label: "Time", value: formatDateTimePKT(vote.createdAt) },
-        ],
-      })
-    )
-
-    return NextResponse.json({ success: true, vote })
-  } catch (e: unknown) {
-    if (typeof e === "object" && e !== null && "code" in e && (e as { code: string }).code === "P2002") {
-      return NextResponse.json({ error: "You have already voted for this season" }, { status: 409 })
-    }
-    return NextResponse.json({ error: "Failed to submit vote" }, { status: 500 })
-  }
 }

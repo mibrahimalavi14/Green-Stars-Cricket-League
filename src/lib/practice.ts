@@ -100,9 +100,6 @@ export async function resetPractice() {
 
   await prisma.playerMatch.deleteMany({ where: { matchId: { in: matchIds } } })
   await prisma.squadMember.deleteMany({ where: { matchId: { in: matchIds } } })
-  await prisma.prediction.deleteMany({ where: { matchId: { in: matchIds } } })
-  await prisma.quiz.deleteMany({ where: { matchId: { in: matchIds } } })
-  await prisma.potmVote.deleteMany({ where: { matchId: { in: matchIds } } })
   await prisma.ballEvent.deleteMany({ where: { matchId: { in: matchIds } } })
   await prisma.superOverInnings.deleteMany({ where: { matchId: { in: matchIds } } })
   await prisma.matchNotes.deleteMany({ where: { matchId: { in: matchIds } } })
@@ -116,8 +113,6 @@ export async function resetPractice() {
   await prisma.leaguePenalty.deleteMany({ where: { seasonId: { in: seasonIds } } })
   await prisma.teamCaptaincy.deleteMany({ where: { seasonId: { in: seasonIds } } })
   await prisma.seasonSnapshot.deleteMany({ where: { seasonId: { in: seasonIds } } })
-  await prisma.seasonQuiz.deleteMany({ where: { seasonId: { in: seasonIds } } })
-  await prisma.seasonPrediction.deleteMany({ where: { seasonId: { in: seasonIds } } })
 
   const resetStats = Object.fromEntries(PLAYER_STAT_FIELDS.map(f => [f, 0]))
   await prisma.player.updateMany({

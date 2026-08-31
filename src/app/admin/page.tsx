@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { getCurrentWorkspaceId } from "@/lib/workspace"
-import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Brain, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical, PenLine, Users2, List } from "lucide-react"
+import { Calendar, Users, Shield, Newspaper, PlusCircle, MessageSquare, Trophy, Image, Star, Sparkles, BarChart3, Database, FileText, Activity, FlaskConical, PenLine, Users2, List } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -55,7 +55,7 @@ async function AdminPage() {
           <Link href="/admin/seasons" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Calendar className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Seasons</h3>
-          <p className="text-sm text-[var(--muted-foreground)]">Manage seasons & prediction lock</p>
+          <p className="text-sm text-[var(--muted-foreground)]">Manage seasons</p>
         </Link>
 
         <Link href="/admin/practice" className="rounded-xl border border-purple-500/40 bg-[var(--card)] p-6 transition-all hover:border-purple-500 hover:shadow-lg">
@@ -70,12 +70,6 @@ async function AdminPage() {
           <p className="text-sm text-[var(--muted-foreground)]">Enter player batting/bowling stats</p>
         </Link>
 
-        <Link href="/admin/predictions" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
-          <Trophy className="mb-3 h-8 w-8 text-[var(--accent)]" />
-          <h3 className="text-lg font-semibold">Predictions</h3>
-          <p className="text-sm text-[var(--muted-foreground)]">View season predictions</p>
-        </Link>
-
         <Link href="/admin/gallery" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Image className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Gallery</h3>
@@ -86,12 +80,6 @@ async function AdminPage() {
           <Users className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Sponsors</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Manage sponsors</p>
-        </Link>
-
-        <Link href="/admin/quiz" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
-          <Brain className="mb-3 h-8 w-8 text-[var(--accent)]" />
-          <h3 className="text-lg font-semibold">Quizzes</h3>
-          <p className="text-sm text-[var(--muted-foreground)]">Create & manage match quizzes</p>
         </Link>
 
         <Link href="/admin/challenges" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">

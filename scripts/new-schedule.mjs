@@ -8,7 +8,6 @@ if (!season) { console.log("Season not found"); process.exit(1) }
 const existing = await prisma.match.findMany({ where: { seasonId: season.id } })
 for (const m of existing) {
   await prisma.playerMatch.deleteMany({ where: { matchId: m.id } })
-  await prisma.prediction.deleteMany({ where: { matchId: m.id } })
   await prisma.inning.deleteMany({ where: { matchId: m.id } })
 }
 await prisma.match.deleteMany({ where: { seasonId: season.id } })

@@ -59,7 +59,6 @@ export interface MatchData {
   youtubeUrl: string
   season?: SeasonData
   innings?: InningData[]
-  predictions?: PredictionData[]
 }
 
 export interface InningData {
@@ -81,16 +80,6 @@ export interface SeasonData {
   isActive: boolean
   scheduleAnnounced: boolean
   winnerId?: string
-}
-
-export interface PredictionData {
-  id: string
-  userId: string
-  matchId: string
-  predictedTeamId: string
-  user?: { name: string; image: string }
-  match?: MatchData
-  predictedTeam?: TeamData
 }
 
 export interface NewsData {

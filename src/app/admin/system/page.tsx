@@ -33,7 +33,7 @@ interface SystemData {
   counts: Record<string, number>
   activeSeason: { id: string; name: string; year: number; teams: number; players: number; matches: number; completedMatches: number } | null
   activeMatches: { id: string; matchNo: number; team1: string; team2: string; status: string; date: string }[]
-  queue: { unreadNotifications: number; openQuizzes: number; scheduledMatches: number; liveMatches: number }
+  queue: { unreadNotifications: number; scheduledMatches: number; liveMatches: number }
   backup: { lastSnapshotAt: string | null; snapshotCount: number }
   restore: { lastRestoreAt: string | null; action: string | null }
   errors: { count: number; recent: { action: string; createdAt: string }[] }
@@ -276,9 +276,6 @@ export default function AdminSystemPage() {
               ["Undo Used", "undoUsed"],
               ["Page Views", "pageViews"],
               ["Searches", "searches"],
-              ["Predictions", "predictions"],
-              ["Quiz Attempts", "quizAttempts"],
-              ["POTM Votes", "potmVotes"],
             ].map(([label, key]) => (
               <div key={key} className="flex items-center justify-between text-xs">
                 <span className="text-[var(--muted-foreground)]">{label}</span>

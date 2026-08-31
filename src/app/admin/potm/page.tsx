@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Star, Trophy, Loader2, Medal, Vote, Check, Clock } from "lucide-react"
-import { formatDateTimePKT } from "@/lib/utils"
+import { Star, Trophy, Loader2 } from "lucide-react"
 
 interface MatchData {
   id: string
@@ -16,34 +15,23 @@ interface MatchData {
   team2: { id: string; name: string; shortName: string; logo: string }
 }
 
-interface PlayerVote {
-  id: string
-  name: string
-  role: string
-  photo: string
-  teamId: string
-  votes: number
-}
-
-interface RecentVote {
-  name: string
-  playerName: string
-  createdAt: string
-}
-
-interface MatchVotes {
-  match: MatchData
-  players: PlayerVote[]
-  totalVotes: number
-  recentVotes: RecentVote[]
+interface PotmData {
+  winner: {
+    playerId: string
+    name: string
+    team: string
+    stats: {
+      battingRuns: number
+      bowlingWickets: number
+      catches: number
+    }
+  } | null
 }
 
 export default function AdminPotmPage() {
   const [matches, setMatches] = useState<MatchData[]>([])
-  const [matchVotes, setMatchVotes] = useState<Record<string, MatchVotes>>({})
+  const [winners, setWinners] = useState<Record<string, PotmData>>({})
   const [loading, setLoading] = useState(true)
-  const [expandedMatch, setExpandedMatch] = useState<string | null>(null)
-  const [settingMotm, setSettingMotm] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMatches()
@@ -57,51 +45,21 @@ export default function AdminPotmPage() {
     setLoading(false)
   }
 
-  async function fetchVotesForMatch(matchId: string) {
-    if (matchVotes[matchId]) return
+  async function fetchWinner(matchId: string) {
+    if (winners[matchId]) return
     const res = await fetch(`/api/potm?matchId=${matchId}`)
     if (!res.ok) return
     const data = await res.json()
-    setMatchVotes(prev => ({
-      ...prev,
-      [matchId]: {
-        match: data.match,
-        players: data.players,
-        totalVotes: data.totalVotes,
-        recentVotes: data.recentVotes || [],
-      },
-    }))
-  }
-
-  async function toggleExpand(matchId: string) {
-    if (expandedMatch === matchId) {
-      setExpandedMatch(null)
-      return
-    }
-    setExpandedMatch(matchId)
-    await fetchVotesForMatch(matchId)
-  }
-
-  async function setOfficialMotm(matchId: string, playerName: string) {
-    setSettingMotm(matchId)
-    await fetch("/api/matches", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: matchId, manOfMatch: playerName }),
-    })
-    setMatches(prev =>
-      prev.map(m => (m.id === matchId ? { ...m, manOfMatch: playerName } : m))
-    )
-    setSettingMotm(null)
+    setWinners(prev => ({ ...prev, [matchId]: { winner: data.winner || null } }))
   }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <h1 className="mb-2 flex items-center gap-2 text-3xl font-bold">
         <Star className="h-7 w-7 text-[var(--accent)]" />
-        POTM Voting Admin
+        Man of the Match (Auto)
       </h1>
-      <p className="mb-8 text-[var(--muted-foreground)]">View vote breakdowns and set official Man of the Match</p>
+      <p className="mb-8 text-[var(--muted-foreground)]">Auto-computed Man of the Match for completed matches</p>
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>
@@ -112,17 +70,16 @@ export default function AdminPotmPage() {
       ) : (
         <div className="space-y-3">
           {matches.map(m => {
-            const isExpanded = expandedMatch === m.id
-            const mv = matchVotes[m.id]
-            const topPlayer = mv && mv.players.length > 0
-              ? [...mv.players].sort((a, b) => b.votes - a.votes)[0]
-              : null
-
+            const w = winners[m.id]?.winner
             return (
-              <div key={m.id} className="rounded-xl border border-[var(--border)] bg-[var(--card)]">
+              <div
+                key={m.id}
+                className="rounded-xl border border-[var(--border)] bg-[var(--card)]"
+                onClick={() => fetchWinner(m.id)}
+              >
                 <button
-                  onClick={() => toggleExpand(m.id)}
                   className="flex w-full items-center gap-4 p-4 text-left"
+                  onClick={() => fetchWinner(m.id)}
                 >
                   <div className="flex items-center gap-3">
                     {m.team1.logo && <img src={m.team1.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
@@ -135,127 +92,34 @@ export default function AdminPotmPage() {
                     {m.team2.logo && <img src={m.team2.logo} alt="" className="h-8 w-8 rounded-full object-cover" />}
                   </div>
                   <div className="ml-auto flex items-center gap-3">
-                    {m.manOfMatch && (
+                    {w && (
                       <span className="flex items-center gap-1 rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
-                        <Trophy className="h-3 w-3" /> {m.manOfMatch}
+                        <Trophy className="h-3 w-3" /> {w.name}
                       </span>
                     )}
-                    {mv && (
-                      <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
-                        <Vote className="h-3 w-3" /> {mv.totalVotes}
-                      </span>
-                    )}
-                    <span className="text-xs text-[var(--muted-foreground)]">
-                      {isExpanded ? "▲" : "▼"}
-                    </span>
+                    <span className="text-xs text-[var(--muted-foreground)]">▼</span>
                   </div>
                 </button>
 
-                {isExpanded && (
+                {w && (
                   <div className="border-t border-[var(--border)] px-4 pb-4 pt-3">
                     {m.result && (
                       <p className="mb-3 text-sm text-green-500 font-medium">{m.result}</p>
                     )}
-
-                    {!mv ? (
-                      <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin" /></div>
-                    ) : mv.players.length === 0 ? (
-                      <p className="py-4 text-center text-sm text-[var(--muted-foreground)]">No votes yet</p>
-                    ) : (
-                      <>
-                        <div className="mb-4 space-y-2">
-                          {[...mv.players]
-                            .sort((a, b) => b.votes - a.votes)
-                            .map((p, i) => {
-                              const pct = mv.totalVotes > 0 ? (p.votes / mv.totalVotes) * 100 : 0
-                              const isCurrentMotm = m.manOfMatch === p.name
-                              return (
-                                <div key={p.id} className="flex items-center gap-3">
-                                  <span className="w-5 text-center text-xs font-bold text-[var(--muted-foreground)]">
-                                    {i + 1}
-                                  </span>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="mb-1 flex items-center justify-between">
-                                      <span className={`flex items-center gap-1 text-sm font-medium ${isCurrentMotm ? "text-[var(--accent)]" : ""}`}>
-                                        {p.name}
-                                        {isCurrentMotm && <Trophy className="h-3 w-3" />}
-                                      </span>
-                                      <span className="text-xs text-[var(--muted-foreground)]">
-                                        {p.votes} vote{p.votes !== 1 ? "s" : ""} ({pct.toFixed(0)}%)
-                                      </span>
-                                    </div>
-                                    <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--muted)]">
-                                      <div
-                                        className="h-full rounded-full bg-[var(--accent)] transition-all"
-                                        style={{ width: `${pct}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              )
-                            })}
-                        </div>
-
-                        {topPlayer && topPlayer.votes > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            <p className="w-full text-xs font-medium text-[var(--muted-foreground)] mb-1">Set Official MOTM:</p>
-                            {[...mv.players]
-                              .filter(p => p.votes > 0)
-                              .sort((a, b) => b.votes - a.votes)
-                              .map(p => (
-                                <button
-                                  key={p.id}
-                                  onClick={() => setOfficialMotm(m.id, p.name)}
-                                  disabled={settingMotm === m.id}
-                                  className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                                    m.manOfMatch === p.name
-                                      ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
-                                      : "bg-[var(--muted)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
-                                  }`}
-                                >
-                                  {settingMotm === m.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                  ) : m.manOfMatch === p.name ? (
-                                    <Check className="h-3 w-3" />
-                                  ) : (
-                                    <Medal className="h-3 w-3" />
-                                  )}
-                                  {p.name} ({p.votes})
-                                </button>
-                              ))}
-                          </div>
-                        )}
-
-                        <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-                          <span>Total: {mv.totalVotes} votes</span>
-                          {topPlayer && topPlayer.votes > 0 && (
-                            <>
-                              <span>·</span>
-                              <span>Top: {topPlayer.name}</span>
-                            </>
-                          )}
-                        </div>
-
-                        {mv.recentVotes.length > 0 && (
-                          <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 p-3">
-                            <p className="mb-2 flex items-center gap-1 text-xs font-semibold text-[var(--muted-foreground)]">
-                              <Clock className="h-3 w-3" /> Recent votes ({mv.recentVotes.length})
-                            </p>
-                            <div className="flex max-h-40 flex-col gap-1.5 overflow-y-auto">
-                              {mv.recentVotes.map((v, i) => (
-                                <div key={i} className="flex items-center justify-between gap-2 text-xs">
-                                  <span className="truncate min-w-0">
-                                    <strong>{v.name}</strong>
-                                    <span className="text-[var(--muted-foreground)]"> voted for {v.playerName}</span>
-                                  </span>
-                                  <span className="shrink-0 text-[var(--muted-foreground)]">{formatDateTimePKT(v.createdAt)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)]/15">
+                        <Trophy className="h-5 w-5 text-[var(--accent)]" />
+                      </span>
+                      <div>
+                        <p className="font-semibold">{w.name}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {w.team}
+                          {w.stats.bowlingWickets > 0 && ` · ${w.stats.bowlingWickets} wkts`}
+                          {w.stats.battingRuns > 0 && ` · ${w.stats.battingRuns} runs`}
+                          {w.stats.catches > 0 && ` · ${w.stats.catches} catches`}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

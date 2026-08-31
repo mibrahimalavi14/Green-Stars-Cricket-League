@@ -18,7 +18,6 @@ import {
   CloudOff,
   RefreshCw,
 } from "lucide-react"
-import { FieldDiagram } from "@/components/FieldDiagram"
 import { MATCH_CONFIG, isMatchComplete, formatOvers } from "@/lib/config"
 import { loadOfflineQueue, addToOfflineQueue, removeFromOfflineQueue, createBallId } from "@/lib/offline-queue"
 import { useOfflineQueue } from "@/hooks/useOfflineQueue"
@@ -52,7 +51,6 @@ interface BallEvent {
   isNoBall: boolean
   byes: number
   legByes: number
-  region: string
 }
 
 interface Innings {
@@ -88,21 +86,20 @@ interface SummaryData {
   team2Players: Player[]
 }
 
-function ballDisplay(ball: BallEvent): { text: string; color: string; region: string } {
-  const region = ball.region ? ball.region : ""
-  if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white", region }
-  if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white", region }
-  if (ball.isNoBall) return { text: "Nb", color: "bg-gray-500 text-white", region }
-  if (ball.byes > 0) return { text: `${ball.byes}B`, color: "bg-gray-500 text-white", region }
-  if (ball.legByes > 0) return { text: `${ball.legByes}LB`, color: "bg-gray-500 text-white", region }
+function ballDisplay(ball: BallEvent): { text: string; color: string } {
+  if (ball.wicket) return { text: "W", color: "bg-purple-600 text-white" }
+  if (ball.isWide) return { text: "Wd", color: "bg-gray-500 text-white" }
+  if (ball.isNoBall) return { text: "Nb", color: "bg-gray-500 text-white" }
+  if (ball.byes > 0) return { text: `${ball.byes}B`, color: "bg-gray-500 text-white" }
+  if (ball.legByes > 0) return { text: `${ball.legByes}LB`, color: "bg-gray-500 text-white" }
   const r = ball.runs
-  if (r === 0) return { text: "0", color: "bg-[var(--muted)]", region }
-  if (r === 1) return { text: "1", color: "bg-blue-500 text-white", region }
-  if (r === 2) return { text: "2", color: "bg-yellow-500 text-white", region }
-  if (r === 3) return { text: "3", color: "bg-orange-500 text-white", region }
-  if (r === 4) return { text: "4", color: "bg-pink-500 text-white", region }
-  if (r === 6) return { text: "6", color: "bg-red-500 text-white", region }
-  return { text: String(r), color: "bg-[var(--muted)]", region }
+  if (r === 0) return { text: "0", color: "bg-[var(--muted)]" }
+  if (r === 1) return { text: "1", color: "bg-blue-500 text-white" }
+  if (r === 2) return { text: "2", color: "bg-yellow-500 text-white" }
+  if (r === 3) return { text: "3", color: "bg-orange-500 text-white" }
+  if (r === 4) return { text: "4", color: "bg-pink-500 text-white" }
+  if (r === 6) return { text: "6", color: "bg-red-500 text-white" }
+  return { text: String(r), color: "bg-[var(--muted)]" }
 }
 
 export default function LiveScoringPage() {
@@ -140,8 +137,6 @@ export default function LiveScoringPage() {
   const [wicketFielder, setWicketFielder] = useState("")
   const [pendingExtraRuns, setPendingExtraRuns] = useState<number | null>(null)
   const [pendingExtraType, setPendingExtraType] = useState<string | null>(null)
-  const [ballRegion, setBallRegion] = useState("")
-
   const [inningsNum, setInningsNum] = useState(1)
   const [endMatchConfirm, setEndMatchConfirm] = useState(false)
   const [endingMatch, setEndingMatch] = useState(false)
@@ -179,7 +174,6 @@ export default function LiveScoringPage() {
   const [superOverWicketFielder, setSuperOverWicketFielder] = useState("")
   const [superOverPendingExtraType, setSuperOverPendingExtraType] = useState<string | null>(null)
   const [superOverPendingExtraRuns, setSuperOverPendingExtraRuns] = useState<number | null>(null)
-  const [superOverRegion, setSuperOverRegion] = useState("")
   const [superOverSubmitting, setSuperOverSubmitting] = useState(false)
   const [completedSuperOverInnings, setCompletedSuperOverInnings] = useState<Array<{
     superOverNumber: number
@@ -364,7 +358,6 @@ export default function LiveScoringPage() {
     setSuperOverWicketFielder("")
     setSuperOverPendingExtraType(null)
     setSuperOverPendingExtraRuns(null)
-    setSuperOverRegion("")
   }, [])
 
   const completeSuperOverInnings = useCallback(async (ballsOverride?: BallEvent[]) => {
@@ -435,7 +428,6 @@ export default function LiveScoringPage() {
     setSuperOverWicketFielder("")
     setSuperOverPendingExtraRuns(null)
     setSuperOverPendingExtraType(null)
-    setSuperOverRegion("")
 
     const newLegalBalls = updatedBalls.filter(b => !b.isWide && !b.isNoBall).length
     const overDone = newLegalBalls >= MATCH_CONFIG.superOverBalls
@@ -712,7 +704,6 @@ export default function LiveScoringPage() {
       setWicketFielder("")
       setPendingExtraRuns(null)
       setPendingExtraType(null)
-      setBallRegion("")
       const isLegal = !ball.isWide && !ball.isNoBall
       const legalBallsAfter = (activeInnings?.balls || 0) + (isLegal ? 1 : 0)
       const overComplete = isLegal && legalBallsAfter % 6 === 0
@@ -838,7 +829,6 @@ export default function LiveScoringPage() {
         isNoBall: false,
         byes: 0,
         legByes: 0,
-        region: ballRegion,
       })
     } else {
       addBall({
@@ -854,7 +844,6 @@ export default function LiveScoringPage() {
         isNoBall: false,
         byes: 0,
         legByes: 0,
-        region: ballRegion,
       })
     }
   }
@@ -885,7 +874,6 @@ export default function LiveScoringPage() {
         isNoBall: pendingExtraType === "noball",
         byes: 0,
         legByes: 0,
-        region: ballRegion,
       })
     } else {
       addBall({
@@ -901,7 +889,6 @@ export default function LiveScoringPage() {
         isNoBall: false,
         byes: pendingExtraType === "bye" ? runs : 0,
         legByes: pendingExtraType === "legbye" ? runs : 0,
-        region: ballRegion,
       })
     }
   }
@@ -1307,9 +1294,8 @@ export default function LiveScoringPage() {
               {superOverBalls.map((b, i) => {
                 const d = ballDisplay(b)
                 return (
-                  <div key={i} className={`flex h-8 min-w-[2rem] flex-col items-center justify-center rounded px-1 text-xs font-bold ${d.color}`}>
+                  <div key={i} className={`flex h-8 min-w-[2rem] items-center justify-center rounded px-1 text-xs font-bold ${d.color}`}>
                     <span>{d.text}</span>
-                    {d.region && <span className="text-[8px] opacity-70">{d.region.slice(0, 3)}</span>}
                   </div>
                 )
               })}
@@ -1398,7 +1384,6 @@ export default function LiveScoringPage() {
                         isWide: false, isNoBall: false,
                         byes: superOverPendingExtraType === "bye" ? r : 0,
                         legByes: superOverPendingExtraType === "legbye" ? r : 0,
-                        region: superOverRegion,
                       })
                     }} className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-sm font-bold text-amber-600 hover:bg-amber-500/20">{r}</button>
                   ))}
@@ -1413,9 +1398,9 @@ export default function LiveScoringPage() {
                 <button key={r} disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
                   onClick={() => {
                     if (superOverWicketType) {
-                      addSuperOverBall({ runs: r, extras: null, wicket: superOverWicketType, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: superOverWicketType ? (superOverWicketBatsman || superOverStrikerId) : null, wicketFielder: superOverWicketType ? superOverWicketFielder : null, isWide: false, isNoBall: false, byes: 0, legByes: 0, region: superOverRegion })
+                      addSuperOverBall({ runs: r, extras: null, wicket: superOverWicketType, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: superOverWicketType ? (superOverWicketBatsman || superOverStrikerId) : null, wicketFielder: superOverWicketType ? superOverWicketFielder : null, isWide: false, isNoBall: false, byes: 0, legByes: 0 })
                     } else {
-                      addSuperOverBall({ runs: r, extras: null, wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: false, isNoBall: false, byes: 0, legByes: 0, region: superOverRegion })
+                      addSuperOverBall({ runs: r, extras: null, wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: false, isNoBall: false, byes: 0, legByes: 0 })
                     }
                   }}
                   className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold disabled:opacity-30 ${
@@ -1427,10 +1412,10 @@ export default function LiveScoringPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-semibold text-[var(--muted-foreground)]">EXTRAS</span>
               <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
-                onClick={() => addSuperOverBall({ runs: 0, extras: "wide", wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: true, isNoBall: false, byes: 0, legByes: 0, region: "" })}
+                onClick={() => addSuperOverBall({ runs: 0, extras: "wide", wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: true, isNoBall: false, byes: 0, legByes: 0 })}
                 className="flex h-10 items-center gap-1 rounded-lg bg-gray-500/10 px-3 text-xs font-bold disabled:opacity-30 hover:bg-gray-500/20"><Zap className="h-3 w-3" /> Wide</button>
               <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
-                onClick={() => addSuperOverBall({ runs: 0, extras: "noball", wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: false, isNoBall: true, byes: 0, legByes: 0, region: "" })}
+                onClick={() => addSuperOverBall({ runs: 0, extras: "noball", wicket: null, bowler: superOverBowlerId, striker: superOverStrikerId, nonStriker: superOverNonStrikerId, wicketBatsman: null, wicketFielder: null, isWide: false, isNoBall: true, byes: 0, legByes: 0 })}
                 className="flex h-10 items-center gap-1 rounded-lg bg-gray-500/10 px-3 text-xs font-bold disabled:opacity-30 hover:bg-gray-500/20"><Zap className="h-3 w-3" /> No Ball</button>
               <button disabled={superOverSubmitting || !superOverStrikerId || !superOverBowlerId}
                 onClick={() => setSuperOverPendingExtraType("bye")}
@@ -1870,7 +1855,6 @@ export default function LiveScoringPage() {
                             isNoBall: true,
                             byes: pendingExtraType === "nb-bye" ? r : 0,
                             legByes: pendingExtraType === "nb-legbye" ? r : 0,
-                            region: ballRegion,
                           })
                         }}
                         disabled={submitting}
@@ -1917,33 +1901,6 @@ export default function LiveScoringPage() {
                   </div>
                 </div>
               )}
-
-              <div className="mb-3">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-xs font-semibold text-[var(--muted-foreground)]">FIELD</span>
-                  {ballRegion && (
-                    <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-medium text-green-600">
-                      {ballRegion}
-                    </span>
-                  )}
-                </div>
-                <FieldDiagram selected={ballRegion} onSelect={setBallRegion} />
-                <div className="mt-1.5 flex flex-wrap gap-1">
-                  {["", "Off", "Cover", "Mid Off", "Mid On", "Leg", "Fine Leg", "Square Leg", "Mid Wkt", "Long On", "Long Off", "Third", "Point", "Gully", "Slip", "Straight"].map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => setBallRegion(r)}
-                      className={`rounded px-2 py-1 text-[10px] font-medium transition-all ${
-                        ballRegion === r
-                          ? "bg-green-500 text-white"
-                          : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
-                      }`}
-                    >
-                      {r || "All"}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               <div className="mb-2 text-xs font-semibold text-[var(--muted-foreground)]">
                 RUNS
@@ -2135,15 +2092,9 @@ export default function LiveScoringPage() {
                     return (
                       <span
                         key={i}
-                        title={display.region || "No region"}
                         className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${display.color}`}
                       >
                         {display.text}
-                        {display.region && (
-                          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[7px] font-medium text-[var(--muted-foreground)] opacity-60">
-                            {display.region.slice(0, 4)}
-                          </span>
-                        )}
                       </span>
                     )
                   })}
@@ -2398,7 +2349,6 @@ export default function LiveScoringPage() {
                             return (
                               <span
                                 key={i}
-                                title={display.region || ""}
                                 className={`relative flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold ${display.color}`}
                               >
                                 {display.text}

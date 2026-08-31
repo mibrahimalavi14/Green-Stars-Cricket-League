@@ -42,7 +42,6 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  predictions   Prediction[]
 }
 
 model VerificationToken {
@@ -81,7 +80,6 @@ model Season {
   scheduleAnnounced   Boolean              @default(false)
   winnerId            String?              @default("")
   runnerUpId          String               @default("")
-  seasonQuizLocked    Boolean              @default(false)
   isLocked            Boolean              @default(false)
   lockedAt            DateTime?
   lockedReason        String               @default("")
@@ -97,9 +95,6 @@ model Season {
   fairPlayRecords     FairPlayRecord[]
   awards              SeasonAward[]
   honors              TeamHonor[]
-  seasonQuizzes       SeasonQuiz[]
-  seasonQuizStandings SeasonQuizStanding[]
-  playerOfSeasonVotes PlayerOfSeasonVote[]
   formatText          String?
   formatImage         String?
   scheduleText        String?
@@ -182,9 +177,7 @@ model Player {
 
   performances        PlayerMatch[]
   squadMembers        SquadMember[]
-  potmVotes           PotmVote[]
   transfers           PlayerTransfer[]
-  playerOfSeasonVotes PlayerOfSeasonVote[]
 
   createdAt DateTime @default(now())
 
@@ -234,11 +227,8 @@ model Match {
   isSquadLocked      Boolean            @default(false)
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @default(now()) @updatedAt
-  predictions        Prediction[]
   innings            Inning[]
   performances       PlayerMatch[]
-  quizzes            Quiz[]
-  potmVotes          PotmVote[]
   ballEvents         BallEvent[]
   superOvers         SuperOverInnings[]
   notes              MatchNotes?
@@ -311,16 +301,6 @@ model PlayerMatch {
   @@index([teamId])
 }
 
-model Prediction {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  matchId         String
-  match           Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  predictedTeamId String
-  createdAt       DateTime @default(now())
-}
-
 model News {
   id        String   @id @default(cuid())
   title     String
@@ -346,26 +326,6 @@ model Contact {
   sponsorshipType String   @default("")
   budgetRange     String   @default("")
   createdAt       DateTime @default(now())
-}
-
-model SeasonPrediction {
-  id              String   @id @default(cuid())
-  seasonId        String
-  predictedTeamId String
-  name            String
-  email           String
-  googleUserId    String?
-  timeZone        String?
-  createdAt       DateTime @default(now())
-
-  @@unique([email, seasonId])
-}
-
-model PredictionLock {
-  id        String   @id @default(cuid())
-  seasonId  String
-  locked    Boolean  @default(false)
-  createdAt DateTime @default(now())
 }
 
 model Sponsor {
@@ -405,27 +365,6 @@ model PracticeCloneMapping {
   @@index([practiceTeamId])
 }
 
-model Review {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @default("")
-  city      String   @default("")
-  rating    Int
-  comment   String
-  approved  Boolean  @default(false)
-  ip        String   @default("")
-  createdAt DateTime @default(now())
-}
-
-model Rating {
-  id        String   @id @default(cuid())
-  value     Int
-  ip        String
-  createdAt DateTime @default(now())
-
-  @@unique([ip])
-}
-
 model EmailOtp {
   id        String   @id @default(cuid())
   email     String
@@ -454,35 +393,6 @@ model Notification {
   link      String   @default("")
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
-}
-
-model Quiz {
-  id            String        @id @default(cuid())
-  matchId       String
-  match         Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  question      String
-  options       String        @default("[]")
-  correctAnswer String
-  pointValue    Int           @default(10)
-  active        Boolean       @default(true)
-  attempts      QuizAttempt[]
-  createdAt     DateTime      @default(now())
-
-  @@unique([matchId])
-}
-
-model QuizAttempt {
-  id             String   @id @default(cuid())
-  quizId         String
-  quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  name           String
-  email          String
-  selectedAnswer String
-  correct        Boolean
-  createdAt      DateTime @default(now())
-
-  @@unique([quizId, email])
-  @@index([quizId])
 }
 
 model Challenge {
@@ -531,33 +441,6 @@ model ChallengeAttempt {
 
   @@unique([challengeId, email])
   @@index([challengeId])
-}
-
-model PotmVote {
-  id        String   @id @default(cuid())
-  matchId   String
-  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  playerId  String
-  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  email     String
-  name      String   @default("Anonymous")
-  createdAt DateTime @default(now())
-
-  @@unique([matchId, email])
-}
-
-model PlayerOfSeasonVote {
-  id        String   @id @default(cuid())
-  seasonId  String
-  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  playerId  String
-  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  email     String
-  name      String   @default("Anonymous")
-  createdAt DateTime @default(now())
-
-  @@unique([seasonId, email])
-  @@index([seasonId])
 }
 
 model BallEvent {
@@ -783,52 +666,6 @@ model TeamHonor {
 
   @@unique([seasonId, teamId, title])
   @@index([teamId])
-}
-
-model SeasonQuiz {
-  id            String              @id @default(cuid())
-  seasonId      String
-  season        Season              @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  question      String
-  options       String              @default("[]")
-  correctAnswer String
-  position      Int                 @default(0)
-  pointValue    Int                 @default(10)
-  active        Boolean             @default(true)
-  attempts      SeasonQuizAttempt[]
-  createdAt     DateTime            @default(now())
-
-  @@unique([seasonId, position])
-  @@index([seasonId])
-}
-
-model SeasonQuizAttempt {
-  id           String     @id @default(cuid())
-  seasonQuizId String
-  seasonQuiz   SeasonQuiz @relation(fields: [seasonQuizId], references: [id], onDelete: Cascade)
-  name         String
-  email        String
-  answers      String     @default("[]")
-  score        Int        @default(0)
-  total        Int        @default(0)
-  createdAt    DateTime   @default(now())
-
-  @@unique([seasonQuizId, email])
-  @@index([seasonQuizId])
-}
-
-model SeasonQuizStanding {
-  id        String   @id @default(cuid())
-  seasonId  String
-  season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  name      String
-  isHidden  Boolean  @default(false)
-  isShown   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([seasonId, name])
-  @@index([seasonId])
 }
 
 model SeasonFixture {

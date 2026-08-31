@@ -4,7 +4,6 @@ const p = new PrismaClient()
 const s = await p.season.findFirst({ where: { name: 'Season 2' } })
 if (s) {
   await p.playerMatch.deleteMany({ where: { match: { seasonId: s.id } } })
-  await p.prediction.deleteMany({ where: { match: { seasonId: s.id } } })
   await p.inning.deleteMany({ where: { match: { seasonId: s.id } } })
   await p.match.deleteMany({ where: { seasonId: s.id } })
   await p.player.deleteMany({ where: { team: { seasonId: s.id } } })

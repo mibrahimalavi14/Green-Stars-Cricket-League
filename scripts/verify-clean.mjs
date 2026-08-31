@@ -9,7 +9,6 @@ console.log(`  Matches: ${await prisma.match.count()}`)
 console.log(`  Innings: ${await prisma.inning.count()}`)
 console.log(`  PlayerMatch: ${await prisma.playerMatch.count()}`)
 console.log(`  News: ${await prisma.news.count()}`)
-console.log(`  Predictions: ${await prisma.prediction.count()}`)
 console.log(`  Contact: ${await prisma.contactMessage.count()}`)
 
 const teams = await prisma.team.findMany({ select: { name: true, shortName: true } })

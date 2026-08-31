@@ -242,7 +242,7 @@ export default function AdminChallengesPage() {
           Quiz Challenges
         </h1>
         <p className="text-[var(--muted-foreground)]">
-          Daily + weekly challenges — 12-20 question pool, every player gets a random 10 with a per-question timer. Points add to total quiz score &amp; level.
+          Daily + weekly challenges — 12-20 question pool, every player gets a random 10 with a per-question timer.
         </p>
       </div>
 

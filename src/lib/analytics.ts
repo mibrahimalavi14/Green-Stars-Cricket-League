@@ -6,11 +6,7 @@ export type AnalyticsEventType =
   | "undo_used"
   | "page_view"
   | "search_query"
-  | "prediction_submitted"
-  | "quiz_attempted"
   | "challenge_attempted"
-  | "potm_vote"
-  | "player_of_season_vote"
   | "notification_sent"
   | "feature_feedback"
 

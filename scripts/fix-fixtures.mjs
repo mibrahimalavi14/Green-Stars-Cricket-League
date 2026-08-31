@@ -6,7 +6,6 @@ if (!season) { console.log("Season 2 not found"); process.exit(1) }
 
 // Delete existing matches for season 2
 await p.playerMatch.deleteMany({ where: { match: { seasonId: season.id } } })
-await p.prediction.deleteMany({ where: { match: { seasonId: season.id } } })
 await p.inning.deleteMany({ where: { match: { seasonId: season.id } } })
 await p.match.deleteMany({ where: { seasonId: season.id } })
 
