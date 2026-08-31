@@ -86,7 +86,7 @@ export function calculatePartnerships(balls: BallData[]): Partnership[] {
       startNewPartnership(ball.striker, ball.nonStriker)
     }
 
-    const totalRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+    const totalRuns = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0)
 
     if (isLegalDelivery(ball)) {
       currentPartnership!.balls++
@@ -109,7 +109,7 @@ export function calculatePartnerships(balls: BallData[]): Partnership[] {
       }
     }
 
-    const completedRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+    const completedRuns = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0)
     if (completedRuns % 2 === 1) {
       const temp = currentStriker
       currentStriker = currentNonStriker

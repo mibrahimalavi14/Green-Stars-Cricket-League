@@ -24,7 +24,7 @@
  *
  * MOTM (Man of the Match) — Automatic via Impact Score:
  *   Impact Score = Runs × 0.4 + Wickets × 8 + Catches × 5 + RunOuts × 5 + Stumpings × 5
- *   Tie-breakers: more wickets → more runs → better SR → lower economy → more catches
+ *   Tie-breakers: more wickets → more runs → better SR → more catches
  *   Admin override ONLY if all tie-breakers are also equal.
  *
  * Two separate awards:
@@ -37,8 +37,8 @@
  *   → Hall of Fame → Dream Team → MOTM (auto) → Analytics → Audit → Notification
  *
  * Result formatting:
- *   "Team A won by X runs"      — batting second wins; X = margin = (team1Total - team2Total)
- *   "Team A won by X wickets"   — batting first wins;  X = wicketsPerInnings - wicketsLost
+ *   "Team A won by X runs"      — batting first (team1) wins via higher total; X = team1Total - team2Total
+ *   "Team B won by X wickets"   — batting second (team2) chases down target; X = wicketsPerInnings - wicketsLost
  *   "Super Over: Team A won"    — tie decided by Super Over
  *   "No Result"                 — abandoned / incomplete
  *

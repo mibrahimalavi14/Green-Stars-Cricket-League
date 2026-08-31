@@ -54,7 +54,7 @@ export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL
       team1: { select: { name: true } },
       team2: { select: { name: true } },
       season: { select: { name: true } },
-      innings: { select: { teamId: true, runs: true, wickets: true, balls: true, ballsData: true } },
+      innings: { select: { teamId: true, runs: true, wickets: true, balls: true, extras: true, ballsData: true } },
       performances: {
         select: {
           playerId: true,
@@ -114,17 +114,18 @@ export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL
       const otherTeamName = inn.teamId === m.team1Id ? m.team2.name : m.team1.name
       const isTeam1 = inn.teamId === m.team1Id
       const otherInn = m.innings.find(i => i.teamId !== inn.teamId)
-      const totalRuns = inn.runs
+      const totalRuns = inn.runs + inn.extras
+      const otherTotal = otherInn ? otherInn.runs + otherInn.extras : 0
       const totalBalls = inn.balls
 
-      rawTeamRecords.push({ type: "highest_team_score", value: totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `${inn.runs}/${inn.wickets} (${Math.floor(totalBalls / 6)}.${totalBalls % 6} ov)`, date: m.date })
+      rawTeamRecords.push({ type: "highest_team_score", value: totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `${totalRuns}/${inn.wickets} (${Math.floor(totalBalls / 6)}.${totalBalls % 6} ov)`, date: m.date })
 
       if (totalBalls >= 12) {
-        rawTeamRecords.push({ type: "lowest_team_score", value: totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `${inn.runs}/${inn.wickets} (${Math.floor(totalBalls / 6)}.${totalBalls % 6} ov)`, date: m.date })
+        rawTeamRecords.push({ type: "lowest_team_score", value: totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `${totalRuns}/${inn.wickets} (${Math.floor(totalBalls / 6)}.${totalBalls % 6} ov)`, date: m.date })
       }
 
       if (otherInn) {
-        const diff = totalRuns - otherInn.runs
+        const diff = totalRuns - otherTotal
         if (diff > 0 && m.winnerTeamId === inn.teamId) {
           rawTeamRecords.push({ type: "biggest_win_runs", value: diff, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `Won by ${diff} runs`, date: m.date })
         }
@@ -138,11 +139,11 @@ export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL
           if (wktsLeft > 0) rawTeamRecords.push({ type: "biggest_win_wickets", value: wktsLeft, teamName: otherTeamName, teamId: m.team1Id, matchId: m.id, matchLabel: ml, details: `Won by ${wktsLeft} wickets`, date: m.date })
         }
 
-        if (m.winnerTeamId === inn.teamId && totalRuns > otherInn.runs) {
-          rawTeamRecords.push({ type: "highest_successful_chase", value: totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `Chased ${otherInn.runs}`, date: m.date })
+        if (m.winnerTeamId === inn.teamId && totalRuns > otherTotal) {
+          rawTeamRecords.push({ type: "highest_successful_chase", value: totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `Chased ${otherTotal}`, date: m.date })
         }
-        if (m.winnerTeamId === inn.teamId && totalRuns < otherInn.runs) {
-          rawTeamRecords.push({ type: "lowest_successful_defence", value: otherInn.runs - totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `Defended ${totalRuns}`, date: m.date })
+        if (m.winnerTeamId === inn.teamId && totalRuns < otherTotal) {
+          rawTeamRecords.push({ type: "lowest_successful_defence", value: otherTotal - totalRuns, teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml, details: `Defended ${totalRuns}`, date: m.date })
         }
       }
 
@@ -172,13 +173,13 @@ export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL
         fastestTeam50.push({
           type: "fastest_team_50", value: fiftyAtBalls,
           teamName, teamId: inn.teamId, matchId: m.id, matchLabel: ml,
-          details: `Reached 50 in ${fiftyAtBalls} balls (finished ${inn.runs}/${inn.wickets})`, date: m.date,
+          details: `Reached 50 in ${fiftyAtBalls} balls (finished ${totalRuns}/${inn.wickets})`, date: m.date,
         })
       }
 
       const perStriker = new Map<string, { runs: number; legal: number; dots: number; fifty: number | null; century: number | null }>()
       for (const b of ballsData) {
-        const strikerRuns = b.runs - b.byes - b.legByes
+        const strikerRuns = b.isWide ? 0 : b.runs
         const isLegal = !b.isWide && !b.isNoBall
         if (!perStriker.has(b.striker)) perStriker.set(b.striker, { runs: 0, legal: 0, dots: 0, fifty: null, century: null })
         const st = perStriker.get(b.striker)!
