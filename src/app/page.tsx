@@ -48,7 +48,7 @@ async function HomePage() {
   const seasonWickets = players.reduce((a, p) => a + p.wickets, 0)
   const seasonSixes = players.reduce((a, p) => a + p.sixes, 0)
   const seasonFours = players.reduce((a, p) => a + p.fours, 0)
-  const latestSeasonName = season?.name || (season ? `Season ${season.year}` : "—")
+  const latestSeasonLabel = season ? `${season.name} ${season.year}` : "—"
   const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.png"))
 
   const chairmanRow = await prisma.chairmanMessage.findFirst({
@@ -155,7 +155,8 @@ async function HomePage() {
 
       <FadeInView>
       <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">
-        <div className="mx-auto max-w-7xl px-4">
+          <div className="mx-auto max-w-7xl px-4">
+          <h2 className="mb-4 text-center text-2xl font-bold sm:text-3xl">{latestSeasonLabel}</h2>
           <div className="flex flex-wrap items-stretch justify-center gap-3">
             {[
               { label: "Teams", value: teamCount, icon: Users },
@@ -165,7 +166,6 @@ async function HomePage() {
               { label: "Wickets", value: seasonWickets, icon: Target },
               { label: "Sixes", value: seasonSixes, icon: Zap },
               { label: "Fours", value: seasonFours, icon: Zap },
-              { label: "Latest Season", value: latestSeasonName, icon: Trophy },
             ].map((s) => (
               <div key={s.label} className="min-w-[88px] flex-1 basis-[88px] rounded-lg bg-[var(--muted)] px-3 py-3 text-center">
                 <s.icon className="mx-auto mb-1 h-5 w-5 text-[var(--accent)]" />
