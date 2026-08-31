@@ -98,10 +98,10 @@ export function Footer() {
             <div>
               <SectionHeading>Contact</SectionHeading>
               <div className="space-y-2.5 text-sm text-[var(--muted-foreground)]">
-                <a href="mailto:greenstarscricketleague@gmail.com" className="flex items-center gap-2.5 rounded-lg bg-[var(--muted)] px-3 py-2.5 transition-colors hover:bg-[var(--accent)]/10 hover:text-[var(--accent)]">
+                <div className="flex items-center gap-2.5 rounded-lg bg-[var(--muted)] px-3 py-2.5">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gscl-gold/15"><Mail className="h-3.5 w-3.5 text-gscl-gold" /></span>
                   <span className="break-all">greenstarscricketleague@gmail.com</span>
-                </a>
+                </div>
                 <a href="/contact" className="flex items-center gap-2.5 rounded-lg bg-[var(--muted)] px-3 py-2.5 transition-colors hover:bg-[var(--accent)]/10 hover:text-[var(--accent)]">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gscl-gold/15"><MessageSquare className="h-3.5 w-3.5 text-gscl-gold" /></span>
                   <span>Send us a message</span>

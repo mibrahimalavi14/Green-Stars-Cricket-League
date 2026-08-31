@@ -96,14 +96,14 @@ async function AdminPage() {
 
         <Link href="/admin/potm" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Star className="mb-3 h-8 w-8 text-[var(--accent)]" />
-          <h3 className="text-lg font-semibold">POTM Voting</h3>
-          <p className="text-sm text-[var(--muted-foreground)]">View votes & set official MOTM</p>
+          <h3 className="text-lg font-semibold">Man of the Match</h3>
+          <p className="text-sm text-[var(--muted-foreground)]">View auto-computed Man of the Match</p>
         </Link>
 
         <Link href="/admin/player-of-season" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">
           <Trophy className="mb-3 h-8 w-8 text-[var(--accent)]" />
           <h3 className="text-lg font-semibold">Player of Season</h3>
-          <p className="text-sm text-[var(--muted-foreground)]">View votes & announce winner</p>
+          <p className="text-sm text-[var(--muted-foreground)]">View auto-calculated Player of the Season</p>
         </Link>
 
         <Link href="/admin/news" className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[var(--accent)] hover:shadow-lg">

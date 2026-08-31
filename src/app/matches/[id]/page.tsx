@@ -598,7 +598,7 @@ async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) 
             className="mb-6 inline-flex items-center gap-2 rounded-xl border border-[var(--accent)] bg-[var(--accent)]/10 px-5 py-2.5 text-sm font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
           >
             <Star className="h-4 w-4" />
-            Vote for Player of the Match
+            View Man of the Match
           </Link>
 
           <h2 className="mb-6 text-lg font-bold text-center">Scorecard</h2>
