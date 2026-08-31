@@ -122,13 +122,6 @@ export function Footer() {
                 >
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a
-                  href="mailto:greenstarscricketleague@gmail.com"
-                  aria-label="Email"
-                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--muted)] text-[var(--foreground)] transition-all hover:scale-110 hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
-                >
-                  <Mail className="h-5 w-5" />
-                </a>
               </div>
             </div>
           </div>
