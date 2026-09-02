@@ -578,7 +578,7 @@ export function LiveScoreClient({
       const runs: Record<string, number> = {}
       for (const p of battingSide) runs[p.id] = 0
       for (const b of balls) {
-        if (b.striker && runs[b.striker] !== undefined) runs[b.striker] += b.runs || 0
+        if (b.striker && runs[b.striker] !== undefined) runs[b.striker] += b.isWide ? 0 : b.runs || 0
       }
       return runs
     }
@@ -604,7 +604,7 @@ export function LiveScoreClient({
       const sid = b.striker
       if (!sid || strikerRuns[sid] === undefined) continue
       const before = strikerRuns[sid]
-      strikerRuns[sid] = before + (b.runs || 0)
+      strikerRuns[sid] = before + (b.isWide ? 0 : b.runs || 0)
       const after = strikerRuns[sid]
       if (before < 100 && after >= 100) {
         setCelebration({ type: "hundred", playerName: playerMap.get(sid) || "Batsman", runs: after })

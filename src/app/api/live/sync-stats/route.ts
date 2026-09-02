@@ -79,16 +79,17 @@ export async function POST(req: Request) {
       if (ball.nonStriker) ensurePlayer(ball.nonStriker, inn.teamId)
 
       const ps = playerStats[ball.striker]
-      ps.battingRuns += ball.runs
+      const batRuns = ball.isWide ? 0 : ball.runs
+      ps.battingRuns += batRuns
       if (!ball.isWide && !ball.isNoBall) {
         ps.ballsFaced++
       }
-      if (ball.runs === 1) ps.ones++
-      if (ball.runs === 2) ps.twos++
-      if (ball.runs === 3) ps.threes++
-      if (ball.runs === 4) ps.fours++
-      if (ball.runs === 6) ps.sixes++
-      if (ball.runs === 0 && !ball.isWide && !ball.isNoBall && !ball.wicket) ps.dotBalls++
+      if (batRuns === 1) ps.ones++
+      if (batRuns === 2) ps.twos++
+      if (batRuns === 3) ps.threes++
+      if (batRuns === 4) ps.fours++
+      if (batRuns === 6) ps.sixes++
+      if (batRuns === 0 && !ball.isWide && !ball.isNoBall && !ball.wicket) ps.dotBalls++
 
       const bps = playerStats[ball.bowler]
       if (!ball.isWide && !ball.isNoBall) {

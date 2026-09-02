@@ -21,7 +21,7 @@ Each item is classified as ✅ (done), ⚠️ (partial), or ❌ (missing).
 | A9 | Auto-match completion | ✅ | |
 | A10 | Super Over (all match types, infinite retries) | ✅ | |
 | A11 | Super Over history persistence | ✅ | |
-| A12 | **Wides/No-balls with bat runs** | ❌ | Wide button hardcodes runs:0. A wide hit for 4 cannot be recorded. Same for no-ball. |
+| A12 | **Wides/No-balls with bat runs** | ✅ | Wide/No-ball support extra runs; wide extras never credited to batsman, no-ball bat runs credited to striker. |
 | A13 | **Overthrow runs** | ❌ | No explicit mechanism. Runs off bat works but indistinguishable from normal. |
 | A14 | **Dead ball** | ❌ | No mechanism to declare a ball dead. |
 
@@ -39,7 +39,7 @@ Each item is classified as ✅ (done), ⚠️ (partial), or ❌ (missing).
 | B6 | Not out tracking | ✅ | |
 | B7 | Batting average (display layer) | ✅ | `runs / dismissals` |
 | B8 | Bowling average (display layer) | ✅ | `runsConceded / wickets` |
-| B9 | **Retired Hurt vs Retired Out distinction** | ⚠️ | Both stored as "retired". No way to distinguish. |
+| B9 | **Retired Hurt vs Retired Out distinction** | ✅ | `retired_hurt` = not a dismissal (avg unaffected); `retired_out` = a dismissal. |
 | B10 | **Career average (not-out handling)** | ⚠️ | Works for players with dismissals. All not-outs shows "-". |
 | B11 | Player comparison tool | ✅ | |
 | B12 | Player photo upload | ✅ | Via admin |
@@ -260,8 +260,8 @@ Each item is classified as ✅ (done), ⚠️ (partial), or ❌ (missing).
 
 | # | Feature | Effort | Why |
 |---|---------|--------|-----|
-| H-1 | **Wides/No-balls with bat runs** | Medium | A wide hit for 4 shows as 1 run instead of 5. Affects player stats. |
-| H-2 | **Retired Hurt vs Retired Out** | Small | Affects batting average calculation. |
+| H-1 | **Wides/No-balls with bat runs** | ✅ Done | Wide/no-ball extra runs record correctly; batsman attribution cricket-accurate. |
+| H-2 | **Retired Hurt vs Retired Out** | ✅ Done | Retirement types separated; affects batting average only when retired out. |
 
 ### MEDIUM PRIORITY (completes professional look)
 
@@ -298,9 +298,9 @@ Each item is classified as ✅ (done), ⚠️ (partial), or ❌ (missing).
 
 ## RECOMMENDED ACTION PLAN
 
-### Phase 1: HIGH PRIORITY (Do now)
-1. Fix wides/no-balls to support bat runs
-2. Add retired hurt vs retired out distinction
+### Phase 1: HIGH PRIORITY (Done)
+1. Wides/no-balls with bat runs — ✅ committed
+2. Retired hurt vs retired out distinction — ✅ committed
 
 ### Phase 2: MEDIUM PRIORITY (Do before Season 1)
 3. Add umpire fields to Match model

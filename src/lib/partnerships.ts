@@ -97,9 +97,11 @@ export function calculatePartnerships(balls: BallData[]): Partnership[] {
       currentPartnership!.extras += ball.isWide ? 1 : 1
     }
 
-    if (ball.runs > 0 && ball.striker === currentStriker) {
-      if (strikerIsFirst) batsman1Runs += ball.runs
-      else batsman2Runs += ball.runs
+    const batRuns = ball.isWide ? 0 : ball.runs
+
+    if (batRuns > 0 && ball.striker === currentStriker) {
+      if (strikerIsFirst) batsman1Runs += batRuns
+      else batsman2Runs += batRuns
     }
 
     if (isLegalDelivery(ball)) {

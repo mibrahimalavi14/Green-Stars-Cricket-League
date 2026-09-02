@@ -986,12 +986,13 @@ export default function LiveScoringPage() {
           if (ball.nonStriker) ensurePlayer(ball.nonStriker, inn.teamId)
 
           const ps = playerStats[ball.striker]
+          const batRuns = ball.isWide ? 0 : ball.runs
           ps.ballsFaced++
-          ps.battingRuns += ball.runs
-          if (ball.runs === 1) ps.ones++
-          if (ball.runs === 2) ps.twos++
-          if (ball.runs === 4) ps.fours++
-          if (ball.runs === 6) ps.sixes++
+          ps.battingRuns += batRuns
+          if (batRuns === 1) ps.ones++
+          if (batRuns === 2) ps.twos++
+          if (batRuns === 4) ps.fours++
+          if (batRuns === 6) ps.sixes++
 
           const bps = playerStats[ball.bowler]
           if (!ball.isWide && !ball.isNoBall) {
@@ -1012,8 +1013,8 @@ export default function LiveScoringPage() {
             const dismissed = ball.wicketBatsman || ball.striker
             ensurePlayer(dismissed, inn.teamId)
             const dps = playerStats[dismissed]
-            dps.isOut = true
-            dps.wicketsLost = 1
+            dps.isOut = ball.wicket !== "retired_hurt"
+            dps.wicketsLost = ball.wicket !== "retired_hurt" ? 1 : 0
             dps.dismissalType = ball.wicket
             if (ball.wicket !== "runout") {
               dps.dismissedByBowlerId = ball.bowler

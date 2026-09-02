@@ -107,7 +107,7 @@ export function generateMatchTimeline(data: TimelineMatchData): TimelineEvent[] 
       const sid = ball.striker
       if (sid) {
         const before = strikerRuns[sid] || 0
-        strikerRuns[sid] = before + (ball.runs || 0)
+        strikerRuns[sid] = before + (ball.isWide ? 0 : ball.runs || 0)
         const after = strikerRuns[sid]
         const name = names[sid] || "Batsman"
         if (before < 50 && after >= 50) {
@@ -129,7 +129,7 @@ export function generateMatchTimeline(data: TimelineMatchData): TimelineEvent[] 
       }
 
       // Six
-      if (ball.runs === 6) {
+      if (ball.runs === 6 && !ball.isWide) {
         const name = sid ? names[sid] || "Batsman" : "Batsman"
         events.push({
           type: "six",
