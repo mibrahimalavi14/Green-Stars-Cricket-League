@@ -22,8 +22,8 @@ Each item is classified as ✅ (done), ⚠️ (partial), or ❌ (missing).
 | A10 | Super Over (all match types, infinite retries) | ✅ | |
 | A11 | Super Over history persistence | ✅ | |
 | A12 | **Wides/No-balls with bat runs** | ✅ | Wide/No-ball support extra runs; wide extras never credited to batsman, no-ball bat runs credited to striker. |
-| A13 | **Overthrow runs** | ❌ | No explicit mechanism. Runs off bat works but indistinguishable from normal. |
-| A14 | **Dead ball** | ❌ | No mechanism to declare a ball dead. |
+| A13 | **Overthrow runs** | ✅ | Run tapped then "Overthrow +1..+4" appended to the last legal delivery; credited to striker + team, flagged in over-by-over. |
+| A14 | **Dead ball** | ✅ | "Dead Ball" button records a non-delivery event (no over advance, no bowler ball, no batsman/bowler runs). |
 
 ---
 
@@ -62,7 +62,7 @@ Each item is classified as ✅ (done), ⚠️ (partial), or ❌ (missing).
 | C10 | YouTube highlights embed | ✅ | |
 | C11 | Custom highlights | ✅ | |
 | C12 | Share buttons | ✅ | |
-| C13 | **Penalty runs** | ❌ | No mechanism |
+| C13 | **Penalty runs** | ✅ | "Penalty" button awards 1-6 (default 5) team runs to the innings total; never credited to a batsman or bowler, not a legal delivery. |
 | C14 | **Abandoned / No Result** | ✅ | Via result string "no result" or "abandon" |
 
 ---

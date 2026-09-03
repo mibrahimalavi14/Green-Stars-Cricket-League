@@ -166,7 +166,7 @@ export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL
       let fiftyAtBalls: number | null = null
       for (const b of ballsData) {
         cumRuns += b.runs + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0) + b.byes + b.legByes
-        if (!b.isWide && !b.isNoBall) legalCount++
+        if (!b.isWide && !b.isNoBall && !b.deadBall) legalCount++
         if (fiftyAtBalls === null && cumRuns >= 50 && legalCount > 0) fiftyAtBalls = legalCount
       }
       if (fiftyAtBalls !== null && cumRuns >= 50) {
@@ -180,7 +180,7 @@ export async function computeAllRecords(workspaceId: string = WORKSPACE_OFFICIAL
       const perStriker = new Map<string, { runs: number; legal: number; dots: number; fifty: number | null; century: number | null }>()
       for (const b of ballsData) {
         const strikerRuns = b.isWide ? 0 : b.runs
-        const isLegal = !b.isWide && !b.isNoBall
+        const isLegal = !b.isWide && !b.isNoBall && !b.deadBall
         if (!perStriker.has(b.striker)) perStriker.set(b.striker, { runs: 0, legal: 0, dots: 0, fifty: null, century: null })
         const st = perStriker.get(b.striker)!
         st.runs += strikerRuns

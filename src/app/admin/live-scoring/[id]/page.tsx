@@ -17,10 +17,13 @@ import {
   CheckCircle,
   CloudOff,
   RefreshCw,
+  CircleOff,
+  Scale,
 } from "lucide-react"
 import { MATCH_CONFIG, isMatchComplete, formatOvers } from "@/lib/config"
 import { loadOfflineQueue, addToOfflineQueue, removeFromOfflineQueue, createBallId } from "@/lib/offline-queue"
 import { useOfflineQueue } from "@/hooks/useOfflineQueue"
+import { isLegalDelivery, ballBatRuns, ballBowlingRuns } from "@/lib/scoring"
 
 interface Player {
   id: string
@@ -51,6 +54,9 @@ interface BallEvent {
   isNoBall: boolean
   byes: number
   legByes: number
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 interface Innings {
@@ -137,6 +143,8 @@ export default function LiveScoringPage() {
   const [wicketFielder, setWicketFielder] = useState("")
   const [pendingExtraRuns, setPendingExtraRuns] = useState<number | null>(null)
   const [pendingExtraType, setPendingExtraType] = useState<string | null>(null)
+  const [penaltyOpen, setPenaltyOpen] = useState(false)
+  const [overthrowOpen, setOverthrowOpen] = useState(false)
   const [inningsNum, setInningsNum] = useState(1)
   const [endMatchConfirm, setEndMatchConfirm] = useState(false)
   const [endingMatch, setEndingMatch] = useState(false)
@@ -243,7 +251,7 @@ export default function LiveScoringPage() {
         const b = q.ball as unknown as BallEvent
         runs += b.runs
         extras += (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0) + b.byes + b.legByes
-        if (!b.isWide && !b.isNoBall) balls++
+        if (!b.isWide && !b.isNoBall && !b.deadBall) balls++
         if (b.wicket) wickets++
       }
       return { ...inn, ballsData, runs, balls, wickets, extras }
@@ -381,7 +389,7 @@ export default function LiveScoringPage() {
       setSuperOverT2Wkts(String(soWkts))
     }
 
-    const soLegalBalls = (ballsOverride || superOverBalls).filter(b => !b.isWide && !b.isNoBall).length
+    const soLegalBalls = (ballsOverride || superOverBalls).filter(b => !b.isWide && !b.isNoBall && !b.deadBall).length
     const bowlingTeamId = superOverBattingTeamId === summary.match.team1.id ? summary.match.team2.id : summary.match.team1.id
     setCompletedSuperOverInnings(prev => [...prev, {
       superOverNumber,
@@ -412,7 +420,7 @@ export default function LiveScoringPage() {
       return
     }
 
-    const legalBalls = superOverBalls.filter(b => !b.isWide && !b.isNoBall).length
+    const legalBalls = superOverBalls.filter(b => !b.isWide && !b.isNoBall && !b.deadBall).length
     if (!ball.isWide && !ball.isNoBall && legalBalls >= MATCH_CONFIG.superOverBalls) return
 
     let wickets = superOverWickets
@@ -429,7 +437,7 @@ export default function LiveScoringPage() {
     setSuperOverPendingExtraRuns(null)
     setSuperOverPendingExtraType(null)
 
-    const newLegalBalls = updatedBalls.filter(b => !b.isWide && !b.isNoBall).length
+    const newLegalBalls = updatedBalls.filter(b => !b.isWide && !b.isNoBall && !b.deadBall).length
     const overDone = newLegalBalls >= MATCH_CONFIG.superOverBalls
     const allOut = wickets >= MATCH_CONFIG.superOverWickets
 
@@ -571,7 +579,7 @@ export default function LiveScoringPage() {
   const getCurrentOverBalls = useCallback((balls: BallEvent[]): BallEvent[] => {
     if (balls.length === 0) return []
     const legalCount = balls.filter(
-      (b) => !b.isWide && !b.isNoBall
+      (b) => !b.isWide && !b.isNoBall && !b.deadBall
     ).length
     const oversCompleted = Math.floor(legalCount / 6)
     let count = 0
@@ -595,7 +603,7 @@ export default function LiveScoringPage() {
   const bowlerLegalBalls = useMemo(() => {
     const map: Record<string, number> = {}
     for (const b of activeInnings?.ballsData || []) {
-      if (!b.isWide && !b.isNoBall) {
+      if (!b.isWide && !b.isNoBall && !b.deadBall) {
         map[b.bowler] = (map[b.bowler] || 0) + 1
       }
     }
@@ -604,7 +612,7 @@ export default function LiveScoringPage() {
 
   const lastOverBowlerId: string | null = useMemo(() => {
     if (!activeInnings || activeInnings.ballsData.length === 0) return null
-    const legalBalls = activeInnings.ballsData.filter((b) => !b.isWide && !b.isNoBall)
+    const legalBalls = activeInnings.ballsData.filter((b) => !b.isWide && !b.isNoBall && !b.deadBall)
     const currentOverNum = Math.floor(legalBalls.length / 6)
     if (currentOverNum <= 0) return null
     const prevOverStart = (currentOverNum - 1) * 6
@@ -633,7 +641,7 @@ export default function LiveScoringPage() {
       if (b.isWide || b.isNoBall) runs += 1
       runs += b.byes + b.legByes
       if (b.wicket) wickets++
-      if (!b.isWide && !b.isNoBall) legalBalls++
+      if (!b.isWide && !b.isNoBall && !b.deadBall) legalBalls++
     }
     const ballsLeft = MATCH_CONFIG.superOverBalls - legalBalls
     const isSecondBatting = superOverBattingTeamId !== summary.match.team1.id
@@ -893,6 +901,71 @@ export default function LiveScoringPage() {
     }
   }
 
+  function handleDeadBall() {
+    addBall({
+      runs: 0,
+      extras: null,
+      wicket: null,
+      bowler: bowlerId,
+      striker: strikerId,
+      nonStriker: nonStrikerId,
+      wicketBatsman: null,
+      wicketFielder: null,
+      isWide: false,
+      isNoBall: false,
+      byes: 0,
+      legByes: 0,
+      deadBall: true,
+    })
+  }
+
+  function handlePenalty(runs: number) {
+    setPenaltyOpen(false)
+    addBall({
+      runs: 0,
+      extras: null,
+      wicket: null,
+      bowler: bowlerId,
+      striker: strikerId,
+      nonStriker: nonStrikerId,
+      wicketBatsman: null,
+      wicketFielder: null,
+      isWide: false,
+      isNoBall: false,
+      byes: 0,
+      legByes: 0,
+      deadBall: true,
+      penaltyRuns: runs,
+    })
+  }
+
+  async function handleOverthrow(runs: number) {
+    if (!matchId || !battingTeamId || !activeInnings) return
+    setSubmitting(true)
+    setOverthrowOpen(false)
+    try {
+      if (navigator.onLine) {
+        const res = await fetch("/api/live/balls/overthrow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchId, battingTeamId, runs }),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => null)
+          if (data?.error) alert(data.error)
+          setSubmitting(false)
+          return
+        }
+        await fetchSummary()
+      } else {
+        alert("Add overthrows while online only")
+      }
+    } catch {
+      alert("Failed to add overthrows")
+    }
+    setSubmitting(false)
+  }
+
   async function handleEndMatch() {
     if (!summary || !activeInnings) return
     setEndingMatch(true)
@@ -986,8 +1059,8 @@ export default function LiveScoringPage() {
           if (ball.nonStriker) ensurePlayer(ball.nonStriker, inn.teamId)
 
           const ps = playerStats[ball.striker]
-          const batRuns = ball.isWide ? 0 : ball.runs
-          ps.ballsFaced++
+          const batRuns = ballBatRuns(ball)
+          if (isLegalDelivery(ball)) ps.ballsFaced++
           ps.battingRuns += batRuns
           if (batRuns === 1) ps.ones++
           if (batRuns === 2) ps.twos++
@@ -995,16 +1068,12 @@ export default function LiveScoringPage() {
           if (batRuns === 6) ps.sixes++
 
           const bps = playerStats[ball.bowler]
-          if (!ball.isWide && !ball.isNoBall) {
+          if (isLegalDelivery(ball)) {
             bps.ballsBowled++
           }
-          bps.bowlingRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+          bps.bowlingRuns += ballBowlingRuns(ball)
           if (ball.isWide) bps.wides++
           if (ball.isNoBall) bps.noBalls++
-
-          if (ball.isWide || ball.isNoBall) {
-            ps.ballsFaced--
-          }
 
           if (ball.wicket && ball.wicket !== "runout") {
             bps.bowlingWickets++
@@ -1927,6 +1996,39 @@ export default function LiveScoringPage() {
                 ))}
               </div>
 
+              {activeInnings && activeInnings.ballsData.length > 0 && (() => {
+                const last = activeInnings.ballsData[activeInnings.ballsData.length - 1]
+                const legal = last && !last.isWide && !last.isNoBall && !last.deadBall
+                if (!legal) return null
+                return (
+                  <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-xs font-bold text-emerald-600">OVERTHROWS — add to last ball?</p>
+                      <button
+                        onClick={() => setOverthrowOpen(v => !v)}
+                        className="text-xs text-[var(--muted-foreground)] hover:text-emerald-500"
+                      >
+                        {overthrowOpen ? "Hide" : "Add"}
+                      </button>
+                    </div>
+                    {overthrowOpen && (
+                      <div className="flex gap-2 flex-wrap">
+                        {[1, 2, 3, 4].map((r) => (
+                          <button
+                            key={r}
+                            onClick={() => handleOverthrow(r)}
+                            disabled={submitting}
+                            className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500 text-lg font-bold text-white hover:bg-emerald-600 disabled:opacity-50"
+                          >
+                            +{r}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
               <div className="mb-2 text-xs font-semibold text-[var(--muted-foreground)]">
                 EXTRAS
               </div>
@@ -1959,7 +2061,47 @@ export default function LiveScoringPage() {
                 >
                   Leg Bye
                 </button>
+                <button
+                  onClick={handleDeadBall}
+                  disabled={submitting || !strikerId || !bowlerId}
+                  className="flex h-12 items-center justify-center gap-1 rounded-xl bg-slate-500 text-sm font-bold text-white hover:bg-slate-600 disabled:opacity-40"
+                >
+                  <CircleOff className="h-3 w-3" /> Dead Ball
+                </button>
+                <button
+                  onClick={() => setPenaltyOpen(true)}
+                  disabled={submitting || !strikerId || !bowlerId}
+                  className="flex h-12 items-center justify-center gap-1 rounded-xl bg-indigo-500 text-sm font-bold text-white hover:bg-indigo-600 disabled:opacity-40"
+                >
+                  <Scale className="h-3 w-3" /> Penalty
+                </button>
               </div>
+
+              {penaltyOpen && (
+                <div className="mb-3 rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-3">
+                  <p className="mb-2 text-xs font-bold text-indigo-600">PENALTY RUNS — award to {battingTeamName}</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {[5, 1, 2, 3, 4, 6].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => handlePenalty(r)}
+                        disabled={submitting}
+                        className={`flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold text-white hover:opacity-80 disabled:opacity-50 ${
+                          r === 5 ? "bg-indigo-600" : "bg-indigo-400"
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setPenaltyOpen(false)}
+                      className="rounded-lg bg-[var(--muted)] px-4 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted-foreground)]/20"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="mb-2 text-xs font-semibold text-[var(--muted-foreground)]">
                 WICKETS
@@ -2205,7 +2347,7 @@ export default function LiveScoringPage() {
                           )
                           const runs = balls.reduce((s, b) => s + b.runs, 0)
                           const legalBalls = balls.filter(
-                            (b) => !b.isWide && !b.isNoBall
+                            (b) => !b.isWide && !b.isNoBall && !b.deadBall
                           ).length
                           const ones = balls.filter((b) => b.runs === 1).length
                           const twos = balls.filter((b) => b.runs === 2).length
@@ -2259,7 +2401,7 @@ export default function LiveScoringPage() {
                             (b) => b.bowler === p.id
                           )
                           const legalBalls = balls.filter(
-                            (b) => !b.isWide && !b.isNoBall
+                            (b) => !b.isWide && !b.isNoBall && !b.deadBall
                           ).length
                           const runsConceded = balls.reduce(
                             (s, b) => s + b.runs + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0),
@@ -2330,7 +2472,7 @@ export default function LiveScoringPage() {
                     let legalCount = 0
                     let currentGroup: typeof activeInnings.ballsData = []
                     for (const ball of activeInnings.ballsData) {
-                      const isLegal = !ball.isWide && !ball.isNoBall
+      const isLegal = !ball.isWide && !ball.isNoBall && !ball.deadBall
                       if (isLegal && legalCount > 0 && legalCount % 6 === 0) {
                         groups.push({ over: groups.length, balls: currentGroup })
                         currentGroup = []

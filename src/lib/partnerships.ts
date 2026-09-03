@@ -11,6 +11,9 @@ export interface BallData {
   isNoBall: boolean
   byes: number
   legByes: number
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 export interface Partnership {
@@ -28,7 +31,7 @@ export interface Partnership {
 }
 
 function isLegalDelivery(ball: BallData): boolean {
-  return !ball.isWide && !ball.isNoBall
+  return !ball.isWide && !ball.isNoBall && !ball.deadBall
 }
 
 export function calculatePartnerships(balls: BallData[]): Partnership[] {
@@ -86,7 +89,7 @@ export function calculatePartnerships(balls: BallData[]): Partnership[] {
       startNewPartnership(ball.striker, ball.nonStriker)
     }
 
-    const totalRuns = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0)
+    const totalRuns = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0) + (ball.overthrows || 0) + (ball.penaltyRuns || 0)
 
     if (isLegalDelivery(ball)) {
       currentPartnership!.balls++
@@ -97,7 +100,7 @@ export function calculatePartnerships(balls: BallData[]): Partnership[] {
       currentPartnership!.extras += ball.isWide ? 1 : 1
     }
 
-    const batRuns = ball.isWide ? 0 : ball.runs
+    const batRuns = (ball.isWide ? 0 : ball.runs) + (ball.overthrows || 0)
 
     if (batRuns > 0 && ball.striker === currentStriker) {
       if (strikerIsFirst) batsman1Runs += batRuns
@@ -111,7 +114,7 @@ export function calculatePartnerships(balls: BallData[]): Partnership[] {
       }
     }
 
-    const completedRuns = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0)
+    const completedRuns = ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.byes || 0) + (ball.legByes || 0) + (ball.overthrows || 0)
     if (completedRuns % 2 === 1) {
       const temp = currentStriker
       currentStriker = currentNonStriker

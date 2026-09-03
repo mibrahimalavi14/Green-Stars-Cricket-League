@@ -15,6 +15,9 @@ interface BallData {
   isNoBall: boolean
   byes: number
   legByes: number
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 interface WormChartProps {
@@ -36,10 +39,10 @@ function computeOverData(ballsData: BallData[], maxOvers: number): OverPoint[] {
   let legalCount = 0
 
   for (const ball of ballsData) {
-    const totalRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+    const totalRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0) + (ball.overthrows || 0) + (ball.penaltyRuns || 0)
     cumulativeRuns += totalRuns
     if (ball.wicket) cumulativeWickets++
-    if (!ball.isWide && !ball.isNoBall) legalCount++
+    if (!ball.isWide && !ball.isNoBall && !ball.deadBall) legalCount++
 
     if (legalCount % 6 === 0 && legalCount > 0) {
       points.push({ over: legalCount / 6, runs: cumulativeRuns, wickets: cumulativeWickets })

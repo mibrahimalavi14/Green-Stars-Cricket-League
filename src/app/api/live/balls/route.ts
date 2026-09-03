@@ -5,26 +5,7 @@ import { logAudit } from "@/lib/audit"
 import { MATCH_CONFIG } from "@/lib/config"
 import { trackEvent } from "@/lib/analytics"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
-
-interface BallEvent {
-  id?: string
-  runs: number
-  extras: string | null
-  wicket: string | null
-  bowler: string
-  striker: string
-  nonStriker: string
-  wicketBatsman: string | null
-  wicketFielder: string | null
-  isWide: boolean
-  isNoBall: boolean
-  byes: number
-  legByes: number
-}
-
-function isLegalDelivery(ball: BallEvent): boolean {
-  return !ball.isWide && !ball.isNoBall
-}
+import { isLegalDelivery, ballTeamRuns, ballBowlingRuns, ballExtras, type BallEvent } from "@/lib/scoring"
 
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -87,21 +68,21 @@ export async function POST(req: Request) {
     if (batters.size > 11) throw new Error("Cannot exceed 11 batters")
     if (dismissed.has(ball.striker)) throw new Error("Dismissed batsman cannot bat again")
 
-    const legalBefore = ballsData.filter(b => !b.isWide && !b.isNoBall).length
+    const legalBefore = ballsData.filter(b => !b.isWide && !b.isNoBall && !b.deadBall).length
     if (isLegalDelivery(ball) && legalBefore >= MATCH_CONFIG.totalBalls) throw new Error(`Innings complete (${MATCH_CONFIG.totalBalls} legal balls)`)
 
-    const bowlerLegalBalls = ballsData.filter(b => b.bowler === ball.bowler && !b.isWide && !b.isNoBall).length
+    const bowlerLegalBalls = ballsData.filter(b => b.bowler === ball.bowler && !b.isWide && !b.isNoBall && !b.deadBall).length
     if (isLegalDelivery(ball) && bowlerLegalBalls >= MATCH_CONFIG.maxBallsPerBowler) throw new Error(`Bowler cannot bowl more than ${MATCH_CONFIG.maxOversPerBowler} over`)
 
     ballsData.push(ballId ? { ...ball, id: ballId } : ball)
     const newBallsData = JSON.stringify(ballsData)
 
     const legal = isLegalDelivery(ball)
-    const runs = ball.runs
+    const runs = ballTeamRuns(ball)
     const newBalls = legal ? innings.balls + 1 : innings.balls
     const newRuns = innings.runs + runs
     const newWickets = ball.wicket ? innings.wickets + 1 : innings.wickets
-    const extraRuns = (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + ball.byes + ball.legByes
+    const extraRuns = ballExtras(ball)
     const newExtras = innings.extras + extraRuns
 
     const updated = await tx.inning.update({

@@ -3,26 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { logAudit } from "@/lib/audit"
 import { trackEvent } from "@/lib/analytics"
-
-interface BallEvent {
-  id?: string
-  runs: number
-  extras: string | null
-  wicket: string | null
-  bowler: string
-  striker: string
-  nonStriker: string
-  wicketBatsman: string | null
-  wicketFielder: string | null
-  isWide: boolean
-  isNoBall: boolean
-  byes: number
-  legByes: number
-}
-
-function isLegalDelivery(ball: BallEvent): boolean {
-  return !ball.isWide && !ball.isNoBall
-}
+import { isLegalDelivery, ballTeamRuns, ballExtras, type BallEvent } from "@/lib/scoring"
 
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -67,8 +48,8 @@ export async function POST(req: Request) {
     }
 
     const legal = isLegalDelivery(targetBall)
-    const runs = targetBall.runs
-    const extraRuns = (targetBall.isWide ? 1 : 0) + (targetBall.isNoBall ? 1 : 0) + targetBall.byes + targetBall.legByes
+    const runs = ballTeamRuns(targetBall)
+    const extraRuns = ballExtras(targetBall)
 
     const updated = await tx.inning.update({
       where: { id: inningsId },

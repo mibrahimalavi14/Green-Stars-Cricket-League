@@ -11,21 +11,8 @@ import {
   calculateMotm,
   type InningsState,
 } from "@/lib/config"
+import { isLegalDelivery, ballBatRuns, ballBowlingRuns, type BallEvent } from "@/lib/scoring"
 
-interface BallEvent {
-  runs: number
-  extras: string | null
-  wicket: string | null
-  bowler: string
-  striker: string
-  nonStriker: string
-  wicketBatsman: string | null
-  wicketFielder: string | null
-  isWide: boolean
-  isNoBall: boolean
-  byes: number
-  legByes: number
-}
 
 interface PlayerStats {
   playerId: string
@@ -183,8 +170,8 @@ export async function POST(req: Request) {
         if (ball.nonStriker) ensurePlayer(ball.nonStriker, inn.teamId)
 
         const ps = playerStats[ball.striker]
-        const batRuns = ball.isWide ? 0 : ball.runs
-        if (!ball.isWide && !ball.isNoBall) ps.ballsFaced++
+        const batRuns = ballBatRuns(ball)
+        if (isLegalDelivery(ball)) ps.ballsFaced++
         ps.battingRuns += batRuns
         if (batRuns === 1) ps.ones++
         if (batRuns === 2) ps.twos++
@@ -192,8 +179,8 @@ export async function POST(req: Request) {
         if (batRuns === 6) ps.sixes++
 
         const bps = playerStats[ball.bowler]
-        if (!ball.isWide && !ball.isNoBall) bps.ballsBowled++
-        bps.bowlingRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+        if (isLegalDelivery(ball)) bps.ballsBowled++
+        bps.bowlingRuns += ballBowlingRuns(ball)
         if (ball.isWide) bps.wides++
         if (ball.isNoBall) bps.noBalls++
 

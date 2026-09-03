@@ -16,6 +16,9 @@ interface BallEvent {
   byes?: number
   legByes?: number
   region?: string
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 interface Inning {
@@ -46,9 +49,9 @@ function computeWicketPartnerships(
     if (ball.striker) currentBatsmen.add(ball.striker)
     if (ball.nonStriker) currentBatsmen.add(ball.nonStriker)
 
-    const isLegal = !ball.isWide && !ball.isNoBall
+    const isLegal = !ball.isWide && !ball.isNoBall && !ball.deadBall
     if (isLegal) currentBalls++
-    currentRuns += ball.runs || 0
+    currentRuns += (ball.runs || 0) + (ball.overthrows || 0)
 
     if (ball.wicket) {
       wicketsSoFar++
@@ -89,8 +92,8 @@ function computeBattingContributions(
   for (const ball of ballsData) {
     const sid = ball.striker || ""
     if (sid && stats[sid]) {
-      stats[sid].runs += ball.runs || 0
-      if (!ball.isWide && !ball.isNoBall) stats[sid].balls++
+      stats[sid].runs += (ball.runs || 0) + (ball.overthrows || 0)
+      if (!ball.isWide && !ball.isNoBall && !ball.deadBall) stats[sid].balls++
       if (ball.runs === 4) stats[sid].fours++
       if (ball.runs === 6) stats[sid].sixes++
     }

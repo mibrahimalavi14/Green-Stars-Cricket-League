@@ -15,6 +15,9 @@ interface BallData {
   isNoBall: boolean
   byes: number
   legByes: number
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 interface OverByOverProps {
@@ -23,10 +26,13 @@ interface OverByOverProps {
 }
 
 function isLegalDelivery(ball: BallData): boolean {
-  return !ball.isWide && !ball.isNoBall
+  return !ball.isWide && !ball.isNoBall && !ball.deadBall
 }
 
 function ballDisplay(ball: BallData): { text: string; color: string; isWicket: boolean } {
+  if (ball.deadBall && !ball.penaltyRuns) {
+    return { text: "DB", color: "#64748b", isWicket: false }
+  }
   if (ball.wicket) {
     const wkTypes: Record<string, string> = {
       bowled: "W", caught: "W", lbw: "W", stumped: "W", runout: "W-RO", "hit wicket": "W-HW",
@@ -42,12 +48,16 @@ function ballDisplay(ball: BallData): { text: string; color: string; isWicket: b
     const r = ball.runs
     return { text: r > 0 ? `NB+${r}` : "NB", color: "#f59e0b", isWicket: false }
   }
-  const total = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+  const ov = ball.overthrows || 0
+  const pen = ball.penaltyRuns || 0
+  const total = ball.runs + (ball.byes || 0) + (ball.legByes || 0) + ov + pen
   const suffix = (ball.byes || 0) > 0 ? "b" : (ball.legByes || 0) > 0 ? "lb" : ""
+  if (pen > 0) return { text: `P${pen}`, color: "#6366f1", isWicket: false }
+  const label = suffix + (ov > 0 ? `+${ov}O` : "")
   if (total === 0) return { text: "·", color: "var(--muted-foreground)", isWicket: false }
-  if (total === 4) return { text: `${total}${suffix}`, color: "#22c55e", isWicket: false }
-  if (total === 6) return { text: `${total}${suffix}`, color: "#3b82f6", isWicket: false }
-  return { text: `${total}${suffix}`, color: "var(--foreground)", isWicket: false }
+  if (total === 4) return { text: `${total}${label}`, color: "#22c55e", isWicket: false }
+  if (total === 6) return { text: `${total}${label}`, color: "#3b82f6", isWicket: false }
+  return { text: `${total}${label}`, color: "var(--foreground)", isWicket: false }
 }
 
 export function OverByOver({ ballsData, teamName }: OverByOverProps) {
@@ -63,7 +73,7 @@ export function OverByOver({ ballsData, teamName }: OverByOverProps) {
     for (const ball of ballsData) {
       const display = ballDisplay(ball)
       currentOver.push(display)
-      const totalRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0)
+      const totalRuns = ball.runs + (ball.byes || 0) + (ball.legByes || 0) + (ball.overthrows || 0) + (ball.penaltyRuns || 0)
       overRuns += totalRuns
       if (ball.wicket) overWickets++
       if (ball.isWide || ball.isNoBall) overExtras++

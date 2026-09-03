@@ -12,6 +12,9 @@ export interface BallEvent {
   byes?: number
   legByes?: number
   region?: string
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 export interface TimelineEvent {
@@ -98,7 +101,7 @@ export function generateMatchTimeline(data: TimelineMatchData): TimelineEvent[] 
 
     let legalCount = 0
     for (const ball of balls) {
-      const isLegal = !ball.isWide && !ball.isNoBall
+      const isLegal = !ball.isWide && !ball.isNoBall && !ball.deadBall
       if (isLegal) legalCount++
 
       const over = overLabel(legalCount)
@@ -107,7 +110,7 @@ export function generateMatchTimeline(data: TimelineMatchData): TimelineEvent[] 
       const sid = ball.striker
       if (sid) {
         const before = strikerRuns[sid] || 0
-        strikerRuns[sid] = before + (ball.isWide ? 0 : ball.runs || 0)
+        strikerRuns[sid] = before + (ball.isWide ? 0 : ball.runs || 0) + (ball.overthrows || 0)
         const after = strikerRuns[sid]
         const name = names[sid] || "Batsman"
         if (before < 50 && after >= 50) {

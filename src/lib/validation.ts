@@ -109,6 +109,9 @@ export const ballEventSchema = z.object({
   byes: z.number().int().min(0).max(6),
   legByes: z.number().int().min(0).max(6),
   region: z.string().nullable().optional(),
+  deadBall: z.boolean().optional(),
+  overthrows: z.number().int().min(0).max(6).optional(),
+  penaltyRuns: z.number().int().min(0).max(10).optional(),
 })
 
 export const contactSchema = z.object({

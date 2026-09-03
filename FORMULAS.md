@@ -14,8 +14,16 @@ Single source of truth: `src/lib/config.ts` (MATCH_CONFIG), `src/lib/stats.ts`, 
 | Max overs per bowler | 1 (6 balls) |
 | Super Over | 6 balls, max 2 wickets |
 
-**Innings total** = `batsman runs + extras` (extras = wides + no-balls + byes + leg-byes).
+**Innings total** = `runs` (bat runs + overthrows + penalty runs) + `extras` (wides + no-balls + byes + leg-byes).
 Every innings stores: `runs`, `wickets`, `balls`, `extras`.
+
+Per-ball attribution rules:
+- **Overthrow runs** are credited to the striker and added to the team total on the same
+  legal delivery (`overthrows`), shown as `+NO` in over-by-over.
+- **Dead ball** is a **non-delivery**: it does not advance the over, give the bowler a ball,
+  or credit runs to a batsman/bowler.
+- **Penalty runs** are added to the team/innings total only — never to a batsman's or
+  bowler's figures — and are not a legal delivery.
 
 ## 2. Innings End / Match Complete
 

@@ -52,6 +52,9 @@ interface BallEvent {
   byes?: number
   legByes?: number
   region?: string
+  deadBall?: boolean
+  overthrows?: number
+  penaltyRuns?: number
 }
 
 interface TeamFormResult {
@@ -141,8 +144,8 @@ function computeInningsStats(
     const sid = ball.striker || ""
     if (sid && batting[sid]) {
       const bs = batting[sid]
-      bs.runs += ball.runs || 0
-      if (!ball.isWide && !ball.isNoBall) bs.balls++
+      bs.runs += (ball.runs || 0) + (ball.overthrows || 0)
+      if (!ball.isWide && !ball.isNoBall && !ball.deadBall) bs.balls++
       if (ball.runs === 4) bs.fours++
       if (ball.runs === 6) bs.sixes++
     }
@@ -151,14 +154,14 @@ function computeInningsStats(
     if (bid) {
       if (!bowling[bid]) bowling[bid] = { runs: 0, balls: 0, wickets: 0, wides: 0, noBalls: 0, maidens: 0 }
       const bws = bowling[bid]
-      const conceded = (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+      const conceded = (ball.runs || 0) + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0) + (ball.overthrows || 0)
       bws.runs += conceded
-      if (!ball.isWide && !ball.isNoBall) bws.balls++
+      if (!ball.isWide && !ball.isNoBall && !ball.deadBall) bws.balls++
 
       const perOverRuns = overRuns[bid] || 0
       const perOverBalls = overBalls[bid] || 0
       overRuns[bid] = perOverRuns + conceded
-      overBalls[bid] = perOverBalls + (ball.isWide || ball.isNoBall ? 0 : 1)
+      overBalls[bid] = perOverBalls + (ball.isWide || ball.isNoBall || ball.deadBall ? 0 : 1)
       if (overBalls[bid] >= 6) {
         if (overRuns[bid] === 0) bws.maidens++
         overRuns[bid] = 0
@@ -186,14 +189,14 @@ function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
   if (balls.length === 0) return []
   let legalCount = 0
   for (const b of balls) {
-    if (!b.isWide && !b.isNoBall) legalCount++
+    if (!b.isWide && !b.isNoBall && !b.deadBall) legalCount++
   }
   const inLastOver = legalCount % 6 || 6
   let count = 0
   let startIdx = balls.length
   for (let i = balls.length - 1; i >= 0; i--) {
     const b = balls[i]
-    const isLegal = !b.isWide && !b.isNoBall
+    const isLegal = !b.isWide && !b.isNoBall && !b.deadBall
     if (isLegal) count++
     if (count === inLastOver) {
       startIdx = i
@@ -204,7 +207,7 @@ function getCurrentOverBalls(balls: BallEvent[]): BallEvent[] {
 }
 
 function getLastLegalBalls(balls: BallEvent[], count: number): BallEvent[] {
-  const legal = balls.filter(b => !b.isWide && !b.isNoBall)
+  const legal = balls.filter(b => !b.isWide && !b.isNoBall && !b.deadBall)
   return legal.slice(-count)
 }
 
@@ -213,7 +216,7 @@ function computeOverScores(balls: BallEvent[]): number[] {
   let runsThisOver = 0
   let legalCount = 0
   for (const b of balls) {
-    const isLegal = !b.isWide && !b.isNoBall
+    const isLegal = !b.isWide && !b.isNoBall && !b.deadBall
     if (isLegal) {
       if (legalCount > 0 && legalCount % 6 === 0) {
         overs.push(runsThisOver)
@@ -236,7 +239,7 @@ function computeCumulativeScores(balls: BallEvent[]): number[] {
   let total = 0
   let legalCount = 0
   for (const b of balls) {
-    const isLegal = !b.isWide && !b.isNoBall
+    const isLegal = !b.isWide && !b.isNoBall && !b.deadBall
     if (isLegal) {
       if (legalCount > 0 && legalCount % 6 === 0) {
         cumulative.push(total)
@@ -271,7 +274,7 @@ function computeMatchHighlights(
       if (sid) {
         if (!stats[sid]) stats[sid] = { runs: 0, balls: 0 }
         stats[sid].runs += b.runs || 0
-        if (!b.isWide && !b.isNoBall) stats[sid].balls++
+        if (!b.isWide && !b.isNoBall && !b.deadBall) stats[sid].balls++
       }
     }
     let best = { id: "", runs: 0, balls: 0 }
@@ -292,7 +295,7 @@ function computeMatchHighlights(
       if (bid) {
         if (!stats[bid]) stats[bid] = { runs: 0, balls: 0, wickets: 0 }
         stats[bid].runs += (b.runs || 0) + (b.isWide ? 1 : 0) + (b.isNoBall ? 1 : 0)
-        if (!b.isWide && !b.isNoBall) stats[bid].balls++
+        if (!b.isWide && !b.isNoBall && !b.deadBall) stats[bid].balls++
         if (b.wicket) stats[bid].wickets++
       }
     }
@@ -328,7 +331,7 @@ function computeMatchHighlights(
     let overStart = 0
     for (let i = 0; i < balls.length; i++) {
       const b = balls[i]
-      const isLegal = !b.isWide && !b.isNoBall
+      const isLegal = !b.isWide && !b.isNoBall && !b.deadBall
       if (isLegal) curLegal++
       curRuns += b.runs || 0
       if (b.isWide) curRuns++
@@ -578,7 +581,7 @@ export function LiveScoreClient({
       const runs: Record<string, number> = {}
       for (const p of battingSide) runs[p.id] = 0
       for (const b of balls) {
-        if (b.striker && runs[b.striker] !== undefined) runs[b.striker] += b.isWide ? 0 : b.runs || 0
+        if (b.striker && runs[b.striker] !== undefined) runs[b.striker] += (b.isWide ? 0 : b.runs || 0) + (b.overthrows || 0)
       }
       return runs
     }
@@ -604,7 +607,7 @@ export function LiveScoreClient({
       const sid = b.striker
       if (!sid || strikerRuns[sid] === undefined) continue
       const before = strikerRuns[sid]
-      strikerRuns[sid] = before + (b.isWide ? 0 : b.runs || 0)
+      strikerRuns[sid] = before + (b.isWide ? 0 : b.runs || 0) + (b.overthrows || 0)
       const after = strikerRuns[sid]
       if (before < 100 && after >= 100) {
         setCelebration({ type: "hundred", playerName: playerMap.get(sid) || "Batsman", runs: after })
@@ -852,7 +855,7 @@ export function LiveScoreClient({
     }
 
     allBallsParsed.forEach((ball, i) => {
-      const isLegal = !ball.isWide && !ball.isNoBall
+      const isLegal = !ball.isWide && !ball.isNoBall && !ball.deadBall
       if (isLegal) {
         if (legalCount > 0 && legalCount % 6 === 0) {
           flushOver()

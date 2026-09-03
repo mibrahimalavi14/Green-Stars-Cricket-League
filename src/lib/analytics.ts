@@ -4,6 +4,7 @@ export type AnalyticsEventType =
   | "match_scored"
   | "match_completed"
   | "undo_used"
+  | "overthrows_added"
   | "page_view"
   | "search_query"
   | "challenge_attempted"

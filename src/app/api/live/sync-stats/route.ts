@@ -1,21 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { isLegalDelivery, ballBatRuns, ballBowlingRuns, type BallEvent } from "@/lib/scoring"
 
-interface BallEvent {
-  runs: number
-  extras: string | null
-  wicket: string | null
-  bowler: string
-  striker: string
-  nonStriker: string
-  wicketBatsman: string | null
-  wicketFielder: string | null
-  isWide: boolean
-  isNoBall: boolean
-  byes: number
-  legByes: number
-}
 
 export async function POST(req: Request) {
   if (!(await isAdminAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -79,9 +66,9 @@ export async function POST(req: Request) {
       if (ball.nonStriker) ensurePlayer(ball.nonStriker, inn.teamId)
 
       const ps = playerStats[ball.striker]
-      const batRuns = ball.isWide ? 0 : ball.runs
+      const batRuns = ballBatRuns(ball)
       ps.battingRuns += batRuns
-      if (!ball.isWide && !ball.isNoBall) {
+      if (isLegalDelivery(ball)) {
         ps.ballsFaced++
       }
       if (batRuns === 1) ps.ones++
@@ -89,15 +76,15 @@ export async function POST(req: Request) {
       if (batRuns === 3) ps.threes++
       if (batRuns === 4) ps.fours++
       if (batRuns === 6) ps.sixes++
-      if (batRuns === 0 && !ball.isWide && !ball.isNoBall && !ball.wicket) ps.dotBalls++
+      if (batRuns === 0 && isLegalDelivery(ball) && !ball.wicket) ps.dotBalls++
 
       const bps = playerStats[ball.bowler]
-      if (!ball.isWide && !ball.isNoBall) {
+      if (isLegalDelivery(ball)) {
         bps.ballsBowled++
         bowlerBallsInOver++
       }
-      bps.bowlingRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
-      overRuns += ball.runs + (ball.isWide ? 1 : 0) + (ball.isNoBall ? 1 : 0)
+      bps.bowlingRuns += ballBowlingRuns(ball)
+      overRuns += ballBowlingRuns(ball)
       if (ball.isWide) bps.wides++
       if (ball.isNoBall) bps.noBalls++
 
