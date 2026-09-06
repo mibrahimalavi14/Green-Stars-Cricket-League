@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 
 export default function AdminLoginPage() {
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [show, setShow] = useState(false)
   const [error, setError] = useState("")
@@ -17,13 +18,13 @@ export default function AdminLoginPage() {
     const res = await fetch("/api/admin/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ username, password }),
     })
 
     if (res.ok) {
       window.location.href = "/admin"
     } else {
-      setError("Wrong password")
+      setError("Wrong username or password")
     }
     setLoading(false)
   }
@@ -32,16 +33,28 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
       <div className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--card)] p-8">
         <h1 className="mb-2 text-center text-2xl font-bold">Admin Login</h1>
-        <p className="mb-6 text-center text-sm text-[var(--muted-foreground)]">Enter password to access admin panel</p>
+        <p className="mb-6 text-center text-sm text-[var(--muted-foreground)]">Enter username and password to access admin panel</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Username"
+              autoFocus
+              autoComplete="username"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm"
+            />
+          </div>
+
           <div className="relative">
             <input
               type={show ? "text" : "password"}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Password"
-              autoFocus
+              autoComplete="current-password"
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 pr-10 text-sm"
             />
             <button

@@ -3,9 +3,11 @@ import { cookies } from "next/headers"
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { password } = body
+  const { username, password } = body
 
-  if (password === process.env.ADMIN_PASSWORD) {
+  const adminUsername = process.env.ADMIN_USERNAME ?? "admin"
+
+  if (username === adminUsername && password === process.env.ADMIN_PASSWORD) {
     const cookieStore = await cookies()
     cookieStore.set("admin_auth", "true", {
       httpOnly: true,
