@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     name: typeof body.name === "string" && body.name.trim() ? body.name.trim() : "Hafiz Muhammad Ibrahim Alavi",
     title: typeof body.title === "string" && body.title.trim() ? body.title.trim() : "Chairman, Green Stars Cricket League",
     message,
-    photo: typeof body.photo === "string" && body.photo.trim() ? body.photo.trim() : "/images/optimized/chairman.webp",
+    photo: typeof body.photo === "string" && body.photo.trim() ? body.photo.trim() : "/images/management/Chairman Muhammad Ibrahim Alavi.png",
     showSignature: body.showSignature !== false,
     active: body.active !== false,
   }

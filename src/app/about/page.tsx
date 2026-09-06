@@ -13,7 +13,7 @@ function AboutPage() {
 
       <div className="mb-12 overflow-hidden rounded-xl border border-[var(--border)]">
         <Image
-          src="/images/optimized/banner.webp"
+          src="/images/teams/Banner.jpg"
           alt="Green Stars Cricket League"
           width={1024}
           height={400}
@@ -27,7 +27,7 @@ function AboutPage() {
           <div className="relative bg-gradient-to-br from-gscl-gold/20 via-gscl-dark to-gscl-gold/10 p-6">
             <div className="absolute inset-0 opacity-10" style={{backgroundImage: "radial-gradient(circle at 30% 50%, rgba(255,215,0,0.4) 0%, transparent 60%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.3) 0%, transparent 50%)"}} />
             <Image
-              src="/images/optimized/chairman.webp"
+              src="/images/management/Chairman Muhammad Ibrahim Alavi.png"
               alt="Chairman Muhammad Ibrahim Alavi"
               width={1044}
               height={1507}

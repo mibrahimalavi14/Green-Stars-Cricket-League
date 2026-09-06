@@ -690,7 +690,7 @@ model ChairmanMessage {
   name          String   @default("Hafiz Muhammad Ibrahim Alavi")
   title         String   @default("Chairman, Green Stars Cricket League")
   message       String
-  photo         String   @default("/images/optimized/chairman.webp")
+  photo         String   @default("/images/management/Chairman Muhammad Ibrahim Alavi.png")
   showSignature Boolean  @default(true)
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())

@@ -33,7 +33,7 @@ async function main() {
       name: "Hafiz Muhammad Ibrahim Alavi",
       title: "Chairman, Green Stars Cricket League",
       message: CHAIRMAN_MESSAGE,
-      photo: "/images/optimized/chairman.webp",
+      photo: "/images/management/Chairman Muhammad Ibrahim Alavi.png",
       showSignature: true,
       active: true,
     },
@@ -46,7 +46,7 @@ async function main() {
       id: "management-chairman",
       name: "Muhammad Ibrahim Alavi",
       role: "Chairman",
-      photo: "/images/optimized/chairman.webp",
+      photo: "/images/management/Chairman Muhammad Ibrahim Alavi.png",
       quote:
         "GSCL is not just a league — it is a platform for the youth of Haripur to showcase their talent and pursue their dreams.",
       sortOrder: 0,

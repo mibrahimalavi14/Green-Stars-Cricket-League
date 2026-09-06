@@ -21,7 +21,7 @@ const fallbackMembers: Member[] = [
   {
     name: "Muhammad Ibrahim Alavi",
     role: "Chairman",
-    photo: "/images/optimized/chairman.webp",
+    photo: "/images/management/Chairman Muhammad Ibrahim Alavi.png",
     quote:
       "GSCL is not just a league — it is a platform for the youth of Haripur to showcase their talent and pursue their dreams.",
   },

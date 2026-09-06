@@ -60,7 +60,7 @@ async function HomePage() {
     title: "Chairman, Green Stars Cricket League",
     message:
       "Welcome to Green Stars Cricket League.\n\nWhen I look at the young cricketers of Haripur, I see the future of Pakistan cricket. Green Stars Cricket League was born from a simple belief — that every talented young player, no matter where they come from, deserves a fair chance to shine.\n\nThe energy, the passion and the discipline you bring to every match fills me with pride. This league is not just about winning matches or lifting trophies; it is about building character, learning teamwork, and chasing dreams with heart. Every run you score and every wicket you take writes a new chapter in the story of GSCL.\n\nI want to thank every player, coach, official, sponsor and supporter who makes this dream possible. This is your league, and together we will take it to new heights.\n\nMay our league and our community continue to grow. Let us keep playing with passion, sportsmanship and respect.",
-    photo: "/images/optimized/chairman.webp",
+    photo: "/images/management/Chairman Muhammad Ibrahim Alavi.png",
     showSignature: true,
   }
   const chairmanParagraphs = chairman.message.split(/\n+/).map((p) => p.trim()).filter(Boolean)
@@ -83,7 +83,7 @@ async function HomePage() {
     <>
       <NewsNotification news={latestNews ? { id: latestNews.id, title: latestNews.title, excerpt: latestNews.excerpt || "", createdAt: latestNews.createdAt.toISOString(), type: latestNews.type } : null} />
       <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
-        <Image src="/images/optimized/banner.webp" alt="" fill className="object-cover" priority />
+        <Image src="/images/teams/Banner.jpg" alt="" fill className="object-cover" priority />
         <div className="absolute inset-0 bg-black/50" />
         {/* Floating cricket balls */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">

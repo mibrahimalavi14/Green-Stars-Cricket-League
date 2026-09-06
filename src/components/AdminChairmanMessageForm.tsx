@@ -20,7 +20,7 @@ export function AdminChairmanMessageForm({ defaults }: { defaults?: Defaults | n
     name: defaults?.name || "Hafiz Muhammad Ibrahim Alavi",
     title: defaults?.title || "Chairman, Green Stars Cricket League",
     message: defaults?.message || "",
-    photo: defaults?.photo || "/images/optimized/chairman.webp",
+    photo: defaults?.photo || "/images/management/Chairman Muhammad Ibrahim Alavi.png",
     showSignature: defaults ? defaults.showSignature : true,
     active: defaults ? defaults.active : true,
   })
