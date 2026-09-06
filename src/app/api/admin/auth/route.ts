@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { username, password } = body
 
-  const adminUsername = process.env.ADMIN_USERNAME ?? "admin"
+  const adminUsername = process.env.ADMIN_USERNAME
 
   if (username === adminUsername && password === process.env.ADMIN_PASSWORD) {
     const cookieStore = await cookies()
