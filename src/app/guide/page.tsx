@@ -168,7 +168,7 @@ export default function GuidePage() {
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
               <div className="relative">
                 <div className="flex items-center gap-3 mb-4">
-                  <img src="/images/optimized/gscl-logo.webp" alt="GSCL" className="h-12 w-12 rounded-full border-2 border-white/20" />
+                  <img src="/images/logo/gscl-logo.png" alt="GSCL" className="h-12 w-12 rounded-full border-2 border-white/20" />
                   <div>
                     <h1 className="text-3xl md:text-4xl font-bold">GSCL Admin Guide</h1>
                     <span className="inline-block mt-1 rounded-full bg-gscl-gold/20 px-3 py-0.5 text-xs font-semibold text-gscl-gold">v1.0.1 — T4 Edition</span>

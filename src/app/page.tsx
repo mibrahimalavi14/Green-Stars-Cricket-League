@@ -347,7 +347,7 @@ async function HomePage() {
           <h2 className="mb-6 text-xl font-bold">Our Partners</h2>
             <div className="flex flex-wrap items-center justify-center gap-8 opacity-60 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
               <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-6 py-4">
-                <img src="/images/optimized/gscl-logo.webp" alt="" className="h-10 w-10 rounded-full object-cover" />
+                <img src="/images/logo/gscl-logo.png" alt="" className="h-10 w-10 rounded-full object-cover" />
                 <span className="font-semibold text-sm">GSCL</span>
               </div>
               <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--muted)] px-6 py-4">

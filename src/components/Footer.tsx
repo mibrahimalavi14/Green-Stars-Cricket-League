@@ -69,7 +69,7 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-3">
             <div className="mb-3 flex items-center gap-2">
-              <img src="/images/optimized/gscl-logo.webp" alt="GSCL" className="h-9 w-9 rounded-full object-cover ring-1 ring-gscl-gold/40" />
+              <img src="/images/logo/gscl-logo.png" alt="GSCL" className="h-9 w-9 rounded-full object-cover ring-1 ring-gscl-gold/40" />
               <h3 className="text-xl font-extrabold tracking-tight text-[var(--accent)]">GSCL</h3>
             </div>
             <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
