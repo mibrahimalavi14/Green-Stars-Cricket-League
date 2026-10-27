@@ -49,7 +49,7 @@ async function HomePage() {
   const seasonSixes = players.reduce((a, p) => a + p.sixes, 0)
   const seasonFours = players.reduce((a, p) => a + p.fours, 0)
   const latestSeasonLabel = season ? `${season.name} ${season.year}` : "—"
-  const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.png"))
+  const hasSignature = fs.existsSync(path.join(process.cwd(), "public", "images", "optimized", "signature.jpeg"))
 
   const chairmanRow = await prisma.chairmanMessage.findFirst({
     where: { active: true },
@@ -267,7 +267,7 @@ async function HomePage() {
                 <p className="text-sm font-bold">{chairman.name}</p>
                 <p className="text-xs text-[var(--muted-foreground)]">{chairman.title}</p>
                 {chairman.showSignature && (hasSignature ? (
-                  <img src="/images/optimized/signature.png" alt={`Signature of ${chairman.name}`} className="mt-3 ml-auto h-16 w-auto rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)]" loading="lazy" />
+                  <img src="/images/optimized/signature.jpeg" alt={`Signature of ${chairman.name}`} className="mt-3 ml-auto h-16 w-auto rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)]" loading="lazy" />
                 ) : (
                   <p className="mt-4 font-serif text-xl italic text-gscl-gold" style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive" }}>
                     {chairman.name}
