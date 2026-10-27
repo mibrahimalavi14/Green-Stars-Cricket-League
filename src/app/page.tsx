@@ -267,7 +267,7 @@ async function HomePage() {
                 <p className="text-sm font-bold">{chairman.name}</p>
                 <p className="text-xs text-[var(--muted-foreground)]">{chairman.title}</p>
                 {chairman.showSignature && (hasSignature ? (
-                  <img src="/images/optimized/signature.jpeg" alt={`Signature of ${chairman.name}`} className="mt-3 ml-auto h-16 w-auto rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)]" loading="lazy" />
+                  <img src="/images/optimized/signature.jpeg" alt={`Signature of ${chairman.name}`} className="mt-3 ml-auto h-24 w-auto max-w-full rounded-lg bg-white object-contain shadow-sm ring-1 ring-[var(--border)] contrast-150 sm:h-28" loading="lazy" />
                 ) : (
                   <p className="mt-4 font-serif text-xl italic text-gscl-gold" style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive" }}>
                     {chairman.name}
